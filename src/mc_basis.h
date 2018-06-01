@@ -1,14 +1,14 @@
 // Copyright 2017
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "qc_mpi.h"
 #include "qc_geom.h"
+#include "qc_mpi.h"
 
 #ifndef MC_BASIS_H_
 #define MC_BASIS_H_
@@ -17,7 +17,7 @@ struct mc_basis_typ {
   double alpha[10], norm[10];
 };
 
-class MC_Basis{
+class MC_Basis {
  public:
   // variables
   int mc_nbas, mc_nprim;

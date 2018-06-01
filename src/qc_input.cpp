@@ -1,10 +1,10 @@
 // Copyright 2017
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <algorithm>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -15,7 +15,7 @@
 
 IOPs::IOPs() {
   bopns[KEYS::SPHERICAL] = true;
-  dopns[KEYS::MC_DELX]  = 0.1;
+  dopns[KEYS::MC_DELX] = 0.1;
   iopns[KEYS::MC_NPAIR] = 16;
   iopns[KEYS::MC_TRIAL] = 1024;
   iopns[KEYS::MC_PAIR_GROUPS] = 1;
@@ -34,7 +34,7 @@ IOPs::IOPs() {
 }
 
 void IOPs::read(const MPI_info& mpi_info,
-           const std::string& file) {
+                const std::string& file) {
   KEYS::KeyVal keyval;
 
   bool keySet;
@@ -42,14 +42,12 @@ void IOPs::read(const MPI_info& mpi_info,
   std::string key;
 
   const std::vector<std::string> key_vals = {
-    "JOBNAME", "SPHERICAL"     , "MC_TRIAL", "MC_NPAIR", "MC_DELX" ,  //  0-4
-    "GEOM"   , "BASIS"         , "MC_BASIS", "NBLOCK"  , "MOVECS"  ,  //  5-9
-    "DEBUG"  , "MC_PAIR_GROUPS", "TASK"    , "NUM_BAND", "OFF_BAND",  // 10-14
-    "DIFFS"  , "ORDER"
-  };
+      "JOBNAME", "SPHERICAL", "MC_TRIAL", "MC_NPAIR", "MC_DELX",  //  0-4
+      "GEOM", "BASIS", "MC_BASIS", "NBLOCK", "MOVECS",            //  5-9
+      "DEBUG", "MC_PAIR_GROUPS", "TASK", "NUM_BAND", "OFF_BAND",  // 10-14
+      "DIFFS", "ORDER"};
   const std::vector<std::string> taskVals = {
-    "MP2"    , "GF"    , "GFDIFF"  , "GFFULL"  , "GFFULLDIFF"
-  };
+      "MP2", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
 
   if (mpi_info.sys_master) {
     std::ifstream input(file.c_str());
@@ -195,22 +193,21 @@ void IOPs::read(const MPI_info& mpi_info,
 
   MPI_Barrier(MPI_COMM_WORLD);
 
-  MPI_Bcast(iopns.data(), iopns.size(), MPI_INT   , 0, MPI_COMM_WORLD);
+  MPI_Bcast(iopns.data(), iopns.size(), MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(dopns.data(), dopns.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(bopns.data(), bopns.size(), MPI_CHAR , 0, MPI_COMM_WORLD);
+  MPI_Bcast(bopns.data(), bopns.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
 
   MPI_Barrier(MPI_COMM_WORLD);
 }
 
 void IOPs::print(const MPI_info& mpi_info,
-           const std::string& file) {
+                 const std::string& file) {
   const std::vector<std::string> taskVals = {
-    "MP2"    , "GF"    , "GFDIFF"  , "GFFULL"  , "GFFULLDIFF"
-  };
+      "MP2", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
 
   if (mpi_info.sys_master) {
     std::cout << std::endl;
-    std::cout << "Input read from " << file  << std::endl;
+    std::cout << "Input read from " << file << std::endl;
     std::cout << "JOBNAME: " << sopns[KEYS::JOBNAME] << std::endl;
     std::cout << " TASK: " << taskVals[iopns[KEYS::TASK]] << std::endl;
     std::cout << " ORDER: " << iopns[KEYS::ORDER] << std::endl;
@@ -236,17 +233,17 @@ void IOPs::print(const MPI_info& mpi_info,
     std::cout << "\tBands: ";
 
     for (int i = 0; i < iopns[KEYS::NUM_BAND]; i++) {
-        if ((i+1-iopns[KEYS::OFF_BAND]) < 0) {
-          std::cout << "HOMO" << i-iopns[KEYS::OFF_BAND]+1;
-        } else if ((i+1-iopns[KEYS::OFF_BAND]) == 0) {
-          std::cout << "HOMO-" << i-iopns[KEYS::OFF_BAND]+1;
-        } else {
-          std::cout << "LUMO+" << i-iopns[KEYS::OFF_BAND];
-        }
+      if ((i + 1 - iopns[KEYS::OFF_BAND]) < 0) {
+        std::cout << "HOMO" << i - iopns[KEYS::OFF_BAND] + 1;
+      } else if ((i + 1 - iopns[KEYS::OFF_BAND]) == 0) {
+        std::cout << "HOMO-" << i - iopns[KEYS::OFF_BAND] + 1;
+      } else {
+        std::cout << "LUMO+" << i - iopns[KEYS::OFF_BAND];
+      }
 
-        if (i < iopns[KEYS::NUM_BAND]-1) {
-          std::cout << ", ";
-        }
+      if (i < iopns[KEYS::NUM_BAND] - 1) {
+        std::cout << ", ";
+      }
     }
     std::cout << std::endl;
   }

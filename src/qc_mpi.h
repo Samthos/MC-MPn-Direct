@@ -7,7 +7,7 @@ class MPI_info {
   void mpi_set_info();
   void print();
   int numtasks;  // formerly sys_nproc
-  int taskid;  // formerly sys_me
+  int taskid;    // formerly sys_me
 
   double dnumtasks;  // double version of nubmer of tasks
   bool sys_master;

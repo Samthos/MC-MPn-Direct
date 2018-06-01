@@ -1,14 +1,14 @@
 // Copyright 2017
 
 #include <fstream>
-#include <string>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 #include "mpi.h"
 
-#include "qc_geom.h"
 #include "qc_constant.h"
+#include "qc_geom.h"
 
 void Molec::read(MPI_info& mpi_info, std::string& filename) {
   int i;
@@ -47,7 +47,8 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
       std::cout << "\t " << atype << "\t";
       std::cout << std::setw(30) << std::setprecision(16) << std::fixed << pos[0];
       std::cout << std::setw(30) << std::setprecision(16) << std::fixed << pos[1];
-      std::cout << std::setw(30) << std::setprecision(16) << std::fixed << pos[2] << std::endl;;
+      std::cout << std::setw(30) << std::setprecision(16) << std::fixed << pos[2] << std::endl;
+      ;
 
       pos[0] = pos[0] * ang_to_bohr;
       pos[1] = pos[1] * ang_to_bohr;
@@ -68,7 +69,8 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
   if (mpi_info.sys_master) {
     std::cout << "-----------------------------------------------------------------------------------------------------------" << std::endl;
     std::cout << std::setprecision(6);
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl
+              << std::endl;
   }
 }
 

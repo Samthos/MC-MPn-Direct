@@ -1,12 +1,12 @@
 // Copyright 2017
 
-#include "mpi.h"
-#include "qc_mpi.h"
-#include "qc_input.h"
-#include "qc_geom.h"
-#include "qc_basis.h"
 #include "mc_basis.h"
+#include "mpi.h"
+#include "qc_basis.h"
+#include "qc_geom.h"
+#include "qc_input.h"
 #include "qc_monte.h"
+#include "qc_mpi.h"
 #include "qc_ovps.h"
 
 #define VERSION "fix"

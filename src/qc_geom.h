@@ -1,8 +1,8 @@
 // Copyright 2017
 
 #include <array>
-#include <vector>
 #include <string>
+#include <vector>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -12,7 +12,7 @@
 
 #ifndef QC_GEOM_H_
 #define QC_GEOM_H_
-struct Atom{
+struct Atom {
   double pos[3];
   int znum;
 };

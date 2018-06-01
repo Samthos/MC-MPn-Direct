@@ -1,10 +1,10 @@
+#include <algorithm>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
 
 #include "mpi.h"
 
@@ -15,7 +15,7 @@ std::string QC_monte::genFileName(int checkNum, int type, int order, int band, i
   std::string str;
   ss.clear();
 
-  ss << iops.sopns[KEYS::JOBNAME] <<  ".";
+  ss << iops.sopns[KEYS::JOBNAME] << ".";
   ss << "2" << order << ".";
   ss << "CHK" << checkNum << ".";
   if (type == 0) {
@@ -23,14 +23,14 @@ std::string QC_monte::genFileName(int checkNum, int type, int order, int band, i
   } else if (type == 1) {
     ss << "ERR.FULL.";
   }
-  ss <<  "DIFF" << diff << ".";
+  ss << "DIFF" << diff << ".";
   ss << "BLOCK" << block << ".";
-  if((band+1-offBand) < 0) {
-    ss << "HOMO" << band-offBand+1;
-  } else if((band+1-offBand) == 0) {
-    ss << "HOMO-" << band-offBand+1;
+  if ((band + 1 - offBand) < 0) {
+    ss << "HOMO" << band - offBand + 1;
+  } else if ((band + 1 - offBand) == 0) {
+    ss << "HOMO-" << band - offBand + 1;
   } else {
-    ss << "LUMO+" << band-offBand;
+    ss << "LUMO+" << band - offBand;
   }
   ss >> str;
 
@@ -43,15 +43,15 @@ void QC_monte::mc_gf2_full_print(int band, int steps, int checkNum) {
   std::ofstream output;
 
   // vector to copy data to
-  std::vector<double> ex1 ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> ex2 ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> ex1All ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> ex2All ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> err ((ivir2-iocc1) * (ivir2-iocc1));
+  std::vector<double> ex1((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> ex2((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> ex1All((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> ex2All((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> err((ivir2 - iocc1) * (ivir2 - iocc1));
 
-  for (auto diff = 0;  diff < iops.iopns[KEYS::DIFFS]; diff++) {
+  for (auto diff = 0; diff < iops.iopns[KEYS::DIFFS]; diff++) {
     int blockPower2 = 1;
-    for (auto block = 0;  block < iops.iopns[KEYS::NBLOCK]; block++) {
+    for (auto block = 0; block < iops.iopns[KEYS::NBLOCK]; block++) {
       // copy first and second moments too host
       mc_gf_copy(ex1, ex2, ovps.d_ovps.en2Ex1[band][diff][block], ovps.d_ovps.en2Ex2[band][diff][block]);
 
@@ -60,13 +60,12 @@ void QC_monte::mc_gf2_full_print(int band, int steps, int checkNum) {
       MPI_Reduce(ex2.data(), ex2All.data(), ex2.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
       if (mpi_info.sys_master) {
+        double numTasks = static_cast<double>(mpi_info.numtasks);
+        double numSteps = numTasks * static_cast<double>(steps / blockPower2) - 1.0;
 
-        double numTasks = static_cast<double> (mpi_info.numtasks);
-        double numSteps = numTasks * static_cast<double>(steps/blockPower2) - 1.0;
-
-        std::transform(ex1All.begin(), ex1All.end(), ex1All.begin(), [numTasks](double x){return x/numTasks;});
-        std::transform(ex2All.begin(), ex2All.end(), ex2All.begin(), [numTasks](double x){return x/numTasks;});
-        std::transform(ex1All.begin(), ex1All.end(), ex2All.begin(), err.begin(), [numSteps](double x1, double x2){return sqrt((x2-x1*x1)/numSteps);});
+        std::transform(ex1All.begin(), ex1All.end(), ex1All.begin(), [numTasks](double x) { return x / numTasks; });
+        std::transform(ex2All.begin(), ex2All.end(), ex2All.begin(), [numTasks](double x) { return x / numTasks; });
+        std::transform(ex1All.begin(), ex1All.end(), ex2All.begin(), err.begin(), [numSteps](double x1, double x2) { return sqrt((x2 - x1 * x1) / numSteps); });
 
         if (block == 0) {
           // create file name
@@ -113,15 +112,15 @@ void QC_monte::mc_gf3_full_print(int band, int steps, int checkNum) {
   std::ofstream output;
 
   // vector to copy data to
-  std::vector<double> ex1 ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> ex2 ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> ex1All ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> ex2All ((ivir2-iocc1) * (ivir2-iocc1));
-  std::vector<double> err ((ivir2-iocc1) * (ivir2-iocc1));
+  std::vector<double> ex1((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> ex2((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> ex1All((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> ex2All((ivir2 - iocc1) * (ivir2 - iocc1));
+  std::vector<double> err((ivir2 - iocc1) * (ivir2 - iocc1));
 
-  for (auto diff = 0;  diff < iops.iopns[KEYS::DIFFS]; diff++) {
+  for (auto diff = 0; diff < iops.iopns[KEYS::DIFFS]; diff++) {
     int blockPower2 = 1;
-    for (auto block = 0;  block < iops.iopns[KEYS::NBLOCK]; block++) {
+    for (auto block = 0; block < iops.iopns[KEYS::NBLOCK]; block++) {
       // copy first and second moments too host
       mc_gf_copy(ex1, ex2, ovps.d_ovps.en3Ex1[band][diff][block], ovps.d_ovps.en3Ex2[band][diff][block]);
 
@@ -130,13 +129,12 @@ void QC_monte::mc_gf3_full_print(int band, int steps, int checkNum) {
       MPI_Reduce(ex2.data(), ex2All.data(), ex2.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
       if (mpi_info.sys_master) {
+        double numTasks = static_cast<double>(mpi_info.numtasks);
+        double numSteps = numTasks * static_cast<double>(steps / blockPower2) - 1.0;
 
-        double numTasks = static_cast<double> (mpi_info.numtasks);
-        double numSteps = numTasks * static_cast<double>(steps/blockPower2) - 1.0;
-
-        std::transform(ex1All.begin(), ex1All.end(), ex1All.begin(), [numTasks](double x){return x/numTasks;});
-        std::transform(ex2All.begin(), ex2All.end(), ex2All.begin(), [numTasks](double x){return x/numTasks;});
-        std::transform(ex1All.begin(), ex1All.end(), ex2All.begin(), err.begin(), [numSteps](double x1, double x2){return sqrt((x2-x1*x1)/numSteps);});
+        std::transform(ex1All.begin(), ex1All.end(), ex1All.begin(), [numTasks](double x) { return x / numTasks; });
+        std::transform(ex2All.begin(), ex2All.end(), ex2All.begin(), [numTasks](double x) { return x / numTasks; });
+        std::transform(ex1All.begin(), ex1All.end(), ex2All.begin(), err.begin(), [numSteps](double x1, double x2) { return sqrt((x2 - x1 * x1) / numSteps); });
 
         if (block == 0) {
           // create file name

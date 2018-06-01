@@ -1,18 +1,18 @@
 // Copyright 2017
 
+#include <chrono>
 #include <fstream>
 #include <string>
-#include <chrono>
 #include <vector>
 
-#include "qc_random.h"
-#include "qc_mpi.h"
-#include "qc_input.h"
-#include "qc_geom.h"
-#include "qc_basis.h"
-#include "mc_basis.h"
 #include "el_pair.h"
+#include "mc_basis.h"
+#include "qc_basis.h"
+#include "qc_geom.h"
+#include "qc_input.h"
+#include "qc_mpi.h"
 #include "qc_ovps.h"
+#include "qc_random.h"
 
 #ifndef QC_MONTE_H_
 #define QC_MONTE_H_
@@ -22,12 +22,13 @@ class GFStats {
   std::vector<std::ofstream*> output_streams;
   bool isMaster;
   double tasks;
+
  public:
   std::vector<std::vector<double>> qeps;
 
   GFStats(bool, int, int, int, int, int, const std::string&, int);
-  GFStats(const GFStats& gf) {exit(0);}
-  GFStats operator = (const GFStats& gf) {exit(0);}
+  GFStats(const GFStats& gf) { exit(0); }
+  GFStats operator=(const GFStats& gf) { exit(0); }
 
   ~GFStats();
 
@@ -75,11 +76,11 @@ class QC_monte {
   void mc_gf3_func(double*, int, int, int, int);
 
   void mc_gf_statistics(int,
-         std::vector<std::vector<double>>&,
-         std::vector<std::vector<double*>>&,
-         std::vector<std::vector<std::vector<double*>>>&,
-         std::vector<std::vector<std::vector<double*>>>&,
-         std::vector<std::vector<std::vector<double*>>>&);
+                        std::vector<std::vector<double>>&,
+                        std::vector<std::vector<double*>>&,
+                        std::vector<std::vector<std::vector<double*>>>&,
+                        std::vector<std::vector<std::vector<double*>>>&,
+                        std::vector<std::vector<std::vector<double*>>>&);
 
   void mc_gf_copy(std::vector<double>&, std::vector<double>&, double*, double*);
   std::string genFileName(int, int, int, int, int, int);
@@ -105,13 +106,13 @@ class QC_Monte_2 : public QC_monte {
  public:
   QC_Monte_2(MPI_info p1, IOPs p2, Molec p3, Basis p4, MC_Basis p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-        iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-        iops.iopns[KEYS::NBLOCK], basis);
+                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                      iops.iopns[KEYS::NBLOCK], basis);
 
     ovps.gpuMalloc_02();
-    #ifdef QUAD_TAU
+#ifdef QUAD_TAU
     ovps.init_tau_02(basis);
-    #endif
+#endif
   }
   ~QC_Monte_2() {
     ovps.cpuFree_02();
@@ -127,12 +128,12 @@ class QC_Monte_3 : public QC_monte {
  public:
   QC_Monte_3(MPI_info p1, IOPs p2, Molec p3, Basis p4, MC_Basis p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.cpuMalloc_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-        iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-        iops.iopns[KEYS::NBLOCK], basis);
+                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                      iops.iopns[KEYS::NBLOCK], basis);
     ovps.gpuMalloc_03();
-    #ifdef QUAD_TAU
+#ifdef QUAD_TAU
     ovps.init_tau_03(basis);
-    #endif
+#endif
   }
   ~QC_Monte_3() {
     ovps.cpuFree_03();

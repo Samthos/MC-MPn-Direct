@@ -1,11 +1,11 @@
 // Copyright 2017
 
 #include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <cstdio>
-#include <string>
 #include <cmath>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 #include "mpi.h"
 #include "qc_basis.h"
@@ -13,15 +13,15 @@
 
 Basis::Basis() {
   cd[0] = sqrt(3.0);
-  cd[1] = cd[0]*0.5;
+  cd[1] = cd[0] * 0.5;
 
-  cf[0] = sqrt(2.5)*0.5;
-  cf[1] = cf[0]*3.0;
+  cf[0] = sqrt(2.5) * 0.5;
+  cf[1] = cf[0] * 3.0;
   cf[2] = sqrt(15.0);
-  cf[3] = sqrt(1.5)*0.5;
+  cf[3] = sqrt(1.5) * 0.5;
   cf[4] = sqrt(6.0);
   cf[5] = 1.5;
-  cf[6] = cf[2]*0.5;
+  cf[6] = cf[2] * 0.5;
 
   cg[0] = 2.9580398915498085;  // (3, 1, 0) (1, 3, 0)
   cg[1] = 6.2749501990055672;
@@ -33,7 +33,7 @@ Basis::Basis() {
   cg[7] = 0.55901699437494745;
   cg[8] = 3.3541019662496847;
   cg[9] = 0.73950997288745213;
-  cg[10]= 4.4370598373247132;
+  cg[10] = 4.4370598373247132;
 }
 Basis::~Basis() {
   delete[] nw_en;
@@ -56,13 +56,13 @@ Basis::Basis(const Basis& param) {
 
   h_basis.am = new int[qc_nshl];
   h_basis.at = new int[qc_nshl];
-  h_basis.isgs = new int[qc_nshl+1];
-  h_basis.stop_list = new int[qc_nshl+1];
+  h_basis.isgs = new int[qc_nshl + 1];
+  h_basis.stop_list = new int[qc_nshl + 1];
 
   std::copy(param.h_basis.am, param.h_basis.am + qc_nshl, h_basis.am);
   std::copy(param.h_basis.at, param.h_basis.at + qc_nshl, h_basis.at);
-  std::copy(param.h_basis.isgs, param.h_basis.isgs + qc_nshl+1, h_basis.isgs);
-  std::copy(param.h_basis.stop_list, param.h_basis.stop_list + qc_nshl+1, h_basis.stop_list);
+  std::copy(param.h_basis.isgs, param.h_basis.isgs + qc_nshl + 1, h_basis.isgs);
+  std::copy(param.h_basis.stop_list, param.h_basis.stop_list + qc_nshl + 1, h_basis.stop_list);
 
   iocc1 = param.iocc1;
   iocc2 = param.iocc2;
@@ -81,15 +81,15 @@ Basis::Basis(const Basis& param) {
   nw_en = new double[nw_nbf];
   std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);
 
-  h_basis.nw_co = new double[nw_nbf*nw_nmo[0]];
-  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo[0]*nw_nbf, h_basis.nw_co);
+  h_basis.nw_co = new double[nw_nbf * nw_nmo[0]];
+  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo[0] * nw_nbf, h_basis.nw_co);
 
   h_basis.alpha = new double[qc_nprm];
-  h_basis.norm  = new double[qc_nprm];
+  h_basis.norm = new double[qc_nprm];
   std::copy(param.h_basis.alpha, param.h_basis.alpha + qc_nprm, h_basis.alpha);
-  std::copy(param.h_basis.norm , param.h_basis.norm  + qc_nprm, h_basis.norm);
+  std::copy(param.h_basis.norm, param.h_basis.norm + qc_nprm, h_basis.norm);
 }
-Basis& Basis::operator = (const Basis& param) {
+Basis& Basis::operator=(const Basis& param) {
   qc_nprm = param.qc_nprm;
   qc_ncgs = param.qc_ncgs;
   qc_ngfs = param.qc_ngfs;
@@ -98,13 +98,13 @@ Basis& Basis::operator = (const Basis& param) {
 
   h_basis.am = new int[qc_nshl];
   h_basis.at = new int[qc_nshl];
-  h_basis.isgs = new int[qc_nshl+1];
-  h_basis.stop_list = new int[qc_nshl+1];
+  h_basis.isgs = new int[qc_nshl + 1];
+  h_basis.stop_list = new int[qc_nshl + 1];
 
   std::copy(param.h_basis.am, param.h_basis.am + qc_nshl, h_basis.am);
   std::copy(param.h_basis.at, param.h_basis.at + qc_nshl, h_basis.at);
-  std::copy(param.h_basis.isgs, param.h_basis.isgs + qc_nshl+1, h_basis.isgs);
-  std::copy(param.h_basis.stop_list, param.h_basis.stop_list + qc_nshl+1, h_basis.stop_list);
+  std::copy(param.h_basis.isgs, param.h_basis.isgs + qc_nshl + 1, h_basis.isgs);
+  std::copy(param.h_basis.stop_list, param.h_basis.stop_list + qc_nshl + 1, h_basis.stop_list);
 
   iocc1 = param.iocc1;
   iocc2 = param.iocc2;
@@ -123,13 +123,13 @@ Basis& Basis::operator = (const Basis& param) {
   nw_en = new double[nw_nbf];
   std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);
 
-  h_basis.nw_co = new double[nw_nbf*nw_nmo[0]];
-  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nbf*nw_nmo[0], h_basis.nw_co);
+  h_basis.nw_co = new double[nw_nbf * nw_nmo[0]];
+  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nbf * nw_nmo[0], h_basis.nw_co);
 
   h_basis.alpha = new double[qc_nprm];
-  h_basis.norm  = new double[qc_nprm];
+  h_basis.norm = new double[qc_nprm];
   std::copy(param.h_basis.alpha, param.h_basis.alpha + qc_nprm, h_basis.alpha);
-  std::copy(param.h_basis.norm , param.h_basis.norm  + qc_nprm, h_basis.norm);
+  std::copy(param.h_basis.norm, param.h_basis.norm + qc_nprm, h_basis.norm);
 
   return *this;
 }
@@ -140,7 +140,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   int i, j, k;
   int znum, nshell;
   int ncgs0, nsgs0, nprm0;
-  int ncgs , nsgs , nshl , nprm;
+  int ncgs, nsgs, nshl, nprm;
   int nprim;
   std::string atname, sym;
 
@@ -161,7 +161,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
         ncgs0 = 0;
         nsgs0 = 0;
         nprm0 = 0;
-        for (i = 0;  i < nshell;  i++)  {
+        for (i = 0; i < nshell; i++) {
           input >> sym >> nprim;
           input.ignore(256, '\n');
           for (j = 0; j < nprim; j++) {
@@ -227,8 +227,8 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   h_basis.norm = new double[qc_nprm];
   h_basis.am = new int[qc_nshl];
   h_basis.at = new int[qc_nshl];
-  h_basis.stop_list = new int[qc_nshl+1];
-  h_basis.isgs = new int[qc_nshl+1];
+  h_basis.stop_list = new int[qc_nshl + 1];
+  h_basis.isgs = new int[qc_nshl + 1];
 
   nprm = 0;
   nshl = 0;
@@ -240,7 +240,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   h_basis.stop_list[0] = 0;
   h_basis.isgs[0] = 0;
 
-  for (i = 0;  i < molec.natom;  i++) {
+  for (i = 0; i < molec.natom; i++) {
     if (mpi_info.sys_master) {
       input.clear();
       input.seekg(0, std::ios::beg);
@@ -273,18 +273,18 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
             }
 
             if (h_basis.am[kk] == -1) {
-              for (k = 0;  k < nprim;  k++)  {
+              for (k = 0; k < nprim; k++) {
                 // input >> alpha[k][j] >> coef[k][j] >> coef2[k][j];
               }
             } else {
-              for (k = 0;  k < nprim;  k++)  {
-                 input >> h_basis.alpha[nprm] >> h_basis.norm[nprm];
-                 nprm++;
+              for (k = 0; k < nprim; k++) {
+                input >> h_basis.alpha[nprm] >> h_basis.norm[nprm];
+                nprm++;
               }
             }
             h_basis.at[kk] = i;
-            h_basis.stop_list[kk+1] = nprm;
-            h_basis.isgs[kk+1] = new_sgs;
+            h_basis.stop_list[kk + 1] = nprm;
+            h_basis.isgs[kk + 1] = new_sgs;
             kk++;
           }
         } else {
@@ -301,16 +301,16 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   }
 
   MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.alpha, qc_nprm  , MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.norm , qc_nprm  , MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.am   , qc_nshl  , MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.at   , qc_nshl  , MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.stop_list, qc_nshl+1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.isgs     , qc_nshl+1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.alpha, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.norm, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.am, qc_nshl, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.at, qc_nshl, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.stop_list, qc_nshl + 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.isgs, qc_nshl + 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   new_read2();
 
-/*
+  /*
   for (i = 0; i < qc_nprm; i++) {
       MPI_Barrier(MPI_COMM_WORLD);
       if (mpi_info.taskid == 0) {
@@ -329,7 +329,6 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
   MPI_Barrier(MPI_COMM_WORLD);
 
-
   // if (mpi_info.taskid == 0) {
   //   std::cout << "NSHL\t" << qc_nshl << "\t" << mpi_info.taskid << std::endl;
   //   std::cout << "NGFS\t" << qc_ngfs << "\t" << mpi_info.taskid << std::endl;
@@ -343,7 +342,7 @@ void Basis::new_read2() {
 
   for (i = 0; i < qc_nshl; i++) {  // number of shells on the atom
     if (h_basis.am[i] == -1) {
-/*
+      /*
       qc_shl_list[nshl[0]].ncgs = 4;
       qc_shl_list[nshl[0]].nsgs = 4;
 
@@ -364,15 +363,15 @@ void Basis::new_read2() {
       }
 */
     } else if (h_basis.am[i] == 0) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi));
-        h_basis.norm[j]  = h_basis.norm[j] * cnorm;
+        h_basis.norm[j] = h_basis.norm[j] * cnorm;
       }
 
       // ncgs = ncgs + 1;
       // nsgs[0] = nsgs[0] + 1;
       facs = 0.0;
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         for (k = h_basis.stop_list[i]; k <= j; k++) {
           aa = h_basis.alpha[j] + h_basis.alpha[k];
           fac = aa * sqrt(aa);
@@ -386,11 +385,11 @@ void Basis::new_read2() {
       pi32 = 5.56832799683170;
       facs = 1.0 / sqrt(facs * pi32);
 
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         h_basis.norm[j] = h_basis.norm[j] * facs;
       }
     } else if (h_basis.am[i] == 1) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi));
         cnorm = cnorm * sqrt(4.0 * h_basis.alpha[j]);
         h_basis.norm[j] = h_basis.norm[j] * cnorm;
@@ -399,7 +398,7 @@ void Basis::new_read2() {
       // nsgs[0] = nsgs[0] + 3;
 
       facs = 0.0;
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         for (k = h_basis.stop_list[i]; k <= j; k++) {
           aa = h_basis.alpha[j] + h_basis.alpha[k];
           fac = aa * sqrt(aa);
@@ -411,13 +410,13 @@ void Basis::new_read2() {
         }
       }
       pi32 = 5.56832799683170;
-      facs = 1.0 / sqrt(facs*pi32);
+      facs = 1.0 / sqrt(facs * pi32);
 
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         h_basis.norm[j] = h_basis.norm[j] * facs;
       }
     } else if (h_basis.am[i] == 2) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi)) * 4.0 * h_basis.alpha[j];
         cnorm = cnorm / sqrt(3.0);
         h_basis.norm[j] = h_basis.norm[j] * cnorm;  // dxx
@@ -425,7 +424,7 @@ void Basis::new_read2() {
       // ncgs = ncgs + 6;
       // nsgs[0] = nsgs[0] + 5;
     } else if (h_basis.am[i] == 3) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi)) * pow(4.0 * h_basis.alpha[j], 1.5);
         cnorm = cnorm / sqrt(15.0);
         h_basis.norm[j] = h_basis.norm[j] * cnorm;  // dxx
@@ -434,7 +433,7 @@ void Basis::new_read2() {
       // ncgs = ncgs + 10;
       // nsgs[0] = nsgs[0] + 7;
     } else if (h_basis.am[i] == 4) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i+1]; j++) {
+      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
         cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi)) * pow(4.0 * h_basis.alpha[j], 2.0);
         cnorm = cnorm / sqrt(7.0 * 15.0);
         h_basis.norm[j] = h_basis.norm[j] * cnorm;  // dxx

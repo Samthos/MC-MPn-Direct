@@ -4,7 +4,7 @@ TIDX_CONTROL {
     double en2m, en2p;
     en2m = 0;
     en2p = 0;
-    if(tidx != tidy) {
+    if (tidx != tidy) {
       en2p = en2p - 2.00 * ovps.os_13[Index] * ovps.vs_24[Index] * ovps.vs_13[Index];  // ovps.ps_24[bandIndex];
       en2p = en2p + 1.00 * ovps.os_13[Index] * ovps.vs_14[Index] * ovps.vs_23[Index];  // ovps.ps_24[bandIndex];
 

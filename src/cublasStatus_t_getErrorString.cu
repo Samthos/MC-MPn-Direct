@@ -1,6 +1,6 @@
+#include <cuda.h>
 #include <iostream>
 #include <string>
-#include <cuda.h>
 #include "cublas_v2.h"
 
 #include "cublasStatus_t_getErrorString.h"

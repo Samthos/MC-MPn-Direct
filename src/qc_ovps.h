@@ -2,9 +2,9 @@
 
 #include <vector>
 
+#include "el_pair.h"
 #include "qc_basis.h"
 #include "qc_random.h"
-#include "el_pair.h"
 
 #ifndef QC_OVPS_H_
 #define QC_OVPS_H_
@@ -32,17 +32,17 @@ struct OVPS_ARRAY {
   double *ps_12c, *ps_22c;
 
   double *ent;
-  std::vector<std::vector<std::vector<double*>>> en2Block;
-  std::vector<std::vector<std::vector<double*>>> en2Ex1;
-  std::vector<std::vector<std::vector<double*>>> en2Ex2;
-  std::vector<std::vector<double*>> en2;
+  std::vector<std::vector<std::vector<double *>>> en2Block;
+  std::vector<std::vector<std::vector<double *>>> en2Ex1;
+  std::vector<std::vector<std::vector<double *>>> en2Ex2;
+  std::vector<std::vector<double *>> en2;
   double *en2mCore, *en2pCore;
   double *en2m, *en2p;
 
-  std::vector<std::vector<std::vector<double*>>> en3Block;
-  std::vector<std::vector<std::vector<double*>>> en3Ex1;
-  std::vector<std::vector<std::vector<double*>>> en3Ex2;
-  std::vector<std::vector<double*>> en3;
+  std::vector<std::vector<std::vector<double *>>> en3Block;
+  std::vector<std::vector<std::vector<double *>>> en3Ex1;
+  std::vector<std::vector<std::vector<double *>>> en3Ex2;
+  std::vector<std::vector<double *>> en3;
   double *en3_1pCore, *en3_2pCore, *en3_12pCore;
   double *en3_1mCore, *en3_2mCore, *en3_12mCore;
   double *en3_12cCore, *en3_22cCore;
@@ -61,25 +61,25 @@ class OVPs {
   double lambda;
 
  public:
-  void cpuMalloc_02(int, int, int, int, int, const Basis&);
+  void cpuMalloc_02(int, int, int, int, int, const Basis &);
   void gpuMalloc_02();
   void cpuFree_02();
   void gpuFree_02();
   void zero_energy_arrays_02();
-  void new_tau_02(Basis&, Random&);
+  void new_tau_02(Basis &, Random &);
   void set_tau_02(int);
-  void init_tau_02(Basis&);
-  void update_ovps_02(el_pair_typ*);
+  void init_tau_02(Basis &);
+  void update_ovps_02(el_pair_typ *);
 
-  void cpuMalloc_03(int, int, int, int, int, const Basis&);
+  void cpuMalloc_03(int, int, int, int, int, const Basis &);
   void gpuMalloc_03();
   void cpuFree_03();
   void gpuFree_03();
   void zero_energy_arrays_03();
-  void new_tau_03(Basis&, Random&);
+  void new_tau_03(Basis &, Random &);
   void set_tau_03(int, int);
-  void init_tau_03(Basis&);
-  void update_ovps_03(el_pair_typ*);
+  void init_tau_03(Basis &);
+  void update_ovps_03(el_pair_typ *);
 
   OVPS_ARRAY ovps, d_ovps;
 

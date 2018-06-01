@@ -2,19 +2,17 @@
 
 #include "blas_calls.h"
 
-#ifndef OFFSET 
-#define OFFSET(N, incX) ((incX) > 0 ?  0 : ((N) - 1) * (-(incX)))
-#endif 
+#ifndef OFFSET
+#define OFFSET(N, incX) ((incX) > 0 ? 0 : ((N)-1) * (-(incX)))
+#endif
 
 typedef int INDEX;
 
-void
-cblas_dgemm (const enum CBLAS_ORDER Order, const enum CBLAS_TRANSPOSE TransA,
-             const enum CBLAS_TRANSPOSE TransB, const int M, const int N,
-             const int K, const double alpha, const double *A, const int lda,
-             const double *B, const int ldb, const double beta, double *C,
-             const int ldc)
-{
+void cblas_dgemm(const enum CBLAS_ORDER Order, const enum CBLAS_TRANSPOSE TransA,
+                 const enum CBLAS_TRANSPOSE TransB, const int M, const int N,
+                 const int K, const double alpha, const double *A, const int lda,
+                 const double *B, const int ldb, const double beta, double *C,
+                 const int ldc) {
   {
     INDEX i, j, k;
     INDEX n1, n2;
@@ -106,11 +104,9 @@ cblas_dgemm (const enum CBLAS_ORDER Order, const enum CBLAS_TRANSPOSE TransA,
   }
 }
 
-void
-cblas_dger (const enum CBLAS_ORDER order, const int M, const int N,
-            const double alpha, const double *X, const int incX,
-            const double *Y, const int incY, double *A, const int lda)
-{
+void cblas_dger(const enum CBLAS_ORDER order, const int M, const int N,
+                const double alpha, const double *X, const int incX,
+                const double *Y, const int incY, double *A, const int lda) {
   {
     INDEX i, j;
 
@@ -144,9 +140,8 @@ cblas_dger (const enum CBLAS_ORDER order, const int M, const int N,
 }
 
 double
-cblas_ddot (const int N, const double *X, const int incX, const double *Y,
-            const int incY)
-{
+cblas_ddot(const int N, const double *X, const int incX, const double *Y,
+           const int incY) {
   {
     double r = 0.0;
     INDEX i;
@@ -161,12 +156,10 @@ cblas_ddot (const int N, const double *X, const int incX, const double *Y,
   }
 }
 
-void
-cblas_dgemv (const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE TransA,
-             const int M, const int N, const double alpha, const double *A,
-             const int lda, const double *X, const int incX,
-             const double beta, double *Y, const int incY)
-{
+void cblas_dgemv(const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE TransA,
+                 const int M, const int N, const double alpha, const double *A,
+                 const int lda, const double *X, const int incX,
+                 const double beta, double *Y, const int incY) {
   {
     INDEX i, j;
     INDEX lenX, lenY;
@@ -197,8 +190,7 @@ cblas_dgemv (const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE TransA,
     }
     if (alpha == 0.0)
       return;
-    if ((order == CblasRowMajor && Trans == CblasNoTrans)
-        || (order == CblasColMajor && Trans == CblasTrans)) {
+    if ((order == CblasRowMajor && Trans == CblasNoTrans) || (order == CblasColMajor && Trans == CblasTrans)) {
       INDEX iy = OFFSET(lenY, incY);
       for (i = 0; i < lenY; i++) {
         double temp = 0.0;
@@ -210,8 +202,7 @@ cblas_dgemv (const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE TransA,
         Y[iy] += alpha * temp;
         iy += incY;
       }
-    } else if ((order == CblasRowMajor && Trans == CblasTrans)
-               || (order == CblasColMajor && Trans == CblasNoTrans)) {
+    } else if ((order == CblasRowMajor && Trans == CblasTrans) || (order == CblasColMajor && Trans == CblasNoTrans)) {
       INDEX ix = OFFSET(lenX, incX);
       for (j = 0; j < lenX; j++) {
         const double temp = alpha * X[ix];
@@ -231,24 +222,22 @@ cblas_dgemv (const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE TransA,
   }
 }
 
-void
-Ddgmm(const enum DDGMM_SIDE Side,
-    int m, int n,
-    const double *A, int lda,
-    const double *x, int incx,
-    double *C, int ldc) {
+void Ddgmm(const enum DDGMM_SIDE Side,
+           int m, int n,
+           const double *A, int lda,
+           const double *x, int incx,
+           double *C, int ldc) {
   if (Side == DDGMM_SIDE_LEFT) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        C[i*ldc+j] = x[j*incx] * A[i*lda+j];
+        C[i * ldc + j] = x[j * incx] * A[i * lda + j];
       }
     }
   } else if (Side == DDGMM_SIDE_RIGHT) {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        C[i*ldc+j] = x[i*incx] * A[i*lda+j];
+        C[i * ldc + j] = x[i * incx] * A[i * lda + j];
       }
     }
   }
 }
-
