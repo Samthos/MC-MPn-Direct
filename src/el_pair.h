@@ -1,13 +1,13 @@
 // Copyright 2017 Hirata Lab
 
-#include <array>
-#include <vector>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "mc_basis.h"
+#include <array>
+#include <vector>
+
+#include "weight_function.h"
 #include "qc_geom.h"
 #include "qc_random.h"
 
@@ -15,15 +15,18 @@
 #define EL_PAIR_H_
 class el_pair_typ {
  private:
+  double r12();
+  double calculate_r(double p, double alpha, double beta, double a);
+  double calculate_phi(double p, double r, double alpha, double beta, double a);
+
  public:
-  void init(int);
-  void pos_init(Molec&, Random&);
-  void weight_func_set(Molec&, MC_Basis&);
-  void mc_move_scheme(int*, int*, double, Random&, Molec&, MC_Basis&);
+  void init(const int);
+  void pos_init(const Molec&, Random&);
+  void mc_move_scheme(Random&, const Molec&, const GTO_Weight&);
 
   std::array<double, 3> pos1, pos2;
   std::vector<double> psi1, psi2;
-  double wgt, r12, rv;
+  double wgt, rv;
   bool is_new;
 };
 #endif  // EL_PAIR_H_

@@ -9,7 +9,7 @@
 
 #include "qc_monte.h"
 
-QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, MC_Basis p4) : mpi_info(p0), iops(p1), molec(p2), basis(p3), mc_basis(p4) {
+QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4) : mpi_info(p0), iops(p1), molec(p2), basis(p3), mc_basis(p4) {
   random.seed(iops.iopns[KEYS::DEBUG]);
 
   numBand = iops.iopns[KEYS::NUM_BAND];
@@ -26,21 +26,8 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, MC_Basis p4) : mpi_
   el_pair_list.resize(iops.iopns[KEYS::MC_NPAIR]);
   for (auto &it : el_pair_list) {
     it.init(ivir2);
-    it.pos_init(molec, random);
-    it.weight_func_set(molec, mc_basis);
   }
-  //Perform Metropolis Monte Carlo burn in
-  nsucc = 0;
-  nfail = 0;
-  delx = iops.dopns[KEYS::MC_DELX];
-  for (int i = 1; i <= 100000; i++) {
-    move_walkers();
-    if (0 == i % 1000) {
-      scale_delx();
-    }
-  }
-  nsucc = 0;
-  nfail = 0;
+
   //init wavefunctions walkers
   for (auto &it : el_pair_list) {
     it.is_new = true;
@@ -50,20 +37,8 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, MC_Basis p4) : mpi_
 }
 void QC_monte::move_walkers() {
   for (auto &it : el_pair_list) {
-    it.mc_move_scheme(&nsucc, &nfail, delx, random, molec, mc_basis);
+    it.mc_move_scheme(random, molec, mc_basis);
   }
-}
-void QC_monte::scale_delx() {
-  double ratio = ((double)nfail) / ((double)(nfail + nsucc));
-  if (ratio < 0.5) {
-    ratio = std::min(1.0 / (2.0 * ratio), 1.1);
-  } else {
-    ratio = std::max(0.9, 1.0 / (2.0 * ratio));
-  }
-  delx = delx * ratio;  //1.1
-
-  nsucc = 0;
-  nfail = 0;
 }
 void QC_monte::print_mc_head(std::chrono::high_resolution_clock::time_point mc_start) {
   std::time_t tt = std::chrono::high_resolution_clock::to_time_t(mc_start);
@@ -96,9 +71,6 @@ void QC_Monte_2::monte_energy() {
   mc_local_energy(qeps2.qeps, 0);
   for (i = 1; i <= iops.iopns[KEYS::MC_TRIAL]; i++) {
     move_walkers();
-    if (0 == i % 1000) {
-      scale_delx();
-    }
 
     //calculate energies
     mc_local_energy(qeps2.qeps, i);
@@ -219,9 +191,6 @@ void QC_Monte_3::monte_energy() {
   mc_local_energy(qeps2.qeps, qeps3.qeps, 0);
   for (i = 1; i <= iops.iopns[KEYS::MC_TRIAL]; i++) {
     move_walkers();
-    if (0 == i % 1000) {
-      scale_delx();
-    }
 
     //calculate energies
     mc_local_energy(qeps2.qeps, qeps3.qeps, i);

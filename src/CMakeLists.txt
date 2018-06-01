@@ -24,8 +24,8 @@ set(source
 #  gpu_psi.cu
 #  gpu_qc_monte.cpp
   main.cpp
-  mc_basis.cpp
-  mc_basis.h
+        weight_function.cpp
+        weight_function.h
   nw_vectors.cpp
   qc_basis.cpp
   qc_basis.h

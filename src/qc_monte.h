@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "el_pair.h"
-#include "mc_basis.h"
+#include "weight_function.h"
 #include "qc_basis.h"
 #include "qc_geom.h"
 #include "qc_input.h"
@@ -52,7 +52,7 @@ class QC_monte {
   IOPs iops;
   Molec molec;
   Basis basis;
-  MC_Basis mc_basis;
+  GTO_Weight mc_basis;
   Random random;
   OVPs ovps;
 
@@ -92,7 +92,7 @@ class QC_monte {
   void mc_gf3_full_print(int, int, int);
 
  public:
-  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, MC_Basis p4);
+  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4);
   ~QC_monte() {
     basis.gpu_free();
   }
@@ -104,7 +104,7 @@ class QC_Monte_2 : public QC_monte {
   void mc_local_energy(std::vector<std::vector<double>>&, int);
 
  public:
-  QC_Monte_2(MPI_info p1, IOPs p2, Molec p3, Basis p4, MC_Basis p5) : QC_monte(p1, p2, p3, p4, p5) {
+  QC_Monte_2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                       iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                       iops.iopns[KEYS::NBLOCK], basis);
@@ -126,7 +126,7 @@ class QC_Monte_3 : public QC_monte {
   void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
 
  public:
-  QC_Monte_3(MPI_info p1, IOPs p2, Molec p3, Basis p4, MC_Basis p5) : QC_monte(p1, p2, p3, p4, p5) {
+  QC_Monte_3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.cpuMalloc_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                       iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                       iops.iopns[KEYS::NBLOCK], basis);

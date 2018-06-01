@@ -1,6 +1,6 @@
 // Copyright 2017
 
-#include "mc_basis.h"
+#include "weight_function.h"
 #include "mpi.h"
 #include "qc_basis.h"
 #include "qc_geom.h"
@@ -39,9 +39,8 @@ int main(int argc, char* argv[]) {
   basis.read(iops, mpi_info, molec);
   basis.nw_vectors_read(mpi_info, molec, iops);
 
-  MC_Basis mc_basis;
+  GTO_Weight mc_basis;
   mc_basis.read(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);
-  mc_basis.mc_eri2v(mpi_info, molec);
 
   if (iops.iopns[KEYS::ORDER] == 2) {
     QC_Monte_2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
