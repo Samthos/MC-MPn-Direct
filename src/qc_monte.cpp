@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <chrono>
-#include <cstdint>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -35,23 +34,26 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4) : mp
 
   basis.gpu_alloc(iops.iopns[KEYS::MC_NPAIR], molec);
 }
+
 void QC_monte::move_walkers() {
   for (auto &it : el_pair_list) {
     it.mc_move_scheme(random, molec, mc_basis);
   }
 }
+
 void QC_monte::print_mc_head(std::chrono::high_resolution_clock::time_point mc_start) {
   std::time_t tt = std::chrono::high_resolution_clock::to_time_t(mc_start);
   std::cout << "Begining MC run at: " << ctime(&tt);
   std::cout.flush();
 }
+
 void QC_monte::print_mc_tail(double time_span, std::chrono::high_resolution_clock::time_point mc_end) {
   std::time_t tt = std::chrono::high_resolution_clock::to_time_t(mc_end);
   std::cout << "Finished MC run at: " << ctime(&tt);
   std::cout << "Spent " << time_span << " second preforming MC integration" << std::endl;
 }
 
-void QC_Monte_2::monte_energy() {
+void GF2::monte_energy() {
   int checkNum = 1;
   int i, band, print_mat;
 
@@ -127,7 +129,7 @@ void QC_Monte_2::monte_energy() {
   }
 }
 
-void QC_Monte_2::mc_local_energy(std::vector<std::vector<double>> &qeps2, int step) {
+void GF2::mc_local_energy(std::vector<std::vector<double>> &qeps2, int step) {
   update_wavefunction();
 
   if (iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFDIFF) {
@@ -170,7 +172,7 @@ void QC_Monte_2::mc_local_energy(std::vector<std::vector<double>> &qeps2, int st
   }
 }
 
-void QC_Monte_3::monte_energy() {
+void GF3::monte_energy() {
   int checkNum = 1;
   int i, band, print_mat;
 
@@ -253,7 +255,7 @@ void QC_Monte_3::monte_energy() {
   }
 }
 
-void QC_Monte_3::mc_local_energy(std::vector<std::vector<double>> &qeps2, std::vector<std::vector<double>> &qeps3, int step) {
+void GF3::mc_local_energy(std::vector<std::vector<double>> &qeps2, std::vector<std::vector<double>> &qeps3, int step) {
   update_wavefunction();
 
   if (iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFDIFF) {

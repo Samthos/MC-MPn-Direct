@@ -43,10 +43,10 @@ int main(int argc, char* argv[]) {
   mc_basis.read(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);
 
   if (iops.iopns[KEYS::ORDER] == 2) {
-    QC_Monte_2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+    GF2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
     qc_monte.monte_energy();
   } else if (iops.iopns[KEYS::ORDER] == 3) {
-    QC_Monte_3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+    GF3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
     qc_monte.monte_energy();
   }
 

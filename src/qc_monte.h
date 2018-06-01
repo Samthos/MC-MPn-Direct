@@ -99,12 +99,12 @@ class QC_monte {
   virtual void monte_energy() = 0;
 };
 
-class QC_Monte_2 : public QC_monte {
+class GF2 : public QC_monte {
  protected:
   void mc_local_energy(std::vector<std::vector<double>>&, int);
 
  public:
-  QC_Monte_2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+  GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                       iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                       iops.iopns[KEYS::NBLOCK], basis);
@@ -114,19 +114,19 @@ class QC_Monte_2 : public QC_monte {
     ovps.init_tau_02(basis);
 #endif
   }
-  ~QC_Monte_2() {
+  ~GF2() {
     ovps.cpuFree_02();
     ovps.gpuFree_02();
   }
   void monte_energy();
 };
 
-class QC_Monte_3 : public QC_monte {
+class GF3 : public QC_monte {
  protected:
   void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
 
  public:
-  QC_Monte_3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+  GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.cpuMalloc_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                       iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                       iops.iopns[KEYS::NBLOCK], basis);
@@ -135,7 +135,7 @@ class QC_Monte_3 : public QC_monte {
     ovps.init_tau_03(basis);
 #endif
   }
-  ~QC_Monte_3() {
+  ~GF3() {
     ovps.cpuFree_03();
     ovps.gpuFree_03();
   }
