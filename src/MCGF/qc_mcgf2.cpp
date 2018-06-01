@@ -1,5 +1,5 @@
-#include "blas_calls.h"
-#include "qc_monte.h"
+#include "../blas_calls.h"
+#include "../qc_monte.h"
 
 void gf2_core(OVPS_ARRAY ovps, int mc_pair_num) {
   int tidx, tidy;

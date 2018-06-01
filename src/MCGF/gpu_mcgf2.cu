@@ -2,9 +2,9 @@
 #include <thrust/reduce.h>
 #include "cublas_v2.h"
 
-#include "cublasStatus_t_getErrorString.h"
+#include "../cublasStatus_t_getErrorString.h"
 
-#include "qc_monte.h"
+#include "../qc_monte.h"
 __global__ void gf2_core(OVPS_ARRAY ovps, int mc_pair_num) {
   int tidx = blockIdx.x * blockDim.x + threadIdx.x;
   int tidy = blockIdx.y * blockDim.y + threadIdx.y;

@@ -3,9 +3,9 @@
 
 #include "cublas_v2.h"
 
-#include "cublasStatus_t_getErrorString.h"
+#include "../cublasStatus_t_getErrorString.h"
 
-#include "qc_monte.h"
+#include "../qc_monte.h"
 
 __global__ void squareElements(int m, int n, double* A) {
   // m is number of rows of A

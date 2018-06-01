@@ -99,6 +99,59 @@ class QC_monte {
   virtual void monte_energy() = 0;
 };
 
+class MP2 : public QC_monte {
+ public:
+  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+    ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                      iops.iopns[KEYS::NBLOCK], basis);
+    ovps.gpuMalloc_02();
+
+    lambda = 2.0 * (basis.nw_en[iocc2] - basis.nw_en[iocc2 - 1]);
+    tau_values.resize(ivir2);
+  }
+  ~MP2() {
+    ovps.cpuFree_02();
+    ovps.gpuFree_02();
+  }
+  void monte_energy();
+
+ protected:
+  void mcmp2_energy(double&, std::vector<double>&);
+  void new_tau();
+
+  double lambda;
+  double tau_wgt;
+  std::vector<double> tau_values;
+};
+
+class MP3 : public QC_monte {
+ public:
+  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+    ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                      iops.iopns[KEYS::NBLOCK], basis);
+    ovps.gpuMalloc_02();
+
+    lambda = 2.0 * (basis.nw_en[iocc2] - basis.nw_en[iocc2 - 1]);
+    tau_values.resize(ivir2);
+  }
+  ~MP3() {
+    ovps.cpuFree_02();
+    ovps.gpuFree_02();
+  }
+  void monte_energy();
+
+ protected:
+  void mcmp2_energy(double&, std::vector<double>&);
+  void mcmp3_energy(double&, std::vector<double>&);
+  void new_tau();
+
+  double lambda;
+  double tau_wgt;
+  std::vector<double> tau_values;
+};
+
 class GF2 : public QC_monte {
  protected:
   void mc_local_energy(std::vector<std::vector<double>>&, int);

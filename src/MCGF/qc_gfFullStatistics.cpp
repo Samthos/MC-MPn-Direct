@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include "qc_monte.h"
+#include "../qc_monte.h"
 
 void QC_monte::mc_gf_statistics(int step,
                                 std::vector<std::vector<double>>& qep,

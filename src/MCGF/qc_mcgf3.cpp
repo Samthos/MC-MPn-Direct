@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "blas_calls.h"
-#include "qc_monte.h"
+#include "../blas_calls.h"
+#include "../qc_monte.h"
 
 void gf3_core_c(OVPS_ARRAY ovps, int mc_pair_num) {
   int tidx, tidy;

@@ -8,7 +8,7 @@
 
 #include "mpi.h"
 
-#include "qc_monte.h"
+#include "../qc_monte.h"
 
 std::string QC_monte::genFileName(int checkNum, int type, int order, int band, int diff, int block) {
   std::stringstream ss;

@@ -1,10 +1,9 @@
 #include <algorithm>
-#include <cstdint>
 #include <fstream>
 #include <iomanip>
 #include "mpi.h"
 
-#include "qc_monte.h"
+#include "../qc_monte.h"
 
 void fillVector3(std::vector<std::vector<std::vector<double>>>& in) {
   for (auto& it : in) {
