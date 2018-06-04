@@ -1,11 +1,11 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <string>
 
+#ifdef USE_MPI
 #include "mpi.h"
+#endif
 #include "qc_basis.h"
-#include "qc_geom.h"
 
 void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
   int i, j;
@@ -153,10 +153,12 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
     std::cout.flush();
   }
 
+#ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&nw_nsets, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nw_nbf, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nw_nmo, 2, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
 
   h_basis.icgs = new double[nw_nbf];
   occ = new double[nw_nbf];
@@ -234,11 +236,13 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
     delete[] occ;
   }
 
+#ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&nw_iocc, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nw_icore, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(nw_en, nw_nbf, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(h_basis.nw_co, nw_nbf * nw_nmo[0], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+#endif
 
   //orbital_check();
   nw_icore = 0;

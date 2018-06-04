@@ -1,7 +1,10 @@
 // Copyright 2017
 
-#include "weight_function.h"
+#ifdef USE_MPI
 #include "mpi.h"
+#endif
+
+#include "weight_function.h"
 #include "qc_basis.h"
 #include "qc_geom.h"
 #include "qc_input.h"
@@ -12,7 +15,9 @@
 #define VERSION "fix"
 
 int main(int argc, char* argv[]) {
+#ifdef USE_MPI
   MPI_Init(&argc, &argv);
+#endif
   MPI_info mpi_info;
 
   if (argc != 2) {
@@ -60,5 +65,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
+#ifdef USE_MPI
   MPI_Finalize();
+#endif
 }

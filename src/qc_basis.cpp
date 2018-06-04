@@ -7,7 +7,9 @@
 #include <iostream>
 #include <string>
 
+#ifdef USE_MPI
 #include "mpi.h"
+#endif
 #include "qc_basis.h"
 #include "qc_constant.h"
 
@@ -205,11 +207,13 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
+#ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&nshl, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&ncgs, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nsgs, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nprm, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
 
   qc_nprm = nprm;
   qc_ncgs = ncgs;
@@ -300,6 +304,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
+#ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(h_basis.alpha, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(h_basis.norm, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -307,19 +312,24 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   MPI_Bcast(h_basis.at, qc_nshl, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(h_basis.stop_list, qc_nshl + 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(h_basis.isgs, qc_nshl + 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
 
   new_read2();
 
   /*
   for (i = 0; i < qc_nprm; i++) {
+#ifdef USE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
+#endif
       if (mpi_info.taskid == 0) {
         printf("%2i\t%7.3f\t%7.3f\n", i, h_basis.alpha[i], h_basis.norm[i]);
         fflush(stdout);
       }
   }
   for (i = 0; i < qc_nprm; i++) {
+#ifdef USE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
+#endif
       if (mpi_info.taskid == 1) {
         printf("%2i\t%7.3f\t%7.3f\n", i, h_basis.alpha[i], h_basis.norm[i]);
         fflush(stdout);
@@ -327,7 +337,9 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   }
 */
 
+#ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
   // if (mpi_info.taskid == 0) {
   //   std::cout << "NSHL\t" << qc_nshl << "\t" << mpi_info.taskid << std::endl;

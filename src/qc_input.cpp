@@ -10,7 +10,9 @@
 #include "config.h"
 #endif  // HAVE_CONFIG_H
 
+#ifdef USE_MPI
 #include "mpi.h"
+#endif
 #include "qc_input.h"
 
 IOPs::IOPs() {
@@ -191,6 +193,7 @@ void IOPs::read(const MPI_info& mpi_info,
     iopns[KEYS::DIFFS] = 1;
   }
 
+#ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
 
   MPI_Bcast(iopns.data(), iopns.size(), MPI_INT, 0, MPI_COMM_WORLD);
@@ -198,6 +201,7 @@ void IOPs::read(const MPI_info& mpi_info,
   MPI_Bcast(bopns.data(), bopns.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
 
   MPI_Barrier(MPI_COMM_WORLD);
+#endif
 }
 
 void IOPs::print(const MPI_info& mpi_info,

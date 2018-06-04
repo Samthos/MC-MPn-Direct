@@ -5,7 +5,9 @@
 #include <iostream>
 #include <string>
 
+#ifdef USE_MPI
 #include "mpi.h"
+#endif
 
 #include "qc_constant.h"
 #include "qc_geom.h"
@@ -27,9 +29,11 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
     input >> natom;
   }
 
+#ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&natom, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
   atom.resize(natom);
   if (mpi_info.sys_master) {
@@ -55,10 +59,12 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
       pos[2] = pos[2] * ang_to_bohr;
     }
 
+#ifdef USE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&pos, 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&znum, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
     atom[i].znum = znum;
     atom[i].pos[0] = pos[0];

@@ -6,7 +6,9 @@
 #define MC_MP2_DIRECT_TIMER_H
 
 #include <chrono>
+#ifdef USE_MPI
 #include "mpi.h"
+#endif
 
 class Timer {
  public:
