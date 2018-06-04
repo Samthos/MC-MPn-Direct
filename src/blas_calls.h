@@ -39,4 +39,6 @@ void Ddgmm(const enum DDGMM_SIDE Side,
            const double *x, int incx,
            double *C, int ldc);
 
+void Transpose(const double*A, int m, double *B);
+
 #endif  // BLAS_CALLS_H_

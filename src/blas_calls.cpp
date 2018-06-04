@@ -241,3 +241,11 @@ void Ddgmm(const enum DDGMM_SIDE Side,
     }
   }
 }
+
+void Transpose(const double*A, int m, double *B) {
+  for (int row = 0; row < m; row++) {
+    for (int col = 0; col < m; col++) {
+      B[col * m + row] = A[row * m + col];
+    }
+  }
+}
