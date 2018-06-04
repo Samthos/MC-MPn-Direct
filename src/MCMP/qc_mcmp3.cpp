@@ -7,18 +7,22 @@
 #include "../qc_monte.h"
 
 void MP3::mcmp3_energy(double& emp3, std::vector<double>& control) {
-  std::vector<double> en(control.size(), 0);
+  std::array<double, 6> en;
+
+  double en_k, en_jk;
+  std::array<double, 6> c_k, c_jk;
 
   emp3 = 0.0;
   std::fill(control.begin(), control.end(), 0.0);
 
   for (auto i = 0; i < iops.iopns[KEYS::MC_NPAIR]; i++) {
-    double en_jk = 0;
-    std::vector<double> c_jk(control.size(), 0);
+    en_jk = 0;
+    c_jk.fill(0);
     for (auto j = i + 1; j < iops.iopns[KEYS::MC_NPAIR]; j++) {
       auto ij = i * iops.iopns[KEYS::MC_NPAIR] + j;
-      double en_k = 0;
-      std::vector<double> c_k(control.size(), 0);
+
+      en_k = 0;
+      c_k.fill(0);
 
       for (auto k = j + 1; k < iops.iopns[KEYS::MC_NPAIR]; k++) {
         auto ik = i * iops.iopns[KEYS::MC_NPAIR] + k;
