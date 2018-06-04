@@ -24,18 +24,12 @@ void MP3::mcmp3_energy(double& emp3, std::vector<double>& control) {
         auto ik = i * iops.iopns[KEYS::MC_NPAIR] + k;
         auto jk = j * iops.iopns[KEYS::MC_NPAIR] + k;
 
-        en[0] = -1 * ovps.d_ovps.os_15[ik] * ovps.d_ovps.os_26[ik] * ovps.d_ovps.vs_35[jk] * ovps.d_ovps.vs_46[jk] * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.vs_23[ij];
-        en[1] = -1 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_46[jk] * ovps.d_ovps.os_13[ij] * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_16[ik] * ovps.d_ovps.vs_25[ik];
-        en[2] = -4 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_45[jk] * ovps.d_ovps.vs_16[ik] * ovps.d_ovps.vs_24[ij];
-        en[3] = -4 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_46[jk] * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.vs_25[ik];
-        en[4] = -4 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_35[jk] * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.vs_26[ik];
-        en[5] = -4 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_36[jk] * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_15[ik] * ovps.d_ovps.vs_24[ij];
-        en[6] = 2 * ovps.d_ovps.os_15[ik] * ovps.d_ovps.os_26[ik] * ovps.d_ovps.vs_35[jk] * ovps.d_ovps.vs_46[jk] * ovps.d_ovps.vs_13[ij] * ovps.d_ovps.vs_24[ij];
-        en[7] = 2 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_45[jk] * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.vs_26[ik];
-        en[8] = 2 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_46[jk] * ovps.d_ovps.vs_15[ik] * ovps.d_ovps.vs_24[ij];
-        en[9] = 2 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_36[jk] * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.vs_25[ik];
-        en[10] = 2 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_46[jk] * ovps.d_ovps.os_13[ij] * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_15[ik] * ovps.d_ovps.vs_26[ik];
-        en[11] = 8 * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_35[jk] * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_16[ik] * ovps.d_ovps.vs_24[ij];
+        en[0] = (2 * ovps.d_ovps.vs_13[ij] * ovps.d_ovps.vs_24[ij] -1 * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.vs_23[ij]) * ovps.d_ovps.os_15[ik] * ovps.d_ovps.os_26[ik] * ovps.d_ovps.vs_35[jk] * ovps.d_ovps.vs_46[jk];
+        en[1] = (2 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_46[jk] - 4 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_36[jk]) * ovps.d_ovps.vs_24[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_15[ik] * ovps.d_ovps.os_35[jk];
+        en[2] = (8 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_35[jk] - 4 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_45[jk]) * ovps.d_ovps.vs_24[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_16[ik] * ovps.d_ovps.os_35[jk];
+        en[3] = (2 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_36[jk] - 4 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_46[jk]) * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_25[ik] * ovps.d_ovps.os_35[jk];
+        en[4] = (2 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_45[jk] - 4 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_35[jk]) * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_26[ik] * ovps.d_ovps.os_35[jk];
+        en[5] = (2 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.os_14[ij] -1 * ovps.d_ovps.os_13[ij] * ovps.d_ovps.os_24[ij]) * ovps.d_ovps.vs_16[ik] * ovps.d_ovps.vs_25[ik] * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_46[jk];
 
         std::transform(c_k.begin(), c_k.end(), en.begin(), c_k.begin(),
                        [&](double x, double y) { return x + y / el_pair_list[k].wgt; });
@@ -63,4 +57,3 @@ void MP3::mcmp3_energy(double& emp3, std::vector<double>& control) {
   std::transform(control.begin(), control.end(), control.begin(),
                  [nsamp](double x) { return x / nsamp; });
 }
-

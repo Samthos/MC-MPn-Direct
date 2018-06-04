@@ -81,11 +81,11 @@ void MP2::new_tau() {
 void MP3::monte_energy() {
   // variables to store emp2 energy
   double emp2, emp3;
-  std::vector<double> mp2_control(2), mp3_control(12);
-  ControlVariate cv_emp2(2, {0, 0}), cv_emp3(12, {0.0, 0.0, 0.0,
-                                                  0.0, 0.0, 0.0,
-                                                  0.0, 0.0, 0.0,
+  std::vector<double> mp2_control(2), mp3_control(6);
+  ControlVariate cv_emp2(2, {0, 0}), cv_emp3(6, {0.0, 0.0, 0.0,
                                                   0.0, 0.0, 0.0});
+                                                 // 0.0, 0.0, 0.0,
+                                                 // 0.0, 0.0, 0.0});
 
   std::ofstream out_mp2, out_mp3;
   Timer mcTimer, stepTimer;
