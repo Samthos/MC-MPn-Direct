@@ -35,7 +35,7 @@ enum KeyVal {
 }
 namespace TASKS {
 enum TaskVal {
-  MP2 = 0,
+  MP = 0,
   GF,
   GFDIFF,
   GFFULL,

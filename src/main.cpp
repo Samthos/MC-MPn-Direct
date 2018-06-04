@@ -42,12 +42,22 @@ int main(int argc, char* argv[]) {
   GTO_Weight mc_basis;
   mc_basis.read(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);
 
-  if (iops.iopns[KEYS::ORDER] == 2) {
-    GF2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
-    qc_monte.monte_energy();
-  } else if (iops.iopns[KEYS::ORDER] == 3) {
-    GF3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
-    qc_monte.monte_energy();
+  if (iops.iopns[KEYS::TASK] == TASKS::MP) {
+    if (iops.iopns[KEYS::ORDER] == 2) {
+      MP2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      qc_monte.monte_energy();
+    } else if (iops.iopns[KEYS::ORDER] == 3) {
+      MP3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      qc_monte.monte_energy();
+    }
+  } else {
+    if (iops.iopns[KEYS::ORDER] == 2) {
+      GF2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      qc_monte.monte_energy();
+    } else if (iops.iopns[KEYS::ORDER] == 3) {
+      GF3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      qc_monte.monte_energy();
+    }
   }
 
   MPI_Finalize();

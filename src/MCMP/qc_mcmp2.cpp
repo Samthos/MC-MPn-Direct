@@ -104,11 +104,11 @@ void MP3::mcmp2_energy(double& emp2, std::vector<double>& control) {
 
     for (auto jt = it + 1; jt !=  iops.iopns[KEYS::MC_NPAIR]; jt++) {
       auto ijIndex = it * iops.iopns[KEYS::MC_NPAIR] + jt;
-      a_resk = (ovps.ovps.os_13[ijIndex] * ovps.ovps.os_24[ijIndex] * ovps.ovps.vs_13[ijIndex] * ovps.ovps.vs_24[ijIndex]);
-      b_resk = (ovps.ovps.os_14[ijIndex] * ovps.ovps.os_23[ijIndex] * ovps.ovps.vs_13[ijIndex] * ovps.ovps.vs_24[ijIndex]);
+      a_resk = (ovps.d_ovps.os_13[ijIndex] * ovps.d_ovps.os_24[ijIndex] * ovps.d_ovps.vs_13[ijIndex] * ovps.d_ovps.vs_24[ijIndex]);
+      b_resk = (ovps.d_ovps.os_14[ijIndex] * ovps.d_ovps.os_23[ijIndex] * ovps.d_ovps.vs_13[ijIndex] * ovps.d_ovps.vs_24[ijIndex]);
 
-      a_resk = a_resk + (ovps.ovps.os_14[ijIndex] * ovps.ovps.os_23[ijIndex] * ovps.ovps.vs_14[ijIndex] * ovps.ovps.vs_23[ijIndex]);
-      b_resk = b_resk + (ovps.ovps.os_13[ijIndex] * ovps.ovps.os_24[ijIndex] * ovps.ovps.vs_14[ijIndex] * ovps.ovps.vs_23[ijIndex]);
+      a_resk = a_resk + (ovps.d_ovps.os_14[ijIndex] * ovps.d_ovps.os_23[ijIndex] * ovps.d_ovps.vs_14[ijIndex] * ovps.d_ovps.vs_23[ijIndex]);
+      b_resk = b_resk + (ovps.d_ovps.os_13[ijIndex] * ovps.d_ovps.os_24[ijIndex] * ovps.d_ovps.vs_14[ijIndex] * ovps.d_ovps.vs_23[ijIndex]);
 
       emp2a = a_resk * el_pair_list[jt].rv;
       emp2b = b_resk * el_pair_list[jt].rv;
@@ -119,7 +119,7 @@ void MP3::mcmp2_energy(double& emp2, std::vector<double>& control) {
     emp2 += emp2_rvj * el_pair_list[it].rv;
     std::transform(control_j.begin(), control_j.end(), control.begin(), control.begin(), [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
   }
-  emp2 = emp2 * tau_wgt / icount2;
-  std::transform(control.begin(), control.end(), control.begin(), [&](double c) { return c * tau_wgt / icount2; });
+  emp2 = emp2 * ovps.t1_twgt / icount2;
+  std::transform(control.begin(), control.end(), control.begin(), [&](double c) { return c * ovps.t1_twgt / icount2; });
 }
 

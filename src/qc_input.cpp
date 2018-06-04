@@ -24,7 +24,7 @@ IOPs::IOPs() {
   iopns[KEYS::DIFFS] = 1;
   iopns[KEYS::NBLOCK] = 1;
   iopns[KEYS::ORDER] = 2;
-  iopns[KEYS::TASK] = TASKS::MP2;
+  iopns[KEYS::TASK] = TASKS::MP;
 
   sopns[KEYS::GEOM] = "geom.xyz";
   sopns[KEYS::BASIS] = "basis.dat";
@@ -47,7 +47,7 @@ void IOPs::read(const MPI_info& mpi_info,
       "DEBUG", "MC_PAIR_GROUPS", "TASK", "NUM_BAND", "OFF_BAND",  // 10-14
       "DIFFS", "ORDER"};
   const std::vector<std::string> taskVals = {
-      "MP2", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
+      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
 
   if (mpi_info.sys_master) {
     std::ifstream input(file.c_str());
@@ -203,7 +203,7 @@ void IOPs::read(const MPI_info& mpi_info,
 void IOPs::print(const MPI_info& mpi_info,
                  const std::string& file) {
   const std::vector<std::string> taskVals = {
-      "MP2", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
+      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
 
   if (mpi_info.sys_master) {
     std::cout << std::endl;

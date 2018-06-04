@@ -128,28 +128,20 @@ class MP2 : public QC_monte {
 class MP3 : public QC_monte {
  public:
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
-    ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.cpuMalloc_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                       iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                       iops.iopns[KEYS::NBLOCK], basis);
-    ovps.gpuMalloc_02();
-
-    lambda = 2.0 * (basis.nw_en[iocc2] - basis.nw_en[iocc2 - 1]);
-    tau_values.resize(ivir2);
+    ovps.gpuMalloc_03();
   }
   ~MP3() {
-    ovps.cpuFree_02();
-    ovps.gpuFree_02();
+    ovps.cpuFree_03();
+    ovps.gpuFree_03();
   }
   void monte_energy();
 
  protected:
   void mcmp2_energy(double&, std::vector<double>&);
   void mcmp3_energy(double&, std::vector<double>&);
-  void new_tau();
-
-  double lambda;
-  double tau_wgt;
-  std::vector<double> tau_values;
 };
 
 class GF2 : public QC_monte {
