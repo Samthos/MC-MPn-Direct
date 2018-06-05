@@ -11,19 +11,16 @@
 #include "mpi.h"
 #endif
 #include "qc_basis.h"
-#include "qc_constant.h"
+#include "../qc_constant.h"
 
 Basis::Basis() {
-  cd[0] = sqrt(3.0);
-  cd[1] = cd[0] * 0.5;
-
   cf[0] = sqrt(2.5) * 0.5;
-  cf[1] = cf[0] * 3.0;
+  cf[1] = sqrt(2.5) * 1.5;
   cf[2] = sqrt(15.0);
   cf[3] = sqrt(1.5) * 0.5;
   cf[4] = sqrt(6.0);
   cf[5] = 1.5;
-  cf[6] = cf[2] * 0.5;
+  cf[6] = sqrt(15.0) * 0.5;
 
   cg[0] = 2.9580398915498085;  // (3, 1, 0) (1, 3, 0)
   cg[1] = 6.2749501990055672;
@@ -314,7 +311,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   MPI_Bcast(h_basis.isgs, qc_nshl + 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
 
-  new_read2();
+  normalize();
 
   /*
   for (i = 0; i < qc_nprm; i++) {
@@ -348,7 +345,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   // }
 }
 
-void Basis::new_read2() {
+void Basis::normalize() {
   int i, j, k;
   double cnorm, aa, dum, fac, facs, pi32;
 

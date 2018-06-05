@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "blas_calls.h"
+#include "../blas_calls.h"
 #include "qc_basis.h"
 
 void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
@@ -13,12 +13,10 @@ void Basis::gpu_free() {
 }
 
 void Basis::host_psi_get(double* pos, double* psi, Molec& molec) {
-  int i, j, index;
-  double psii;
-
   host_cgs_get(pos, molec);
 
   std::fill(psi, psi+ivir2, 0.0);
+
   cblas_dgemv(CblasRowMajor, CblasNoTrans,
               ivir2-iocc1, nw_nbf,
               1.0, h_basis.nw_co + iocc1*nw_nbf, ivir2,

@@ -5,7 +5,7 @@
 #include <cuda.h>
 #include "cublas_v2.h"
 
-#include "cublasStatus_t_getErrorString.h"
+#include "../cublasStatus_t_getErrorString.h"
 #include "qc_basis.h"
 
 void Basis::gpu_alloc(int mc_pair_num, Molec &molec) {

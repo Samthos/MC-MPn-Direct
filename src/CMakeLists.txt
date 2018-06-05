@@ -12,9 +12,9 @@ set(source
         main.cpp
         weight_function.cpp
         weight_function.h
-        nw_vectors.cpp
-        qc_basis.cpp
-        qc_basis.h
+        basis/nw_vectors.cpp
+        basis/qc_basis.cpp
+        basis/qc_basis.h
         qc_constant.cpp
         qc_constant.h
         qc_geom.cpp
@@ -35,11 +35,11 @@ set(source
 )
 
 set(CPU_EXTRA_SOURCES
-        MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp qc_psi.cpp cpu_qc_monte.cpp
+        MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp basis/qc_psi.cpp cpu_qc_monte.cpp
 )
 set(GPU_EXTRA_SOURCES
         cublasStatus_t_getErrorString.cu cublasStatus_t_getErrorString.h
-        MCGF/gpu_gfFullStatistics.cu MCGF/gpu_mcgf2.cu MCGF/gpu_mcgf3.cu gpu_ovps.cu gpu_psi.cu gpu_qc_monte.cpp)
+        MCGF/gpu_gfFullStatistics.cu MCGF/gpu_mcgf2.cu MCGF/gpu_mcgf3.cu gpu_ovps.cu basis/gpu_psi.cu gpu_qc_monte.cpp)
 
 
 add_executable(MC_MPn_Direct ${source} ${CPU_EXTRA_SOURCES})

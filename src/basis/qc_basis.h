@@ -1,8 +1,8 @@
 // Copyright 2017
 
-#include "qc_geom.h"
-#include "qc_input.h"
-#include "qc_mpi.h"
+#include "../qc_geom.h"
+#include "../qc_input.h"
+#include "../qc_mpi.h"
 
 #ifndef QC_BASIS_H_
 #define QC_BASIS_H_
@@ -30,7 +30,7 @@ struct BasisData {
 
 class Basis {
  private:
-  double ang[15], cd[2], cf[7], cg[11];
+  double ang[15], cf[7], cg[11];
 
  public:
   Basis();
@@ -40,7 +40,7 @@ class Basis {
 
   // read write
   void read(IOPs &, MPI_info &, Molec &);
-  void new_read2();
+  void normalize();
   void nw_vectors_read(MPI_info &, Molec &, IOPs &);
   void gpu_alloc(int, Molec &);
   void gpu_free();

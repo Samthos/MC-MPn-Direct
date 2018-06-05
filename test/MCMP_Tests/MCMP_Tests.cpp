@@ -6,7 +6,7 @@
 #include <qc_mpi.h>
 #include <qc_input.h>
 #include <weight_function.h>
-#include <qc_basis.h>
+#include <basis/qc_basis.h>
 #include <qc_monte.h>
 
 TEST(MPTests, MP2) {

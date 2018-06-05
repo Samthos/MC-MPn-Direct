@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "el_pair.h"
-#include "qc_basis.h"
+#include "basis/qc_basis.h"
 #include "qc_random.h"
 
 #ifndef QC_OVPS_H_
