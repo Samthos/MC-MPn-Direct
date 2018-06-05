@@ -7,7 +7,9 @@
 #include <iomanip>
 #include <iostream>
 
+#ifdef USE_MPII
 #include "mpi.h"
+#endif
 
 #include "../qc_monte.h"
 
@@ -44,7 +46,9 @@ void GF2::monte_energy() {
 #endif
     {
       //Reduce variables across all threads
+#ifdef USE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
+#endif
       qeps2.reduce();
 
       if (mpi_info.sys_master) {  //print out results
@@ -59,14 +63,18 @@ void GF2::monte_energy() {
       mc_end = std::chrono::high_resolution_clock::now();
       time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
       print_mat = (time_span.count() > checkNum * 900);
+#ifdef UES_MPI
       MPI_Barrier(MPI_COMM_WORLD);
       MPI_Bcast(&print_mat, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
       if (print_mat) {
         for (band = 0; band < numBand; band++) {
           mc_gf2_full_print(band, i, checkNum % 2);
         }
         checkNum++;
+#ifdef USE_MPI
         MPI_Barrier(MPI_COMM_WORLD);
+#endif
       }
     }
   }
@@ -76,7 +84,9 @@ void GF2::monte_energy() {
       mc_gf2_full_print(i, iops.iopns[KEYS::MC_TRIAL], 2);
       std::cout.flush();
     }
+#ifdef USE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
   }
 
   //close streams and print out time
@@ -165,7 +175,9 @@ void GF3::monte_energy() {
 #endif
     {
       //Reduce variables across all threads
+#ifdef USE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
+#endif
       qeps2.reduce();
       qeps3.reduce();
 
@@ -182,15 +194,19 @@ void GF3::monte_energy() {
       mc_end = std::chrono::high_resolution_clock::now();
       time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
       print_mat = (time_span.count() > checkNum * 900);
+#ifdef USE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
       MPI_Bcast(&print_mat, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
       if (print_mat) {
         for (band = 0; band < numBand; band++) {
           mc_gf2_full_print(band, i, checkNum % 2);
           mc_gf3_full_print(band, i, checkNum % 2);
         }
         checkNum++;
+#ifdef USE_MPI
         MPI_Barrier(MPI_COMM_WORLD);
+#endif
       }
     }
   }
@@ -202,7 +218,9 @@ void GF3::monte_energy() {
       mc_gf3_full_print(i, iops.iopns[KEYS::MC_TRIAL], 2);
       std::cout.flush();
     }
+#ifdef USE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
   }
 
   //close streams and print out time

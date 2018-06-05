@@ -1,7 +1,10 @@
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
+
+#ifdef USE_MPI
 #include "mpi.h"
+#endif
 
 #include "../qc_monte.h"
 
@@ -86,8 +89,13 @@ void GFStats::blockIt(const int& step) {
 void GFStats::reduce() {
   for (uint it = 0; it < qepsEx1.size(); it++) {
     for (uint jt = 0; jt < qepsEx1[it].size(); jt++) {
+#ifdef USE_MPI
       MPI_Reduce(qepsEx1[it][jt].data(), qepsAvg[it][jt].data(), qepsEx1[it][jt].size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       MPI_Reduce(qepsEx2[it][jt].data(), qepsVar[it][jt].data(), qepsEx2[it][jt].size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+#else
+      std::copy(qepsEx1[it][jt].begin(), qepsEx1[it][jt].end(), qepsAvg[it][jt].begin());
+      std::copy(qepsEx2[it][jt].begin(), qepsEx2[it][jt].end(), qepsVar[it][jt].begin());
+#endif
     }
   }
 }
