@@ -102,17 +102,17 @@ class QC_monte {
 class MP2 : public QC_monte {
  public:
   MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
-    ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                      iops.iopns[KEYS::NBLOCK], basis);
-    ovps.gpuMalloc_02();
+    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                 iops.iopns[KEYS::NBLOCK], basis);
+    ovps.alloc_02();
 
     lambda = 2.0 * (basis.nw_en[iocc2] - basis.nw_en[iocc2 - 1]);
     tau_values.resize(ivir2);
   }
   ~MP2() {
-    ovps.cpuFree_02();
-    ovps.gpuFree_02();
+    ovps.free_tau_02();
+    ovps.free_02();
   }
   void monte_energy();
 
@@ -128,14 +128,14 @@ class MP2 : public QC_monte {
 class MP3 : public QC_monte {
  public:
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
-    ovps.cpuMalloc_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                      iops.iopns[KEYS::NBLOCK], basis);
-    ovps.gpuMalloc_03();
+    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                 iops.iopns[KEYS::NBLOCK], basis);
+    ovps.alloc_03();
   }
   ~MP3() {
-    ovps.cpuFree_03();
-    ovps.gpuFree_03();
+    ovps.free_tau_03();
+    ovps.free_03();
   }
   void monte_energy();
 
@@ -144,24 +144,44 @@ class MP3 : public QC_monte {
   void mcmp3_energy(double&, std::vector<double>&);
 };
 
+class MP4 : public QC_monte {
+ public:
+  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                 iops.iopns[KEYS::NBLOCK], basis);
+    ovps.alloc_03();
+  }
+  ~MP4() {
+    ovps.free_tau_03();
+    ovps.free_03();
+  }
+  void monte_energy();
+
+ protected:
+  void mcmp2_energy(double&, std::vector<double>&);
+  void mcmp3_energy(double&, std::vector<double>&);
+  void mcmp4_energy(double&, std::vector<double>&);
+};
+
 class GF2 : public QC_monte {
  protected:
   void mc_local_energy(std::vector<std::vector<double>>&, int);
 
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
-    ovps.cpuMalloc_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                      iops.iopns[KEYS::NBLOCK], basis);
+    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                 iops.iopns[KEYS::NBLOCK], basis);
 
-    ovps.gpuMalloc_02();
+    ovps.alloc_02();
 #ifdef QUAD_TAU
     ovps.init_tau_02(basis);
 #endif
   }
   ~GF2() {
-    ovps.cpuFree_02();
-    ovps.gpuFree_02();
+    ovps.free_tau_02();
+    ovps.free_02();
   }
   void monte_energy();
 };
@@ -172,17 +192,17 @@ class GF3 : public QC_monte {
 
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
-    ovps.cpuMalloc_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-                      iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                      iops.iopns[KEYS::NBLOCK], basis);
-    ovps.gpuMalloc_03();
+    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                 iops.iopns[KEYS::NBLOCK], basis);
+    ovps.alloc_03();
 #ifdef QUAD_TAU
     ovps.init_tau_03(basis);
 #endif
   }
   ~GF3() {
-    ovps.cpuFree_03();
-    ovps.gpuFree_03();
+    ovps.free_tau_03();
+    ovps.free_03();
   }
   void monte_energy();
 };

@@ -61,20 +61,20 @@ class OVPs {
   double lambda;
 
  public:
-  void cpuMalloc_02(int, int, int, int, int, const Basis &);
-  void gpuMalloc_02();
-  void cpuFree_02();
-  void gpuFree_02();
+  void init_02(int, int, int, int, int, const Basis &);
+  void alloc_02();
+  void free_tau_02();
+  void free_02();
   void zero_energy_arrays_02();
   void new_tau_02(Basis &, Random &);
   void set_tau_02(int);
   void init_tau_02(Basis &);
   void update_ovps_02(el_pair_typ *);
 
-  void cpuMalloc_03(int, int, int, int, int, const Basis &);
-  void gpuMalloc_03();
-  void cpuFree_03();
-  void gpuFree_03();
+  void init_03(int, int, int, int, int, const Basis &);
+  void alloc_03();
+  void free_tau_03();
+  void free_03();
   void zero_energy_arrays_03();
   void new_tau_03(Basis &, Random &);
   void set_tau_03(int, int);

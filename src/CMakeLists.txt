@@ -37,10 +37,11 @@ set(source
 set(CPU_EXTRA_SOURCES
         MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp qc_psi.cpp cpu_qc_monte.cpp
 )
-
 set(GPU_EXTRA_SOURCES
         cublasStatus_t_getErrorString.cu cublasStatus_t_getErrorString.h
-        MCGF/gpu_gfFullStatistics.cu MCGF/gpu_mcgf2.cu MCGF/gpu_mcgf3.cu gpu_ovps.cu gpu_psi.cu gpu_qc_monte.cpp )
+        MCGF/gpu_gfFullStatistics.cu MCGF/gpu_mcgf2.cu MCGF/gpu_mcgf3.cu gpu_ovps.cu gpu_psi.cu gpu_qc_monte.cpp)
+
+
 add_executable(MC_MPn_Direct ${source} ${CPU_EXTRA_SOURCES})
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 IF(${MPI_CXX_FOUND})

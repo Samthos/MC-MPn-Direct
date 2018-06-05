@@ -8,7 +8,16 @@
 #include "blas_calls.h"
 #include "qc_ovps.h"
 
-void OVPs::cpuMalloc_02(int p1, int p2, int p3, int p4, int p5, const Basis& basis) {
+void print_out(double* A, int m, int n) {
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      printf("%12.8f", A[i * n + j]);
+    }
+    printf("\n");
+  }
+}
+
+void OVPs::init_02(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
   mc_pair_num = p1;
   numBand = p2;
   offBand = p3;
@@ -31,7 +40,7 @@ void OVPs::cpuMalloc_02(int p1, int p2, int p3, int p4, int p5, const Basis& bas
   ovps.tgc_val1 = new double[ivir2];
 #endif  // QUAD_TAU
 }
-void OVPs::gpuMalloc_02() {
+void OVPs::alloc_02() {
   d_ovps.occ1 = new double[mc_pair_num * (iocc2 - iocc1)];
   d_ovps.occ2 = new double[mc_pair_num * (iocc2 - iocc1)];
   d_ovps.vir1 = new double[mc_pair_num * (ivir2 - ivir1)];
@@ -79,7 +88,7 @@ void OVPs::gpuMalloc_02() {
     }
   }
 }
-void OVPs::cpuFree_02() {
+void OVPs::free_tau_02() {
 #ifdef QUAD_TAU
   delete[] ovps.t_save_val1;
   delete[] ovps.tg_save_val1;
@@ -90,7 +99,7 @@ void OVPs::cpuFree_02() {
   delete[] ovps.tgc_val1;
 #endif  // QUAD_TAU
 }
-void OVPs::gpuFree_02() {
+void OVPs::free_02() {
   delete[] d_ovps.occ1;
   delete[] d_ovps.occ2;
   delete[] d_ovps.vir1;
@@ -133,8 +142,8 @@ void OVPs::gpuFree_02() {
   }
 }
 
-void OVPs::cpuMalloc_03(int p1, int p2, int p3, int p4, int p5, const Basis& basis) {
-  cpuMalloc_02(p1, p2, p3, p4, p5, basis);
+void OVPs::init_03(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
+  init_02(p1, p2, p3, p4, p5, basis);
 
 #ifdef QUAD_TAU
   ovps.t_save_val2 = new double[21 * ivir2];
@@ -150,8 +159,8 @@ void OVPs::cpuMalloc_03(int p1, int p2, int p3, int p4, int p5, const Basis& bas
   ovps.tg_val12 = new double[ivir2];
   ovps.tgc_val12 = new double[ivir2];
 }
-void OVPs::gpuMalloc_03() {
-  gpuMalloc_02();
+void OVPs::alloc_03() {
+  alloc_02();
   d_ovps.os_15 = new double[mc_pair_num * mc_pair_num];
   d_ovps.os_16 = new double[mc_pair_num * mc_pair_num];
   d_ovps.os_25 = new double[mc_pair_num * mc_pair_num];
@@ -212,8 +221,8 @@ void OVPs::gpuMalloc_03() {
     }
   }
 }
-void OVPs::cpuFree_03() {
-  cpuFree_02();
+void OVPs::free_tau_03() {
+  free_tau_02();
 
 #ifdef QUAD_TAU
   delete[] ovps.t_save_val2;
@@ -228,8 +237,8 @@ void OVPs::cpuFree_03() {
   delete[] ovps.tg_val12;
   delete[] ovps.tgc_val12;
 }
-void OVPs::gpuFree_03() {
-  gpuFree_02();
+void OVPs::free_03() {
+  free_02();
 
   delete[] d_ovps.os_15;
   delete[] d_ovps.os_16;
@@ -591,15 +600,6 @@ void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int 
         ovps.ps_22c[index] = ovps.vir2[lookup] * ovps.vir2[lookup];
       }
     }
-  }
-}
-
-void print_out(double* A, int m, int n) {
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
-      printf("%12.8f", A[i * n + j]);
-    }
-    printf("\n");
   }
 }
 

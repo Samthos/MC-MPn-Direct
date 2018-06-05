@@ -8,5 +8,5 @@ set(CMAKE_CUDA_STANDARD 11)
 #find_package(MPI)
 find_package(Armadillo REQUIRED)
 
+add_subdirectory(test)
 add_subdirectory(src)
-#add_subdirectory(test)

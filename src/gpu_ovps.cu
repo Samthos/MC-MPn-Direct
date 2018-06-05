@@ -13,7 +13,7 @@
 #include "cublasStatus_t_getErrorString.h"
 #include "qc_ovps.h"
 
-void OVPs::cpuMalloc_02(int p1, int p2, int p3, int p4, int p5, const Basis& basis) {
+void OVPs::init_02(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
   mc_pair_num = p1;
   numBand = p2;
   offBand = p3;
@@ -47,7 +47,7 @@ void OVPs::cpuMalloc_02(int p1, int p2, int p3, int p4, int p5, const Basis& bas
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.virTau1, sizeof(double) * mc_pair_num * (ivir2 - ivir1)), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.virTau2, sizeof(double) * mc_pair_num * (ivir2 - ivir1)), __FILE__, __LINE__);
 }
-void OVPs::gpuMalloc_02() {
+void OVPs::alloc_02() {
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.t_val1, sizeof(double) * ivir2), __FILE__, __LINE__);
 
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.rv, sizeof(double) * mc_pair_num), __FILE__, __LINE__);
@@ -102,7 +102,7 @@ void OVPs::gpuMalloc_02() {
     }
   }
 }
-void OVPs::cpuFree_02() {
+void OVPs::free_tau_02() {
 #ifdef QUAD_TAU
   cudaError_t_Assert(cudaFreeHost(ovps.t_save_val1), __FILE__, __LINE__);
   cudaError_t_Assert(cudaFreeHost(ovps.tg_save_val1), __FILE__, __LINE__);
@@ -124,7 +124,7 @@ void OVPs::cpuFree_02() {
   cudaError_t_Assert(cudaFreeHost(ovps.virTau1), __FILE__, __LINE__);
   cudaError_t_Assert(cudaFreeHost(ovps.virTau2), __FILE__, __LINE__);
 }
-void OVPs::gpuFree_02() {
+void OVPs::free_02() {
   cudaError_t_Assert(cudaFree(d_ovps.t_val1), __FILE__, __LINE__);
   cudaError_t_Assert(cudaFree(d_ovps.rv), __FILE__, __LINE__);
 
@@ -170,8 +170,8 @@ void OVPs::gpuFree_02() {
   }
 }
 
-void OVPs::cpuMalloc_03(int p1, int p2, int p3, int p4, int p5, const Basis& basis) {
-  cpuMalloc_02(p1, p2, p3, p4, p5, basis);
+void OVPs::init_03(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
+  init_02(p1, p2, p3, p4, p5, basis);
 
 #ifdef QUAD_TAU
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.t_save_val2, sizeof(double) * 21 * ivir2), __FILE__, __LINE__);
@@ -186,8 +186,8 @@ void OVPs::cpuMalloc_03(int p1, int p2, int p3, int p4, int p5, const Basis& bas
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.tg_val12, sizeof(double) * ivir2), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.tgc_val12, sizeof(double) * ivir2), __FILE__, __LINE__);
 }
-void OVPs::gpuMalloc_03() {
-  gpuMalloc_02();
+void OVPs::alloc_03() {
+  alloc_02();
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.t_val2, sizeof(double) * ivir2), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.t_val12, sizeof(double) * ivir2), __FILE__, __LINE__);
 
@@ -258,8 +258,8 @@ void OVPs::gpuMalloc_03() {
   std::fill(one.begin(), one.end(), 1.0);
   cudaError_t_Assert(cudaMemcpy(d_ovps.one, one.data(), sizeof(double) * one.size(), cudaMemcpyHostToDevice), __FILE__, __LINE__);
 }
-void OVPs::cpuFree_03() {
-  cpuFree_02();
+void OVPs::free_tau_03() {
+  free_tau_02();
 
 #ifdef QUAD_TAU
   cudaError_t_Assert(cudaFreeHost(ovps.t_save_val2), __FILE__, __LINE__);
@@ -274,8 +274,8 @@ void OVPs::cpuFree_03() {
   cudaError_t_Assert(cudaFreeHost(ovps.tg_val12), __FILE__, __LINE__);
   cudaError_t_Assert(cudaFreeHost(ovps.tgc_val12), __FILE__, __LINE__);
 }
-void OVPs::gpuFree_03() {
-  gpuFree_02();
+void OVPs::free_03() {
+  free_02();
 
   cudaError_t_Assert(cudaFree(d_ovps.t_val2), __FILE__, __LINE__);
   cudaError_t_Assert(cudaFree(d_ovps.t_val12), __FILE__, __LINE__);
