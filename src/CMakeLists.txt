@@ -46,18 +46,23 @@ add_executable(MC_MPn_Direct ${source} ${CPU_EXTRA_SOURCES})
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to MC_MPn_Direct")
-    target_compile_definitions(MC_MPn_Direct PUBLIC -DUSE_MPI)
+    target_compile_definitions(MC_MPn_Direct PUBLIC -DHAVE_MPI)
     target_link_libraries(MC_MPn_Direct ${MPI_CXX_LIBRARIES})
     target_include_directories(MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
 endif()
 
 
+
 add_executable(GPU_MC_MPn_Direct ${source} ${GPU_EXTRA_SOURCES})
 target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+
+target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
 target_link_libraries(GPU_MC_MPn_Direct cublas)
+target_include_directories(GPU_MC_MPn_Direct PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
 IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to GPU_MC_MPn_Direct")
-    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DUSE_MPI)
+    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
     target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
     target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
 endif()

@@ -30,7 +30,8 @@ enum KeyVal {
   NUM_BAND,
   OFF_BAND,
   DIFFS,
-  ORDER
+  ORDER,
+  CPU
 };
 }
 namespace TASKS {
