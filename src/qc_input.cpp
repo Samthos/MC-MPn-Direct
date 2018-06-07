@@ -27,6 +27,7 @@ IOPs::IOPs() {
   iopns[KEYS::NBLOCK] = 1;
   iopns[KEYS::ORDER] = 2;
   iopns[KEYS::TASK] = TASKS::MP;
+  iopns[KEYS::CPU] = true;
 
   sopns[KEYS::GEOM] = "geom.xyz";
   sopns[KEYS::BASIS] = "basis.dat";
@@ -47,7 +48,7 @@ void IOPs::read(const MPI_info& mpi_info,
       "JOBNAME", "SPHERICAL", "MC_TRIAL", "MC_NPAIR", "MC_DELX",  //  0-4
       "GEOM", "BASIS", "MC_BASIS", "NBLOCK", "MOVECS",            //  5-9
       "DEBUG", "MC_PAIR_GROUPS", "TASK", "NUM_BAND", "OFF_BAND",  // 10-14
-      "DIFFS", "ORDER"};
+      "DIFFS", "ORDER", "CPU"};
   const std::vector<std::string> taskVals = {
       "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
 
@@ -175,6 +176,10 @@ void IOPs::read(const MPI_info& mpi_info,
               keySet = false;
               break;
             case KEYS::MC_PAIR_GROUPS:
+              iopns[keyval] = stoi(key, nullptr);
+              keySet = false;
+              break;
+            case KEYS::CPU:
               iopns[keyval] = stoi(key, nullptr);
               keySet = false;
               break;

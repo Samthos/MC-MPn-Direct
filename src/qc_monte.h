@@ -164,6 +164,28 @@ class MP4 : public QC_monte {
   void mcmp4_energy(double&, std::vector<double>&);
 };
 
+class GPU_GF2 : public QC_monte {
+ protected:
+  void mc_local_energy(std::vector<std::vector<double>>&, int);
+
+ public:
+  GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                 iops.iopns[KEYS::NBLOCK], basis);
+
+    ovps.alloc_02();
+#ifdef QUAD_TAU
+    ovps.init_tau_02(basis);
+#endif
+  }
+  ~GPU_GF2() {
+    ovps.free_tau_02();
+    ovps.free_02();
+  }
+  void monte_energy();
+};
+
 class GF2 : public QC_monte {
  protected:
   void mc_local_energy(std::vector<std::vector<double>>&, int);
@@ -182,6 +204,27 @@ class GF2 : public QC_monte {
   ~GF2() {
     ovps.free_tau_02();
     ovps.free_02();
+  }
+  void monte_energy();
+};
+
+class GPU_GF3 : public QC_monte {
+ protected:
+  void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
+
+ public:
+  GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
+                 iops.iopns[KEYS::NBLOCK], basis);
+    ovps.alloc_03();
+#ifdef QUAD_TAU
+    ovps.init_tau_03(basis);
+#endif
+  }
+  ~GPU_GF3() {
+    ovps.free_tau_03();
+    ovps.free_03();
   }
   void monte_energy();
 };
