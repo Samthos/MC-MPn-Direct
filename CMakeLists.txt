@@ -5,8 +5,13 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
 
+option(NDEBUG "NDEBUG" OFF)
+if(${NDEBUG})
+    add_definitions(-DNDEBUG)
+endif()
+
 #find_package(MPI)
 find_package(Armadillo REQUIRED)
 
-add_subdirectory(test)
+#add_subdirectory(test)
 add_subdirectory(src)
