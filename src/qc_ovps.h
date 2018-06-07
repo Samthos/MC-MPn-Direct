@@ -5,9 +5,122 @@
 #include "el_pair.h"
 #include "basis/qc_basis.h"
 #include "qc_random.h"
+#include "blas_calls.h"
 
 #ifndef QC_OVPS_H_
 #define QC_OVPS_H_
+class OVPS_SET {
+  OVPS_SET() {
+    cpu_allocated = false;
+    gpu_allocated = false;
+  }
+  OVPS_SET(int mc_pair_num_, int n1_, int n2_) :
+      mc_pair_num(mc_pair_num_), n1(n1_), n2(n2_)
+  {
+    cpu_allocated = false;
+    gpu_allocated = false;
+  }
+  ~OVPS_SET() {
+    free();
+  }
+  void alloc_cpu() {
+    if (cpu_allocated || gpu_allocated) {
+      throw std::runtime_error("OVPS_SET already allocated");
+    } else {
+      s_11 = new double[mc_pair_num * mc_pair_num];
+      s_12 = new double[mc_pair_num * mc_pair_num];
+      s_21 = new double[mc_pair_num * mc_pair_num];
+      s_22 = new double[mc_pair_num * mc_pair_num];
+      cpu_allocated = true;
+    }
+  }
+  void alloc_gpu() {
+    if (cpu_allocated || gpu_allocated) {
+      throw std::runtime_error("OVPS_SET already allocated");
+    } else {
+      throw std::runtime_error("OVPS_SET.alloc_gpu not implemented");
+    }
+  }
+
+  void alloc_cpu(int mc_pair_num_, int n1_, int n2_) {
+    if (cpu_allocated || gpu_allocated) {
+      throw std::runtime_error("OVPS_SET already allocated");
+    } else {
+      alloc_cpu();
+    }
+  }
+  void alloc_gpu(int mc_pair_num_, int n1_, int n2_) {
+    if (cpu_allocated || gpu_allocated) {
+      throw std::runtime_error("OVPS_SET already allocated");
+    } else {
+      alloc_gpu();
+    }
+  }
+
+  void free() {
+    if (gpu_allocated) {
+      free_gpu();
+    } else if (cpu_allocated) {
+      free_cpu();
+    }
+  }
+  void free_cpu() {
+    if (gpu_allocated) {
+      throw std::runtime_error("OVPS_SET already allocated");
+    } else if (cpu_allocated){
+      delete[] s_11;
+      delete[] s_12;
+      delete[] s_21;
+      delete[] s_22;
+      cpu_allocated = false;
+    }
+  }
+  void free_gpu() {
+    if (gpu_allocated) {
+      throw std::runtime_error("OVPS_SET already allocated");
+    } else if (cpu_allocated){
+      throw std::runtime_error("OVPS_SET.alloc_gpu not implemented");
+    }
+  }
+
+  void update(double *psi1, double *psi2, double *psi1Tau, double *psi2Tau) {
+    if (cpu_allocated) {
+      hst_update(psi1, psi2, psi1Tau, psi2Tau);
+    } else if (gpu_allocated) {
+      device_update(psi1, psi2, psi1Tau, psi2Tau);
+    }
+  }
+  void hst_update(double *psi1, double *psi2, double *psi1Tau, double *psi2Tau) {
+    double alpha = 1.0;
+    double beta = 0.0;
+
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans,
+                    mc_pair_num, mc_pair_num, n2 - n1,
+                    alpha, psi1Tau, mc_pair_num,
+                    psi1, mc_pair_num,
+                    beta, s_11, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans,
+                    mc_pair_num, mc_pair_num, n2 - n1,
+                    alpha, psi2Tau, mc_pair_num,
+                    psi2, mc_pair_num,
+                    beta, s_22, mc_pair_num);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
+                mc_pair_num, mc_pair_num, n2 - n1,
+                alpha, psi1Tau, mc_pair_num,
+                psi2, mc_pair_num,
+                beta, s_21, mc_pair_num);
+    Transpose(s_21, mc_pair_num, s_12);
+  }
+  void device_update(double *psi1, double *psi2, double *psi1Tau, double *psi2Tau) {
+    throw std::runtime_error("OVPS_SET.device_update not yet implemented");
+  }
+
+  int mc_pair_num;
+  int n1, n2;
+  bool cpu_allocated, gpu_allocated;
+  double *s_11, *s_12, *s_21, *s_22;
+};
+
 struct OVPS_ARRAY {
   double *psi1, *psi2;
   double *occ1, *occ2, *vir1, *vir2;
