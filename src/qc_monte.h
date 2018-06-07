@@ -44,9 +44,6 @@ class QC_monte {
   int nDeriv, nBlock;
   int numBand, offBand;
   int iocc1, iocc2, ivir1, ivir2;
-  const double rnd_min = 1.0e-3;
-  int nsucc, nfail;
-  double delx;
 
   MPI_info mpi_info;
   IOPs iops;
@@ -56,9 +53,11 @@ class QC_monte {
   Random random;
   OVPs ovps;
 
+  OVPS_SET o1, o2, o12;
+  OVPS_SET v1, v2, v12;
+
   void update_wavefunction();
   void move_walkers();
-  void scale_delx();
   void print_mc_head(std::chrono::high_resolution_clock::time_point);
   void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
 
@@ -132,6 +131,14 @@ class MP3 : public QC_monte {
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  iops.iopns[KEYS::NBLOCK], basis);
     ovps.alloc_03();
+
+    o1.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2);
+    o2.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2);
+    o12.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2);
+
+    v1.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.ivir1, basis.ivir2);
+    v2.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.ivir1, basis.ivir2);
+    v12.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.ivir1, basis.ivir2);
   }
   ~MP3() {
     ovps.free_tau_03();

@@ -10,6 +10,7 @@
 #ifndef QC_OVPS_H_
 #define QC_OVPS_H_
 class OVPS_SET {
+ public:
   OVPS_SET() {
     cpu_allocated = false;
     gpu_allocated = false;
@@ -43,6 +44,9 @@ class OVPS_SET {
   }
 
   void alloc_cpu(int mc_pair_num_, int n1_, int n2_) {
+    mc_pair_num = mc_pair_num_;
+    n1 = n1_;
+    n2 = n2_;
     if (cpu_allocated || gpu_allocated) {
       throw std::runtime_error("OVPS_SET already allocated");
     } else {
@@ -85,12 +89,12 @@ class OVPS_SET {
 
   void update(double *psi1, double *psi2, double *psi1Tau, double *psi2Tau) {
     if (cpu_allocated) {
-      hst_update(psi1, psi2, psi1Tau, psi2Tau);
+      host_update(psi1, psi2, psi1Tau, psi2Tau);
     } else if (gpu_allocated) {
       device_update(psi1, psi2, psi1Tau, psi2Tau);
     }
   }
-  void hst_update(double *psi1, double *psi2, double *psi1Tau, double *psi2Tau) {
+  void host_update(double *psi1, double *psi2, double *psi1Tau, double *psi2Tau) {
     double alpha = 1.0;
     double beta = 0.0;
 
@@ -115,8 +119,7 @@ class OVPS_SET {
     throw std::runtime_error("OVPS_SET.device_update not yet implemented");
   }
 
-  int mc_pair_num;
-  int n1, n2;
+  int mc_pair_num, n1, n2;
   bool cpu_allocated, gpu_allocated;
   double *s_11, *s_12, *s_21, *s_22;
 };
