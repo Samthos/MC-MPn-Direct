@@ -19,7 +19,7 @@
 
 class GFStats {
  private:
-  std::vector<std::vector<std::vector<double>>> qepsBlock, qepsEx1, qepsEx2, qepsAvg, qepsVar;
+  std::vector<std::vector<double>> qepsBlock, qepsEx1, qepsEx2, qepsAvg, qepsVar;
   std::vector<std::ofstream*> output_streams;
   bool isMaster;
   double tasks;
