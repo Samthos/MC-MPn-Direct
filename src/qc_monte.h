@@ -1,4 +1,6 @@
 // Copyright 2017
+#ifndef QC_MONTE_H_
+#define QC_MONTE_H_
 
 #include <chrono>
 #include <fstream>
@@ -13,9 +15,8 @@
 #include "qc_mpi.h"
 #include "qc_ovps.h"
 #include "qc_random.h"
+#include "tau_integrals.h"
 
-#ifndef QC_MONTE_H_
-#define QC_MONTE_H_
 class GFStats {
  private:
   std::vector<std::vector<std::vector<double>>> qepsBlock, qepsEx1, qepsEx2, qepsAvg, qepsVar;
@@ -101,24 +102,16 @@ class QC_monte {
 class MP2 : public QC_monte {
  public:
   MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
-    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis);
-    ovps.alloc_02();
-
-    lambda = 2.0 * (basis.nw_en[iocc2] - basis.nw_en[iocc2 - 1]);
-    tau_values.resize(ivir2);
+    tau.resize(2, basis);
   }
   ~MP2() {
-    ovps.free_tau_02();
-    ovps.free_02();
   }
   void monte_energy();
 
  protected:
   void mcmp2_energy(double&, std::vector<double>&);
-  void new_tau();
 
+  Stochastic_Tau tau;
   double lambda;
   double tau_wgt;
   std::vector<double> tau_values;

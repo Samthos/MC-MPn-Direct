@@ -32,11 +32,12 @@ set(source
         MCMP/qc_mcmp.cpp
         MCMP/qc_mcmp2.cpp
         MCMP/qc_mcmp3.cpp
+        tau_integrals.h
 )
 
 set(CPU_EXTRA_SOURCES
         MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp basis/qc_psi.cpp cpu_qc_monte.cpp
-)
+        )
 set(GPU_EXTRA_SOURCES
         cublasStatus_t_getErrorString.cu cublasStatus_t_getErrorString.h
         MCGF/gpu_gfFullStatistics.cu MCGF/gpu_mcgf2.cu MCGF/gpu_mcgf3.cu gpu_ovps.cu basis/gpu_psi.cu gpu_qc_monte.cpp)

@@ -65,20 +65,6 @@ void MP2::monte_energy() {
   }
 }
 
-void MP2::new_tau() {
-  double p = random.get_rand();
-  double tau = -log(1.0 - p) / lambda;
-  tau_wgt = 1.0 / (lambda * (1.0 - p));
-  p = random.get_rand();
-
-  for (int jt = iocc1; jt < iocc2; ++jt) {
-    tau_values[jt] = exp(basis.nw_en[jt] * tau);
-  }
-  for (int jt = ivir1; jt < ivir2; ++jt) {
-    tau_values[jt] = exp(-basis.nw_en[jt] * tau);
-  }
-}
-
 void MP3::monte_energy() {
   // variables to store emp2 energy
   double emp2, emp3;
