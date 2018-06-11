@@ -181,7 +181,6 @@ class OVPs {
   void free_02();
   void zero_energy_arrays_02();
   void new_tau_02(Basis &, Random &);
-  void set_tau_02(int);
   void init_tau_02(Basis &);
   void update_ovps_02(el_pair_typ *);
 
@@ -191,7 +190,6 @@ class OVPs {
   void free_03();
   void zero_energy_arrays_03();
   void new_tau_03(Basis &, Random &);
-  void set_tau_03(int, int);
   void init_tau_03(Basis &);
   void update_ovps_03(el_pair_typ *);
 

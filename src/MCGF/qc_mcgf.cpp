@@ -39,12 +39,7 @@ void GF2::monte_energy() {
     qeps2.blockIt(i);
 
 //print every 128 steps
-#ifdef QUAD_TAU
-    if (0 == i % 16)
-#else
-    if (0 == i % 128)
-#endif
-    {
+    if (0 == i % 128) {
       //Reduce variables across all threads
 #ifdef USE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
@@ -108,13 +103,7 @@ void GF2::mc_local_energy(std::vector<std::vector<double>> &qeps2, int step) {
     ovps.zero_energy_arrays_02();
   }
 
-#ifdef QUAD_TAU
-  for (auto it = 0; it < 21; it++) {
-    ovps.set_tau_02(it);
-#else
   ovps.new_tau_02(basis, random);
-#endif
-
   ovps.update_ovps_02(el_pair_list.data());
   mcgf2_local_energy_core();
   for (int band = 0; band < numBand; band++) {
@@ -131,9 +120,6 @@ void GF2::mc_local_energy(std::vector<std::vector<double>> &qeps2, int step) {
       }
     }
   }
-#ifdef QUAD_TAU
-  }
-#endif
 
   if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
     mc_gf_statistics(step, qeps2, ovps.d_ovps.en2, ovps.d_ovps.en2Ex1, ovps.d_ovps.en2Ex2);
@@ -168,12 +154,7 @@ void GF3::monte_energy() {
     qeps3.blockIt(i);
 
 //print every 128 steps
-#ifdef QUAD_TAU
-    if (0 == i % 16)
-#else
-    if (0 == i % 128)
-#endif
-    {
+    if (0 == i % 128) {
       //Reduce variables across all threads
 #ifdef USE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
@@ -245,28 +226,13 @@ void GF3::mc_local_energy(std::vector<std::vector<double>> &qeps2, std::vector<s
     ovps.zero_energy_arrays_03();
   }
 
-#ifdef QUAD_TAU
-  for (auto it = 0; it < 21; it++) {
-    for (auto jt = 0; jt < 21; jt++) {
-      ovps.set_tau_03(it, jt);
-#else
   ovps.new_tau_03(basis, random);
-#endif
 
   ovps.update_ovps_03(el_pair_list.data());
-#ifdef QUAD_TAU
-  if (0 == jt) {
-#endif
   mcgf2_local_energy_core();
-#ifdef QUAD_TAU
-  }
-#endif
   mcgf3_local_energy_core();
 
   for (int band = 0; band < numBand; band++) {
-#ifdef QUAD_TAU
-    if (0 == jt) {
-#endif
     if (iops.iopns[KEYS::TASK] == TASKS::GF) {
       mcgf2_local_energy(qeps2[band], band);
     } else if (iops.iopns[KEYS::TASK] == TASKS::GFDIFF) {
@@ -279,9 +245,6 @@ void GF3::mc_local_energy(std::vector<std::vector<double>> &qeps2, std::vector<s
         mc_gf2_statistics(band, step);
       }
     }
-#ifdef QUAD_TAU
-    }
-#endif
 
     if (iops.iopns[KEYS::TASK] == TASKS::GF) {
       mcgf3_local_energy(qeps3[band], band);
@@ -296,10 +259,6 @@ void GF3::mc_local_energy(std::vector<std::vector<double>> &qeps2, std::vector<s
       }
     }
   }
-#ifdef QUAD_TAU
-  }
-  }
-#endif
 
   if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
     mc_gf_statistics(step, qeps2, ovps.d_ovps.en2, ovps.d_ovps.en2Ex1, ovps.d_ovps.en2Ex2);

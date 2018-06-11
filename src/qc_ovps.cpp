@@ -29,15 +29,9 @@ void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   ivir2 = basis.ivir2;
   lambda = 2.0 * (basis.nw_en[ivir1] - basis.nw_en[iocc2 - 1]);
 
-#ifdef QUAD_TAU
-  ovps.t_save_val1 = new double[21 * ivir2];
-  ovps.tg_save_val1 = new double[21 * numBand];
-  ovps.tgc_save_val1 = new double[21 * numBand];
-#else
   ovps.t_val1 = new double[ivir2];
   ovps.tg_val1 = new double[ivir2];
   ovps.tgc_val1 = new double[ivir2];
-#endif  // QUAD_TAU
 }
 void OVPs::alloc_02() {
   d_ovps.occ1 = new double[mc_pair_num * (iocc2 - iocc1)];
@@ -84,15 +78,9 @@ void OVPs::alloc_02() {
   }
 }
 void OVPs::free_tau_02() {
-#ifdef QUAD_TAU
-  delete[] ovps.t_save_val1;
-  delete[] ovps.tg_save_val1;
-  delete[] ovps.tgc_save_val1;
-#else
   delete[] ovps.t_val1;
   delete[] ovps.tg_val1;
   delete[] ovps.tgc_val1;
-#endif  // QUAD_TAU
 }
 void OVPs::free_02() {
   delete[] d_ovps.occ1;
@@ -137,15 +125,9 @@ void OVPs::free_02() {
 void OVPs::init_03(int p1, int p2, int p3, int p4, const Basis &basis) {
   init_02(p1, p2, p3, p4, basis);
 
-#ifdef QUAD_TAU
-  ovps.t_save_val2 = new double[21 * ivir2];
-  ovps.tg_save_val2 = new double[21 * numBand];
-  ovps.tgc_save_val2 = new double[21 * numBand];
-#else
   ovps.t_val2 = new double[ivir2];
   ovps.tg_val2 = new double[ivir2];
   ovps.tgc_val2 = new double[ivir2];
-#endif  // QUAD_TAU
 
   ovps.t_val12 = new double[ivir2];
   ovps.tg_val12 = new double[ivir2];
@@ -212,15 +194,9 @@ void OVPs::alloc_03() {
 void OVPs::free_tau_03() {
   free_tau_02();
 
-#ifdef QUAD_TAU
-  delete[] ovps.t_save_val2;
-  delete[] ovps.tg_save_val2;
-  delete[] ovps.tgc_save_val2;
-#else
   delete[] ovps.t_val2;
   delete[] ovps.tg_val2;
   delete[] ovps.tgc_val2;
-#endif  // QUAD_TAU
   delete[] ovps.t_val12;
   delete[] ovps.tg_val12;
   delete[] ovps.tgc_val12;
@@ -366,123 +342,6 @@ void OVPs::new_tau_03(Basis& basis, Random& random) {
     ovps.tg_val12[am] = ovps.tg_val1[am] * ovps.tg_val2[am];
     ovps.tgc_val12[am] = ovps.tgc_val1[am] * ovps.tgc_val2[am];
   }
-}
-
-void OVPs::set_tau_02(int t1) {
-  static std::array<double, 21> tauWgt = {
-      1240.137264162088286,
-      0.005872796340197,
-      95.637046659066982,
-      0.016712318843111,
-      22.450252490071218,
-      0.029395130776845,
-      8.242542564370559,
-      0.043145326054643,
-      3.876926315587520,
-      0.058729927034166,
-      2.128605721895366,
-      0.077568088880637,
-      1.291883267060868,
-      0.101131338617294,
-      0.839203153977961,
-      0.131127958307208,
-      0.573533895185722,
-      0.170432651403897,
-      0.407885334132820,
-      0.223862010922047,
-      0.298891108005834};
-  static std::array<double, 21> xx = {
-      459.528454529921248195023509,
-      0.002176143805986910199912,
-      75.647524700428292021570087,
-      0.013219203192174486943822,
-      27.635855710538834273393149,
-      0.036184875564343521592292,
-      13.821771900816584022209099,
-      0.072349623997261858221464,
-      8.124825510985218102177896,
-      0.123079566280893559770959,
-      5.238489369094648573366158,
-      0.190894727380696543894700,
-      3.574116946388957050118051,
-      0.279789389938773946919781,
-      2.529798344872996818111233,
-      0.395288423690625334572246,
-      1.834438449215696431693345,
-      0.545125948721552511244681,
-      1.349829280916060136874535,
-      0.740834425610734315092998,
-      1.000000000000000000000000};
-  ovps.t_val1 = ovps.t_save_val1 + t1 * ivir2;
-  ovps.tg_val1 = ovps.tg_save_val1 + t1 * numBand;
-  ovps.tgc_val1 = ovps.tgc_save_val1 + t1 * numBand;
-
-  t1_twgt = tauWgt[t1];
-  xx1 = xx[t1];
-}
-void OVPs::set_tau_03(int t1, int t2) {
-  static std::array<double, 21> tauWgt = {
-      1240.137264162088286,
-      0.005872796340197,
-      95.637046659066982,
-      0.016712318843111,
-      22.450252490071218,
-      0.029395130776845,
-      8.242542564370559,
-      0.043145326054643,
-      3.876926315587520,
-      0.058729927034166,
-      2.128605721895366,
-      0.077568088880637,
-      1.291883267060868,
-      0.101131338617294,
-      0.839203153977961,
-      0.131127958307208,
-      0.573533895185722,
-      0.170432651403897,
-      0.407885334132820,
-      0.223862010922047,
-      0.298891108005834};
-  static std::array<double, 21> xx = {
-      459.528454529921248195023509,
-      0.002176143805986910199912,
-      75.647524700428292021570087,
-      0.013219203192174486943822,
-      27.635855710538834273393149,
-      0.036184875564343521592292,
-      13.821771900816584022209099,
-      0.072349623997261858221464,
-      8.124825510985218102177896,
-      0.123079566280893559770959,
-      5.238489369094648573366158,
-      0.190894727380696543894700,
-      3.574116946388957050118051,
-      0.279789389938773946919781,
-      2.529798344872996818111233,
-      0.395288423690625334572246,
-      1.834438449215696431693345,
-      0.545125948721552511244681,
-      1.349829280916060136874535,
-      0.740834425610734315092998,
-      1.000000000000000000000000};
-
-  ovps.t_val1 = ovps.t_save_val1 + t1 * ivir2;
-  ovps.tg_val1 = ovps.tg_save_val1 + t1 * numBand;
-  ovps.tgc_val1 = ovps.tgc_save_val1 + t1 * numBand;
-
-  t1_twgt = tauWgt[t1];
-  xx1 = xx[t1];
-
-  ovps.t_val2 = ovps.t_save_val2 + t2 * ivir2;
-  ovps.tg_val2 = ovps.tg_save_val2 + t2 * numBand;
-  ovps.tgc_val2 = ovps.tgc_save_val2 + t2 * numBand;
-
-  std::transform(ovps.t_val1, ovps.t_val1 + ivir2, ovps.t_val2, ovps.t_val12, std::multiplies<double>());
-  std::transform(ovps.tg_val1, ovps.tg_val1 + numBand, ovps.tg_val2, ovps.tg_val12, std::multiplies<double>());
-  std::transform(ovps.tgc_val1, ovps.tgc_val1 + numBand, ovps.tgc_val2, ovps.tgc_val12, std::multiplies<double>());
-
-  t2_twgt = tauWgt[t1] * tauWgt[t2];
-  xx2 = xx[t1];
 }
 
 void OVPs::init_tau_02(Basis& basis) {
