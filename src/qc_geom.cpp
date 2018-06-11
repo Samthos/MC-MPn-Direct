@@ -4,15 +4,17 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 #ifdef USE_MPI
 #include "mpi.h"
 #endif
 
-#include "qc_constant.h"
+#include "atom_znum.h"
 #include "qc_geom.h"
 
 void Molec::read(MPI_info& mpi_info, std::string& filename) {
+  const double ang_to_bohr = 1.8897259860;
   int i;
   int znum;
   double pos[3];
@@ -52,11 +54,8 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
       std::cout << std::setw(30) << std::setprecision(16) << std::fixed << pos[0];
       std::cout << std::setw(30) << std::setprecision(16) << std::fixed << pos[1];
       std::cout << std::setw(30) << std::setprecision(16) << std::fixed << pos[2] << std::endl;
-      ;
 
-      pos[0] = pos[0] * ang_to_bohr;
-      pos[1] = pos[1] * ang_to_bohr;
-      pos[2] = pos[2] * ang_to_bohr;
+      std::transform(pos, pos+3, pos, [ang_to_bohr](double x) {return x * ang_to_bohr; });
     }
 
 #ifdef USE_MPI

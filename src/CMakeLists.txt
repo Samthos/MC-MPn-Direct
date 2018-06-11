@@ -15,8 +15,8 @@ set(source
         basis/nw_vectors.cpp
         basis/qc_basis.cpp
         basis/qc_basis.h
-        qc_constant.cpp
-        qc_constant.h
+        atom_znum.cpp
+        atom_znum.h
         qc_geom.cpp
         qc_geom.h
         qc_input.cpp

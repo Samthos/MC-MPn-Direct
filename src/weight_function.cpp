@@ -3,6 +3,10 @@
 #include "config.h"
 #endif
 
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 #include <cmath>
 #include <algorithm>
 #include <numeric>
@@ -12,11 +16,7 @@
 #include <iostream>
 #include <map>
 
-#ifdef USE_MPI
-#include "mpi.h"
-#endif
-
-#include "qc_constant.h"
+#include "atom_znum.h"
 #include "weight_function.h"
 
 void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec,
@@ -186,24 +186,19 @@ double GTO_Weight::normalize() {
   double g_wgt;
 
   // constants
-  double pisub, pisub2;
   double igamma[1501][17];
-  double f1[10];
-  double f2[] = {-0.5, -1.5, -2.5, -3.5, -4.5, -5.5, -6.5, -7.5, -8.5, -9.5};
-  double tf[] = {33.0, 37.0, 41.0, 43.0, 46.0, 49.0, 51.0, 54.0, 56.0,
-                 58.0, 61.0, 63.0, 66.0, 68.0, 70.0, 72.0, 74.0};
-  pisub = 2.0 / sqrt_pi;
-  pisub2 = 2.0 * pow(sqrt_pi, 5);
-  f1[0] = 1.0 / pisub;
-  f1[1] = 1.0 / 2.0 / pisub;
-  f1[2] = 3.0 / 4.0 / pisub;
-  f1[3] = 15.0 / 8.0 / pisub;
-  f1[4] = 105.0 / 16.0 / pisub;
-  f1[5] = 945.0 / 32.0 / pisub;
-  f1[6] = 10395.0 / 64.0 / pisub;
-  f1[7] = 135135.0 / 128.0 / pisub;
-  f1[8] = 2027025.0 / 256.0 / pisub;
-  f1[9] = 34459425.0 / 512.0 / pisub;
+  constexpr double PI = 3.141592653589793;
+  constexpr double sqrt_pi = sqrt(PI);
+  constexpr double pisub = 2.0 / sqrt_pi;
+  constexpr double pisub2 = 2.0 * pow(sqrt_pi, 5);
+  constexpr double f2[] = {-0.5, -1.5, -2.5, -3.5, -4.5, -5.5, -6.5, -7.5, -8.5, -9.5};
+  constexpr double tf[] = {33.0, 37.0, 41.0, 43.0, 46.0, 49.0, 51.0, 54.0, 56.0,
+                           58.0, 61.0, 63.0, 66.0, 68.0, 70.0, 72.0, 74.0};
+  constexpr double f1[] = {1.0 / pisub, 1.0 / 2.0 / pisub,
+                           3.0 / 4.0 / pisub, 15.0 / 8.0 / pisub,
+                           105.0 / 16.0 / pisub, 945.0 / 32.0 / pisub,
+                           10395.0 / 64.0 / pisub, 135135.0 / 128.0 / pisub,
+                           2027025.0 / 256.0 / pisub, 34459425.0 / 512.0 / pisub };
   for (i = 0; i <= 1500; i++) {
     for (j = 0; j < 17; j++) {
       igamma[i][j] = 0.00;
@@ -224,7 +219,7 @@ double GTO_Weight::normalize() {
   for (auto &it : mcBasisList) {
     std::transform(
         it.norm.begin(), it.norm.end(), it.alpha.begin(), it.norm.begin(),
-        [](double c, double a) { return c * pow(2.0 * a / pi, 0.75); });
+        [](double c, double a) { return c * pow(2.0 * a / PI, 0.75); });
   }
 
   // calculate g_wgt

@@ -9,47 +9,10 @@
 #include <iomanip>
 
 #include "el_pair.h"
-#include "qc_constant.h"
 
 void el_pair_typ::init(const int ivir2) {
   psi1.resize(ivir2);
   psi2.resize(ivir2);
-}
-
-void el_pair_typ::pos_init(const Molec& molec, Random& rand) {
-  int i;
-  double amp1, amp2, theta1, theta2;
-  double pos[3];
-
-  // elec position 1
-  i = static_cast<int>(molec.atom.size() * rand.get_rand());
-  pos[0] = molec.atom[i].pos[0];
-  pos[1] = molec.atom[i].pos[1];
-  pos[2] = molec.atom[i].pos[2];
-
-  amp1 = sqrt(-0.5 * log(rand.get_rand() * 0.2));
-  amp2 = sqrt(-0.5 * log(rand.get_rand() * 0.5));
-  theta1 = twopi * rand.get_rand();
-  theta2 = pi * rand.get_rand();
-
-  pos1[0] = pos[0] + amp1 * cos(theta1);
-  pos1[1] = pos[1] + amp1 * sin(theta1);
-  pos1[2] = pos[2] + amp2 * cos(theta2);
-
-  // elec position 2;
-  i = static_cast<int>(molec.atom.size() * rand.get_rand());
-  pos[0] = molec.atom[i].pos[0];
-  pos[1] = molec.atom[i].pos[1];
-  pos[2] = molec.atom[i].pos[2];
-
-  amp1 = sqrt(-0.5 * log(rand.get_rand() * 0.2));
-  amp2 = sqrt(-0.5 * log(rand.get_rand() * 0.5));
-  theta1 = twopi * rand.get_rand();
-  theta2 = pi * rand.get_rand();
-
-  pos2[0] = pos[0] + amp1 * cos(theta1);
-  pos2[1] = pos[1] + amp1 * sin(theta1);
-  pos2[2] = pos[2] + amp2 * cos(theta2);
 }
 
 double el_pair_typ::r12() {
@@ -73,6 +36,7 @@ void el_pair_typ::mc_move_scheme(Random& rand,
     step++;
   }
 #endif
+  constexpr double TWOPI = 6.283185307179586;
   std::array<double, 3> dr{};
 
   // choose function to sample;
@@ -93,7 +57,7 @@ void el_pair_typ::mc_move_scheme(Random& rand,
   // sample x, y, and theta
   double x = rand.normal(0.0, gamma);
   double y = rand.normal(0.0, gamma);
-  double theta = rand.uniform(0.0, twopi);
+  double theta = rand.uniform(0.0, TWOPI); // 2*pi
 
   double z, r, phi;
   if (a1 != a2) {
@@ -194,9 +158,11 @@ double CDF(const double& rho, const double& c, const double& erf_c) {
   return (2.0 * erf_c + erf(rho - c) - erf(rho + c)) / (2.0 * erf_c);
 }
 double PDF(const double& rho, const double& c, const double& erf_c) {
+  constexpr double sqrt_pi = 1.772453850905516;
   return exp(-(c+rho)*(c+rho)) * (exp(4*c*rho)-1.0) / (sqrt_pi * erf_c);
 }
 double PDF_Prime(const double& rho, const double& c, const double& erf_c) {
+  constexpr double sqrt_pi = 1.772453850905516;
   return 2.0 * exp(-(c+rho)*(c+rho)) * (c+rho + (c-rho)*exp(4*c*rho)) / (sqrt_pi * erf_c);
 }
 double el_pair_typ::calculate_r(double p, double alpha, double beta, double a) {
@@ -221,6 +187,7 @@ double el_pair_typ::calculate_r(double p, double alpha, double beta, double a) {
   return rho * 2.0 * gamma;
 }
 double el_pair_typ::calculate_phi(double p, double r, double alpha, double beta, double a) {
+  constexpr double sqrt_pi = 1.772453850905516;
   auto gamma = sqrt(alpha * beta / ( alpha + beta));
   auto c = a * gamma;
   auto rho = r / (2.0 * gamma);

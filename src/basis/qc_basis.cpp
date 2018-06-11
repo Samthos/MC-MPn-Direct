@@ -11,7 +11,7 @@
 #include "mpi.h"
 #endif
 #include "qc_basis.h"
-#include "../qc_constant.h"
+#include "../atom_znum.h"
 
 Basis::Basis() {
   cf[0] = sqrt(2.5) * 0.5;
@@ -348,6 +348,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 void Basis::normalize() {
   int i, j, k;
   double cnorm, aa, dum, fac, facs, pi32;
+  constexpr double pi = 3.141592653589793;
 
   for (i = 0; i < qc_nshl; i++) {  // number of shells on the atom
     if (h_basis.am[i] == -1) {
