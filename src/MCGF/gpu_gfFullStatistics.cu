@@ -22,13 +22,11 @@ __global__ void squareElements(int m, int n, double* A) {
 void QC_monte::mc_gf_statistics(int step,
                                 std::vector<std::vector<double>>& qep,
                                 std::vector<std::vector<double*>>& en,
-                                std::vector<std::vector<std::vector<double*>>>& enBlock,
-                                std::vector<std::vector<std::vector<double*>>>& enEx1,
-                                std::vector<std::vector<std::vector<double*>>>& enEx2) {
+                                std::vector<std::vector<double*>>& enEx1,
+                                std::vector<std::vector<double*>>& enEx2) {
   cublasHandle_t handle;
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
   double alpha, beta;
-  int blockPower2, blockStep;
   int offset;
 
   // initialize block and grid size variables
@@ -40,50 +38,27 @@ void QC_monte::mc_gf_statistics(int step,
     for (auto diff = 0; diff < iops.iopns[KEYS::DIFFS]; diff++) {
       cudaError_t_Assert(cudaMemcpy(&qep[band][diff], en[band][diff] + offset, sizeof(double), cudaMemcpyDeviceToHost), __FILE__, __LINE__);
 
-      blockPower2 = 1;
-      for (auto block = 0; block < iops.iopns[KEYS::NBLOCK]; block++) {
-        blockStep = (step - 1) % blockPower2 + 1;
+      // enEx1[i] = en / step + (step-1)*enEx1[i]/(step) i.e update first momenT
+      alpha = 1.0 / static_cast<double>(step);
+      beta = (static_cast<double>(step) - 1.0) / static_cast<double>(step);
+      cublasStatusAssert(cublasDgeam(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+                                     ivir2 - iocc1, ivir2 - iocc1,
+                                     &alpha, en[band][diff], ivir2 - iocc1,
+                                     &beta, enEx1[band][diff], ivir2 - iocc1,
+                                     enEx1[band][diff], ivir2 - iocc1),
+                         __FILE__, __LINE__);
 
-        // enBlock[i][j] = en / step + (step-1)*enBlock[i][j]/(step) i.e update first moment
-        alpha = 1.0 / static_cast<double>(blockStep);
-        beta = (static_cast<double>(blockStep) - 1.0) / static_cast<double>(blockStep);
-        cublasStatusAssert(cublasDgeam(handle, CUBLAS_OP_N, CUBLAS_OP_N,
-                                       ivir2 - iocc1, ivir2 - iocc1,
-                                       &alpha, en[band][diff], ivir2 - iocc1,
-                                       &beta, enBlock[band][diff][block], ivir2 - iocc1,
-                                       enBlock[band][diff][block], ivir2 - iocc1),
-                           __FILE__, __LINE__);
+      // en[i][j] = en[i][j]^2
+      squareElements<<<gridSize, blockSize>>>(ivir2 - iocc1, ivir2 - iocc1, en[band][diff]);
+      cudaError_t_Assert(cudaPeekAtLastError(), __FILE__, __LINE__);
 
-        if ((step & (blockPower2 - 1)) == 0) {  //if block is filled -> accumulate
-          blockStep = step / blockPower2;
-
-          // enEx1[i] = en / step + (step-1)*enEx1[i]/(step) i.e update first momenT
-          alpha = 1.0 / static_cast<double>(blockStep);
-          beta = (static_cast<double>(blockStep) - 1.0) / static_cast<double>(blockStep);
-          cublasStatusAssert(cublasDgeam(handle, CUBLAS_OP_N, CUBLAS_OP_N,
-                                         ivir2 - iocc1, ivir2 - iocc1,
-                                         &alpha, enBlock[band][diff][block], ivir2 - iocc1,
-                                         &beta, enEx1[band][diff][block], ivir2 - iocc1,
-                                         enEx1[band][diff][block], ivir2 - iocc1),
-                             __FILE__, __LINE__);
-
-          // en[i][j] = en[i][j]^2
-          squareElements<<<gridSize, blockSize>>>(ivir2 - iocc1, ivir2 - iocc1, enBlock[band][diff][block]);
-          cudaError_t_Assert(cudaPeekAtLastError(), __FILE__, __LINE__);
-
-          // enEx1 = en/step + (step-1)*enEx2/(step) i.e update second momenT
-          cublasStatusAssert(cublasDgeam(handle, CUBLAS_OP_N, CUBLAS_OP_N,
-                                         ivir2 - iocc1, ivir2 - iocc1,
-                                         &alpha, enBlock[band][diff][block], ivir2 - iocc1,
-                                         &beta, enEx2[band][diff][block], ivir2 - iocc1,
-                                         enEx2[band][diff][block], ivir2 - iocc1),
-                             __FILE__, __LINE__);
-
-          // zero block;
-          cudaError_t_Assert(cudaMemset(enBlock[band][diff][block], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        }
-        blockPower2 *= 2;
-      }
+      // enEx1 = en/step + (step-1)*enEx2/(step) i.e update second momenT
+      cublasStatusAssert(cublasDgeam(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+                                     ivir2 - iocc1, ivir2 - iocc1,
+                                     &alpha, en[band][diff], ivir2 - iocc1,
+                                     &beta, enEx2[band][diff], ivir2 - iocc1,
+                                     enEx2[band][diff], ivir2 - iocc1),
+                         __FILE__, __LINE__);
     }
   }
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);

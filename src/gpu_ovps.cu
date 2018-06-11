@@ -13,12 +13,11 @@
 #include "cublasStatus_t_getErrorString.h"
 #include "qc_ovps.h"
 
-void OVPs::init_02(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
+void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   mc_pair_num = p1;
   numBand = p2;
   offBand = p3;
   numDiff = p4;
-  numBlock = p5;
 
   iocc1 = basis.iocc1;
   iocc2 = basis.iocc2;
@@ -84,21 +83,17 @@ void OVPs::alloc_02() {
 
   d_ovps.en2 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
 
-  d_ovps.en2Ex1 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en2Ex2 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en2Block = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
+  d_ovps.en2Ex1 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
+  d_ovps.en2Ex2 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
   for (auto i = 0; i < d_ovps.en2Ex1.size(); i++) {
     for (auto j = 0; j < d_ovps.en2Ex1[i].size(); j++) {
-      cudaError_t_Assert(cudaMalloc((void**)&d_ovps.en2[i][j], sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-      for (auto k = 0; k < d_ovps.en2Ex1[i][j].size(); k++) {
-        cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en2Ex1[i][j][k]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en2Ex2[i][j][k]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en2Block[i][j][k]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
+      cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en2[i][j]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
 
-        cudaError_t_Assert(cudaMemset(d_ovps.en2Ex1[i][j][k], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMemset(d_ovps.en2Ex2[i][j][k], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMemset(d_ovps.en2Block[i][j][k], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-      }
+      cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en2Ex1[i][j]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
+      cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en2Ex2[i][j]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
+
+      cudaError_t_Assert(cudaMemset(d_ovps.en2Ex1[i][j], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
+      cudaError_t_Assert(cudaMemset(d_ovps.en2Ex2[i][j], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
     }
   }
 }
@@ -161,17 +156,14 @@ void OVPs::free_02() {
   for (auto i = 0; i < d_ovps.en2Ex1.size(); i++) {
     for (auto j = 0; j < d_ovps.en2Ex1[i].size(); j++) {
       cudaError_t_Assert(cudaFree(d_ovps.en2[i][j]), __FILE__, __LINE__);
-      for (auto k = 0; k < d_ovps.en2Ex1[i][j].size(); k++) {
-        cudaError_t_Assert(cudaFree(d_ovps.en2Ex1[i][j][k]), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaFree(d_ovps.en2Ex2[i][j][k]), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaFree(d_ovps.en2Block[i][j][k]), __FILE__, __LINE__);
-      }
+      cudaError_t_Assert(cudaFree(d_ovps.en2Ex1[i][j]), __FILE__, __LINE__);
+      cudaError_t_Assert(cudaFree(d_ovps.en2Ex2[i][j]), __FILE__, __LINE__);
     }
   }
 }
 
-void OVPs::init_03(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
-  init_02(p1, p2, p3, p4, p5, basis);
+void OVPs::init_03(int p1, int p2, int p3, int p4, const Basis &basis) {
+  init_02(p1, p2, p3, p4, basis);
 
 #ifdef QUAD_TAU
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.t_save_val2, sizeof(double) * 21 * ivir2), __FILE__, __LINE__);
@@ -236,21 +228,17 @@ void OVPs::alloc_03() {
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.en3c22, sizeof(double) * mc_pair_num), __FILE__, __LINE__);
 
   d_ovps.en3 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
-  d_ovps.en3Ex1 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en3Ex2 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en3Block = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
+  d_ovps.en3Ex1 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
+  d_ovps.en3Ex2 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
   for (auto i = 0; i < d_ovps.en3Ex1.size(); i++) {
     for (auto j = 0; j < d_ovps.en3Ex1[i].size(); j++) {
       cudaError_t_Assert(cudaMalloc((void**)&d_ovps.en3[i][j], sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-      for (auto k = 0; k < d_ovps.en3Ex1[i][j].size(); k++) {
-        cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en3Ex1[i][j][k]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en3Ex2[i][j][k]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en3Block[i][j][k]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
 
-        cudaError_t_Assert(cudaMemset(d_ovps.en3Ex1[i][j][k], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMemset(d_ovps.en3Ex2[i][j][k], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaMemset(d_ovps.en3Block[i][j][k], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
-      }
+      cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en3Ex1[i][j]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
+      cudaError_t_Assert(cudaMalloc((void**)&(d_ovps.en3Ex2[i][j]), sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
+
+      cudaError_t_Assert(cudaMemset(d_ovps.en3Ex1[i][j], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
+      cudaError_t_Assert(cudaMemset(d_ovps.en3Ex2[i][j], 0, sizeof(double) * (ivir2 - iocc1) * (ivir2 - iocc1)), __FILE__, __LINE__);
     }
   }
 
@@ -327,11 +315,8 @@ void OVPs::free_03() {
   for (auto i = 0; i < d_ovps.en3Ex1.size(); i++) {
     for (auto j = 0; j < d_ovps.en3Ex1[i].size(); j++) {
       cudaError_t_Assert(cudaFree(d_ovps.en3[i][j]), __FILE__, __LINE__);
-      for (auto k = 0; k < d_ovps.en3Ex1[i][j].size(); k++) {
-        cudaError_t_Assert(cudaFree(d_ovps.en3Ex1[i][j][k]), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaFree(d_ovps.en3Ex2[i][j][k]), __FILE__, __LINE__);
-        cudaError_t_Assert(cudaFree(d_ovps.en3Block[i][j][k]), __FILE__, __LINE__);
-      }
+      cudaError_t_Assert(cudaFree(d_ovps.en3Ex1[i][j]), __FILE__, __LINE__);
+      cudaError_t_Assert(cudaFree(d_ovps.en3Ex2[i][j]), __FILE__, __LINE__);
     }
   }
 }

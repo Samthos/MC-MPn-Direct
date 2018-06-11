@@ -16,10 +16,9 @@ void fillVector3(std::vector<std::vector<std::vector<double>>>& in) {
   }
 }
 
-GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeriv, int nBlock, const std::string& jobname, int order) : isMaster(isMaster_), tasks(static_cast<double>(tasks_)) {
+GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeriv, const std::string& jobname, int order) : isMaster(isMaster_), tasks(static_cast<double>(tasks_)) {
   qeps = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv));  //stores energy correction for current step
 
-  qepsBlock = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv, 0));  // used to accumlated blocked energied
   qepsEx1 = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv, 0));    // stores first moment of blocked energy correction
   qepsEx2 = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv, 0));    // stores second moment of blocked energy correction
   qepsAvg = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv, 0));    // stores energies after MPI reduce
@@ -59,17 +58,13 @@ void GFStats::blockIt(const int& step) {
   double diff1, diff2;
   uint32_t band, deriv, block;
   uint32_t blockPower2, blockStep;
-  for (band = 0; band < qepsBlock.size(); band++) {                                                         // loop over bands
-    for (deriv = 0; deriv < qepsBlock[band].size(); deriv++) {                                              // loop over number of requested derivatives
-      diff1 = qeps[band][deriv] - qepsBlock[band][deriv];
-      qepsBlock[band][deriv] += diff1;
-
-      diff1 = qepsBlock[band][deriv] - qepsEx1[band][deriv];
-      diff2 = qepsBlock[band][deriv] * qepsBlock[band][deriv] - qepsEx2[band][deriv];
+  for (band = 0; band < qeps.size(); band++) {                                                         // loop over bands
+    for (deriv = 0; deriv < qeps[band].size(); deriv++) {                                              // loop over number of requested derivatives
+      diff1 = qeps[band][deriv] - qepsEx1[band][deriv];
+      diff2 = qeps[band][deriv] * qeps[band][deriv] - qepsEx2[band][deriv];
 
       qepsEx1[band][deriv] += diff1 / static_cast<double>(step);
       qepsEx2[band][deriv] += diff2 / static_cast<double>(step);
-      qepsBlock[band][deriv] = 0.00;
     }
   }
 }

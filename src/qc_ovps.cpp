@@ -17,12 +17,11 @@ void print_out(double* A, int m, int n) {
   }
 }
 
-void OVPs::init_02(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
+void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   mc_pair_num = p1;
   numBand = p2;
   offBand = p3;
   numDiff = p4;
-  numBlock = p5;
 
   iocc1 = basis.iocc1;
   iocc2 = basis.iocc2;
@@ -74,17 +73,13 @@ void OVPs::alloc_02() {
 
   d_ovps.en2 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
 
-  d_ovps.en2Ex1 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en2Ex2 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en2Block = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
+  d_ovps.en2Ex1 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
+  d_ovps.en2Ex2 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
   for (uint32_t i = 0; i < d_ovps.en2Ex1.size(); i++) {
     for (uint32_t j = 0; j < d_ovps.en2Ex1[i].size(); j++) {
       d_ovps.en2[i][j] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-      for (uint32_t k = 0; k < d_ovps.en2Ex1[i][j].size(); k++) {
-        d_ovps.en2Ex1[i][j][k] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-        d_ovps.en2Ex2[i][j][k] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-        d_ovps.en2Block[i][j][k] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-      }
+      d_ovps.en2Ex1[i][j] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
+      d_ovps.en2Ex2[i][j] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
     }
   }
 }
@@ -133,17 +128,14 @@ void OVPs::free_02() {
   for (uint32_t i = 0; i < d_ovps.en2Ex1.size(); i++) {
     for (uint32_t j = 0; j < d_ovps.en2Ex1[i].size(); j++) {
       delete[] d_ovps.en2[i][j];
-      for (uint32_t k = 0; k < d_ovps.en2Ex1[i][j].size(); k++) {
-        delete[] d_ovps.en2Ex1[i][j][k];
-        delete[] d_ovps.en2Ex2[i][j][k];
-        delete[] d_ovps.en2Block[i][j][k];
-      }
+      delete[] d_ovps.en2Ex1[i][j];
+      delete[] d_ovps.en2Ex2[i][j];
     }
   }
 }
 
-void OVPs::init_03(int p1, int p2, int p3, int p4, int p5, const Basis &basis) {
-  init_02(p1, p2, p3, p4, p5, basis);
+void OVPs::init_03(int p1, int p2, int p3, int p4, const Basis &basis) {
+  init_02(p1, p2, p3, p4, basis);
 
 #ifdef QUAD_TAU
   ovps.t_save_val2 = new double[21 * ivir2];
@@ -207,17 +199,13 @@ void OVPs::alloc_03() {
   std::fill(d_ovps.one, d_ovps.one + mc_pair_num, 1.0);
 
   d_ovps.en3 = std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
-  d_ovps.en3Ex1 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en3Ex2 = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
-  d_ovps.en3Block = std::vector<std::vector<std::vector<double*>>>(numBand, std::vector<std::vector<double*>>(numDiff, std::vector<double*>(numBlock)));
+  d_ovps.en3Ex1 =   std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
+  d_ovps.en3Ex2 =   std::vector<std::vector<double*>>(numBand, std::vector<double*>(numDiff));
   for (uint32_t i = 0; i < d_ovps.en3Ex1.size(); i++) {
     for (uint32_t j = 0; j < d_ovps.en3Ex1[i].size(); j++) {
       d_ovps.en3[i][j] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-      for (uint32_t k = 0; k < d_ovps.en3Ex1[i][j].size(); k++) {
-        d_ovps.en3Ex1[i][j][k] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-        d_ovps.en3Ex2[i][j][k] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-        d_ovps.en3Block[i][j][k] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
-      }
+      d_ovps.en3Ex1[i][j] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
+      d_ovps.en3Ex2[i][j] = new double[(ivir2 - iocc1) * (ivir2 - iocc1)];
     }
   }
 }
@@ -287,11 +275,8 @@ void OVPs::free_03() {
   for (uint32_t i = 0; i < d_ovps.en3Ex1.size(); i++) {
     for (uint32_t j = 0; j < d_ovps.en3Ex1[i].size(); j++) {
       delete[] d_ovps.en3[i][j];
-      for (uint32_t k = 0; k < d_ovps.en3Ex1[i][j].size(); k++) {
-        delete[] d_ovps.en3Ex1[i][j][k];
-        delete[] d_ovps.en3Ex2[i][j][k];
-        delete[] d_ovps.en3Block[i][j][k];
-      }
+      delete[] d_ovps.en3Ex1[i][j];
+      delete[] d_ovps.en3Ex2[i][j];
     }
   }
 }

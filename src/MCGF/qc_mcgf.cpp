@@ -17,7 +17,7 @@ void GF2::monte_energy() {
   int checkNum = 1;
   int i, band, print_mat;
 
-  GFStats qeps2(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, nBlock, iops.sopns[KEYS::JOBNAME], 2);
+  GFStats qeps2(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
 
   //clock
   std::chrono::high_resolution_clock::time_point step_start, step_end, mc_start, mc_end;
@@ -136,7 +136,7 @@ void GF2::mc_local_energy(std::vector<std::vector<double>> &qeps2, int step) {
 #endif
 
   if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
-    mc_gf_statistics(step, qeps2, ovps.d_ovps.en2, ovps.d_ovps.en2Block, ovps.d_ovps.en2Ex1, ovps.d_ovps.en2Ex2);
+    mc_gf_statistics(step, qeps2, ovps.d_ovps.en2, ovps.d_ovps.en2Ex1, ovps.d_ovps.en2Ex2);
   }
 }
 
@@ -144,8 +144,8 @@ void GF3::monte_energy() {
   int checkNum = 1;
   int i, band, print_mat;
 
-  GFStats qeps2(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, nBlock, iops.sopns[KEYS::JOBNAME], 2);
-  GFStats qeps3(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, nBlock, iops.sopns[KEYS::JOBNAME], 3);
+  GFStats qeps2(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
+  GFStats qeps3(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 3);
 
   //clock
   std::chrono::high_resolution_clock::time_point step_start, step_end, mc_start, mc_end;
@@ -302,7 +302,7 @@ void GF3::mc_local_energy(std::vector<std::vector<double>> &qeps2, std::vector<s
 #endif
 
   if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
-    mc_gf_statistics(step, qeps2, ovps.d_ovps.en2, ovps.d_ovps.en2Block, ovps.d_ovps.en2Ex1, ovps.d_ovps.en2Ex2);
-    mc_gf_statistics(step, qeps3, ovps.d_ovps.en3, ovps.d_ovps.en3Block, ovps.d_ovps.en3Ex1, ovps.d_ovps.en3Ex2);
+    mc_gf_statistics(step, qeps2, ovps.d_ovps.en2, ovps.d_ovps.en2Ex1, ovps.d_ovps.en2Ex2);
+    mc_gf_statistics(step, qeps3, ovps.d_ovps.en3, ovps.d_ovps.en3Ex1, ovps.d_ovps.en3Ex2);
   }
 }

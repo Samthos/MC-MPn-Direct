@@ -7,62 +7,34 @@
 void QC_monte::mc_gf_statistics(int step,
                                 std::vector<std::vector<double>>& qep,
                                 std::vector<std::vector<double*>>& en,
-                                std::vector<std::vector<std::vector<double*>>>& enBlock,
-                                std::vector<std::vector<std::vector<double*>>>& enEx1,
-                                std::vector<std::vector<std::vector<double*>>>& enEx2) {
-  double alpha, beta;
-  int blockPower2, blockStep;
-  int offset;
-
+                                std::vector<std::vector<double*>>& enEx1,
+                                std::vector<std::vector<double*>>& enEx2) {
   for (auto band = 0; band < iops.iopns[KEYS::NUM_BAND]; band++) {
-    offset = (ivir2 - iocc1) * (iocc2 - iocc1 - offBand + band) + (iocc2 - iocc1 - offBand + band);
+    auto offset = (ivir2 - iocc1) * (iocc2 - iocc1 - offBand + band) + (iocc2 - iocc1 - offBand + band);
     for (auto diff = 0; diff < iops.iopns[KEYS::DIFFS]; diff++) {
       qep[band][diff] = en[band][diff][offset];
 
-      blockPower2 = 1;
-      for (auto block = 0; block < iops.iopns[KEYS::NBLOCK]; block++) {
-        blockStep = (step - 1) % blockPower2 + 1;
+      // enEx1[i] = en / step + (step-1)*enEx1[i]/(step) i.e update first momenT
+      auto alpha = 1.0 / static_cast<double>(step);
+      auto beta = (static_cast<double>(step) - 1.0) / static_cast<double>(step);
+      std::transform(
+          en[band][diff],
+          en[band][diff] + ((ivir2 - iocc1) * (ivir2 - iocc1)),
+          enEx1[band][diff],
+          enEx1[band][diff],
+          [&](double a, double b) { return alpha * a + beta * b; });
 
-        // enBlock[i][j] = en / step + (step-1)*enBlock[i][j]/(step) i.e update first moment
-        alpha = 1.0 / static_cast<double>(blockStep);
-        beta = (static_cast<double>(blockStep) - 1.0) / static_cast<double>(blockStep);
-        std::transform(
-            en[band][diff],
-            en[band][diff] + ((ivir2 - iocc1) * (ivir2 - iocc1)),
-            enBlock[band][diff][block],
-            enBlock[band][diff][block],
-            [&](double a, double b) { return alpha * a + beta * b; });
+      // en[i][j] = en[i][j]^2
+      std::transform(en[band][diff], en[band][diff] + ((ivir2 - iocc1) * (ivir2 - iocc1)), en[band][diff],
+                     [](double a) { return a * a; });
 
-        if ((step & (blockPower2 - 1)) == 0) {  //if block is filled -> accumulate
-          blockStep = step / blockPower2;
-
-          // enEx1[i] = en / step + (step-1)*enEx1[i]/(step) i.e update first momenT
-          alpha = 1.0 / static_cast<double>(blockStep);
-          beta = (static_cast<double>(blockStep) - 1.0) / static_cast<double>(blockStep);
-          std::transform(
-              enBlock[band][diff][block],
-              enBlock[band][diff][block] + ((ivir2 - iocc1) * (ivir2 - iocc1)),
-              enEx1[band][diff][block],
-              enEx1[band][diff][block],
-              [&](double a, double b) { return alpha * a + beta * b; });
-
-          // en[i][j] = en[i][j]^2
-          std::transform(enBlock[band][diff][block], enBlock[band][diff][block] + ((ivir2 - iocc1) * (ivir2 - iocc1)), enBlock[band][diff][block],
-                         [](double a) { return a * a; });
-
-          // enEx2 = en/step + (step-1)*enEx2/(step) i.e update second momenT
-          std::transform(
-              enBlock[band][diff][block],
-              enBlock[band][diff][block] + ((ivir2 - iocc1) * (ivir2 - iocc1)),
-              enEx2[band][diff][block],
-              enEx2[band][diff][block],
-              [&](double a, double b) { return alpha * a + beta * b; });
-
-          // zero block;
-          std::fill(enBlock[band][diff][block], enBlock[band][diff][block] + ((ivir2 - iocc1) * (ivir2 - iocc1)), 0.0);
-        }
-        blockPower2 *= 2;
-      }
+      // enEx2 = en/step + (step-1)*enEx2/(step) i.e update second momenT
+      std::transform(
+          en[band][diff],
+          en[band][diff] + ((ivir2 - iocc1) * (ivir2 - iocc1)),
+          enEx2[band][diff],
+          enEx2[band][diff],
+          [&](double a, double b) { return alpha * a + beta * b; });
     }
   }
 }

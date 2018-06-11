@@ -19,7 +19,7 @@
 
 class GFStats {
  private:
-  std::vector<std::vector<double>> qepsBlock, qepsEx1, qepsEx2, qepsAvg, qepsVar;
+  std::vector<std::vector<double>> qepsEx1, qepsEx2, qepsAvg, qepsVar;
   std::vector<std::ofstream*> output_streams;
   bool isMaster;
   double tasks;
@@ -27,7 +27,7 @@ class GFStats {
  public:
   std::vector<std::vector<double>> qeps;
 
-  GFStats(bool, int, int, int, int, int, const std::string&, int);
+  GFStats(bool, int, int, int, int, const std::string&, int);
   GFStats(const GFStats& gf) { exit(0); }
   GFStats operator=(const GFStats& gf) { exit(0); }
 
@@ -78,12 +78,11 @@ class QC_monte {
   void mc_gf_statistics(int,
                         std::vector<std::vector<double>>&,
                         std::vector<std::vector<double*>>&,
-                        std::vector<std::vector<std::vector<double*>>>&,
-                        std::vector<std::vector<std::vector<double*>>>&,
-                        std::vector<std::vector<std::vector<double*>>>&);
+                        std::vector<std::vector<double*>>&,
+                        std::vector<std::vector<double*>>&);
 
   void mc_gf_copy(std::vector<double>&, std::vector<double>&, double*, double*);
-  std::string genFileName(int, int, int, int, int, int);
+  std::string genFileName(int, int, int, int, int);
 
   void mc_gf2_statistics(int, int);
   void mc_gf2_full_print(int, int, int);
@@ -122,7 +121,7 @@ class MP3 : public QC_monte {
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis);
+                 basis);
     ovps.alloc_03();
 
     o1.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2);
@@ -149,7 +148,7 @@ class MP4 : public QC_monte {
   MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis);
+                 basis);
     ovps.alloc_03();
   }
   ~MP4() {
@@ -172,7 +171,7 @@ class GPU_GF2 : public QC_monte {
   GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis);
+                 basis);
 
     ovps.alloc_02();
 #ifdef QUAD_TAU
@@ -194,7 +193,7 @@ class GF2 : public QC_monte {
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis);
+                 basis);
 
     ovps.alloc_02();
 #ifdef QUAD_TAU
@@ -216,7 +215,7 @@ class GPU_GF3 : public QC_monte {
   GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis);
+                 basis);
     ovps.alloc_03();
 #ifdef QUAD_TAU
     ovps.init_tau_03(basis);
@@ -237,7 +236,7 @@ class GF3 : public QC_monte {
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis);
+                 basis);
     ovps.alloc_03();
 #ifdef QUAD_TAU
     ovps.init_tau_03(basis);
