@@ -64,15 +64,15 @@ class Stochastic_Tau {
   double get_gfn_tau(std::vector<int> index, int offset, int conjugate) {
     double s(1.0);
     if (index.size() == 1) {
-      s = exp_tau[index[0]][iocc2 - 1 + offset];
+      s = exp_tau[index[0]][iocc2 + offset];
     } else {
       for (auto &it : index) {
-        s *= exp_tau[it][iocc2 - 1 + offset];
+        s *= exp_tau[it][iocc2 + offset];
       }
     }
-    if (conjugate && offset <= 0) {
+    if (conjugate && offset < 0) {
       s = 1.0 / s;
-    } else if (!conjugate && offset > 0) {
+    } else if (!conjugate && offset >= 0) {
       s = 1.0 / s;
     }
     return s;

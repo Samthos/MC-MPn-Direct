@@ -77,7 +77,7 @@ void QC_monte::mc_gf3_statistics(int band, int step) {
   double alpha;
   double beta;
 
-  std::fill(diffMultiplier.begin(), diffMultiplier.end(), 1.0);
+  diffMultiplier.fill(1.0);
 
   for (auto diff = 0; diff < iops.iopns[KEYS::DIFFS]; diff++) {
     // en3 = diffMultipllier[0] en3_1mCore
@@ -163,9 +163,9 @@ void QC_monte::mc_gf3_statistics(int band, int step) {
           ovps.d_ovps.en3[band][diff],
           [&](double a, double b) { return alpha * a + beta * b; });
     }
-    diffMultiplier[0] *= ovps.xx1;
-    diffMultiplier[1] *= ovps.xx2;
-    diffMultiplier[2] *= ovps.xx1 * ovps.xx2;
+    diffMultiplier[0] *= tau.get_tau(0);
+    diffMultiplier[1] *= tau.get_tau(1);
+    diffMultiplier[2] *= diffMultiplier[0] * diffMultiplier[1];
   }
 }
 
