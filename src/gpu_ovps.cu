@@ -491,7 +491,7 @@ __global__ void print_out(double* A, int m, int n) {
     printf("\n");
   }
 }
-void OVPs::update_ovps_02(el_pair_typ* el_pair_list) {
+void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   int ip, am;
   double alpha = 1.00;
   double beta = 0.00;
@@ -536,13 +536,13 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list) {
   cudaError_t_Assert(cudaThreadSynchronize(), __FILE__, __LINE__);
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void OVPs::update_ovps_03(el_pair_typ* el_pair_list) {
+void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   double alpha = 1.00;
   double beta = 0.00;
   cublasHandle_t handle;
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
 
-  update_ovps_02(el_pair_list);
+  update_ovps_02(el_pair_list, tau);
 
   //copy wave functions from host to device;
   cudaError_t_Assert(cudaMemcpy(d_ovps.t_val2, ovps.t_val2, sizeof(double) * ivir2, cudaMemcpyHostToDevice), __FILE__, __LINE__);

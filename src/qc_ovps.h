@@ -6,6 +6,7 @@
 #include "basis/qc_basis.h"
 #include "qc_random.h"
 #include "blas_calls.h"
+#include "tau_integrals.h"
 
 #ifndef QC_OVPS_H_
 #define QC_OVPS_H_
@@ -182,7 +183,7 @@ class OVPs {
   void zero_energy_arrays_02();
   void new_tau_02(Basis &, Random &);
   void init_tau_02(Basis &);
-  void update_ovps_02(el_pair_typ *);
+  void update_ovps_02(el_pair_typ *, Stochastic_Tau&);
 
   void init_03(int, int, int, int, const Basis &);
   void alloc_03();
@@ -191,7 +192,7 @@ class OVPs {
   void zero_energy_arrays_03();
   void new_tau_03(Basis &, Random &);
   void init_tau_03(Basis &);
-  void update_ovps_03(el_pair_typ *);
+  void update_ovps_03(el_pair_typ *, Stochastic_Tau&);
 
   OVPS_ARRAY ovps, d_ovps;
 

@@ -20,8 +20,8 @@ void MP2::mcmp2_energy(double& emp2, std::vector<double>& control) {
   double a_resk, emp2a;
   double b_resk, emp2b;
 
-  tau.new_tau(basis, random);
-  auto tau_values = tau.get_tau({0});
+  tau.new_tau(random);
+  auto tau_values = tau.get_exp_tau({0});
   std::vector<double> psi1Tau(ivir2), psi2Tau(ivir2);
 
   emp2 = 0.0;
@@ -115,7 +115,8 @@ void MP3::mcmp2_energy(double& emp2, std::vector<double>& control) {
     emp2 += emp2_rvj * el_pair_list[it].rv;
     std::transform(control_j.begin(), control_j.end(), control.begin(), control.begin(), [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
   }
-  emp2 = emp2 * ovps.t1_twgt / icount2;
-  std::transform(control.begin(), control.end(), control.begin(), [&](double c) { return c * ovps.t1_twgt / icount2; });
+  auto tau_wgt = tau.get_wgt(1);
+  emp2 = emp2 * tau_wgt / icount2;
+  std::transform(control.begin(), control.end(), control.begin(), [&](double c) { return c * tau_wgt / icount2; });
 }
 

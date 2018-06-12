@@ -68,7 +68,7 @@ void QC_monte::mc_gf2_statistics(int band, int step) {
         ovps.d_ovps.en2[band][diff],
         [&](double a, double b) { return alpha * a + beta * b; });
 
-    diffMultiplier *= ovps.xx1;
+    diffMultiplier *= tau.get_tau(0);
   }
 }
 

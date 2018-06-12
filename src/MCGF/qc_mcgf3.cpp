@@ -131,7 +131,7 @@ void QC_monte::mcgf3_local_energy(std::vector<double>& egf3, int band) {
   en3 = en3 + en3t * ovps.ovps.tgc_val12[band];
 
   nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
-  en3 = en3 * ovps.t2_twgt / static_cast<double>(nsamp);
+  en3 = en3 * tau.get_wgt(2) / static_cast<double>(nsamp);
   egf3.front() += en3;
 }
 void QC_monte::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
@@ -179,7 +179,7 @@ void QC_monte::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
 
   nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
   for (auto& it : en3) {
-    it = it * ovps.t2_twgt / static_cast<double>(nsamp);
+    it = it * tau.get_wgt(2) / static_cast<double>(nsamp);
   }
 
   for (ip = 0; ip < iops.iopns[KEYS::DIFFS]; ip++) {
@@ -210,7 +210,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
   double alpha, beta;
 
   // ent = alpha en3_1p . psi2
-  alpha = ovps.ovps.tg_val1[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tg_val1[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -219,7 +219,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
               beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // ent = alpha en3_2p . psi2 + ent
-  alpha = ovps.ovps.tg_val2[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tg_val2[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -228,7 +228,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
               beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // ent = alpha en3_12p . psi2 + ent
-  alpha = ovps.ovps.tg_val12[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tg_val12[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -237,7 +237,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
               beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // ent = alpha en3_1m . psi2 + ent
-  alpha = ovps.ovps.tgc_val1[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tgc_val1[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -246,7 +246,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
               beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // ent = alpha en3_2m . psi2 + ent
-  alpha = ovps.ovps.tgc_val2[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tgc_val2[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -255,7 +255,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
               beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // ent = alpha en3_12m . psi2 + ent
-  alpha = ovps.ovps.tgc_val12[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tgc_val12[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -272,7 +272,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta, ovps.d_ovps.en3[band][0], ivir2 - iocc1);
   // en3c = alpha en3_12c . IdentityVector
-  //  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  //  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
   //  cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -289,7 +289,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
 
   // en3 = Transpose[psi2] . ent + en3
   //  alpha = 1.00;
-  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -298,7 +298,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
               beta, ovps.d_ovps.en3[band][0], ivir2 - iocc1);
 
   // en3c = alpha en3_22c . IdentityVector
-  //  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  //  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
   //  cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -314,7 +314,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
         ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // en3 = Transpose[psi2] . ent + en3
-  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -333,7 +333,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
   double alpha, beta;
 
   // ent = alpha en3_1pCore . psi2
-  alpha = ovps.ovps.tg_val1[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tg_val1[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -351,7 +351,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_1p, ivir2 - iocc1);
 
   // ent = alpha en3_2pCore . psi2
-  alpha = ovps.ovps.tg_val2[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tg_val2[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -369,7 +369,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_2p, ivir2 - iocc1);
 
   // ent = alpha en3_12pCore . psi2
-  alpha = ovps.ovps.tg_val12[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tg_val12[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -387,7 +387,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_12p, ivir2 - iocc1);
 
   // ent = alpha en3_1mCore . psi2
-  alpha = ovps.ovps.tgc_val1[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tgc_val1[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -405,7 +405,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_1m, ivir2 - iocc1);
 
   // ent = alpha en3_2mCore . psi2
-  alpha = ovps.ovps.tgc_val2[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tgc_val2[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -423,7 +423,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_2m, ivir2 - iocc1);
 
   // ent = alpha en3_12mCore . psi2
-  alpha = ovps.ovps.tgc_val12[band] * ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = ovps.ovps.tgc_val12[band] * tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -441,7 +441,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_12m, ivir2 - iocc1);
 
   // en3c = alpha en3_12cCore . IdentityVector
-  //  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  //  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
   //  cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -458,7 +458,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
 
   // en3_c = Transpose[psi2] . ent
   //alpha = 1.00;
-  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -467,7 +467,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_c, ivir2 - iocc1);
 
   // en3c = alpha en3_22cCore . IdentityVector
-  //  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  //  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
   //  cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], alpha,
@@ -484,7 +484,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
 
   // en3_c = Transpose[psi2] . ent + en3_c
   //alpha = 1.00;
-  alpha = ovps.t2_twgt / static_cast<double>(nsamp);
+  alpha = tau.get_wgt(2) / static_cast<double>(nsamp);
   beta = 1.00;
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,

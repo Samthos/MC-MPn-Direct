@@ -91,8 +91,8 @@ void MP3::monte_energy() {
 
   // --- initialize
   update_wavefunction();
-  ovps.new_tau_03(basis, random);
-  ovps.update_ovps_03(el_pair_list.data());
+  tau.new_tau(random);
+  ovps.update_ovps_03(el_pair_list.data(), tau);
   mcmp2_energy(emp2, mp2_control);
   mcmp3_energy(emp3, mp3_control);
 
@@ -104,11 +104,11 @@ void MP3::monte_energy() {
     }
 
     // generate new tau values
-    ovps.new_tau_03(basis, random);
+    tau.new_tau(random);
 
     // update wavefunction and green's function traces
     update_wavefunction();
-    ovps.update_ovps_03(el_pair_list.data());
+    ovps.update_ovps_03(el_pair_list.data(), tau);
 
     // calcaulte energy for step
     mcmp2_energy(emp2, mp2_control);
@@ -167,8 +167,8 @@ void MP4::monte_energy() {
 
   // --- initialize
   update_wavefunction();
-  ovps.new_tau_03(basis, random);
-  ovps.update_ovps_03(el_pair_list.data());
+  tau.new_tau(random);
+  ovps.update_ovps_03(el_pair_list.data(), tau);
 
 //  mcmp2_energy(emp[0], control[0]);
 //  mcmp3_energy(emp[1], control[1]);
@@ -182,11 +182,11 @@ void MP4::monte_energy() {
     }
 
     // generate new tau values
-    ovps.new_tau_03(basis, random);
+    tau.new_tau(random);
 
     // update wavefunction and green's function traces
     update_wavefunction();
-    ovps.update_ovps_03(el_pair_list.data());
+    ovps.update_ovps_03(el_pair_list.data(), tau);
 
     // calcaulte energy for step
 //    mcmp2_energy(emp[0], control[0]);

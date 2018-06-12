@@ -447,7 +447,7 @@ void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int 
   }
 }
 
-void OVPs::update_ovps_02(el_pair_typ* el_pair_list) {
+void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   int ip, am;
   double alpha = 1.00;
   double beta = 0.00;
@@ -471,19 +471,23 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list) {
     }
   }
   //copy wave functions from host to device;
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &ovps.t_val1[iocc1], 1, d_ovps.occTau1, mc_pair_num);
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &ovps.t_val1[iocc1], 1, d_ovps.occTau2, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_13, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_24, mc_pair_num);
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_23, mc_pair_num);
-  Transpose(d_ovps.os_23, mc_pair_num, d_ovps.os_14);
+  {
+    auto t_val = tau.get_exp_tau({0});
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_13, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_24, mc_pair_num);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_23, mc_pair_num);
+    Transpose(d_ovps.os_23, mc_pair_num, d_ovps.os_14);
 
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &ovps.t_val1[ivir1], 1, d_ovps.virTau1, mc_pair_num);
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &ovps.t_val1[ivir1], 1, d_ovps.virTau2, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, beta, d_ovps.vs_13, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_24, mc_pair_num);
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_23, mc_pair_num);
-  Transpose(d_ovps.vs_23, mc_pair_num, d_ovps.vs_14);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau1, mc_pair_num);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau2, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, beta, d_ovps.vs_13, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_24, mc_pair_num);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_23, mc_pair_num);
+    Transpose(d_ovps.vs_23, mc_pair_num, d_ovps.vs_14);
+  }
+
 
   std::fill(d_ovps.ps_24, d_ovps.ps_24 + mc_pair_num * mc_pair_num * numBand, 0.0);
   for (am = 0; am < numBand; am++) {
@@ -494,40 +498,46 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list) {
     }
   }
 }
-void OVPs::update_ovps_03(el_pair_typ* el_pair_list) {
+void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   double alpha = 1.00;
   double beta = 0.00;
 
-  update_ovps_02(el_pair_list);
+  update_ovps_02(el_pair_list, tau);
 
   freq_indp_gf(d_ovps, mc_pair_num, iocc2 - iocc1, offBand, numBand);
 
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &ovps.t_val2[iocc1], 1, d_ovps.occTau1, mc_pair_num);
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &ovps.t_val2[iocc1], 1, d_ovps.occTau2, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_35, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_46, mc_pair_num);
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_45, mc_pair_num);
-  Transpose(d_ovps.os_45, mc_pair_num, d_ovps.os_36);
+  {
+    auto t_val = tau.get_exp_tau({1});
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_35, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_46, mc_pair_num);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_45, mc_pair_num);
+    Transpose(d_ovps.os_45, mc_pair_num, d_ovps.os_36);
+
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau1, mc_pair_num);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau2, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, beta, d_ovps.vs_35, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_46, mc_pair_num);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_45, mc_pair_num);
+    Transpose(d_ovps.vs_45, mc_pair_num, d_ovps.vs_36);
+  }
 
 
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &ovps.t_val2[ivir1], 1, d_ovps.virTau1, mc_pair_num);
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &ovps.t_val2[ivir1], 1, d_ovps.virTau2, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, beta, d_ovps.vs_35, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_46, mc_pair_num);
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_45, mc_pair_num);
-  Transpose(d_ovps.vs_45, mc_pair_num, d_ovps.vs_36);
+  {
+    auto t_val = tau.get_exp_tau({0, 1});
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_15, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_26, mc_pair_num);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_25, mc_pair_num);
+    Transpose(d_ovps.os_25, mc_pair_num, d_ovps.os_16);
 
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &ovps.t_val12[iocc1], 1, d_ovps.occTau1, mc_pair_num);
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &ovps.t_val12[iocc1], 1, d_ovps.occTau2, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_15, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_26, mc_pair_num);
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_25, mc_pair_num);
-  Transpose(d_ovps.os_25, mc_pair_num, d_ovps.os_16);
-
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &ovps.t_val12[ivir1], 1, d_ovps.virTau1, mc_pair_num);
-  Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &ovps.t_val12[ivir1], 1, d_ovps.virTau2, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, beta, d_ovps.vs_15, mc_pair_num);
-  cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_26, mc_pair_num);
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_25, mc_pair_num);
-  Transpose(d_ovps.vs_25, mc_pair_num, d_ovps.vs_16);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau1, mc_pair_num);
+    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau2, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, beta, d_ovps.vs_15, mc_pair_num);
+    cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_26, mc_pair_num);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_25, mc_pair_num);
+    Transpose(d_ovps.vs_25, mc_pair_num, d_ovps.vs_16);
+  }
 }

@@ -53,9 +53,7 @@ class QC_monte {
   GTO_Weight mc_basis;
   Random random;
   OVPs ovps;
-
-  OVPS_SET o1, o2, o12;
-  OVPS_SET v1, v2, v12;
+  Stochastic_Tau tau;
 
   void update_wavefunction();
   void move_walkers();
@@ -110,7 +108,6 @@ class MP2 : public QC_monte {
  protected:
   void mcmp2_energy(double&, std::vector<double>&);
 
-  Stochastic_Tau tau;
   double lambda;
   double tau_wgt;
   std::vector<double> tau_values;
@@ -123,14 +120,7 @@ class MP3 : public QC_monte {
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);
     ovps.alloc_03();
-
-    o1.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2);
-    o2.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2);
-    o12.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2);
-
-    v1.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.ivir1, basis.ivir2);
-    v2.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.ivir1, basis.ivir2);
-    v12.alloc_cpu(iops.iopns[KEYS::MC_NPAIR], basis.ivir1, basis.ivir2);
+    tau.resize(2, basis);
   }
   ~MP3() {
     ovps.free_tau_03();
@@ -174,9 +164,6 @@ class GPU_GF2 : public QC_monte {
                  basis);
 
     ovps.alloc_02();
-#ifdef QUAD_TAU
-    ovps.init_tau_02(basis);
-#endif
   }
   ~GPU_GF2() {
     ovps.free_tau_02();
@@ -196,9 +183,7 @@ class GF2 : public QC_monte {
                  basis);
 
     ovps.alloc_02();
-#ifdef QUAD_TAU
-    ovps.init_tau_02(basis);
-#endif
+    tau.resize(2, basis);
   }
   ~GF2() {
     ovps.free_tau_02();
@@ -217,9 +202,6 @@ class GPU_GF3 : public QC_monte {
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);
     ovps.alloc_03();
-#ifdef QUAD_TAU
-    ovps.init_tau_03(basis);
-#endif
   }
   ~GPU_GF3() {
     ovps.free_tau_03();
@@ -238,9 +220,7 @@ class GF3 : public QC_monte {
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);
     ovps.alloc_03();
-#ifdef QUAD_TAU
-    ovps.init_tau_03(basis);
-#endif
+    tau.resize(2, basis);
   }
   ~GF3() {
     ovps.free_tau_03();

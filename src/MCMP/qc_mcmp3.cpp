@@ -48,9 +48,10 @@ void MP3::mcmp3_energy(double& emp3, std::vector<double>& control) {
     emp3 += en_jk * el_pair_list[i].rv;
   }
 
+  auto tau_wgt = tau.get_wgt(2);
   std::transform(control.begin(), control.end(), control.begin(),
-                 [&](double x) { return x * ovps.t2_twgt; });
-  emp3 *= ovps.t2_twgt;
+                 [&](double x) { return x * tau_wgt; });
+  emp3 *= tau_wgt;
 
   // divide by number of RW samples
   auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
