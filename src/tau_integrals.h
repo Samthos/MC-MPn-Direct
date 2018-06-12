@@ -5,11 +5,27 @@
 #ifndef MC_MP3_DIRECT_TAU_INTEGRALS_H
 #define MC_MP3_DIRECT_TAU_INTEGRALS_H
 
+#ifdef HAVE_CUDA
+#include <cuda_runtime_api.h>
+#endif
+
 #include <algorithm>
 #include "basis/qc_basis.h"
 #include "qc_random.h"
+
 class Stochastic_Tau {
  public:
+  Stochastic_Tau() = default;
+  Stochastic_Tau(const Stochastic_Tau& tau) {
+    throw std::runtime_error("copy constructor for stochastic tau class called");
+  }
+  ~Stochastic_Tau() {
+#ifdef HAVE_CUDA
+    if (d_allocated) {
+      cudaFree(d_scratch);
+    }
+#endif
+  }
   void resize(int dimm, Basis& basis) {
     iocc1 = basis.iocc1;
     iocc2 = basis.iocc2;
@@ -29,6 +45,13 @@ class Stochastic_Tau {
 
     scratch.resize(ivir2);
     lambda = 2.0 * (evals[ivir1] - evals[iocc2 - 1]);
+#ifdef HAVE_CUDA
+    if (d_allocated) {
+      cudaFree(d_scratch);
+    }
+    cudaMalloc((void**) &d_scratch, sizeof(double) * ivir2);
+    d_allocated = true;
+#endif
   }
 
   void new_tau(Random& random) {
@@ -57,6 +80,20 @@ class Stochastic_Tau {
       }
       return scratch;
     }
+  }
+  double* get_exp_tau_device(std::vector<int> index) {
+#ifdef HAVE_CUDA
+    if (index.size() == 1) {
+      cudaMemcpy(d_scratch, exp_tau[index[0]].data(), sizeof(double) * exp_tau[index[0]].size(), cudaMemcpyHostToDevice);
+    } else {
+      std::fill(scratch.begin(), scratch.end(), 1.0);
+      for (auto &it : index) {
+        std::transform(scratch.begin(), scratch.end(), exp_tau[it].begin(), scratch.begin(), std::multiplies<double>());
+      }
+      cudaMemcpy(d_scratch, scratch.data(), sizeof(double) * scratch.size(), cudaMemcpyHostToDevice);
+    }
+#endif
+    return d_scratch;
   }
   double get_tau(int index) {
     return tau[index];
@@ -89,6 +126,96 @@ class Stochastic_Tau {
   std::vector<double> wgt;
   std::vector<double> scratch;
   std::vector<std::vector<double>> exp_tau;
+
+  double* d_scratch;
+  bool d_allocated;
 };
+
+/*
+void OVPs::init_tau_02(Basis& basis) {
+  std::array<double, 21> xx = {
+      459.528454529921248195023509,
+      0.002176143805986910199912,
+      75.647524700428292021570087,
+      0.013219203192174486943822,
+      27.635855710538834273393149,
+      0.036184875564343521592292,
+      13.821771900816584022209099,
+      0.072349623997261858221464,
+      8.124825510985218102177896,
+      0.123079566280893559770959,
+      5.238489369094648573366158,
+      0.190894727380696543894700,
+      3.574116946388957050118051,
+      0.279789389938773946919781,
+      2.529798344872996818111233,
+      0.395288423690625334572246,
+      1.834438449215696431693345,
+      0.545125948721552511244681,
+      1.349829280916060136874535,
+      0.740834425610734315092998,
+      1.000000000000000000000000};
+
+  for (uint it = 0; it < xx.size(); it++) {
+    for (int jt = 0; jt < iocc2; jt++) {
+      double en = basis.nw_en[jt];
+      ovps.t_save_val1[it * ivir2 + jt] = exp(en * xx[it]);
+    }
+    for (int jt = ivir1; jt < ivir2; jt++) {
+      double en = basis.nw_en[jt];
+      ovps.t_save_val1[it * ivir2 + jt] = exp(-en * xx[it]);
+    }
+    for (int jt = 0; jt < numBand; ++jt) {
+      double en = basis.nw_en[iocc2 - offBand + jt];
+      ovps.tg_save_val1[it * numBand + jt] = exp(en * xx[it]);
+      ovps.tgc_save_val1[it * numBand + jt] = exp(-en * xx[it]);
+    }
+  }
+}
+void OVPs::init_tau_03(Basis& basis) {
+  std::array<double, 21> xx = {
+      459.528454529921248195023509,
+      0.002176143805986910199912,
+      75.647524700428292021570087,
+      0.013219203192174486943822,
+      27.635855710538834273393149,
+      0.036184875564343521592292,
+      13.821771900816584022209099,
+      0.072349623997261858221464,
+      8.124825510985218102177896,
+      0.123079566280893559770959,
+      5.238489369094648573366158,
+      0.190894727380696543894700,
+      3.574116946388957050118051,
+      0.279789389938773946919781,
+      2.529798344872996818111233,
+      0.395288423690625334572246,
+      1.834438449215696431693345,
+      0.545125948721552511244681,
+      1.349829280916060136874535,
+      0.740834425610734315092998,
+      1.000000000000000000000000};
+
+  for (uint it = 0; it < xx.size(); it++) {
+    for (int jt = 0; jt < iocc2; jt++) {
+      double en = basis.nw_en[jt];
+      ovps.t_save_val1[it * ivir2 + jt] = exp(en * xx[it]);
+      ovps.t_save_val2[it * ivir2 + jt] = exp(en * xx[it]);
+    }
+    for (int jt = ivir1; jt < ivir2; jt++) {
+      double en = basis.nw_en[jt];
+      ovps.t_save_val1[it * ivir2 + jt] = exp(-en * xx[it]);
+      ovps.t_save_val2[it * ivir2 + jt] = exp(-en * xx[it]);
+    }
+    for (int jt = 0; jt < numBand; ++jt) {
+      double en = basis.nw_en[iocc2 - offBand + jt];
+      ovps.tg_save_val1[it * numBand + jt] = exp(en * xx[it]);
+      ovps.tgc_save_val1[it * numBand + jt] = exp(-en * xx[it]);
+      ovps.tg_save_val2[it * numBand + jt] = exp(en * xx[it]);
+      ovps.tgc_save_val2[it * numBand + jt] = exp(-en * xx[it]);
+    }
+  }
+}
+*/
 
 #endif //MC_MP3_DIRECT_TAU_INTEGRALS_H

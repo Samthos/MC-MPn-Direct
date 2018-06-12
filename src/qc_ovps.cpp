@@ -28,10 +28,6 @@ void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   ivir1 = basis.ivir1;
   ivir2 = basis.ivir2;
   lambda = 2.0 * (basis.nw_en[ivir1] - basis.nw_en[iocc2 - 1]);
-
-  ovps.t_val1 = new double[ivir2];
-  ovps.tg_val1 = new double[ivir2];
-  ovps.tgc_val1 = new double[ivir2];
 }
 void OVPs::alloc_02() {
   d_ovps.occ1 = new double[mc_pair_num * (iocc2 - iocc1)];
@@ -78,9 +74,6 @@ void OVPs::alloc_02() {
   }
 }
 void OVPs::free_tau_02() {
-  delete[] ovps.t_val1;
-  delete[] ovps.tg_val1;
-  delete[] ovps.tgc_val1;
 }
 void OVPs::free_02() {
   delete[] d_ovps.occ1;
@@ -124,14 +117,6 @@ void OVPs::free_02() {
 
 void OVPs::init_03(int p1, int p2, int p3, int p4, const Basis &basis) {
   init_02(p1, p2, p3, p4, basis);
-
-  ovps.t_val2 = new double[ivir2];
-  ovps.tg_val2 = new double[ivir2];
-  ovps.tgc_val2 = new double[ivir2];
-
-  ovps.t_val12 = new double[ivir2];
-  ovps.tg_val12 = new double[ivir2];
-  ovps.tgc_val12 = new double[ivir2];
 }
 void OVPs::alloc_03() {
   alloc_02();
@@ -193,13 +178,6 @@ void OVPs::alloc_03() {
 }
 void OVPs::free_tau_03() {
   free_tau_02();
-
-  delete[] ovps.t_val2;
-  delete[] ovps.tg_val2;
-  delete[] ovps.tgc_val2;
-  delete[] ovps.t_val12;
-  delete[] ovps.tg_val12;
-  delete[] ovps.tgc_val12;
 }
 void OVPs::free_03() {
   free_02();
@@ -276,155 +254,6 @@ void OVPs::zero_energy_arrays_03() {
     for (auto& jt : it) {
       std::fill(jt, jt + ((ivir2 - iocc1) * (ivir2 - iocc1)), 0.0);
       ;
-    }
-  }
-}
-
-void OVPs::new_tau_02(Basis& basis, Random& random) {
-  int im, am;
-  double en_i, en_a;
-
-  double p = random.get_rand();
-  xx1 = -log(1.0 - p) / lambda;
-  t1_twgt = 1.0 / (lambda * (1.0 - p));
-
-  p = random.get_rand();
-  xx2 = -log(1.0 - p) / lambda;
-  t2_twgt = t1_twgt / (lambda * (1.0 - p));
-
-  for (im = iocc1; im < iocc2; im++) {
-    en_i = basis.nw_en[im];
-    ovps.t_val1[im] = exp(en_i * xx1);
-  }
-  for (am = ivir1; am < ivir2; am++) {
-    en_a = basis.nw_en[am];
-    ovps.t_val1[am] = exp(-en_a * xx1);
-  }
-  for (am = 0; am < numBand; ++am) {
-    en_a = basis.nw_en[iocc2 - offBand + am];
-    ovps.tg_val1[am] = exp(en_a * xx1);
-    ovps.tgc_val1[am] = exp(-en_a * xx1);
-  }
-}
-void OVPs::new_tau_03(Basis& basis, Random& random) {
-  int im, am;
-  double en_i, en_a;
-
-  double p = random.get_rand();
-  xx1 = -log(1.0 - p) / lambda;
-  t1_twgt = 1.0 / (lambda * (1.0 - p));
-
-  p = random.get_rand();
-  xx2 = -log(1.0 - p) / lambda;
-  t2_twgt = t1_twgt / (lambda * (1.0 - p));
-
-  for (im = iocc1; im < iocc2; im++) {
-    en_i = basis.nw_en[im];
-    ovps.t_val1[im] = exp(en_i * xx1);
-
-    ovps.t_val2[im] = exp(en_i * xx2);
-    ovps.t_val12[im] = ovps.t_val1[im] * ovps.t_val2[im];
-  }
-  for (am = ivir1; am < ivir2; am++) {
-    en_a = basis.nw_en[am];
-    ovps.t_val1[am] = exp(-en_a * xx1);
-
-    ovps.t_val2[am] = exp(-en_a * xx2);
-    ovps.t_val12[am] = ovps.t_val1[am] * ovps.t_val2[am];
-  }
-  for (am = 0; am < numBand; ++am) {
-    en_a = basis.nw_en[iocc2 - offBand + am];
-    ovps.tg_val1[am] = exp(en_a * xx1);
-    ovps.tgc_val1[am] = exp(-en_a * xx1);
-
-    ovps.tg_val2[am] = exp(en_a * xx2);
-    ovps.tgc_val2[am] = exp(-en_a * xx2);
-    ovps.tg_val12[am] = ovps.tg_val1[am] * ovps.tg_val2[am];
-    ovps.tgc_val12[am] = ovps.tgc_val1[am] * ovps.tgc_val2[am];
-  }
-}
-
-void OVPs::init_tau_02(Basis& basis) {
-  std::array<double, 21> xx = {
-      459.528454529921248195023509,
-      0.002176143805986910199912,
-      75.647524700428292021570087,
-      0.013219203192174486943822,
-      27.635855710538834273393149,
-      0.036184875564343521592292,
-      13.821771900816584022209099,
-      0.072349623997261858221464,
-      8.124825510985218102177896,
-      0.123079566280893559770959,
-      5.238489369094648573366158,
-      0.190894727380696543894700,
-      3.574116946388957050118051,
-      0.279789389938773946919781,
-      2.529798344872996818111233,
-      0.395288423690625334572246,
-      1.834438449215696431693345,
-      0.545125948721552511244681,
-      1.349829280916060136874535,
-      0.740834425610734315092998,
-      1.000000000000000000000000};
-
-  for (uint it = 0; it < xx.size(); it++) {
-    for (int jt = 0; jt < iocc2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(en * xx[it]);
-    }
-    for (int jt = ivir1; jt < ivir2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(-en * xx[it]);
-    }
-    for (int jt = 0; jt < numBand; ++jt) {
-      double en = basis.nw_en[iocc2 - offBand + jt];
-      ovps.tg_save_val1[it * numBand + jt] = exp(en * xx[it]);
-      ovps.tgc_save_val1[it * numBand + jt] = exp(-en * xx[it]);
-    }
-  }
-}
-void OVPs::init_tau_03(Basis& basis) {
-  std::array<double, 21> xx = {
-      459.528454529921248195023509,
-      0.002176143805986910199912,
-      75.647524700428292021570087,
-      0.013219203192174486943822,
-      27.635855710538834273393149,
-      0.036184875564343521592292,
-      13.821771900816584022209099,
-      0.072349623997261858221464,
-      8.124825510985218102177896,
-      0.123079566280893559770959,
-      5.238489369094648573366158,
-      0.190894727380696543894700,
-      3.574116946388957050118051,
-      0.279789389938773946919781,
-      2.529798344872996818111233,
-      0.395288423690625334572246,
-      1.834438449215696431693345,
-      0.545125948721552511244681,
-      1.349829280916060136874535,
-      0.740834425610734315092998,
-      1.000000000000000000000000};
-
-  for (uint it = 0; it < xx.size(); it++) {
-    for (int jt = 0; jt < iocc2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(en * xx[it]);
-      ovps.t_save_val2[it * ivir2 + jt] = exp(en * xx[it]);
-    }
-    for (int jt = ivir1; jt < ivir2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(-en * xx[it]);
-      ovps.t_save_val2[it * ivir2 + jt] = exp(-en * xx[it]);
-    }
-    for (int jt = 0; jt < numBand; ++jt) {
-      double en = basis.nw_en[iocc2 - offBand + jt];
-      ovps.tg_save_val1[it * numBand + jt] = exp(en * xx[it]);
-      ovps.tgc_save_val1[it * numBand + jt] = exp(-en * xx[it]);
-      ovps.tg_save_val2[it * numBand + jt] = exp(en * xx[it]);
-      ovps.tgc_save_val2[it * numBand + jt] = exp(-en * xx[it]);
     }
   }
 }

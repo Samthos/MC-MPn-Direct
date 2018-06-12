@@ -25,10 +25,6 @@ void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   ivir2 = basis.ivir2;
   lambda = 2.0 * (basis.nw_en[ivir1] - basis.nw_en[iocc2 - 1]);
 
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.t_val1, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.tg_val1, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.tgc_val1, sizeof(double) * ivir2), __FILE__, __LINE__);
-
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.rv, sizeof(double) * mc_pair_num), __FILE__, __LINE__);
 
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.occ1, sizeof(double) * mc_pair_num * (iocc2 - iocc1)), __FILE__, __LINE__);
@@ -41,8 +37,6 @@ void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.virTau2, sizeof(double) * mc_pair_num * (ivir2 - ivir1)), __FILE__, __LINE__);
 }
 void OVPs::alloc_02() {
-  cudaError_t_Assert(cudaMalloc((void**)&d_ovps.t_val1, sizeof(double) * ivir2), __FILE__, __LINE__);
-
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.rv, sizeof(double) * mc_pair_num), __FILE__, __LINE__);
 
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.occ1, sizeof(double) * mc_pair_num * (iocc2 - iocc1)), __FILE__, __LINE__);
@@ -92,10 +86,6 @@ void OVPs::alloc_02() {
   }
 }
 void OVPs::free_tau_02() {
-  cudaError_t_Assert(cudaFreeHost(ovps.t_val1), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFreeHost(ovps.tg_val1), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFreeHost(ovps.tgc_val1), __FILE__, __LINE__);
-
   cudaError_t_Assert(cudaFreeHost(ovps.rv), __FILE__, __LINE__);
 
   cudaError_t_Assert(cudaFreeHost(ovps.occ1), __FILE__, __LINE__);
@@ -108,7 +98,6 @@ void OVPs::free_tau_02() {
   cudaError_t_Assert(cudaFreeHost(ovps.virTau2), __FILE__, __LINE__);
 }
 void OVPs::free_02() {
-  cudaError_t_Assert(cudaFree(d_ovps.t_val1), __FILE__, __LINE__);
   cudaError_t_Assert(cudaFree(d_ovps.rv), __FILE__, __LINE__);
 
   cudaError_t_Assert(cudaFree(d_ovps.psi1), __FILE__, __LINE__);
@@ -152,19 +141,9 @@ void OVPs::free_02() {
 
 void OVPs::init_03(int p1, int p2, int p3, int p4, const Basis &basis) {
   init_02(p1, p2, p3, p4, basis);
-
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.t_val2, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.tg_val2, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.tgc_val2, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.t_val12, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.tg_val12, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMallocHost((void**)&ovps.tgc_val12, sizeof(double) * ivir2), __FILE__, __LINE__);
 }
 void OVPs::alloc_03() {
   alloc_02();
-  cudaError_t_Assert(cudaMalloc((void**)&d_ovps.t_val2, sizeof(double) * ivir2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMalloc((void**)&d_ovps.t_val12, sizeof(double) * ivir2), __FILE__, __LINE__);
-
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.os_15, sizeof(double) * mc_pair_num * mc_pair_num), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.os_16, sizeof(double) * mc_pair_num * mc_pair_num), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMalloc((void**)&d_ovps.os_25, sizeof(double) * mc_pair_num * mc_pair_num), __FILE__, __LINE__);
@@ -230,19 +209,9 @@ void OVPs::alloc_03() {
 }
 void OVPs::free_tau_03() {
   free_tau_02();
-
-  cudaError_t_Assert(cudaFreeHost(ovps.t_val2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFreeHost(ovps.tg_val2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFreeHost(ovps.tgc_val2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFreeHost(ovps.t_val12), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFreeHost(ovps.tg_val12), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFreeHost(ovps.tgc_val12), __FILE__, __LINE__);
 }
 void OVPs::free_03() {
   free_02();
-
-  cudaError_t_Assert(cudaFree(d_ovps.t_val2), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaFree(d_ovps.t_val12), __FILE__, __LINE__);
 
   cudaError_t_Assert(cudaFree(d_ovps.os_15), __FILE__, __LINE__);
   cudaError_t_Assert(cudaFree(d_ovps.os_16), __FILE__, __LINE__);
@@ -317,155 +286,6 @@ void OVPs::zero_energy_arrays_03() {
   }
 }
 
-void OVPs::new_tau_02(Basis& basis, Random& random) {
-  int im, am;
-  double en_i, en_a;
-
-  double p = random.get_rand();
-  xx1 = -log(1.0 - p) / lambda;
-  t1_twgt = 1.0 / (lambda * (1.0 - p));
-
-  p = random.get_rand();
-  xx2 = -log(1.0 - p) / lambda;
-  t2_twgt = t1_twgt / (lambda * (1.0 - p));
-
-  for (im = iocc1; im < iocc2; im++) {
-    en_i = basis.nw_en[im];
-    ovps.t_val1[im] = exp(en_i * xx1);
-  }
-  for (am = ivir1; am < ivir2; am++) {
-    en_a = basis.nw_en[am];
-    ovps.t_val1[am] = exp(-en_a * xx1);
-  }
-  for (am = 0; am < numBand; ++am) {
-    en_a = basis.nw_en[iocc2 - offBand + am];
-    ovps.tg_val1[am] = exp(en_a * xx1);
-    ovps.tgc_val1[am] = exp(-en_a * xx1);
-  }
-}
-void OVPs::new_tau_03(Basis& basis, Random& random) {
-  int im, am;
-  double en_i, en_a;
-
-  double p = random.get_rand();
-  xx1 = -log(1.0 - p) / lambda;
-  t1_twgt = 1.0 / (lambda * (1.0 - p));
-
-  p = random.get_rand();
-  xx2 = -log(1.0 - p) / lambda;
-  t2_twgt = t1_twgt / (lambda * (1.0 - p));
-
-  for (im = iocc1; im < iocc2; im++) {
-    en_i = basis.nw_en[im];
-    ovps.t_val1[im] = exp(en_i * xx1);
-
-    ovps.t_val2[im] = exp(en_i * xx2);
-    ovps.t_val12[im] = ovps.t_val1[im] * ovps.t_val2[im];
-  }
-  for (am = ivir1; am < ivir2; am++) {
-    en_a = basis.nw_en[am];
-    ovps.t_val1[am] = exp(-en_a * xx1);
-
-    ovps.t_val2[am] = exp(-en_a * xx2);
-    ovps.t_val12[am] = ovps.t_val1[am] * ovps.t_val2[am];
-  }
-  for (am = 0; am < numBand; ++am) {
-    en_a = basis.nw_en[iocc2 - offBand + am];
-    ovps.tg_val1[am] = exp(en_a * xx1);
-    ovps.tgc_val1[am] = exp(-en_a * xx1);
-
-    ovps.tg_val2[am] = exp(en_a * xx2);
-    ovps.tgc_val2[am] = exp(-en_a * xx2);
-    ovps.tg_val12[am] = ovps.tg_val1[am] * ovps.tg_val2[am];
-    ovps.tgc_val12[am] = ovps.tgc_val1[am] * ovps.tgc_val2[am];
-  }
-}
-
-void OVPs::init_tau_02(Basis& basis) {
-  std::array<double, 21> xx = {
-      459.528454529921248195023509,
-      0.002176143805986910199912,
-      75.647524700428292021570087,
-      0.013219203192174486943822,
-      27.635855710538834273393149,
-      0.036184875564343521592292,
-      13.821771900816584022209099,
-      0.072349623997261858221464,
-      8.124825510985218102177896,
-      0.123079566280893559770959,
-      5.238489369094648573366158,
-      0.190894727380696543894700,
-      3.574116946388957050118051,
-      0.279789389938773946919781,
-      2.529798344872996818111233,
-      0.395288423690625334572246,
-      1.834438449215696431693345,
-      0.545125948721552511244681,
-      1.349829280916060136874535,
-      0.740834425610734315092998,
-      1.000000000000000000000000};
-
-  for (uint it = 0; it < xx.size(); it++) {
-    for (int jt = 0; jt < iocc2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(en * xx[it]);
-    }
-    for (int jt = ivir1; jt < ivir2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(-en * xx[it]);
-    }
-    for (int jt = 0; jt < numBand; ++jt) {
-      double en = basis.nw_en[iocc2 - offBand + jt];
-      ovps.tg_save_val1[it * numBand + jt] = exp(en * xx[it]);
-      ovps.tgc_save_val1[it * numBand + jt] = exp(-en * xx[it]);
-    }
-  }
-}
-void OVPs::init_tau_03(Basis& basis) {
-  std::array<double, 21> xx = {
-      459.528454529921248195023509,
-      0.002176143805986910199912,
-      75.647524700428292021570087,
-      0.013219203192174486943822,
-      27.635855710538834273393149,
-      0.036184875564343521592292,
-      13.821771900816584022209099,
-      0.072349623997261858221464,
-      8.124825510985218102177896,
-      0.123079566280893559770959,
-      5.238489369094648573366158,
-      0.190894727380696543894700,
-      3.574116946388957050118051,
-      0.279789389938773946919781,
-      2.529798344872996818111233,
-      0.395288423690625334572246,
-      1.834438449215696431693345,
-      0.545125948721552511244681,
-      1.349829280916060136874535,
-      0.740834425610734315092998,
-      1.000000000000000000000000};
-
-  for (uint it = 0; it < xx.size(); it++) {
-    for (int jt = 0; jt < iocc2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(en * xx[it]);
-      ovps.t_save_val2[it * ivir2 + jt] = exp(en * xx[it]);
-    }
-    for (int jt = ivir1; jt < ivir2; jt++) {
-      double en = basis.nw_en[jt];
-      ovps.t_save_val1[it * ivir2 + jt] = exp(-en * xx[it]);
-      ovps.t_save_val2[it * ivir2 + jt] = exp(-en * xx[it]);
-    }
-    for (int jt = 0; jt < numBand; ++jt) {
-      double en = basis.nw_en[iocc2 - offBand + jt];
-      ovps.tg_save_val1[it * numBand + jt] = exp(en * xx[it]);
-      ovps.tgc_save_val1[it * numBand + jt] = exp(-en * xx[it]);
-      ovps.tg_save_val2[it * numBand + jt] = exp(en * xx[it]);
-      ovps.tgc_save_val2[it * numBand + jt] = exp(-en * xx[it]);
-    }
-  }
-}
-
 __global__ void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int numBand) {
   int tidx = blockIdx.x * blockDim.x + threadIdx.x;
   int tidy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -502,24 +322,23 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   for (ip = 0; ip < mc_pair_num; ip++) {  //do i = 1, el_pair_num - 1
     ovps.rv[ip] = el_pair_list[ip].rv;
   }
-
-  //copy wave functions from host to device;
   cudaError_t_Assert(cudaMemcpy(d_ovps.rv, ovps.rv, sizeof(double) * mc_pair_num, cudaMemcpyHostToDevice), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMemcpy(d_ovps.t_val1, ovps.t_val1, sizeof(double) * ivir2, cudaMemcpyHostToDevice), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &d_ovps.t_val1[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
+  auto t_val1 =  tau.get_exp_tau_device({0});
+
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val1[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_13, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, &beta, d_ovps.os_23, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &d_ovps.t_val1[iocc1], 1, d_ovps.occTau2, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val1[iocc1], 1, d_ovps.occTau2, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_14, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, &beta, d_ovps.os_24, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &d_ovps.t_val1[ivir1], 1, d_ovps.virTau1, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val1[ivir1], 1, d_ovps.virTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, &beta, d_ovps.vs_13, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, &beta, d_ovps.vs_23, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &d_ovps.t_val1[ivir1], 1, d_ovps.virTau2, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val1[ivir1], 1, d_ovps.virTau2, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir1, mc_pair_num, &beta, d_ovps.vs_14, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, &beta, d_ovps.vs_24, mc_pair_num), __FILE__, __LINE__);
 
@@ -545,43 +364,43 @@ void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   update_ovps_02(el_pair_list, tau);
 
   //copy wave functions from host to device;
-  cudaError_t_Assert(cudaMemcpy(d_ovps.t_val2, ovps.t_val2, sizeof(double) * ivir2, cudaMemcpyHostToDevice), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMemcpy(d_ovps.t_val12, ovps.t_val12, sizeof(double) * ivir2, cudaMemcpyHostToDevice), __FILE__, __LINE__);
+  auto t_val2 =  tau.get_exp_tau_device({1});
+  auto t_val12 =  tau.get_exp_tau_device({0, 1});
 
   dim3 blockSize(128, 1, 1);
   dim3 gridSize((mc_pair_num + 127) / 128, numBand, 1);
   freq_indp_gf<<<gridSize, blockSize>>>(d_ovps, mc_pair_num, iocc2 - iocc1, offBand, numBand);
   cudaError_t_Assert(cudaPeekAtLastError(), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &d_ovps.t_val2[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val2[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_35, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, &beta, d_ovps.os_45, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &d_ovps.t_val2[iocc1], 1, d_ovps.occTau2, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val2[iocc1], 1, d_ovps.occTau2, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_36, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, &beta, d_ovps.os_46, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &d_ovps.t_val2[ivir1], 1, d_ovps.virTau1, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val2[ivir1], 1, d_ovps.virTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, &beta, d_ovps.vs_35, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, &beta, d_ovps.vs_45, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &d_ovps.t_val2[ivir1], 1, d_ovps.virTau2, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val2[ivir1], 1, d_ovps.virTau2, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir1, mc_pair_num, &beta, d_ovps.vs_36, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, &beta, d_ovps.vs_46, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &d_ovps.t_val12[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val12[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_15, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, &beta, d_ovps.os_25, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &d_ovps.t_val12[iocc1], 1, d_ovps.occTau2, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val12[iocc1], 1, d_ovps.occTau2, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_16, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, &beta, d_ovps.os_26, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &d_ovps.t_val12[ivir1], 1, d_ovps.virTau1, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val12[ivir1], 1, d_ovps.virTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, &beta, d_ovps.vs_15, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, &beta, d_ovps.vs_25, mc_pair_num), __FILE__, __LINE__);
 
-  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &d_ovps.t_val12[ivir1], 1, d_ovps.virTau2, mc_pair_num), __FILE__, __LINE__);
+  cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val12[ivir1], 1, d_ovps.virTau2, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir1, mc_pair_num, &beta, d_ovps.vs_16, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, ivir2 - ivir1, &alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, &beta, d_ovps.vs_26, mc_pair_num), __FILE__, __LINE__);
   cudaError_t_Assert(cudaThreadSynchronize(), __FILE__, __LINE__);

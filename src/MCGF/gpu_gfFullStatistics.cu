@@ -99,7 +99,7 @@ void QC_monte::mc_gf2_statistics(int band, int step) {
                                    ovps.d_ovps.en2[band][diff], ivir2 - iocc1),
                        __FILE__, __LINE__);
 
-    diffMultiplier *= ovps.xx1;
+    diffMultiplier *= tau.get_tau(0);
   }
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
@@ -201,9 +201,9 @@ void QC_monte::mc_gf3_statistics(int band, int step) {
                                      ovps.d_ovps.en3[band][diff], ivir2 - iocc1),
                          __FILE__, __LINE__);
     }
-    diffMultiplier[0] *= ovps.xx1;
-    diffMultiplier[1] *= ovps.xx2;
-    diffMultiplier[2] *= ovps.xx1 * ovps.xx2;
+    diffMultiplier[0] *= tau.get_tau(0);
+    diffMultiplier[1] *= tau.get_tau(1);
+    diffMultiplier[2] *= diffMultiplier[0] * diffMultiplier[1];
   }
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }

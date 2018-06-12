@@ -130,17 +130,9 @@ struct OVPS_ARRAY {
   double *occ1, *occ2, *vir1, *vir2;
   double *occTau1, *occTau2, *virTau1, *virTau2;
 
-  double *t_val1, *tg_val1, *tgc_val1;
-  double *t_save_val1, *tg_save_val1, *tgc_save_val1;
-
   double *os_13, *os_14, *os_23, *os_24;
   double *vs_13, *vs_14, *vs_23, *vs_24;
   double *ps_24;
-
-  double *t_val2, *tg_val2, *tgc_val2;
-  double *t_val12, *tg_val12, *tgc_val12;
-  double *t_save_val2, *tg_save_val2, *tgc_save_val2;
-  double *t_save_val12, *tg_save_val12, *tgc_save_val12;
 
   double *os_35, *os_36, *os_45, *os_46;
   double *os_15, *os_16, *os_25, *os_26;
@@ -173,7 +165,6 @@ class OVPs {
  private:
   int numBand, offBand, numDiff;
   int mc_pair_num, iocc1, iocc2, ivir1, ivir2;
-  double lambda;
 
  public:
   void init_02(int, int, int, int, const Basis &);
@@ -181,8 +172,6 @@ class OVPs {
   void free_tau_02();
   void free_02();
   void zero_energy_arrays_02();
-  void new_tau_02(Basis &, Random &);
-  void init_tau_02(Basis &);
   void update_ovps_02(el_pair_typ *, Stochastic_Tau&);
 
   void init_03(int, int, int, int, const Basis &);
@@ -190,13 +179,8 @@ class OVPs {
   void free_tau_03();
   void free_03();
   void zero_energy_arrays_03();
-  void new_tau_03(Basis &, Random &);
-  void init_tau_03(Basis &);
   void update_ovps_03(el_pair_typ *, Stochastic_Tau&);
 
   OVPS_ARRAY ovps, d_ovps;
-
-  double xx1, t1_twgt;
-  double xx2, t2_twgt;
 };
 #endif  // QC_OVPS_H_
