@@ -116,6 +116,8 @@ class MP2 : public QC_monte {
 class MP3 : public QC_monte {
  public:
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+    ovps.init(2, iops.iopns[KEYS::MC_NPAIR], basis);
+
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);

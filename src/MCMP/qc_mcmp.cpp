@@ -90,12 +90,7 @@ void MP3::monte_energy() {
   }
 
   // --- initialize
-  update_wavefunction();
   tau.new_tau(random);
-  ovps.update_ovps_03(el_pair_list.data(), tau);
-  mcmp2_energy(emp2, mp2_control);
-  mcmp3_energy(emp3, mp3_control);
-
   // run monte carlo simulation
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
     // generate new positions
@@ -108,7 +103,7 @@ void MP3::monte_energy() {
 
     // update wavefunction and green's function traces
     update_wavefunction();
-    ovps.update_ovps_03(el_pair_list.data(), tau);
+    ovps.update_ovps(el_pair_list.data(), tau);
 
     // calcaulte energy for step
     mcmp2_energy(emp2, mp2_control);
@@ -168,6 +163,7 @@ void MP4::monte_energy() {
   // --- initialize
   update_wavefunction();
   tau.new_tau(random);
+  ovps.update_ovps(el_pair_list.data(), tau);
   ovps.update_ovps_03(el_pair_list.data(), tau);
 
 //  mcmp2_energy(emp[0], control[0]);
@@ -186,6 +182,7 @@ void MP4::monte_energy() {
 
     // update wavefunction and green's function traces
     update_wavefunction();
+    ovps.update_ovps(el_pair_list.data(), tau);
     ovps.update_ovps_03(el_pair_list.data(), tau);
 
     // calcaulte energy for step

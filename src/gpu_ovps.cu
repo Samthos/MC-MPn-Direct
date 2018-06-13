@@ -13,6 +13,10 @@
 #include "cublasStatus_t_getErrorString.h"
 #include "qc_ovps.h"
 
+void OVPs::init(const int dimm, const int mc_pair_num_, const Basis& basis) {
+  throw std::runtime_error("OVPs for GPU not implemented");
+}
+
 void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   mc_pair_num = p1;
   numBand = p2;
@@ -323,7 +327,7 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   }
   cudaError_t_Assert(cudaMemcpy(d_ovps.rv, ovps.rv, sizeof(double) * mc_pair_num, cudaMemcpyHostToDevice), __FILE__, __LINE__);
 
-  auto t_val1 =  tau.get_exp_tau_device(0, 0);
+  auto t_val1 = tau.get_exp_tau_device(0, 0);
 
   cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val1[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_13, mc_pair_num), __FILE__, __LINE__);
@@ -363,8 +367,8 @@ void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   update_ovps_02(el_pair_list, tau);
 
   //copy wave functions from host to device;
-  auto t_val2 =  tau.get_exp_tau_device(1, 1);
-  auto t_val12 =  tau.get_exp_tau_device(0, 1);
+  auto t_val2 = tau.get_exp_tau_device(1, 1);
+  auto t_val12 = tau.get_exp_tau_device(1, 0);
 
   dim3 blockSize(128, 1, 1);
   dim3 gridSize((mc_pair_num + 127) / 128, numBand, 1);

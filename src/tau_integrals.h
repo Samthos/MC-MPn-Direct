@@ -69,7 +69,7 @@ class Stochastic_Tau {
       }
     }
   }
-  std::vector<double> get_exp_tau(int start, int stop) {
+  std::vector<double> get_exp_tau(int stop, int start) {
     if (start == stop) {
       return exp_tau[start];
     } else {
@@ -80,7 +80,7 @@ class Stochastic_Tau {
       return scratch;
     }
   }
-  double* get_exp_tau_device(int start, int stop) {
+  double *get_exp_tau_device(int stop, int start) {
 #ifdef HAVE_CUDA
     if (start == stop) {
       cudaMemcpy(d_scratch, exp_tau[start].data(), sizeof(double) * exp_tau[start].size(), cudaMemcpyHostToDevice);
@@ -94,7 +94,7 @@ class Stochastic_Tau {
 #endif
     return d_scratch;
   }
-  double get_gfn_tau(int start, int stop, int offset, int conjugate) {
+  double get_gfn_tau(int stop, int start, int offset, int conjugate) {
     double s(1.0);
     if (start == stop) {
       s = exp_tau[start][iocc2 + offset];

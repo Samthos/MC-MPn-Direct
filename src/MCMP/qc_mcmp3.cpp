@@ -28,12 +28,12 @@ void MP3::mcmp3_energy(double& emp3, std::vector<double>& control) {
         auto ik = i * iops.iopns[KEYS::MC_NPAIR] + k;
         auto jk = j * iops.iopns[KEYS::MC_NPAIR] + k;
 
-        en[0] = (2 * ovps.d_ovps.vs_13[ij] * ovps.d_ovps.vs_24[ij] - 1 * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.vs_23[ij]) * ovps.d_ovps.os_15[ik] * ovps.d_ovps.os_26[ik] * ovps.d_ovps.vs_35[jk] * ovps.d_ovps.vs_46[jk];
-        en[1] = (2 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_46[jk] - 4 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_36[jk]) * ovps.d_ovps.vs_24[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_15[ik] * ovps.d_ovps.os_35[jk];
-        en[2] = (8 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_35[jk] - 4 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_45[jk]) * ovps.d_ovps.vs_24[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_16[ik] * ovps.d_ovps.os_35[jk];
-        en[3] = (2 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_36[jk] - 4 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_46[jk]) * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_25[ik] * ovps.d_ovps.os_35[jk];
-        en[4] = (2 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.vs_45[jk] - 4 * ovps.d_ovps.os_24[ij] * ovps.d_ovps.vs_35[jk]) * ovps.d_ovps.vs_14[ij] * ovps.d_ovps.os_16[ik] * ovps.d_ovps.vs_26[ik] * ovps.d_ovps.os_35[jk];
-        en[5] = (2 * ovps.d_ovps.os_23[ij] * ovps.d_ovps.os_14[ij] - 1 * ovps.d_ovps.os_13[ij] * ovps.d_ovps.os_24[ij]) * ovps.d_ovps.vs_16[ik] * ovps.d_ovps.vs_25[ik] * ovps.d_ovps.os_35[jk] * ovps.d_ovps.os_46[jk];
+        en[0] = (2 * ovps.v_set[0][0].s_11[ij] * ovps.v_set[0][0].s_22[ij] - 1 * ovps.v_set[0][0].s_12[ij] * ovps.v_set[0][0].s_21[ij]) * ovps.o_set[1][0].s_11[ik] * ovps.o_set[1][0].s_22[ik] * ovps.v_set[1][1].s_11[jk] * ovps.v_set[1][1].s_22[jk];
+        en[1] = (2 * ovps.o_set[0][0].s_21[ij] * ovps.v_set[1][1].s_22[jk] - 4 * ovps.o_set[0][0].s_22[ij] * ovps.v_set[1][1].s_12[jk]) * ovps.v_set[0][0].s_22[ij] * ovps.o_set[1][0].s_12[ik] * ovps.v_set[1][0].s_11[ik] * ovps.o_set[1][1].s_11[jk];
+        en[2] = (8 * ovps.o_set[0][0].s_22[ij] * ovps.v_set[1][1].s_11[jk] - 4 * ovps.o_set[0][0].s_21[ij] * ovps.v_set[1][1].s_21[jk]) * ovps.v_set[0][0].s_22[ij] * ovps.o_set[1][0].s_12[ik] * ovps.v_set[1][0].s_12[ik] * ovps.o_set[1][1].s_11[jk];
+        en[3] = (2 * ovps.o_set[0][0].s_22[ij] * ovps.v_set[1][1].s_12[jk] - 4 * ovps.o_set[0][0].s_21[ij] * ovps.v_set[1][1].s_22[jk]) * ovps.v_set[0][0].s_12[ij] * ovps.o_set[1][0].s_12[ik] * ovps.v_set[1][0].s_21[ik] * ovps.o_set[1][1].s_11[jk];
+        en[4] = (2 * ovps.o_set[0][0].s_21[ij] * ovps.v_set[1][1].s_21[jk] - 4 * ovps.o_set[0][0].s_22[ij] * ovps.v_set[1][1].s_11[jk]) * ovps.v_set[0][0].s_12[ij] * ovps.o_set[1][0].s_12[ik] * ovps.v_set[1][0].s_22[ik] * ovps.o_set[1][1].s_11[jk];
+        en[5] = (2 * ovps.o_set[0][0].s_21[ij] * ovps.o_set[0][0].s_12[ij] - 1 * ovps.o_set[0][0].s_11[ij] * ovps.o_set[0][0].s_22[ij]) * ovps.v_set[1][0].s_12[ik] * ovps.v_set[1][0].s_21[ik] * ovps.o_set[1][1].s_11[jk] * ovps.o_set[1][1].s_22[jk];
 
         std::transform(c_k.begin(), c_k.end(), en.begin(), c_k.begin(),
                        [&](double x, double y) { return x + y / el_pair_list[k].wgt; });

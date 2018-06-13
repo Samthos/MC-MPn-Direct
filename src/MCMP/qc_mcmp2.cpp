@@ -100,11 +100,11 @@ void MP3::mcmp2_energy(double& emp2, std::vector<double>& control) {
 
     for (auto jt = it + 1; jt !=  iops.iopns[KEYS::MC_NPAIR]; jt++) {
       auto ijIndex = it * iops.iopns[KEYS::MC_NPAIR] + jt;
-      a_resk = (ovps.d_ovps.os_13[ijIndex] * ovps.d_ovps.os_24[ijIndex] * ovps.d_ovps.vs_13[ijIndex] * ovps.d_ovps.vs_24[ijIndex]);
-      b_resk = (ovps.d_ovps.os_14[ijIndex] * ovps.d_ovps.os_23[ijIndex] * ovps.d_ovps.vs_13[ijIndex] * ovps.d_ovps.vs_24[ijIndex]);
+      a_resk = (ovps.o_set[0][0].s_11[ijIndex] * ovps.o_set[0][0].s_22[ijIndex] * ovps.v_set[0][0].s_11[ijIndex] * ovps.v_set[0][0].s_22[ijIndex]);
+      b_resk = (ovps.o_set[0][0].s_12[ijIndex] * ovps.o_set[0][0].s_21[ijIndex] * ovps.v_set[0][0].s_11[ijIndex] * ovps.v_set[0][0].s_22[ijIndex]);
 
-      a_resk = a_resk + (ovps.d_ovps.os_14[ijIndex] * ovps.d_ovps.os_23[ijIndex] * ovps.d_ovps.vs_14[ijIndex] * ovps.d_ovps.vs_23[ijIndex]);
-      b_resk = b_resk + (ovps.d_ovps.os_13[ijIndex] * ovps.d_ovps.os_24[ijIndex] * ovps.d_ovps.vs_14[ijIndex] * ovps.d_ovps.vs_23[ijIndex]);
+      a_resk = a_resk + (ovps.o_set[0][0].s_12[ijIndex] * ovps.o_set[0][0].s_21[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
+      b_resk = b_resk + (ovps.o_set[0][0].s_11[ijIndex] * ovps.o_set[0][0].s_22[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
 
       emp2a = a_resk * el_pair_list[jt].rv;
       emp2b = b_resk * el_pair_list[jt].rv;
