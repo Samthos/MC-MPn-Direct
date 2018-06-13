@@ -27,7 +27,6 @@ void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   iocc2 = basis.iocc2;
   ivir1 = basis.ivir1;
   ivir2 = basis.ivir2;
-  lambda = 2.0 * (basis.nw_en[ivir1] - basis.nw_en[iocc2 - 1]);
 }
 void OVPs::alloc_02() {
   d_ovps.occ1 = new double[mc_pair_num * (iocc2 - iocc1)];
@@ -301,7 +300,7 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   }
   //copy wave functions from host to device;
   {
-    auto t_val = tau.get_exp_tau({0});
+    auto t_val = tau.get_exp_tau(0, 0);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
     cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_13, mc_pair_num);
@@ -336,7 +335,7 @@ void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   freq_indp_gf(d_ovps, mc_pair_num, iocc2 - iocc1, offBand, numBand);
 
   {
-    auto t_val = tau.get_exp_tau({1});
+    auto t_val = tau.get_exp_tau(1, 1);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
     cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_35, mc_pair_num);
@@ -354,7 +353,7 @@ void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
 
 
   {
-    auto t_val = tau.get_exp_tau({0, 1});
+    auto t_val = tau.get_exp_tau(0, 1);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
     cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_15, mc_pair_num);

@@ -23,7 +23,6 @@ void OVPs::init_02(int p1, int p2, int p3, int p4, const Basis &basis) {
   iocc2 = basis.iocc2;
   ivir1 = basis.ivir1;
   ivir2 = basis.ivir2;
-  lambda = 2.0 * (basis.nw_en[ivir1] - basis.nw_en[iocc2 - 1]);
 
   cudaError_t_Assert(cudaMallocHost((void**)&ovps.rv, sizeof(double) * mc_pair_num), __FILE__, __LINE__);
 
@@ -324,7 +323,7 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   }
   cudaError_t_Assert(cudaMemcpy(d_ovps.rv, ovps.rv, sizeof(double) * mc_pair_num, cudaMemcpyHostToDevice), __FILE__, __LINE__);
 
-  auto t_val1 =  tau.get_exp_tau_device({0});
+  auto t_val1 =  tau.get_exp_tau_device(0, 0);
 
   cublasStatusAssert(cublasDdgmm(handle, CUBLAS_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val1[iocc1], 1, d_ovps.occTau1, mc_pair_num), __FILE__, __LINE__);
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, mc_pair_num, mc_pair_num, iocc2 - iocc1, &alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, &beta, d_ovps.os_13, mc_pair_num), __FILE__, __LINE__);
@@ -364,8 +363,8 @@ void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   update_ovps_02(el_pair_list, tau);
 
   //copy wave functions from host to device;
-  auto t_val2 =  tau.get_exp_tau_device({1});
-  auto t_val12 =  tau.get_exp_tau_device({0, 1});
+  auto t_val2 =  tau.get_exp_tau_device(1, 1);
+  auto t_val12 =  tau.get_exp_tau_device(0, 1);
 
   dim3 blockSize(128, 1, 1);
   dim3 gridSize((mc_pair_num + 127) / 128, numBand, 1);

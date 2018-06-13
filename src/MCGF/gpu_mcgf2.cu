@@ -44,7 +44,7 @@ void QC_monte::mcgf2_local_energy(std::vector<double>& egf2, int band) {
                                 &en2m),
                      __FILE__, __LINE__);
 
-  en2 = en2p * tau.get_gfn_tau({0}, band-offBand, false) + en2m * tau.get_gfn_tau({0}, band-offBand, true);
+  en2 = en2p * tau.get_gfn_tau(0, 0, band - offBand, false) + en2m * tau.get_gfn_tau(0, 0, band - offBand, true);
 
   nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
   en2 = en2 * tau.get_wgt(1) / static_cast<double>(nsamp);
@@ -76,8 +76,8 @@ void QC_monte::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
                      __FILE__, __LINE__);
 
   nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
-  en2p = en2p * tau.get_gfn_tau({0}, band-offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
-  en2m = en2m * tau.get_gfn_tau({0}, band-offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
+  en2p = en2p * tau.get_gfn_tau(0, 0, band - offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
+  en2m = en2m * tau.get_gfn_tau(0, 0, band - offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
 
   for (ip = 0; ip < iops.iopns[KEYS::DIFFS]; ip++) {
     if (ip % 2 == 0) {
@@ -97,7 +97,7 @@ void QC_monte::mcgf2_local_energy_full(int band) {
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
 
   // ent = alpha * en2p . psi2
-  alpha = tau.get_gfn_tau({0}, band-offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
+  alpha = tau.get_gfn_tau(0, 0, band - offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 0.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
                                  iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], &alpha,
@@ -107,7 +107,7 @@ void QC_monte::mcgf2_local_energy_full(int band) {
                      __FILE__, __LINE__);
 
   // ent = alpha * en2m . psi2 + ent
-  alpha = tau.get_gfn_tau({0}, band-offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
+  alpha = tau.get_gfn_tau(0, 0, band - offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 1.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
                                  iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], &alpha,
@@ -135,7 +135,7 @@ void QC_monte::mcgf2_local_energy_full_diff(int band) {
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
 
   // ent = alpha * en2pCore . psi2
-  alpha = tau.get_gfn_tau({0}, band-offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
+  alpha = tau.get_gfn_tau(0, 0, band - offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 0.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
                                  iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], &alpha,
@@ -155,7 +155,7 @@ void QC_monte::mcgf2_local_energy_full_diff(int band) {
                      __FILE__, __LINE__);
 
   // ent = alpha * en2mCore . psi2
-  alpha = tau.get_gfn_tau({0}, band-offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
+  alpha = tau.get_gfn_tau(0, 0, band - offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 0.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
                                  iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], &alpha,

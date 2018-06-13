@@ -26,6 +26,7 @@ class Stochastic_Tau {
     }
 #endif
   }
+
   void resize(int dimm, Basis& basis) {
     iocc1 = basis.iocc1;
     iocc2 = basis.iocc2;
@@ -53,7 +54,6 @@ class Stochastic_Tau {
     d_allocated = true;
 #endif
   }
-
   void new_tau(Random& random) {
     // generate new tau point and weights
     for (auto i = 0; i < tau.size(); i++) {
@@ -69,25 +69,24 @@ class Stochastic_Tau {
       }
     }
   }
-
-  std::vector<double> get_exp_tau(std::vector<int> index) {
-    if (index.size() == 1) {
-      return exp_tau[index[0]];
+  std::vector<double> get_exp_tau(int start, int stop) {
+    if (start == stop) {
+      return exp_tau[start];
     } else {
       std::fill(scratch.begin(), scratch.end(), 1.0);
-      for (auto &it : index) {
+      for (auto it = start; it <= stop; it++) {
         std::transform(scratch.begin(), scratch.end(), exp_tau[it].begin(), scratch.begin(), std::multiplies<double>());
       }
       return scratch;
     }
   }
-  double* get_exp_tau_device(std::vector<int> index) {
+  double* get_exp_tau_device(int start, int stop) {
 #ifdef HAVE_CUDA
-    if (index.size() == 1) {
-      cudaMemcpy(d_scratch, exp_tau[index[0]].data(), sizeof(double) * exp_tau[index[0]].size(), cudaMemcpyHostToDevice);
+    if (start == stop) {
+      cudaMemcpy(d_scratch, exp_tau[start].data(), sizeof(double) * exp_tau[start].size(), cudaMemcpyHostToDevice);
     } else {
       std::fill(scratch.begin(), scratch.end(), 1.0);
-      for (auto &it : index) {
+      for (auto it = start; it <= stop; it++) {
         std::transform(scratch.begin(), scratch.end(), exp_tau[it].begin(), scratch.begin(), std::multiplies<double>());
       }
       cudaMemcpy(d_scratch, scratch.data(), sizeof(double) * scratch.size(), cudaMemcpyHostToDevice);
@@ -95,15 +94,12 @@ class Stochastic_Tau {
 #endif
     return d_scratch;
   }
-  double get_tau(int index) {
-    return tau[index];
-  }
-  double get_gfn_tau(std::vector<int> index, int offset, int conjugate) {
+  double get_gfn_tau(int start, int stop, int offset, int conjugate) {
     double s(1.0);
-    if (index.size() == 1) {
-      s = exp_tau[index[0]][iocc2 + offset];
+    if (start == stop) {
+      s = exp_tau[start][iocc2 + offset];
     } else {
-      for (auto &it : index) {
+      for (int it = start; it <= stop; it++) {
         s *= exp_tau[it][iocc2 + offset];
       }
     }
@@ -116,6 +112,9 @@ class Stochastic_Tau {
   }
   double get_wgt(int dimm) {
     return std::accumulate(wgt.begin(), wgt.begin()+dimm, 1.0, std::multiplies<double>());
+  }
+  double get_tau(int index) {
+    return tau[index];
   }
 
  private:

@@ -8,14 +8,6 @@
 
 #include "../qc_monte.h"
 
-void fillVector3(std::vector<std::vector<std::vector<double>>>& in) {
-  for (auto& it : in) {
-    for (auto& jt : it) {
-      std::fill(jt.begin(), jt.end(), 0.0);
-    }
-  }
-}
-
 GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeriv, const std::string& jobname, int order) : isMaster(isMaster_), tasks(static_cast<double>(tasks_)) {
   qeps = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv));  //stores energy correction for current step
 

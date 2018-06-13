@@ -21,7 +21,7 @@ void MP2::mcmp2_energy(double& emp2, std::vector<double>& control) {
   double b_resk, emp2b;
 
   tau.new_tau(random);
-  auto tau_values = tau.get_exp_tau({0});
+  auto tau_values = tau.get_exp_tau(0, 0);
   std::vector<double> psi1Tau(ivir2), psi2Tau(ivir2);
 
   emp2 = 0.0;
