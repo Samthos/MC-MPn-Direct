@@ -37,7 +37,7 @@ std::string QC_monte::genFileName(int checkNum, int type, int order, int band, i
 
   return str;
 }
-void QC_monte::mc_gf2_full_print(int band, int steps, int checkNum) {
+void GF::mc_gf2_full_print(int band, int steps, int checkNum) {
   // variables for streams
   std::stringstream ss;
   std::string str;
@@ -91,7 +91,7 @@ void QC_monte::mc_gf2_full_print(int band, int steps, int checkNum) {
     }
   }
 }
-void QC_monte::mc_gf3_full_print(int band, int steps, int checkNum) {
+void GF::mc_gf3_full_print(int band, int steps, int checkNum) {
   // variables for streams
   std::stringstream ss;
   std::string str;

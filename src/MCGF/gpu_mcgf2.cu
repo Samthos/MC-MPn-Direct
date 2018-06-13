@@ -15,7 +15,7 @@ __global__ void gf2_core(OVPS_ARRAY ovps, int mc_pair_num) {
 #undef TIDY_CONTROL
 }
 
-void QC_monte::mcgf2_local_energy_core() {
+void GF::mcgf2_local_energy_core() {
   // initialize block and grid size variables
   dim3 blockSize(8, 8, 1);
   dim3 gridSize((iops.iopns[KEYS::MC_NPAIR] + 7) / 8, (iops.iopns[KEYS::MC_NPAIR] + 7) / 8, 1);
@@ -24,7 +24,7 @@ void QC_monte::mcgf2_local_energy_core() {
   gf2_core<<<gridSize, blockSize>>>(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
   cudaError_t_Assert(cudaPeekAtLastError(), __FILE__, __LINE__);
 }
-void QC_monte::mcgf2_local_energy(std::vector<double>& egf2, int band) {
+void GF::mcgf2_local_energy(std::vector<double>& egf2, int band) {
   int nsamp;
   double en2, en2p, en2m;
   cublasHandle_t handle;
@@ -52,7 +52,7 @@ void QC_monte::mcgf2_local_energy(std::vector<double>& egf2, int band) {
   egf2.front() += en2;
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void QC_monte::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
+void GF::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
   int ip;
   int nsamp;
   double en2m, en2p;
@@ -90,7 +90,7 @@ void QC_monte::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
   }
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void QC_monte::mcgf2_local_energy_full(int band) {
+void GF::mcgf2_local_energy_full(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
   double alpha, beta;
   cublasHandle_t handle;
@@ -128,7 +128,7 @@ void QC_monte::mcgf2_local_energy_full(int band) {
 
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void QC_monte::mcgf2_local_energy_full_diff(int band) {
+void GF::mcgf2_local_energy_full_diff(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
   double alpha, beta;
   cublasHandle_t handle;

@@ -74,7 +74,7 @@ __global__ void gf3_core_m_12(OVPS_ARRAY ovps, int mc_pair_num) {
 #undef TIDY_CONTROL
 }
 
-void QC_monte::mcgf3_local_energy_core() {
+void GF::mcgf3_local_energy_core() {
   double alpha, beta;
   cublasHandle_t handle;
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
@@ -118,7 +118,7 @@ void QC_monte::mcgf3_local_energy_core() {
   cudaError_t_Assert(cudaThreadSynchronize(), __FILE__, __LINE__);
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void QC_monte::mcgf3_local_energy(std::vector<double>& egf3, int band) {
+void GF::mcgf3_local_energy(std::vector<double>& egf3, int band) {
   int nsamp;
   double en3 = 0;
   double en3t = 0;
@@ -181,7 +181,7 @@ void QC_monte::mcgf3_local_energy(std::vector<double>& egf3, int band) {
   egf3.front() += en3;
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void QC_monte::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
+void GF::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
   int ip, dp;
   int nsamp;
   double en3t;
@@ -274,7 +274,7 @@ void QC_monte::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
   }
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void QC_monte::mcgf3_local_energy_full(int band) {
+void GF::mcgf3_local_energy_full(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
   //	int offset = (ivir2-iocc1) * (iocc2-iocc1-offBand+band) + (iocc2-iocc1-offBand+band);
   //	double en3 = 0;
@@ -412,7 +412,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
 
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
-void QC_monte::mcgf3_local_energy_full_diff(int band) {
+void GF::mcgf3_local_energy_full_diff(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
   double alpha, beta;
   cublasHandle_t handle;
@@ -596,7 +596,7 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
 
-void QC_monte::mc_gf3_func(double* en3, int ip, int jp, int kp, int band) {
+void GF::mc_gf3_func(double* en3, int ip, int jp, int kp, int band) {
   //	std::fill(en3,en3+7,0);
   //
   //	int ijIndex = ip * iops.iopns[KEYS::MC_NPAIR] + jp;

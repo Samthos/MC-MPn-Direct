@@ -11,7 +11,6 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4) : mp
 
   numBand = iops.iopns[KEYS::NUM_BAND];
   offBand = iops.iopns[KEYS::OFF_BAND];
-  nBlock = iops.iopns[KEYS::NBLOCK];
   nDeriv = iops.iopns[KEYS::DIFFS];
 
   iocc1 = basis.iocc1;

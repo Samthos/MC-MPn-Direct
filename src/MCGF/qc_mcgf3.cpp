@@ -63,7 +63,7 @@ void gf3_core_m_12(OVPS_ARRAY ovps, int mc_pair_num) {
 #undef TIDY_CONTROL
 }
 
-void QC_monte::mcgf3_local_energy_core() {
+void GF::mcgf3_local_energy_core() {
   double alpha, beta;
 
   gf3_core_c(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
@@ -90,7 +90,7 @@ void QC_monte::mcgf3_local_energy_core() {
               ovps.d_ovps.one, 1,
               beta, ovps.d_ovps.en3c22, 1);
 }
-void QC_monte::mcgf3_local_energy(std::vector<double>& egf3, int band) {
+void GF::mcgf3_local_energy(std::vector<double>& egf3, int band) {
   int nsamp;
   double en3 = 0;
   double en3t = 0;
@@ -134,7 +134,7 @@ void QC_monte::mcgf3_local_energy(std::vector<double>& egf3, int band) {
   en3 = en3 * tau.get_wgt(2) / static_cast<double>(nsamp);
   egf3.front() += en3;
 }
-void QC_monte::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
+void GF::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
   int ip, dp;
   int nsamp;
   double en3t;
@@ -207,7 +207,7 @@ void QC_monte::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
     en3[6] = en3[6] * xx1 * xx2;
   }
 }
-void QC_monte::mcgf3_local_energy_full(int band) {
+void GF::mcgf3_local_energy_full(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
   double alpha, beta;
 
@@ -330,7 +330,7 @@ void QC_monte::mcgf3_local_energy_full(int band) {
   egf3.front() += en3;
 */
 }
-void QC_monte::mcgf3_local_energy_full_diff(int band) {
+void GF::mcgf3_local_energy_full_diff(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
   double alpha, beta;
 
@@ -495,7 +495,8 @@ void QC_monte::mcgf3_local_energy_full_diff(int band) {
               beta, ovps.d_ovps.en3_c, ivir2 - iocc1);
 }
 
-void QC_monte::mc_gf3_func(double* en3, int ip, int jp, int kp, int band) {
+/*
+void GF::mc_gf3_func(double* en3, int ip, int jp, int kp, int band) {
   //  std::fill(en3,en3+7,0);
   //
   //  int ijIndex = ip * iops.iopns[KEYS::MC_NPAIR] + jp;
@@ -620,3 +621,4 @@ void QC_monte::mc_gf3_func(double* en3, int ip, int jp, int kp, int band) {
   //  en3[6] = en3[6] - 2.00 * ovps.vs_13[ijIndex] * ovps.vs_24[ijIndex] * ovps.vs_35[jkIndex] * ovps.os_16[ikIndex] * ovps.os_24[ijIndex] * ovps.ps_56c[kbIndex];
   //  en3[6] = en3[6] + 1.00 * ovps.vs_13[ijIndex] * ovps.vs_24[ijIndex] * ovps.vs_45[jkIndex] * ovps.os_16[ikIndex] * ovps.os_23[ijIndex] * ovps.ps_56c[kbIndex];
 }
+ */

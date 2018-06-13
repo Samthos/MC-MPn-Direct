@@ -10,11 +10,11 @@ void gf2_core(OVPS_ARRAY ovps, int mc_pair_num) {
 #undef TIDY_CONTROL
 }
 
-void QC_monte::mcgf2_local_energy_core() {
+void GF::mcgf2_local_energy_core() {
   gf2_core(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
 }
 
-void QC_monte::mcgf2_local_energy(std::vector<double>& egf2, int band) {
+void GF::mcgf2_local_energy(std::vector<double>& egf2, int band) {
   int nsamp;
   double en2, en2p, en2m;
 
@@ -32,7 +32,7 @@ void QC_monte::mcgf2_local_energy(std::vector<double>& egf2, int band) {
 
   egf2.front() += en2;
 }
-void QC_monte::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
+void GF::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
   int ip;
   int nsamp;
   double en2m, en2p;
@@ -58,7 +58,7 @@ void QC_monte::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
     en2m = en2m * tau.get_tau(0);
   }
 }
-void QC_monte::mcgf2_local_energy_full(int band) {
+void GF::mcgf2_local_energy_full(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
   double alpha, beta;
 
@@ -89,7 +89,7 @@ void QC_monte::mcgf2_local_energy_full(int band) {
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta, ovps.d_ovps.en2[band][0], ivir2 - iocc1);
 }
-void QC_monte::mcgf2_local_energy_full_diff(int band) {
+void GF::mcgf2_local_energy_full_diff(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
   double alpha, beta;
 

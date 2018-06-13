@@ -8,6 +8,7 @@
 #include <functional>
 #include <algorithm>
 #include <armadillo>
+#include <iomanip>
 
 #ifdef USE_MPI
 #include "mpi.h"

@@ -16,13 +16,13 @@
 #include "../control_variate.h"
 #include "../timer.h"
 
-void MP2::monte_energy() {
+void MP::monte_energy() {
   // variables to store emp2 energy
-  double emp2;
-  std::vector<double> control(2);
-  ControlVariate cv_emp2(2, {0, 0});
+//  double emp2;
+//  std::vector<double> control(2);
+//  ControlVariate cv_emp2(2, {0, 0});
 
-  std::ofstream out_mp2;
+  std::vector<std::ofstream> output(emp.size());
   Timer mcTimer, stepTimer;
 
   // open output stream and start clock for calculation
@@ -30,108 +30,58 @@ void MP2::monte_energy() {
     mcTimer.Start();
     stepTimer.Start();
 
-    std::string filename = iops.sopns[KEYS::JOBNAME] + ".22";
-    out_mp2.open(filename.c_str());
+    for (auto i = 0; i < emp.size(); i++) {
+      std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
+      output[i].open(filename.c_str());
+    }
   }
 
   // --- initialize
-  update_wavefunction();
-  mcmp2_energy(emp2, control);
+  energy();
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
     // generate new positions
-    for (auto& it : el_pair_list) {
-      it.mc_move_scheme(random, molec, mc_basis);
-    }
+    move_walkers();
 
     // update wavefunction
     update_wavefunction();
 
     // calcaulte energy for step
-    mcmp2_energy(emp2, control);
+    energy();
 
     // accumulate
-    cv_emp2.add(emp2, control);
+    for (auto it = 0; it < cv.size(); it++) {
+      cv[it].add(emp[it], control[it]);
+    }
 
     // print if i is a multiple of 128
     if (0 == step % 128) {
-      out_mp2 << cv_emp2 << "\t";
-      out_mp2 << stepTimer << "\n";
+      for (auto i = 0; i < emp.size(); i++) {
+        output[i] << cv[i] << "\t";
+        output[i] << stepTimer << "\n";
+      }
       stepTimer.Start();
     }
   }
   if (mpi_info.sys_master) {
     std::cout << "Spent " << mcTimer << " second preforming MC integration" << std::endl;
-    out_mp2.close();
+    for (auto i = 0; i < emp.size(); i++) {
+      output[i].close();
+    }
   }
 }
 
-void MP3::monte_energy() {
-  // variables to store emp2 energy
-  double emp2, emp3;
-  std::vector<double> mp2_control(2), mp3_control(6);
-  ControlVariate cv_emp2(2, {0, 0}), cv_emp3(6, {0.0, 0.0, 0.0,
-                                                  0.0, 0.0, 0.0});
-                                                 // 0.0, 0.0, 0.0,
-                                                 // 0.0, 0.0, 0.0});
+void MP2::energy() {
+  mcmp2_energy(emp[0], control[0]);
+}
 
-  std::ofstream out_mp2, out_mp3;
-  Timer mcTimer, stepTimer;
-
-  // open output stream and start clock for calculation
-  if (mpi_info.sys_master) {
-    mcTimer.Start();
-    stepTimer.Start();
-
-    std::string filename = iops.sopns[KEYS::JOBNAME] + ".22";
-    out_mp2.open(filename.c_str());
-
-    filename = iops.sopns[KEYS::JOBNAME] + ".23";
-    out_mp3.open(filename.c_str());
-  }
-
-  // --- initialize
+void MP3::energy() {
   tau.new_tau(random);
-  // run monte carlo simulation
-  for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
-    // generate new positions
-    for (auto& it : el_pair_list) {
-      it.mc_move_scheme(random, molec, mc_basis);
-    }
-
-    // generate new tau values
-    tau.new_tau(random);
-
-    // update wavefunction and green's function traces
-    update_wavefunction();
-    ovps.update_ovps(el_pair_list.data(), tau);
-
-    // calcaulte energy for step
-    mcmp2_energy(emp2, mp2_control);
-    mcmp3_energy(emp3, mp3_control);
-
-    // accumulate
-    cv_emp2.add(emp2, mp2_control);
-    cv_emp3.add(emp3, mp3_control);
-
-    // print if i is a multiple of 128
-    if (0 == step % 128) {
-      out_mp2 << cv_emp2 << "\t";
-      out_mp2 << stepTimer << "\n";
-      out_mp2.flush();
-
-      out_mp3 << cv_emp3 << "\t";
-      out_mp3 << stepTimer << "\n";
-      out_mp3.flush();
-      stepTimer.Start();
-    }
-  }
-  if (mpi_info.sys_master) {
-    std::cout << "Spent " << mcTimer << " second preforming MC integration" << std::endl;
-    out_mp2.close();
-    out_mp3.close();
-  }
+  ovps.update_ovps(&el_pair_list[0], tau);
+  mcmp2_energy(emp[0], control[0]);
+  mcmp3_energy(emp[1], control[1]);
 }
 
+/*
 void MP4::monte_energy() {
   // variables to store emp2 energy
   std::vector<double> emp(3);
@@ -213,3 +163,4 @@ void MP4::monte_energy() {
     }
   }
 }
+ */

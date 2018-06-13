@@ -4,7 +4,7 @@
 
 #include "../qc_monte.h"
 
-void QC_monte::mc_gf_statistics(int step,
+void GF::mc_gf_statistics(int step,
                                 std::vector<std::vector<double>>& qep,
                                 std::vector<std::vector<double*>>& en,
                                 std::vector<std::vector<double*>>& enEx1,
@@ -39,7 +39,7 @@ void QC_monte::mc_gf_statistics(int step,
   }
 }
 
-void QC_monte::mc_gf2_statistics(int band, int step) {
+void GF::mc_gf2_statistics(int band, int step) {
   double diffMultiplier = 1.0;
   double alpha, beta;
 
@@ -72,7 +72,7 @@ void QC_monte::mc_gf2_statistics(int band, int step) {
   }
 }
 
-void QC_monte::mc_gf3_statistics(int band, int step) {
+void GF::mc_gf3_statistics(int band, int step) {
   std::array<double, 3> diffMultiplier;
   double alpha;
   double beta;
@@ -169,7 +169,7 @@ void QC_monte::mc_gf3_statistics(int band, int step) {
   }
 }
 
-void QC_monte::mc_gf_copy(std::vector<double>& ex1, std::vector<double>& ex2, double* d_ex1, double* d_ex2) {
+void GF::mc_gf_copy(std::vector<double>& ex1, std::vector<double>& ex2, double* d_ex1, double* d_ex2) {
   std::copy(d_ex1, d_ex1 + ex1.size(), ex1.begin());
   std::copy(d_ex2, d_ex2 + ex2.size(), ex2.begin());
 }

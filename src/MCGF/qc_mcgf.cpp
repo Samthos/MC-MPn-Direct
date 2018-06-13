@@ -13,6 +13,8 @@
 
 #include "../qc_monte.h"
 
+void GF::energy() {}
+
 void GF2::monte_energy() {
   int checkNum = 1;
   int i, band, print_mat;

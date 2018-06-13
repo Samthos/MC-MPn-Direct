@@ -19,7 +19,7 @@ __global__ void squareElements(int m, int n, double* A) {
   }
 }
 
-void QC_monte::mc_gf_statistics(int step,
+void GF::mc_gf_statistics(int step,
                                 std::vector<std::vector<double>>& qep,
                                 std::vector<std::vector<double*>>& en,
                                 std::vector<std::vector<double*>>& enEx1,
@@ -64,7 +64,7 @@ void QC_monte::mc_gf_statistics(int step,
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
 
-void QC_monte::mc_gf2_statistics(int band, int step) {
+void GF::mc_gf2_statistics(int band, int step) {
   cublasHandle_t handle;
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
   double diffMultiplier = 1.0;
@@ -104,7 +104,7 @@ void QC_monte::mc_gf2_statistics(int band, int step) {
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
 
-void QC_monte::mc_gf3_statistics(int band, int step) {
+void GF::mc_gf3_statistics(int band, int step) {
   cublasHandle_t handle;
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
   std::array<double, 3> diffMultiplier;
@@ -208,7 +208,7 @@ void QC_monte::mc_gf3_statistics(int band, int step) {
   cublasStatusAssert(cublasDestroy(handle), __FILE__, __LINE__);
 }
 
-void QC_monte::mc_gf_copy(std::vector<double>& ex1, std::vector<double>& ex2, double* d_ex1, double* d_ex2) {
+void GF::mc_gf_copy(std::vector<double>& ex1, std::vector<double>& ex2, double* d_ex1, double* d_ex2) {
   cudaError_t_Assert(cudaMemcpy(ex1.data(), d_ex1, sizeof(double) * ex1.size(), cudaMemcpyDeviceToHost), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMemcpy(ex2.data(), d_ex2, sizeof(double) * ex2.size(), cudaMemcpyDeviceToHost), __FILE__, __LINE__);
 }
