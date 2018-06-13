@@ -120,7 +120,9 @@ class MP3 : public MP {
     control[1].resize(6);
     cv[1] = ControlVariate(6, {0, 0, 0, 0, 0, 0});
   }
-  ~MP3() {}
+  ~MP3() {
+    ovps.free();
+  }
   void energy();
 
  protected:
