@@ -3,4 +3,5 @@ cmake-build-debug/
 cmake-build-ndebug/
 cmake-build-release/
 release/
+*.swp
 .idea

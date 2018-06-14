@@ -18,22 +18,27 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
         auto ik = it * iops.iopns[KEYS::MC_NPAIR] + kt;
         auto jk = jt * iops.iopns[KEYS::MC_NPAIR] + kt;
 
-        double en_l = 0;
-        double ct_l = 0;
+        std::array<double, 117> en_l;
+        std::array<double, 117> ct_l;
+        en_l.fill(0.0);
+        ct_l.fill(0.0);
         for (auto lt = kt+1; lt < iops.iopns[KEYS::MC_NPAIR]; lt++) {
           auto il = it * iops.iopns[KEYS::MC_NPAIR] + lt;
           auto jl = jt * iops.iopns[KEYS::MC_NPAIR] + lt;
           auto kl = kt * iops.iopns[KEYS::MC_NPAIR] + lt;
 
-          double en = 0.0;
+          std::array<double, 117> en;
 
           #include "qc_mcmp4_ijkl.h"
 
-          en_l += en * el_pair_list[lt].rv;
-          ct_l += en / el_pair_list[lt].wgt;
+          std::transform(en_l.begin(), en_l.end(), en.begin(), en_l.begin(), [&](double x, double y){return x + y * el_pair_list[lt].rv;});
+          std::transform(ct_l.begin(), ct_l.end(), en.begin(), ct_l.begin(), [&](double x, double y){return x + y / el_pair_list[lt].wgt;});
         }
-        ct_kl += ct_l / el_pair_list[kt].wgt;
-        en_kl += en_l * el_pair_list[kt].rv;
+        double en_l_t = 0;
+        double ct_l_t = 0;
+#include "qc_mcmp4_ijk.h"
+        en_kl += en_l_t * el_pair_list[kt].rv;
+        ct_kl += ct_l_t / el_pair_list[kt].wgt;
       }
       ct_jkl += ct_kl / el_pair_list[jt].wgt;
       en_jkl += en_kl * el_pair_list[jt].rv;
