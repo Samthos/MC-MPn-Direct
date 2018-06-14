@@ -126,7 +126,7 @@ class ControlVariate {
     s_c2 += c_ * c_.t();
     nSamples++;
   }
-  double update() {
+  void update() {
     // calculate averages
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
