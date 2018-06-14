@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-#ifdef USE_MPII
+#ifdef HAVE_MPII
 #include "mpi.h"
 #endif
 
@@ -43,7 +43,7 @@ void GF2::monte_energy() {
 //print every 128 steps
     if (0 == i % 128) {
       //Reduce variables across all threads
-#ifdef USE_MPI
+#ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
       qeps2.reduce();
@@ -69,7 +69,7 @@ void GF2::monte_energy() {
           mc_gf2_full_print(band, i, checkNum % 2);
         }
         checkNum++;
-#ifdef USE_MPI
+#ifdef HAVE_MPI
         MPI_Barrier(MPI_COMM_WORLD);
 #endif
       }
@@ -81,7 +81,7 @@ void GF2::monte_energy() {
       mc_gf2_full_print(i, iops.iopns[KEYS::MC_TRIAL], 2);
       std::cout.flush();
     }
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
   }
@@ -158,7 +158,7 @@ void GF3::monte_energy() {
 //print every 128 steps
     if (0 == i % 128) {
       //Reduce variables across all threads
-#ifdef USE_MPI
+#ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
       qeps2.reduce();
@@ -177,7 +177,7 @@ void GF3::monte_energy() {
       mc_end = std::chrono::high_resolution_clock::now();
       time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
       print_mat = (time_span.count() > checkNum * 900);
-#ifdef USE_MPI
+#ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
       MPI_Bcast(&print_mat, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
@@ -187,7 +187,7 @@ void GF3::monte_energy() {
           mc_gf3_full_print(band, i, checkNum % 2);
         }
         checkNum++;
-#ifdef USE_MPI
+#ifdef HAVE_MPI
         MPI_Barrier(MPI_COMM_WORLD);
 #endif
       }
@@ -201,7 +201,7 @@ void GF3::monte_energy() {
       mc_gf3_full_print(i, iops.iopns[KEYS::MC_TRIAL], 2);
       std::cout.flush();
     }
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
   }

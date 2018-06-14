@@ -3,7 +3,7 @@
 #include "config.h"
 #endif
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
@@ -38,7 +38,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec,
     input >> mc_nbas >> mc_nprim;
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&mc_nbas, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&mc_nprim, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -84,7 +84,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec,
       }
     }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&znum, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(alpha.data(), mc_nprim, MPI_DOUBLE, 0, MPI_COMM_WORLD);

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 #include "qc_basis.h"
@@ -153,7 +153,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
     std::cout.flush();
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&nw_nsets, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nw_nbf, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -236,7 +236,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
     delete[] occ;
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&nw_iocc, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nw_icore, 1, MPI_INT, 0, MPI_COMM_WORLD);

@@ -6,7 +6,7 @@
 #include <vector>
 #include "../qc_monte.h"
 
-void MP3::mcmp3_energy(double& emp3, std::vector<double>& control) {
+void MP::mcmp3_energy(double& emp3, std::vector<double>& control) {
   std::array<double, 6> en;
 
   double en_k, en_jk;

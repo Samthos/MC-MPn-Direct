@@ -10,14 +10,14 @@
 #include <armadillo>
 #include <iomanip>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
 class ControlVariate {
  public:
   ControlVariate(size_t nControlVariates, const std::vector<double>& ExactCV) {
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &master);
 #else
     master = 0;
@@ -126,7 +126,7 @@ class ControlVariate {
   }
   double update() {
     // calculate averages
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&nSamples, &TotalSamples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(s_x.memptr(), e_x.memptr(), s_x.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);

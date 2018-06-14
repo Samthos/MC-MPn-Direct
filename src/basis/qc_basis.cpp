@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 #include "qc_basis.h"
@@ -204,7 +204,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&nshl, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&ncgs, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -301,7 +301,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(h_basis.alpha, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(h_basis.norm, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -315,7 +315,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
   /*
   for (i = 0; i < qc_nprm; i++) {
-#ifdef USE_MPI
+#ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
       if (mpi_info.taskid == 0) {
@@ -324,7 +324,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
       }
   }
   for (i = 0; i < qc_nprm; i++) {
-#ifdef USE_MPI
+#ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
       if (mpi_info.taskid == 1) {
@@ -334,7 +334,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   }
 */
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 

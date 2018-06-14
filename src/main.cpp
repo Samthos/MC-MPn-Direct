@@ -67,6 +67,9 @@ int main(int argc, char* argv[]) {
       } else if (iops.iopns[KEYS::ORDER] == 3) {
         MP3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
         qc_monte.monte_energy();
+      } else if (iops.iopns[KEYS::ORDER] == 4) {
+        MP4 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+        qc_monte.monte_energy();
       }
     } else {
       if (iops.iopns[KEYS::ORDER] == 2) {

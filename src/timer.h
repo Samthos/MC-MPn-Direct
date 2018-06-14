@@ -6,14 +6,14 @@
 #define MC_MP2_DIRECT_TIMER_H
 
 #include <chrono>
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
 class Timer {
  public:
   Timer() {
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &master);
 #else
     master = 0;

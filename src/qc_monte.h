@@ -81,12 +81,17 @@ class MP : public QC_monte {
   std::vector<double> emp;
   std::vector<std::vector<double>> control;
   std::vector<ControlVariate> cv;
+
+  void mcmp2_energy_fast(double&, std::vector<double>&);
+  void mcmp2_energy(double&, std::vector<double>&);
+  void mcmp3_energy(double&, std::vector<double>&);
+  void mcmp4_energy(double&, std::vector<double>&);
 };
 
 class MP2 : public MP {
  public:
   MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    tau.resize(2, basis);
+    tau.resize(1, basis);
 
     emp.resize(1);
     control.resize(1);
@@ -95,12 +100,10 @@ class MP2 : public MP {
     control[0].resize(2);
     cv[0] = ControlVariate(2, {0, 0});
   }
-  ~MP2() {
-  }
+  ~MP2() {}
 
  protected:
   void energy();
-  void mcmp2_energy(double&, std::vector<double>&);
 };
 
 class MP3 : public MP {
@@ -123,31 +126,36 @@ class MP3 : public MP {
   ~MP3() {
     ovps.free();
   }
-  void energy();
 
  protected:
-  void mcmp2_energy(double&, std::vector<double>&);
-  void mcmp3_energy(double&, std::vector<double>&);
+  void energy();
 };
 
 class MP4 : public MP {
  public:
   MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
-                 iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 basis);
-    ovps.alloc_03();
+    ovps.init(3, iops.iopns[KEYS::MC_NPAIR], basis);
+    tau.resize(3, basis);
+
+    emp.resize(3);
+    control.resize(3);
+    cv.resize(3);
+
+    control[0].resize(2);
+    cv[0] = ControlVariate(2, {0, 0});
+
+    control[1].resize(6);
+    cv[1] = ControlVariate(6, {0, 0, 0, 0, 0, 0});
+
+    control[2].resize(1);
+    cv[2] = ControlVariate(1, {0});
   }
   ~MP4() {
-    ovps.free_tau_03();
-    ovps.free_03();
+    ovps.free();
   }
-  void monte_energy();
 
  protected:
-  void mcmp2_energy(double&, std::vector<double>&);
-  void mcmp3_energy(double&, std::vector<double>&);
-  void mcmp4_energy(double&, std::vector<double>&);
+  void energy();
 };
 
 class GF : public  QC_monte {

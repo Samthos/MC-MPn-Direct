@@ -2,14 +2,14 @@
 
 #include <cstdio>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
 #include "qc_mpi.h"
 
 MPI_info::MPI_info() {
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
   MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
 #else
@@ -25,7 +25,7 @@ MPI_info::MPI_info() {
 }
 
 void MPI_info::mpi_set_info() {
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
   MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
 #else

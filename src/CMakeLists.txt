@@ -32,6 +32,7 @@ set(source
         MCMP/qc_mcmp.cpp
         MCMP/qc_mcmp2.cpp
         MCMP/qc_mcmp3.cpp
+        MCMP/qc_mcmp4.cpp
         tau_integrals.h
 )
 

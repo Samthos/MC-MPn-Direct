@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
@@ -54,7 +54,7 @@ void GF::mc_gf2_full_print(int band, int steps, int checkNum) {
     // copy first and second moments too host
     mc_gf_copy(ex1, ex2, ovps.d_ovps.en2Ex1[band][diff], ovps.d_ovps.en2Ex2[band][diff]);
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(ex1.data(), ex1All.data(), ex1.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(ex2.data(), ex2All.data(), ex2.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -108,7 +108,7 @@ void GF::mc_gf3_full_print(int band, int steps, int checkNum) {
     // copy first and second moments too host
     mc_gf_copy(ex1, ex2, ovps.d_ovps.en3Ex1[band][diff], ovps.d_ovps.en3Ex2[band][diff]);
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(ex1.data(), ex1All.data(), ex1.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(ex2.data(), ex2All.data(), ex2.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);

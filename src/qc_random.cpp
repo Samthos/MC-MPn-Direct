@@ -8,7 +8,7 @@
 #include <sstream>
 #include <string>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
@@ -31,7 +31,7 @@ void Random::seed(int param) {
   } else if (1 == debug) {
     std::string str;
     std::stringstream sstr;
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
 #else
     taskid = 0;

@@ -6,7 +6,7 @@
 #include <string>
 #include <algorithm>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
@@ -31,7 +31,7 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
     input >> natom;
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&natom, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
@@ -58,7 +58,7 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
       std::transform(pos, pos+3, pos, [ang_to_bohr](double x) {return x * ang_to_bohr; });
     }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(&pos, 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(&znum, 1, MPI_INT, 0, MPI_COMM_WORLD);

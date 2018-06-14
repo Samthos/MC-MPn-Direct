@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iomanip>
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
 #include "mpi.h"
 #endif
 
@@ -63,7 +63,7 @@ void GFStats::blockIt(const int& step) {
 
 void GFStats::reduce() {
   for (uint it = 0; it < qepsEx1.size(); it++) {
-#ifdef USE_MPI
+#ifdef HAVE_MPI
       MPI_Reduce(qepsEx1[it].data(), qepsAvg[it].data(), qepsEx1[it].size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       MPI_Reduce(qepsEx2[it].data(), qepsVar[it].data(), qepsEx2[it].size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 #else

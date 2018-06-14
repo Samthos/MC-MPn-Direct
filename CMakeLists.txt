@@ -10,7 +10,7 @@ if(${NDEBUG})
     add_definitions(-DNDEBUG)
 endif()
 
-#find_package(MPI)
+find_package(MPI)
 find_package(Armadillo REQUIRED)
 
 #add_subdirectory(test)

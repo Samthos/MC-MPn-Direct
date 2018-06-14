@@ -11,7 +11,7 @@
 
 #include "../qc_monte.h"
 
-void MP2::mcmp2_energy(double& emp2, std::vector<double>& control) {
+void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
   int im, am;
   double icount2;
 
@@ -20,7 +20,6 @@ void MP2::mcmp2_energy(double& emp2, std::vector<double>& control) {
   double a_resk, emp2a;
   double b_resk, emp2b;
 
-  tau.new_tau(random);
   auto tau_values = tau.get_exp_tau(0, 0);
   std::vector<double> psi1Tau(ivir2), psi2Tau(ivir2);
 
@@ -81,7 +80,7 @@ void MP2::mcmp2_energy(double& emp2, std::vector<double>& control) {
   std::transform(control.begin(), control.end(), control.begin(), [&](double c) { return c * tau_wgt / icount2; });
 }
 
-void MP3::mcmp2_energy(double& emp2, std::vector<double>& control) {
+void MP::mcmp2_energy(double& emp2, std::vector<double>& control) {
   double icount2;
 
   double a_resk, emp2a;
