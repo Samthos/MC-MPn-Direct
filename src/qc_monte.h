@@ -68,12 +68,12 @@ class QC_monte {
     basis.gpu_free();
   }
   virtual void monte_energy() = 0;
-  virtual void energy() = 0;
 };
 
 class MP : public QC_monte {
  public:
   void monte_energy();
+  virtual void energy() = 0;
  protected:
   MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
   }
@@ -159,11 +159,15 @@ class MP4 : public MP {
 };
 
 class GF : public  QC_monte {
+ public:
+  void monte_energy();
+
  protected:
   GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {}
   std::vector<GFStats> qeps;
+  virtual void mc_local_energy(const int& step) = 0;
+  virtual int full_print(int& step, int checkNum) = 0;
 
-  void energy();
   void mcgf2_local_energy_core();
   void mcgf2_local_energy(std::vector<double>&, int);
   void mcgf2_local_energy_diff(std::vector<double>&, int);
@@ -227,9 +231,9 @@ class GF2 : public GF {
     ovps.free_tau_02();
     ovps.free_02();
   }
-  void monte_energy();
  protected:
-  void mc_local_energy(std::vector<std::vector<double>>&, int);
+  void mc_local_energy(const int& step);
+  int full_print(int& step, int checkNum);
 };
 
 class GPU_GF3 : public GF {
@@ -267,9 +271,9 @@ class GF3 : public GF {
     ovps.free_tau_03();
     ovps.free_03();
   }
-  void monte_energy();
 
  protected:
-  void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
+  void mc_local_energy(const int& step);
+  int full_print(int& step, int checkNum);
 };
 #endif  // QC_MONTE_H_
