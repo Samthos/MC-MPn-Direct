@@ -17,9 +17,7 @@ void GF::energy() {}
 
 void GF2::monte_energy() {
   int checkNum = 1;
-  int i, band, print_mat;
-
-  GFStats qeps2(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
+  int print_mat;
 
   //clock
   std::chrono::high_resolution_clock::time_point step_start, step_end, mc_start, mc_end;
@@ -32,27 +30,33 @@ void GF2::monte_energy() {
     print_mc_head(mc_start);
   }
 
-  mc_local_energy(qeps2.qeps, 0);
-  for (i = 1; i <= iops.iopns[KEYS::MC_TRIAL]; i++) {
+  mc_local_energy(qeps[0].qeps, 0);
+  for (auto step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
     move_walkers();
 
     //calculate energies
-    mc_local_energy(qeps2.qeps, i);
-    qeps2.blockIt(i);
+    mc_local_energy(qeps[0].qeps, step);
+    for (auto order = 0; order < qeps.size(); order++) {
+      qeps[order].blockIt(step);
+    }
 
 //print every 128 steps
-    if (0 == i % 128) {
+    if (0 == step % 128) {
       //Reduce variables across all threads
 #ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
-      qeps2.reduce();
+      for (auto order = 0; order < qeps.size(); order++) {
+        qeps[order].reduce();
+      }
 
       if (mpi_info.sys_master) {  //print out results
         step_end = std::chrono::high_resolution_clock::now();
         time_span = std::chrono::duration_cast<std::chrono::duration<double>>(step_end - step_start);
         step_start = std::chrono::high_resolution_clock::now();
-        qeps2.print(i, time_span.count());
+        for (auto order = 0; order < qeps.size(); order++) {
+          qeps[order].print(step, time_span.count());
+        }
       }
     }
 
@@ -65,8 +69,8 @@ void GF2::monte_energy() {
       MPI_Bcast(&print_mat, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
       if (print_mat) {
-        for (band = 0; band < numBand; band++) {
-          mc_gf2_full_print(band, i, checkNum % 2);
+        for (auto band = 0; band < numBand; band++) {
+          mc_gf2_full_print(band, step, checkNum % 2);
         }
         checkNum++;
 #ifdef HAVE_MPI
@@ -77,8 +81,8 @@ void GF2::monte_energy() {
   }
 
   if (iops.iopns[KEYS::TASK] == TASKS::GFFULL || iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
-    for (i = 0; i < numBand; i++) {
-      mc_gf2_full_print(i, iops.iopns[KEYS::MC_TRIAL], 2);
+    for (auto band = 0; band < numBand; band++) {
+      mc_gf2_full_print(band, iops.iopns[KEYS::MC_TRIAL], 2);
       std::cout.flush();
     }
 #ifdef HAVE_MPI
@@ -132,9 +136,6 @@ void GF3::monte_energy() {
   int checkNum = 1;
   int i, band, print_mat;
 
-  GFStats qeps2(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
-  GFStats qeps3(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 3);
-
   //clock
   std::chrono::high_resolution_clock::time_point step_start, step_end, mc_start, mc_end;
   std::chrono::duration<double> time_span;
@@ -146,14 +147,14 @@ void GF3::monte_energy() {
     print_mc_head(mc_start);
   }
 
-  mc_local_energy(qeps2.qeps, qeps3.qeps, 0);
+  mc_local_energy(qeps[0].qeps, qeps[1].qeps, 0);
   for (i = 1; i <= iops.iopns[KEYS::MC_TRIAL]; i++) {
     move_walkers();
 
     //calculate energies
-    mc_local_energy(qeps2.qeps, qeps3.qeps, i);
-    qeps2.blockIt(i);
-    qeps3.blockIt(i);
+    mc_local_energy(qeps[0].qeps, qeps[1].qeps, i);
+    qeps[0].blockIt(i);
+    qeps[1].blockIt(i);
 
 //print every 128 steps
     if (0 == i % 128) {
@@ -161,15 +162,15 @@ void GF3::monte_energy() {
 #ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
-      qeps2.reduce();
-      qeps3.reduce();
+      qeps[0].reduce();
+      qeps[1].reduce();
 
       if (mpi_info.sys_master) {  //print out results
         step_end = std::chrono::high_resolution_clock::now();
         time_span = std::chrono::duration_cast<std::chrono::duration<double>>(step_end - step_start);
         step_start = std::chrono::high_resolution_clock::now();
-        qeps2.print(i, time_span.count());
-        qeps3.print(i, time_span.count());
+        qeps[0].print(i, time_span.count());
+        qeps[1].print(i, time_span.count());
       }
     }
 

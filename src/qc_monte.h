@@ -29,7 +29,7 @@ class GFStats {
   std::vector<std::vector<double>> qeps;
 
   GFStats(bool, int, int, int, int, const std::string&, int);
-  GFStats(const GFStats& gf) { exit(0); }
+  GFStats(const GFStats& gf) { throw std::runtime_error("Tried to copy GFStats"); }
   GFStats operator=(const GFStats& gf) { exit(0); }
 
   ~GFStats();
@@ -161,6 +161,7 @@ class MP4 : public MP {
 class GF : public  QC_monte {
  protected:
   GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {}
+  std::vector<GFStats> qeps;
 
   void energy();
   void mcgf2_local_energy_core();
@@ -210,9 +211,6 @@ class GPU_GF2 : public GF {
 };
 
 class GF2 : public GF {
- protected:
-  void mc_local_energy(std::vector<std::vector<double>>&, int);
-
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : GF(p1, p2, p3, p4, p5) {
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
@@ -221,12 +219,17 @@ class GF2 : public GF {
 
     ovps.alloc_02();
     tau.resize(2, basis);
+
+    qeps.reserve(1);
+    qeps.emplace_back(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
   }
   ~GF2() {
     ovps.free_tau_02();
     ovps.free_02();
   }
   void monte_energy();
+ protected:
+  void mc_local_energy(std::vector<std::vector<double>>&, int);
 };
 
 class GPU_GF3 : public GF {
@@ -248,9 +251,6 @@ class GPU_GF3 : public GF {
 };
 
 class GF3 : public GF {
- protected:
-  void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
-
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : GF(p1, p2, p3, p4, p5) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
@@ -258,11 +258,18 @@ class GF3 : public GF {
                  basis);
     ovps.alloc_03();
     tau.resize(2, basis);
+
+    qeps.reserve(2);
+    qeps.emplace_back(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
+    qeps.emplace_back(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 3);
   }
   ~GF3() {
     ovps.free_tau_03();
     ovps.free_03();
   }
   void monte_energy();
+
+ protected:
+  void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
 };
 #endif  // QC_MONTE_H_
