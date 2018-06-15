@@ -184,8 +184,8 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
         auto ik = it * iops.iopns[KEYS::MC_NPAIR] + kt;
         auto jk = jt * iops.iopns[KEYS::MC_NPAIR] + kt;
 
-        std::array<double, 117> en_l;
-        std::array<double, 117> ct_l;
+        std::array<double, 57> en_l;
+        std::array<double, 57> ct_l;
         en_l.fill(0.0);
         ct_l.fill(0.0);
         for (auto lt = 0; lt < iops.iopns[KEYS::MC_NPAIR]; lt++) {
@@ -194,7 +194,7 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
           auto jl = jt * iops.iopns[KEYS::MC_NPAIR] + lt;
           auto kl = kt * iops.iopns[KEYS::MC_NPAIR] + lt;
 
-          std::array<double, 117> en;
+          std::array<double, 57> en;
 
           #include "qc_mcmp4_ijkl.h"
 
