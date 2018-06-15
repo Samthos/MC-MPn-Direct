@@ -7,6 +7,26 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   emp4 = 0.0;
   control[0] = 0.0;
 
+  mcmp4_energy_ij(emp4, control);
+  mcmp4_energy_ik(emp4, control);
+  mcmp4_energy_il(emp4, control);
+  mcmp4_energy_ijkl(emp4, control);
+
+  auto tau_wgt = tau.get_wgt(3);
+  std::transform(control.begin(), control.end(), control.begin(),
+                 [&](double x) { return x * tau_wgt; });
+  emp4 *= tau_wgt;
+
+  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
+  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
+  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 3);
+  emp4 /= nsamp;
+  std::transform(control.begin(), control.end(), control.begin(),
+                 [nsamp](double x) { return x / nsamp; });
+}
+
+void MP::mcmp4_energy_ij(double& emp4, std::vector<double>& control) {
   // ij contracted sums
   for (auto it = 0; it < iops.iopns[KEYS::MC_NPAIR]; it++) {
     double en_i = 0;
@@ -60,7 +80,9 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
     emp4 += en_i * el_pair_list[it].rv;
     control[0] += ct_i / el_pair_list[it].wgt;
   }
+}
 
+void MP::mcmp4_energy_ik(double& emp4, std::vector<double>& control) {
   // ik contracted sums
   for (auto it = 0; it < iops.iopns[KEYS::MC_NPAIR]; it++) {
     double en_i = 0;
@@ -114,7 +136,9 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
     emp4 += en_i * el_pair_list[it].rv;
     control[0] += ct_i / el_pair_list[it].wgt;
   }
+}
 
+void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
   // il contracted sums
   for (auto it = 0; it < iops.iopns[KEYS::MC_NPAIR]; it++) {
     double en_i = 0;
@@ -168,7 +192,9 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
     emp4 += en_i * el_pair_list[it].rv;
     control[0] += ct_i / el_pair_list[it].wgt;
   }
+}
 
+void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
   // fourth order sums
   for (auto it = 0; it < iops.iopns[KEYS::MC_NPAIR]; it++) {
     double en_jkl = 0;
@@ -213,17 +239,5 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
     emp4       += en_jkl * el_pair_list[it].rv;
     control[0] += ct_jkl / el_pair_list[it].wgt;
   }
-
-  auto tau_wgt = tau.get_wgt(3);
-  std::transform(control.begin(), control.end(), control.begin(),
-                 [&](double x) { return x * tau_wgt; });
-  emp4 *= tau_wgt;
-
-  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
-  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
-  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
-  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 3);
-  emp4 /= nsamp;
-  std::transform(control.begin(), control.end(), control.begin(),
-                 [nsamp](double x) { return x / nsamp; });
 }
+
