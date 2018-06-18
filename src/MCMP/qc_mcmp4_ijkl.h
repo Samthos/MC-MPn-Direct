@@ -24,16 +24,11 @@ en[16]  = ovps.o_set[2][1].s_11[jl] * ovps.v_set[2][1].s_12[jl] * ovps.o_set[2][
 en[19] = ovps.o_set[2][1].s_12[jl] * ovps.v_set[2][1].s_12[jl] * ovps.v_set[2][0].s_11[il] * ovps.o_set[2][2].s_11[kl];
 en[18]  = ovps.o_set[2][1].s_11[jl] * ovps.v_set[2][1].s_22[jl] * ovps.o_set[2][0].s_12[il] * ovps.v_set[2][2].s_11[kl];
 en[20] = ovps.o_set[2][1].s_12[jl] * ovps.v_set[2][1].s_22[jl] * ovps.v_set[2][0].s_11[il] * ovps.o_set[2][2].s_11[kl];
+
 en[27] = ovps.v_set[2][1].s_11[jl] * ovps.v_set[2][1].s_22[jl] * ovps.o_set[2][0].s_12[il] * ovps.o_set[2][2].s_11[kl];
 
+// double kl
 en[28] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_11[il] * ovps.v_set[2][1].s_12[jl];
-en[29] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_11[il] * ovps.v_set[2][1].s_22[jl];
-en[30] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_12[il] * ovps.v_set[2][1].s_11[jl];
-en[31] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_12[il] * ovps.v_set[2][1].s_21[jl];
-en[32] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_21[il] * ovps.v_set[2][1].s_12[jl];
-en[33] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_21[il] * ovps.v_set[2][1].s_22[jl];
-en[34] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_22[il] * ovps.v_set[2][1].s_11[jl];
-en[35] = ovps.o_set[2][2].s_11[kl] * ovps.o_set[2][2].s_22[kl] * ovps.v_set[2][0].s_22[il] * ovps.v_set[2][1].s_21[jl];
 
 en[36] = ovps.o_set[2][2].s_11[kl] * ovps.v_set[2][2].s_12[kl] * ovps.o_set[2][0].s_12[il] * ovps.v_set[2][1].s_11[jl];
 en[37] = ovps.o_set[2][2].s_11[kl] * ovps.v_set[2][2].s_22[kl] * ovps.o_set[2][0].s_12[il] * ovps.v_set[2][1].s_11[jl];
