@@ -38,7 +38,12 @@ set(source
 
 set(CPU_EXTRA_SOURCES
         MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp basis/qc_psi.cpp cpu_qc_monte.cpp
+        qc_mcmp4_ijk.h qc_mcmp4_ijkl.h
+        qc_mcmp4_ij.h qc_mcmp4_ij_k.h qc_mcmp4_ij_l.h
+        qc_mcmp4_ik.h qc_mcmp4_ik_j.h qc_mcmp4_ik_l.h
+        qc_mcmp4_il.h qc_mcmp4_il_j.h qc_mcmp4_il_k.h
         )
+
 set(GPU_EXTRA_SOURCES
         cublasStatus_t_getErrorString.cu cublasStatus_t_getErrorString.h
         MCGF/gpu_gfFullStatistics.cu MCGF/gpu_mcgf2.cu MCGF/gpu_mcgf3.cu gpu_ovps.cu basis/gpu_psi.cu gpu_qc_monte.cpp)
@@ -55,17 +60,17 @@ endif()
 
 
 
-add_executable(GPU_MC_MPn_Direct ${source} ${GPU_EXTRA_SOURCES})
-target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
-
-target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
-target_link_libraries(GPU_MC_MPn_Direct cublas)
-target_include_directories(GPU_MC_MPn_Direct PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-
-IF(${MPI_CXX_FOUND})
-    message("Adding MPI compile options to GPU_MC_MPn_Direct")
-    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
-    target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
-    target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
-endif()
+#add_executable(GPU_MC_MPn_Direct ${source} ${GPU_EXTRA_SOURCES})
+#target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+#
+#target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
+#target_link_libraries(GPU_MC_MPn_Direct cublas)
+#target_include_directories(GPU_MC_MPn_Direct PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+#
+#IF(${MPI_CXX_FOUND})
+#    message("Adding MPI compile options to GPU_MC_MPn_Direct")
+#    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
+#    target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
+#    target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
+#endif()
 
