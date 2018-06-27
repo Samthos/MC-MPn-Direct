@@ -158,11 +158,7 @@ class ControlVariate {
       cov_c = e_c2 - e_c1 * e_c1.t();
 
       // calcalate scaling coeficent for contrl variates
-      /*
       arma::Col<double> alpha = arma::solve(cov_c, cov_xc);
-      */
-      arma::Col<double> alpha;
-      alpha.zeros(e_c1.size());
 
       // calcaulte control varaiate averate
       e_cv = e_x[0] - arma::dot(alpha, e_c1 - exact_cv);
