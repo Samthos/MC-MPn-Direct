@@ -37,15 +37,15 @@ void MP::mcmp3_energy(double& emp3, std::vector<double>& control) {
         en[4] = (2 * ovps.o_set[0][0].s_21[ij] * ovps.v_set[1][1].s_21[jk] - 4 * ovps.o_set[0][0].s_22[ij] * ovps.v_set[1][1].s_11[jk]) * ovps.v_set[0][0].s_12[ij] * ovps.o_set[1][0].s_12[ik] * ovps.v_set[1][0].s_22[ik] * ovps.o_set[1][1].s_11[jk];
         en[5] = (2 * ovps.o_set[0][0].s_21[ij] * ovps.o_set[0][0].s_12[ij] - 1 * ovps.o_set[0][0].s_11[ij] * ovps.o_set[0][0].s_22[ij]) * ovps.v_set[1][0].s_12[ik] * ovps.v_set[1][0].s_21[ik] * ovps.o_set[1][1].s_11[jk] * ovps.o_set[1][1].s_22[jk];
 
-        std::transform(c_k.begin(), c_k.end(), en.begin(), c_k.begin(), [&](double x, double y) { return x + y / el_pair_list[k].wgt; });
         std::transform(en_k.begin(), en_k.end(), en.begin(), en_k.begin(), [&](double x, double y) { return x + y * el_pair_list[k].rv; });
+        std::transform(c_k.begin(), c_k.end(), en.begin(), c_k.begin(), [&](double x, double y) { return x + y / el_pair_list[k].wgt; });
       }
-      std::transform(c_jk.begin(), c_jk.begin()+6, c_k.begin(), c_jk.begin(), [&](double x, double y) { return x + y / el_pair_list[j].wgt; });
-      std::transform(c_jk.begin()+6, c_jk.end(), en_k.begin(), c_jk.begin()+6, [&](double x, double y) { return x + y / el_pair_list[j].wgt; });
+      std::transform(c_jk.begin(), c_jk.begin()+6, en_k.begin(), c_jk.begin(), [&](double x, double y) { return x + y * el_pair_list[j].rv; });
+      std::transform(c_jk.begin()+6, c_jk.end(), c_k.begin(), c_jk.begin()+6, [&](double x, double y) { return x + y * el_pair_list[j].rv; });
       en_jk += std::accumulate(en_k.begin(), en_k.end(), 0.0) * el_pair_list[j].rv;
     }
     std::transform(control.begin(), control.begin()+12, c_jk.begin(), control.begin(), [&](double x, double y) { return x + y / el_pair_list[i].wgt; });
-    std::transform(control.begin()+12, control.end(), c_jk.begin(), control.begin()+12, [&](double x, double y) { return x + y * el_pair_list[i].rv; });
+    std::transform(control.begin()+12, control.end(), c_jk.begin()+6, control.begin()+12, [&](double x, double y) { return x + y * el_pair_list[i].rv; });
     emp3 += en_jk * el_pair_list[i].rv;
   }
 
