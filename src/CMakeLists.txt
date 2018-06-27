@@ -38,10 +38,10 @@ set(source
 
 set(CPU_EXTRA_SOURCES
         MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp basis/qc_psi.cpp cpu_qc_monte.cpp
-        qc_mcmp4_ijk.h qc_mcmp4_ijkl.h
-        qc_mcmp4_ij.h qc_mcmp4_ij_k.h qc_mcmp4_ij_l.h
-        qc_mcmp4_ik.h qc_mcmp4_ik_j.h qc_mcmp4_ik_l.h
-        qc_mcmp4_il.h qc_mcmp4_il_j.h qc_mcmp4_il_k.h
+        MCMP/qc_mcmp4_ijk.h MCMP/qc_mcmp4_ijkl.h
+        MCMP/qc_mcmp4_ij.h MCMP/qc_mcmp4_ij_k.h MCMP/qc_mcmp4_ij_l.h
+        MCMP/qc_mcmp4_ik.h MCMP/qc_mcmp4_ik_j.h MCMP/qc_mcmp4_ik_l.h
+        MCMP/qc_mcmp4_il.h MCMP/qc_mcmp4_il_j.h MCMP/qc_mcmp4_il_k.h
         )
 
 set(GPU_EXTRA_SOURCES

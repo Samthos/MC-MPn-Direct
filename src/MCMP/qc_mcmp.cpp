@@ -59,14 +59,11 @@ void MP::monte_energy() {
       }
       stepTimer.Start();
     }
-      /*
-    if (0 == step % 16) {
-      for (auto i = 0; i < emp.size(); i++) {
-        output[i].flush();
-      }
-    }
-       */
+  }
 
+  for (auto i = 0; i < emp.size(); i++) {
+      std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
+      cv[i].to_json(filename);
   }
   if (mpi_info.sys_master) {
     std::cout << "Spent " << mcTimer << " second preforming MC integration" << std::endl;

@@ -169,6 +169,58 @@ class ControlVariate {
       error_cv = sqrt(var_cv / static_cast<double>(TotalSamples));
     }
   }
+  void to_json(std::string fname) {
+    // open stream
+    std::ofstream os(fname + ".json");
+
+    // call update function
+    update();
+
+    // open json
+    os << "{\n";
+
+    // print number of steps
+    os << "\t\"Steps\" : " << TotalSamples << ",\n";
+
+    // print E[x]
+    os << "\t\"EX\" : " << e_x[0] << ",\n";
+
+    // print Var[x]
+    os << "\t\"EX2\" : " << e_x[1] << ",\n";
+
+    // print vector of E[cv]
+    os << "\t\"EC\" : [" << e_c1[0];
+    for (auto i=1; i < e_c1.size(); i++) {
+      os << ",\n\t\t" << e_c1[i];
+    }
+    os << "\n\t],\n";
+
+    // print Cov[x, cv]
+    os << "\t\"EXC\" : [" << e_xc[0];
+    for (auto i=1; i < e_xc.size(); i++) {
+      os << ",\n\t\t" << e_xc[i];
+    }
+    os << "\n\t],\n";
+
+    // print Cov[cv, cv]
+    os << "\t\"ECC\" : [";
+    for (auto row = 0; row < e_c2.n_rows; row++) {
+      if (row != 0) {
+        os << "],";
+      }
+
+      os << "\n\t\t[" << e_c2(row, 0);
+      for (auto col = 1; col < e_c2.n_cols; col++) {
+        os << ", " << e_c2(row, col);
+      }
+    }
+    os << "]]\n";
+    
+    os << "}";
+
+    // close stream
+    os.close();
+  }
 
   friend std::ostream& operator<< (std::ostream& os, ControlVariate& cv) {
     cv.update();
