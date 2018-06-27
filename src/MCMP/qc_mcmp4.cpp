@@ -5,7 +5,7 @@
 
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   emp4 = 0.0;
-  control[0] = 0.0;
+  std::fill(control.begin(), control.end(), 0.0);
 
   mcmp4_energy_ij(emp4, control);
   mcmp4_energy_ik(emp4, control);
@@ -134,7 +134,7 @@ void MP::mcmp4_energy_ik(double& emp4, std::vector<double>& control) {
       ct_i += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_lt.begin(), -ct_corr) / el_pair_list[kt].wgt;
     }
     emp4 += en_i * el_pair_list[it].rv;
-    control[0] += ct_i / el_pair_list[it].wgt;
+    control[1] += ct_i / el_pair_list[it].wgt;
   }
 }
 
@@ -190,7 +190,7 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
       ct_i += std::inner_product(ct_kt.begin(), ct_kt.end(), ct_jt.begin(), -ct_corr) / el_pair_list[lt].wgt;
     }
     emp4 += en_i * el_pair_list[it].rv;
-    control[0] += ct_i / el_pair_list[it].wgt;
+    control[2] += ct_i / el_pair_list[it].wgt;
   }
 }
 
@@ -237,7 +237,7 @@ void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
       ct_jkl += ct_kl / el_pair_list[jt].wgt;
     }
     emp4       += en_jkl * el_pair_list[it].rv;
-    control[0] += ct_jkl / el_pair_list[it].wgt;
+    control[3] += ct_jkl / el_pair_list[it].wgt;
   }
 }
 
