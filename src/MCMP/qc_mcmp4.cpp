@@ -156,7 +156,7 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
         std::array<double, 36> en;
 #include "qc_mcmp4_il_k.h"
         std::transform(en_kt.begin(), en_kt.end(), en.begin(), en_kt.begin(), [&](double x, double y) {return x + y * el_pair_list[kt].rv;});
-        std::transform(ct_kt.begin(), ct_kt.end(), en.begin(), ct_kt.begin(), [&](double x, double y) {return x + y / el_pair_list[kt].wgt;});
+        // std::transform(ct_kt.begin(), ct_kt.end(), en.begin(), ct_kt.begin(), [&](double x, double y) {return x + y / el_pair_list[kt].wgt;});
       }
 
       std::array<double, 36> en_jt, ct_jt;
@@ -169,7 +169,7 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
         std::array<double, 36> en;
 #include "qc_mcmp4_il_j.h"
         std::transform(en_jt.begin(), en_jt.end(), en.begin(), en_jt.begin(), [&](double x, double y) {return x + y * el_pair_list[jt].rv;});
-        std::transform(ct_jt.begin(), ct_jt.end(), en.begin(), ct_jt.begin(), [&](double x, double y) {return x + y / el_pair_list[jt].wgt;});
+        // std::transform(ct_jt.begin(), ct_jt.end(), en.begin(), ct_jt.begin(), [&](double x, double y) {return x + y / el_pair_list[jt].wgt;});
       }
 
       double en_corr = 0;
@@ -183,14 +183,16 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
         double en = 0;
 #include "qc_mcmp4_il.h"
         en_corr += en * el_pair_list[kt].rv * el_pair_list[jt].rv;
-        ct_corr += en / el_pair_list[kt].wgt / el_pair_list[jt].wgt;
+        // ct_corr += en / el_pair_list[kt].wgt / el_pair_list[jt].wgt;
       }
 
       en_i += std::inner_product(en_kt.begin(), en_kt.end(), en_jt.begin(), -en_corr) * el_pair_list[lt].rv;
-      ct_i += std::inner_product(ct_kt.begin(), ct_kt.end(), ct_jt.begin(), -ct_corr) / el_pair_list[lt].wgt;
+      ct_i += std::inner_product(en_kt.begin(), en_kt.end(), en_jt.begin(), -en_corr) / el_pair_list[lt].wgt;
     }
     emp4 += en_i * el_pair_list[it].rv;
-    control[2] += ct_i / el_pair_list[it].wgt;
+    control[2] += en_i / el_pair_list[it].wgt;
+    control[3] += ct_i / el_pair_list[it].wgt;
+    control[4] += ct_i * el_pair_list[it].rv;
   }
 }
 

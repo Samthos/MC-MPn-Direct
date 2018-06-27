@@ -149,8 +149,8 @@ class MP4 : public MP {
     cv.emplace_back(ControlVariate(18, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
 
     // set up MP4 control variates
-    control.emplace_back(std::vector<double>(4));
-    cv.emplace_back(ControlVariate(4, {0.0, 0.0, 0.0, 0.0}));
+    control.emplace_back(std::vector<double>(6));
+    cv.emplace_back(ControlVariate(6, {0, 0, 0, 0, 0, 0}));
   }
   ~MP4() {
     ovps.free();
