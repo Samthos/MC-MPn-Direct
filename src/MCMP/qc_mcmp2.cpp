@@ -70,9 +70,16 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
       emp2_rvj = emp2_rvj - 2.0 * emp2a + emp2b;
       control_j[0] = control_j[0] + a_resk / jt->wgt;
       control_j[1] = control_j[1] + b_resk / jt->wgt;
+
+     control_j[2] = control_j[2] + a_resk / jt->wgt;
+     control_j[3] = control_j[3] + b_resk / jt->wgt;
+
+     control_j[4] = control_j[4] + a_resk * jt->rv;
+     control_j[5] = control_j[5] + b_resk * jt->rv;
     }
     emp2 += emp2_rvj * it->rv;
-    std::transform(control_j.begin(), control_j.end(), control.begin(), control.begin(), [&](double x, double y) { return y + x / it->wgt; });
+    std::transform(control_j.begin(), control_j.begin()+2, control.begin(), control.begin(), [&](double x, double y) { return y + x * it->rv; });
+    std::transform(control_j.begin()+2, control_j.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x / it->wgt; });
   }
 
   auto tau_wgt = tau.get_wgt(1);
@@ -110,9 +117,16 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control) {
       emp2_rvj = emp2_rvj - 2.0 * emp2a + emp2b;
       control_j[0] = control_j[0] + a_resk / el_pair_list[jt].wgt;
       control_j[1] = control_j[1] + b_resk / el_pair_list[jt].wgt;
+
+     control_j[2] = control_j[2] + a_resk / el_pair_list[jt].wgt;
+     control_j[3] = control_j[3] + b_resk / el_pair_list[jt].wgt;
+
+     control_j[4] = control_j[4] + a_resk * el_pair_list[jt].rv;
+     control_j[5] = control_j[5] + b_resk * el_pair_list[jt].rv;
     }
     emp2 += emp2_rvj * el_pair_list[it].rv;
-    std::transform(control_j.begin(), control_j.end(), control.begin(), control.begin(), [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
+    std::transform(control_j.begin(), control_j.begin()+2, control.begin(), control.begin(), [&](double x, double y) { return y + x * el_pair_list[it].rv; });
+    std::transform(control_j.begin()+2, control_j.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
   }
   auto tau_wgt = tau.get_wgt(1);
   emp2 = emp2 * tau_wgt / icount2;

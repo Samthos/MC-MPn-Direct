@@ -98,11 +98,9 @@ class MP2 : public MP {
     tau.resize(1, basis);
 
     emp.resize(1);
-    control.resize(1);
-    cv.resize(1);
 
-    control[0].resize(2);
-    cv[0] = ControlVariate(2, {0, 0});
+    control.emplace_back(std::vector<double>(6));
+    cv.emplace_back(ControlVariate(6, {0, 0, 0, 0, 0, 0}));
   }
   ~MP2() {}
 
@@ -121,8 +119,8 @@ class MP3 : public MP {
     control.resize(2);
     cv.resize(2);
 
-    control[0].resize(2);
-    cv[0] = ControlVariate(2, {0, 0});
+    control[0].resize(6);
+    cv[0] = ControlVariate(6, {0, 0, 0, 0, 0, 0});
 
     control[1].resize(6);
     cv[1] = ControlVariate(6, {0, 0, 0, 0, 0, 0});
@@ -145,8 +143,8 @@ class MP4 : public MP {
     control.resize(3);
     cv.resize(3);
 
-    control[0].resize(2);
-    cv[0] = ControlVariate(2, {0, 0});
+    control[0].resize(6);
+    cv[0] = ControlVariate(6, {0, 0, 0, 0, 0, 0});
 
     control[1].resize(6);
     cv[1] = ControlVariate(6, {0, 0, 0, 0, 0, 0});
