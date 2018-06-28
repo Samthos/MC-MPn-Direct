@@ -244,13 +244,16 @@ void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
         double ct_l_t = 0;
 #include "qc_mcmp4_ijk.h"
         en_kl += en_l_t * el_pair_list[kt].rv;
-        ct_kl += ct_l_t / el_pair_list[kt].wgt;
+        ct_kl += ct_l_t * el_pair_list[kt].rv;
       }
       en_jkl += en_kl * el_pair_list[jt].rv;
-      ct_jkl += ct_kl / el_pair_list[jt].wgt;
+      ct_jkl += ct_kl * el_pair_list[jt].rv;
     }
     emp4       += en_jkl * el_pair_list[it].rv;
+
     control[9] += ct_jkl / el_pair_list[it].wgt;
+    control[10] += ct_jkl / el_pair_list[it].wgt;
+    control[11] += en_jkl * el_pair_list[it].rv;
   }
 }
 
