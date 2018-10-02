@@ -58,9 +58,9 @@ Direct sampling of a distribution is desirable as the sampling is free from corr
   After the transformation Eq.\ (\ref{eq:sgl_imp_t0}) becomes
   \begin{align}
     \omega_{Ai,Bj}(\bar{\mathbf{r}}_1, \bar{\mathbf{r}}_2) = 
-    c_{\alpha} c_{\beta}
+    c_{\contraction_exp} c_{\beta}
     \frac{
-      \exp(-\alpha(\bar{x}_1^2 + \bar{y}_1^2 + (\bar{z}_1 - Z_t)^2))
+      \exp(-\contraction_exp(\bar{x}_1^2 + \bar{y}_1^2 + (\bar{z}_1 - Z_t)^2))
       \exp(-\beta(\bar{x}_2^2 + \bar{y}_2^2 + (\bar{z}_2 + Z_t)^2))
     }
     {
@@ -68,7 +68,7 @@ Direct sampling of a distribution is desirable as the sampling is free from corr
     }
     \label{eq:sgl_imp_t1}
   \end{align}
-  where for compactness we have set $(c_\alpha, c_\beta, \alpha, \beta) = (c_{Ai}, c_{Bj}, \alpha_{Ai}, \alpha_{Bj})$.
+  where for compactness we have set $(c_\contraction_exp, c_\beta, \contraction_exp, \beta) = (c_{Ai}, c_{Bj}, \alpha_{Ai}, \alpha_{Bj})$.
 
   %\begin{align}
   %  \bar{\mathbf{r}}_1 &= \mathbf{R}(\phi, y)\mathbf{R}(\theta, z)\tilde{\mathbf{r}}_1 \\
@@ -78,16 +78,16 @@ Direct sampling of a distribution is desirable as the sampling is free from corr
 
   The second transformation introduces a center of mass like coordinates 
   \begin{align}
-    \bar{x}_1 &= \tilde{x} - \frac{\gamma}{\alpha} \tilde{r} \cos(\tilde{\theta}) \sin(\tilde{\phi}) \\
-    \bar{y}_1 &= \tilde{y} - \frac{\gamma}{\alpha} \tilde{r} \sin(\tilde{\theta}) \sin(\tilde{\phi}) \\
-    \bar{z}_1 &= \tilde{z} - \frac{\gamma}{\alpha} \tilde{r} \cos(\tilde{\phi}) \\
+    \bar{x}_1 &= \tilde{x} - \frac{\gamma}{\contraction_exp} \tilde{r} \cos(\tilde{\theta}) \sin(\tilde{\phi}) \\
+    \bar{y}_1 &= \tilde{y} - \frac{\gamma}{\contraction_exp} \tilde{r} \sin(\tilde{\theta}) \sin(\tilde{\phi}) \\
+    \bar{z}_1 &= \tilde{z} - \frac{\gamma}{\contraction_exp} \tilde{r} \cos(\tilde{\phi}) \\
     \bar{x}_2 &= \tilde{x} + \frac{\gamma}{\beta} \tilde{r} \cos(\tilde{\theta}) \sin(\tilde{\phi}) \\
     \bar{y}_2 &= \tilde{y} + \frac{\gamma}{\beta} \tilde{r} \sin(\tilde{\theta}) \sin(\tilde{\phi}) \\
     \bar{z}_2 &= \tilde{z} + \frac{\gamma}{\beta} \tilde{r} \cos(\tilde{\phi})
   \end{align}
   where
   \begin{align}
-    \gamma^2 = \frac{\alpha \beta}{\alpha + \beta}
+    \gamma^2 = \frac{\contraction_exp \beta}{\contraction_exp + \beta}
   \end{align}
   and
   $(\tilde{x}, \tilde{y}, \tilde{z})$ is the center of the coordinate pair, $\tilde{r}$ is half the inter-electronic distance, and $(\tilde{\theta}, \tilde{\phi})$ describe the orientation of
@@ -99,11 +99,11 @@ Direct sampling of a distribution is desirable as the sampling is free from corr
   Applying the second coordinate transformation to Eq.\ (\ref{eq:sgl_imp_t1}) with the inclusion of the Jacobian produces
   \begin{align}
     \omega_{Ai,Bj}(\bar{\mathbf{r}}_1, \bar{\mathbf{r}}_2) =& 
-    \mathrm{N}\left(\tilde{x}; 0, \frac{1}{\sqrt{2(\alpha + \beta)}}\right)
-    \mathrm{N}\left(\tilde{y}; 0, \frac{1}{\sqrt{2(\alpha + \beta)}}\right)
-    \mathrm{N}\left(\tilde{z}; \frac{\bar{z}_t (\alpha -\beta )}{2 (\alpha +\beta )}, \frac{1}{\sqrt{2(\alpha + \beta)}}\right) \nonumber \\
+    \mathrm{N}\left(\tilde{x}; 0, \frac{1}{\sqrt{2(\contraction_exp + \beta)}}\right)
+    \mathrm{N}\left(\tilde{y}; 0, \frac{1}{\sqrt{2(\contraction_exp + \beta)}}\right)
+    \mathrm{N}\left(\tilde{z}; \frac{\bar{z}_t (\contraction_exp -\beta )}{2 (\contraction_exp +\beta )}, \frac{1}{\sqrt{2(\contraction_exp + \beta)}}\right) \nonumber \\
     & \times \mathrm{U}\left(\tilde{\theta}; 0, 2 \pi\right)
-    w_{r\phi}\left(\tilde{r}, \tilde{\phi}; \bar{z}_t, \alpha, \beta\right),
+    w_{r\phi}\left(\tilde{r}, \tilde{\phi}; \bar{z}_t, \contraction_exp, \beta\right),
     \label{eq:sgl_imp_t2}
   \end{align}
   where 
@@ -172,12 +172,12 @@ Direct sampling of a distribution is desirable as the sampling is free from corr
 
   For a fixed value of $r$, $\phi$ is distributed according to Eq.\ (\ref{eq:JointPDF}). The CDF of $\phi$ is
   \begin{align}
-    W_\phi\left(\tilde{\phi} ; \tilde{r}, \bar{z}_t, \alpha, \beta\right) = 
+    W_\phi\left(\tilde{\phi} ; \tilde{r}, \bar{z}_t, \contraction_exp, \beta\right) =
     \frac{e^{-2 a \gamma  r \cos (\phi )-(a \gamma +r)^2} \left(e^{2 a \gamma  r}-e^{2 a \gamma  r \cos (\phi )}\right)}{\sqrt{\pi } \text{erf}(a \gamma )}
   \end{align}
   To generate $\phi$, a random number $p_\phi$ on $[0, 1)$ is generated and then a solution to 
   \begin{align}
-    W_\phi\left(\tilde{\phi} ; \tilde{r}, \bar{z}_t, \alpha, \beta\right) - p_\phi w_r\left(\tilde{r}; \bar{z}_t, \gamma \right) = 0.
+    W_\phi\left(\tilde{\phi} ; \tilde{r}, \bar{z}_t, \contraction_exp, \beta\right) - p_\phi w_r\left(\tilde{r}; \bar{z}_t, \gamma \right) = 0.
     \label{eq:phiJointRoot}
   \end{align}
   is found.

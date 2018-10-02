@@ -96,7 +96,7 @@ void GF::mcgf2_local_energy_full(int band) {
   cublasHandle_t handle;
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
 
-  // ent = alpha * en2p . psi2
+  // ent = contraction_exp * en2p . psi2
   alpha = tau.get_gfn_tau(0, 0, band - offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 0.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
@@ -106,7 +106,7 @@ void GF::mcgf2_local_energy_full(int band) {
                                  &beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]),
                      __FILE__, __LINE__);
 
-  // ent = alpha * en2m . psi2 + ent
+  // ent = contraction_exp * en2m . psi2 + ent
   alpha = tau.get_gfn_tau(0, 0, band - offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 1.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
@@ -134,7 +134,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
   cublasHandle_t handle;
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
 
-  // ent = alpha * en2pCore . psi2
+  // ent = contraction_exp * en2pCore . psi2
   alpha = tau.get_gfn_tau(0, 0, band - offBand, false) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 0.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
@@ -154,7 +154,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
                                  &beta, ovps.d_ovps.en2p, ivir2 - iocc1),
                      __FILE__, __LINE__);
 
-  // ent = alpha * en2mCore . psi2
+  // ent = contraction_exp * en2mCore . psi2
   alpha = tau.get_gfn_tau(0, 0, band - offBand, true) * tau.get_wgt(1) / static_cast<double>(nsamp);
   beta = 0.00;
   cublasStatusAssert(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,

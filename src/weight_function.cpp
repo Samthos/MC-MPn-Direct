@@ -51,7 +51,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec,
     std::cout << "-------------------------------------------------------------"
                  "----------------------------------------------"
               << std::endl;
-    std::cout << "\tAtom\t            alpha                         coef"
+    std::cout << "\tAtom\t            contraction_exp                         coef"
               << std::endl;
     std::cout << "-------------------------------------------------------------"
                  "----------------------------------------------"
@@ -162,10 +162,10 @@ double GTO_Weight::weight(const std::array<double, 3> &pos1,
     std::transform(pos2.begin(), pos2.end(),
                    mcBasisList[it[1]].center.begin(), dr.begin(), std::minus<double>());
 
-    auto a1 = mcBasisList[it[0]].alpha[it[2]];
-    auto a2 = mcBasisList[it[1]].alpha[it[3]];
-    auto n1 = mcBasisList[it[0]].norm[it[2]];
-    auto n2 = mcBasisList[it[1]].norm[it[3]];
+    auto a1 = mcBasisList[it[0]].contraction_exp[it[2]];
+    auto a2 = mcBasisList[it[1]].contraction_exp[it[3]];
+    auto n1 = mcBasisList[it[0]].contraction_coef[it[2]];
+    auto n2 = mcBasisList[it[1]].contraction_coef[it[3]];
 
     r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
     gf1 += n1 * exp(-a1 * r1) * n2 * exp(-a2 * r2);

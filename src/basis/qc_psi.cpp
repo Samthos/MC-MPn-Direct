@@ -20,7 +20,7 @@ void Basis::host_psi_get(double* pos, double* psi, Molec& molec) {
   cblas_dgemv(CblasRowMajor, CblasNoTrans,
               ivir2-iocc1, nw_nbf,
               1.0, h_basis.nw_co + iocc1*nw_nbf, ivir2,
-              h_basis.icgs, 1,
+              h_basis.ao_amplitudes, 1,
               0.0, psi+iocc1, 1);
 }
 
@@ -30,35 +30,34 @@ void Basis::host_cgs_get(double* pos, Molec& molec) {
   double x, y, z;
 
   for (int shell = 0; shell < qc_nshl; shell++) {
-    iat = h_basis.at[shell];
-    iam = h_basis.am[shell];
+    iam = h_basis.meta_data[shell].angular_moment;
 
-    x = pos[0] - molec.atom[iat].pos[0];
-    y = pos[1] - molec.atom[iat].pos[1];
-    z = pos[2] - molec.atom[iat].pos[2];
+    x = pos[0] - h_basis.meta_data[shell].pos[0];
+    y = pos[1] - h_basis.meta_data[shell].pos[1];
+    z = pos[2] - h_basis.meta_data[shell].pos[2];
     r2 = x * x + y * y + z * z;
 
     rad = 0.0;
-    for (auto i = h_basis.stop_list[shell]; i < h_basis.stop_list[shell + 1]; i++) {
-      rad = rad + exp(-h_basis.alpha[i] * r2) * h_basis.norm[i];
+    for (auto i = h_basis.meta_data[shell].contraction_begin; i < h_basis.meta_data[shell].contraction_end; i++) {
+      rad = rad + exp(-h_basis.contraction_exp[i] * r2) * h_basis.contraction_coef[i];
     }
 
     if (lspherical) {
-      ic = h_basis.isgs[shell];
+      ic = h_basis.meta_data[shell].ao_begin;
       switch (iam) {
         case 0:
-          h_basis.icgs[ic + 0] = rad;
+          h_basis.ao_amplitudes[ic + 0] = rad;
           break;
         case -1:
-          h_basis.icgs[ic + 0] = rad;
-          h_basis.icgs[ic + 1] = rad * x;
-          h_basis.icgs[ic + 2] = rad * y;
-          h_basis.icgs[ic + 3] = rad * z;
+          h_basis.ao_amplitudes[ic + 0] = rad;
+          h_basis.ao_amplitudes[ic + 1] = rad * x;
+          h_basis.ao_amplitudes[ic + 2] = rad * y;
+          h_basis.ao_amplitudes[ic + 3] = rad * z;
           break;
         case 1:
-          h_basis.icgs[ic + 0] = rad * x;
-          h_basis.icgs[ic + 1] = rad * y;
-          h_basis.icgs[ic + 2] = rad * z;
+          h_basis.ao_amplitudes[ic + 0] = rad * x;
+          h_basis.ao_amplitudes[ic + 1] = rad * y;
+          h_basis.ao_amplitudes[ic + 2] = rad * z;
           break;
         case 2:
           ang[0] = 1.732050807568877 * x * y;            // dxy
@@ -67,11 +66,11 @@ void Basis::host_cgs_get(double* pos, Molec& molec) {
           ang[3] = -1.732050807568877 * x * z;           // dxz
           ang[4] = 0.86602540378443 * (x * x - y * y);   // dxx, dyy
 
-          h_basis.icgs[ic + 0] = rad * ang[0];
-          h_basis.icgs[ic + 1] = rad * ang[1];
-          h_basis.icgs[ic + 2] = rad * ang[2];
-          h_basis.icgs[ic + 3] = rad * ang[3];
-          h_basis.icgs[ic + 4] = rad * ang[4];
+          h_basis.ao_amplitudes[ic + 0] = rad * ang[0];
+          h_basis.ao_amplitudes[ic + 1] = rad * ang[1];
+          h_basis.ao_amplitudes[ic + 2] = rad * ang[2];
+          h_basis.ao_amplitudes[ic + 3] = rad * ang[3];
+          h_basis.ao_amplitudes[ic + 4] = rad * ang[4];
           break;
         case 3:
           ang[0] = y * (cf[1] * x * x - cf[0] * y * y);  // xxy, yyy
@@ -82,13 +81,13 @@ void Basis::host_cgs_get(double* pos, Molec& molec) {
           ang[5] = z * cf[6] * (x * x - y * y);
           ang[6] = x * (cf[1] * y * y - cf[0] * x * x);
 
-          h_basis.icgs[ic + 0] = rad * ang[0];
-          h_basis.icgs[ic + 1] = rad * ang[1];
-          h_basis.icgs[ic + 2] = rad * ang[2];
-          h_basis.icgs[ic + 3] = rad * ang[3];
-          h_basis.icgs[ic + 4] = rad * ang[4];
-          h_basis.icgs[ic + 5] = rad * ang[5];
-          h_basis.icgs[ic + 6] = rad * ang[6];
+          h_basis.ao_amplitudes[ic + 0] = rad * ang[0];
+          h_basis.ao_amplitudes[ic + 1] = rad * ang[1];
+          h_basis.ao_amplitudes[ic + 2] = rad * ang[2];
+          h_basis.ao_amplitudes[ic + 3] = rad * ang[3];
+          h_basis.ao_amplitudes[ic + 4] = rad * ang[4];
+          h_basis.ao_amplitudes[ic + 5] = rad * ang[5];
+          h_basis.ao_amplitudes[ic + 6] = rad * ang[6];
           break;
         case 4:
           // m = -4
@@ -111,35 +110,35 @@ void Basis::host_cgs_get(double* pos, Molec& molec) {
           // m = 4
           ang[8] = cg[9] * (x * x * x * x + y * y * y * y) - cg[10] * x * x * y * y;
 
-          h_basis.icgs[ic + 0] = rad * ang[0];
-          h_basis.icgs[ic + 1] = rad * ang[1];
-          h_basis.icgs[ic + 2] = rad * ang[2];
-          h_basis.icgs[ic + 3] = rad * ang[3];
-          h_basis.icgs[ic + 4] = rad * ang[4];
-          h_basis.icgs[ic + 5] = rad * ang[5];
-          h_basis.icgs[ic + 6] = rad * ang[6];
-          h_basis.icgs[ic + 7] = rad * ang[7];
-          h_basis.icgs[ic + 8] = rad * ang[8];
+          h_basis.ao_amplitudes[ic + 0] = rad * ang[0];
+          h_basis.ao_amplitudes[ic + 1] = rad * ang[1];
+          h_basis.ao_amplitudes[ic + 2] = rad * ang[2];
+          h_basis.ao_amplitudes[ic + 3] = rad * ang[3];
+          h_basis.ao_amplitudes[ic + 4] = rad * ang[4];
+          h_basis.ao_amplitudes[ic + 5] = rad * ang[5];
+          h_basis.ao_amplitudes[ic + 6] = rad * ang[6];
+          h_basis.ao_amplitudes[ic + 7] = rad * ang[7];
+          h_basis.ao_amplitudes[ic + 8] = rad * ang[8];
           break;
       }
     }
     /*
     else {
       // cartesian GTO
-      // print *, 'ish am ic ', is, ishl%am, ishl%icgs
+      // print *, 'ish am ic ', is, ishl%am, ishl%ao_amplitudes
 
-      ic = ishl%icgs - 1
+      ic = ishl%ao_amplitudes - 1
       if (ishl%am == 0) {
-        icgs(ic+1) = rad(1)
+        ao_amplitudes(ic+1) = rad(1)
       } else if (ishl%am == -1) {
-        icgs(ic+1) = rad(1)
-        icgs(ic+2) = rad(2)*x
-        icgs(ic+3) = rad(2)*y
-        icgs(ic+4) = rad(2)*z
+        ao_amplitudes(ic+1) = rad(1)
+        ao_amplitudes(ic+2) = rad(2)*x
+        ao_amplitudes(ic+3) = rad(2)*y
+        ao_amplitudes(ic+4) = rad(2)*z
       } else if (ishl%am == 1) {
-        icgs(ic+1) = rad(1)*x
-        icgs(ic+2) = rad(1)*y
-        icgs(ic+3) = rad(1)*z
+        ao_amplitudes(ic+1) = rad(1)*x
+        ao_amplitudes(ic+2) = rad(1)*y
+        ao_amplitudes(ic+3) = rad(1)*z
       } else if (ishl%am == 2) {
         ang(1) = x*x  // dxx
         ang(2) = x*y  // cd(1)*x*y  // dxy
@@ -148,12 +147,12 @@ void Basis::host_cgs_get(double* pos, Molec& molec) {
         ang(5) = y*z  // cd(1)*y*z  // dyz
         ang(6) = z*z  // dzz
 
-        icgs(ic+1) = rad(1)*ang(1)
-        icgs(ic+2) = rad(1)*ang(2)
-        icgs(ic+3) = rad(1)*ang(3)
-        icgs(ic+4) = rad(1)*ang(4)
-        icgs(ic+5) = rad(1)*ang(5)
-        icgs(ic+6) = rad(1)*ang(6)
+        ao_amplitudes(ic+1) = rad(1)*ang(1)
+        ao_amplitudes(ic+2) = rad(1)*ang(2)
+        ao_amplitudes(ic+3) = rad(1)*ang(3)
+        ao_amplitudes(ic+4) = rad(1)*ang(4)
+        ao_amplitudes(ic+5) = rad(1)*ang(5)
+        ao_amplitudes(ic+6) = rad(1)*ang(6)
       } else if (ishl%am == 3) {
         ang(1) = x*x*x  // fxxx
         ang(2) = x*x*y  // sqrt_5*x*x*y  // fxxy
@@ -166,16 +165,16 @@ void Basis::host_cgs_get(double* pos, Molec& molec) {
         ang(9) = y*z*z  // sqrt_5*y*z*z  // fyzz
         ang(10) = z*z*z  // fzzz
 
-        icgs(ic+1) = rad(1)*ang(1)
-        icgs(ic+2) = rad(1)*ang(2)
-        icgs(ic+3) = rad(1)*ang(3)
-        icgs(ic+4) = rad(1)*ang(4)
-        icgs(ic+5) = rad(1)*ang(5)
-        icgs(ic+6) = rad(1)*ang(6)
-        icgs(ic+7) = rad(1)*ang(7)
-        icgs(ic+8) = rad(1)*ang(8)
-        icgs(ic+9) = rad(1)*ang(9)
-        icgs(ic+10) = rad(1)*ang(10)
+        ao_amplitudes(ic+1) = rad(1)*ang(1)
+        ao_amplitudes(ic+2) = rad(1)*ang(2)
+        ao_amplitudes(ic+3) = rad(1)*ang(3)
+        ao_amplitudes(ic+4) = rad(1)*ang(4)
+        ao_amplitudes(ic+5) = rad(1)*ang(5)
+        ao_amplitudes(ic+6) = rad(1)*ang(6)
+        ao_amplitudes(ic+7) = rad(1)*ang(7)
+        ao_amplitudes(ic+8) = rad(1)*ang(8)
+        ao_amplitudes(ic+9) = rad(1)*ang(9)
+        ao_amplitudes(ic+10) = rad(1)*ang(10)
       } else if (ishl%am == 4) {
         ang(1) = x*x*x*x  // (4, 0, 0)
         ang(2) = x*x*x*y  // (3, 1, 0)
@@ -194,21 +193,21 @@ void Basis::host_cgs_get(double* pos, Molec& molec) {
         ang(14)= y*z*z*z  // (0, 1, 3)
         ang(15)= z*z*z*z  // (0, 0, 4)
 
-        icgs(ic+1) = rad(1)*ang(1)
-        icgs(ic+2) = rad(1)*ang(2)
-        icgs(ic+3) = rad(1)*ang(3)
-        icgs(ic+4) = rad(1)*ang(4)
-        icgs(ic+5) = rad(1)*ang(5)
-        icgs(ic+6) = rad(1)*ang(6)
-        icgs(ic+7) = rad(1)*ang(7)
-        icgs(ic+8) = rad(1)*ang(8)
-        icgs(ic+9) = rad(1)*ang(9)
-        icgs(ic+10) = rad(1)*ang(10)
-        icgs(ic+11) = rad(1)*ang(11)
-        icgs(ic+12) = rad(1)*ang(12)
-        icgs(ic+13) = rad(1)*ang(13)
-        icgs(ic+14) = rad(1)*ang(14)
-        icgs(ic+15) = rad(1)*ang(15)
+        ao_amplitudes(ic+1) = rad(1)*ang(1)
+        ao_amplitudes(ic+2) = rad(1)*ang(2)
+        ao_amplitudes(ic+3) = rad(1)*ang(3)
+        ao_amplitudes(ic+4) = rad(1)*ang(4)
+        ao_amplitudes(ic+5) = rad(1)*ang(5)
+        ao_amplitudes(ic+6) = rad(1)*ang(6)
+        ao_amplitudes(ic+7) = rad(1)*ang(7)
+        ao_amplitudes(ic+8) = rad(1)*ang(8)
+        ao_amplitudes(ic+9) = rad(1)*ang(9)
+        ao_amplitudes(ic+10) = rad(1)*ang(10)
+        ao_amplitudes(ic+11) = rad(1)*ang(11)
+        ao_amplitudes(ic+12) = rad(1)*ang(12)
+        ao_amplitudes(ic+13) = rad(1)*ang(13)
+        ao_amplitudes(ic+14) = rad(1)*ang(14)
+        ao_amplitudes(ic+15) = rad(1)*ang(15)
       }
     }
     */

@@ -12,8 +12,6 @@
 #include "basis/qc_basis.h"
 #include "qc_monte.h"
 
-#define VERSION "fix"
-
 int main(int argc, char* argv[]) {
 #ifdef HAVE_MPI
   MPI_Init(&argc, &argv);

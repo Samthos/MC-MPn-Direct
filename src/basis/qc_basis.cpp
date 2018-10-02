@@ -36,15 +36,11 @@ Basis::Basis() {
 }
 Basis::~Basis() {
   delete[] nw_en;
-  delete[] h_basis.nw_co;
 
-  delete[] h_basis.icgs;
-  delete[] h_basis.alpha;
-  delete[] h_basis.norm;
-  delete[] h_basis.am;
-  delete[] h_basis.at;
-  delete[] h_basis.stop_list;
-  delete[] h_basis.isgs;
+  delete[] h_basis.nw_co;
+  delete[] h_basis.ao_amplitudes;
+  delete[] h_basis.contraction_exp;
+  delete[] h_basis.contraction_coef;
 }
 Basis::Basis(const Basis& param) {
   qc_nprm = param.qc_nprm;
@@ -53,15 +49,8 @@ Basis::Basis(const Basis& param) {
   qc_nshl = param.qc_nshl;
   lspherical = param.lspherical;
 
-  h_basis.am = new int[qc_nshl];
-  h_basis.at = new int[qc_nshl];
-  h_basis.isgs = new int[qc_nshl + 1];
-  h_basis.stop_list = new int[qc_nshl + 1];
-
-  std::copy(param.h_basis.am, param.h_basis.am + qc_nshl, h_basis.am);
-  std::copy(param.h_basis.at, param.h_basis.at + qc_nshl, h_basis.at);
-  std::copy(param.h_basis.isgs, param.h_basis.isgs + qc_nshl + 1, h_basis.isgs);
-  std::copy(param.h_basis.stop_list, param.h_basis.stop_list + qc_nshl + 1, h_basis.stop_list);
+  h_basis.meta_data = new BasisMetaData[qc_nshl];
+  std::copy(param.h_basis.meta_data, param.h_basis.meta_data + qc_nshl, h_basis.meta_data);
 
   iocc1 = param.iocc1;
   iocc2 = param.iocc2;
@@ -69,24 +58,20 @@ Basis::Basis(const Basis& param) {
   ivir2 = param.ivir2;
 
   // from nwchem
-  nw_nsets = param.nw_nsets;
   nw_nbf = param.nw_nbf;
-  nw_iocc = param.nw_iocc;
-  nw_icore = param.nw_icore;
-  nw_nmo[0] = param.nw_nmo[0];
-  nw_nmo[1] = param.nw_nmo[1];
+  nw_nmo = param.nw_nmo;
 
-  h_basis.icgs = new double[nw_nbf];
+  h_basis.ao_amplitudes = new double[nw_nbf];
   nw_en = new double[nw_nbf];
   std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);
 
-  h_basis.nw_co = new double[nw_nbf * nw_nmo[0]];
-  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo[0] * nw_nbf, h_basis.nw_co);
+  h_basis.nw_co = new double[nw_nbf * nw_nmo];
+  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo * nw_nbf, h_basis.nw_co);
 
-  h_basis.alpha = new double[qc_nprm];
-  h_basis.norm = new double[qc_nprm];
-  std::copy(param.h_basis.alpha, param.h_basis.alpha + qc_nprm, h_basis.alpha);
-  std::copy(param.h_basis.norm, param.h_basis.norm + qc_nprm, h_basis.norm);
+  h_basis.contraction_exp = new double[qc_nprm];
+  h_basis.contraction_coef = new double[qc_nprm];
+  std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + qc_nprm, h_basis.contraction_exp);
+  std::copy(param.h_basis.contraction_coef, param.h_basis.contraction_coef + qc_nprm, h_basis.contraction_coef);
 }
 Basis& Basis::operator=(const Basis& param) {
   qc_nprm = param.qc_nprm;
@@ -95,15 +80,8 @@ Basis& Basis::operator=(const Basis& param) {
   qc_nshl = param.qc_nshl;
   lspherical = param.lspherical;
 
-  h_basis.am = new int[qc_nshl];
-  h_basis.at = new int[qc_nshl];
-  h_basis.isgs = new int[qc_nshl + 1];
-  h_basis.stop_list = new int[qc_nshl + 1];
-
-  std::copy(param.h_basis.am, param.h_basis.am + qc_nshl, h_basis.am);
-  std::copy(param.h_basis.at, param.h_basis.at + qc_nshl, h_basis.at);
-  std::copy(param.h_basis.isgs, param.h_basis.isgs + qc_nshl + 1, h_basis.isgs);
-  std::copy(param.h_basis.stop_list, param.h_basis.stop_list + qc_nshl + 1, h_basis.stop_list);
+  h_basis.meta_data = new BasisMetaData[qc_nshl];
+  std::copy(param.h_basis.meta_data, param.h_basis.meta_data + qc_nshl, h_basis.meta_data);
 
   iocc1 = param.iocc1;
   iocc2 = param.iocc2;
@@ -111,24 +89,20 @@ Basis& Basis::operator=(const Basis& param) {
   ivir2 = param.ivir2;
 
   // from nwchem
-  nw_nsets = param.nw_nsets;
   nw_nbf = param.nw_nbf;
-  nw_iocc = param.nw_iocc;
-  nw_icore = param.nw_icore;
-  nw_nmo[0] = param.nw_nmo[0];
-  nw_nmo[1] = param.nw_nmo[1];
+  nw_nmo = param.nw_nmo;
 
-  h_basis.icgs = new double[nw_nbf];
+  h_basis.ao_amplitudes = new double[nw_nbf];
   nw_en = new double[nw_nbf];
   std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);
 
-  h_basis.nw_co = new double[nw_nbf * nw_nmo[0]];
-  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nbf * nw_nmo[0], h_basis.nw_co);
+  h_basis.nw_co = new double[nw_nbf * nw_nmo];
+  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nbf * nw_nmo, h_basis.nw_co);
 
-  h_basis.alpha = new double[qc_nprm];
-  h_basis.norm = new double[qc_nprm];
-  std::copy(param.h_basis.alpha, param.h_basis.alpha + qc_nprm, h_basis.alpha);
-  std::copy(param.h_basis.norm, param.h_basis.norm + qc_nprm, h_basis.norm);
+  h_basis.contraction_exp = new double[qc_nprm];
+  h_basis.contraction_coef = new double[qc_nprm];
+  std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + qc_nprm, h_basis.contraction_exp);
+  std::copy(param.h_basis.contraction_coef, param.h_basis.contraction_coef + qc_nprm, h_basis.contraction_coef);
 
   return *this;
 }
@@ -224,22 +198,19 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     qc_ngfs = ncgs;
   }
 
-  h_basis.alpha = new double[qc_nprm];
-  h_basis.norm = new double[qc_nprm];
-  h_basis.am = new int[qc_nshl];
-  h_basis.at = new int[qc_nshl];
-  h_basis.stop_list = new int[qc_nshl + 1];
-  h_basis.isgs = new int[qc_nshl + 1];
+  h_basis.contraction_exp = new double[qc_nprm];
+  h_basis.contraction_coef = new double[qc_nprm];
+  h_basis.meta_data = new BasisMetaData[qc_nshl];
 
   nprm = 0;
   nshl = 0;
   ncgs = 0;
   nsgs = 0;
-  int new_sgs = 0;
-  int kk = 0;
 
-  h_basis.stop_list[0] = 0;
-  h_basis.isgs[0] = 0;
+  int shell = 0;
+  int contraction_begin = 0;
+  int ao_begin = 0;
+  int ao_offset = 0;
 
   for (i = 0; i < molec.natom; i++) {
     if (mpi_info.sys_master) {
@@ -255,38 +226,44 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
             input >> sym >> nprim;
             input.ignore(256, '\n');
             if (sym == "SP") {
-              new_sgs = new_sgs + 4;
+              ao_offset = 4;
             } else if (sym == "S") {
-              h_basis.am[kk] = 0;
-              new_sgs = new_sgs + 1;
+              h_basis.meta_data[shell].angular_moment = 0;
+              ao_offset = 1;
             } else if (sym == "P") {
-              h_basis.am[kk] = 1;
-              new_sgs = new_sgs + 3;
+              h_basis.meta_data[shell].angular_moment = 1;
+              ao_offset = 3;
             } else if (sym == "D") {
-              h_basis.am[kk] = 2;
-              new_sgs = new_sgs + 5;
+              h_basis.meta_data[shell].angular_moment = 2;
+              ao_offset = 5;
             } else if (sym == "F") {
-              h_basis.am[kk] = 3;
-              new_sgs = new_sgs + 7;
+              h_basis.meta_data[shell].angular_moment = 3;
+              ao_offset = 7;
             } else if (sym == "G") {
-              h_basis.am[kk] = 4;
-              new_sgs = new_sgs + 9;
+              h_basis.meta_data[shell].angular_moment = 4;
+              ao_offset = 9;
             }
 
-            if (h_basis.am[kk] == -1) {
+            if (h_basis.meta_data[shell].angular_moment == -1) {
               for (k = 0; k < nprim; k++) {
-                // input >> alpha[k][j] >> coef[k][j] >> coef2[k][j];
+                // input >> contraction_exp[k][j] >> coef[k][j] >> coef2[k][j];
               }
             } else {
               for (k = 0; k < nprim; k++) {
-                input >> h_basis.alpha[nprm] >> h_basis.norm[nprm];
-                nprm++;
+                input >> h_basis.contraction_exp[contraction_begin + k];
+                input >> h_basis.contraction_coef[contraction_begin + k];
               }
             }
-            h_basis.at[kk] = i;
-            h_basis.stop_list[kk + 1] = nprm;
-            h_basis.isgs[kk + 1] = new_sgs;
-            kk++;
+            std::copy(molec.atom[i].pos, molec.atom[i].pos + 3, h_basis.meta_data[shell].pos);
+
+            h_basis.meta_data[shell].contraction_begin = contraction_begin;
+            contraction_begin +=nprim;
+            h_basis.meta_data[shell].contraction_end = contraction_begin;
+
+            h_basis.meta_data[shell].ao_begin = ao_begin;
+            ao_begin += ao_offset;
+
+            shell++;
           }
         } else {
           for (j = 0; j < nshell; j++) {
@@ -303,12 +280,9 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
 #ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.alpha, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.norm, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.am, qc_nshl, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.at, qc_nshl, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.stop_list, qc_nshl + 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.isgs, qc_nshl + 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.contraction_exp, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.contraction_coef, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.meta_data, qc_nshl * sizeof(BasisMetaData), MPI_CHAR, 0, MPI_COMM_WORLD);
 #endif
 
   normalize();
@@ -319,7 +293,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
       if (mpi_info.taskid == 0) {
-        printf("%2i\t%7.3f\t%7.3f\n", i, h_basis.alpha[i], h_basis.norm[i]);
+        printf("%2i\t%7.3f\t%7.3f\n", i, h_basis.contraction_exp[i], h_basis.contraction_coef[i]);
         fflush(stdout);
       }
   }
@@ -328,7 +302,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
       if (mpi_info.taskid == 1) {
-        printf("%2i\t%7.3f\t%7.3f\n", i, h_basis.alpha[i], h_basis.norm[i]);
+        printf("%2i\t%7.3f\t%7.3f\n", i, h_basis.contraction_exp[i], h_basis.contraction_coef[i]);
         fflush(stdout);
       }
   }
@@ -351,41 +325,41 @@ void Basis::normalize() {
   constexpr double pi = 3.141592653589793;
 
   for (i = 0; i < qc_nshl; i++) {  // number of shells on the atom
-    if (h_basis.am[i] == -1) {
+    if (h_basis.meta_data[i].angular_moment == -1) {
       /*
       qc_shl_list[nshl[0]].ncgs = 4;
       qc_shl_list[nshl[0]].nsgs = 4;
 
-      qc_shl_list[nshl[0]].h_basis.norm = new double*[2];
+      qc_shl_list[nshl[0]].h_basis.contraction_coef = new double*[2];
       for (j = 0; j < 2; j++) {
-        qc_shl_list[nshl[0]].h_basis.norm[j] = new double[nprim[i]];
+        qc_shl_list[nshl[0]].h_basis.contraction_coef[j] = new double[nprim[i]];
       }
 
       nsgs = nsgs + 4;
       ncgs = ncgs + 4;
 
       for (j = 0; j < nprim[i]; j++) {
-        cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j][i] / pi));
-        qc_shl_list[nshl[0]].h_basis.alpha[j]  = h_basis.alpha[j][i];
-        qc_shl_list[nshl[0]].h_basis.norm[1][j] = coef[j][i] * ch_basis.norm;
+        cnorm = exp(0.75 * log(2.0 * h_basis.contraction_exp[j][i] / pi));
+        qc_shl_list[nshl[0]].h_basis.contraction_exp[j]  = h_basis.contraction_exp[j][i];
+        qc_shl_list[nshl[0]].h_basis.contraction_coef[1][j] = coef[j][i] * ch_basis.contraction_coef;
         cnorm = cnorm * sqrt(4.0 * new_alpha[j][i]);
         qc_shl_list[nshl[0]].new_norm[2][j]  = coef2[j][i] * cnorm;
       }
 */
-    } else if (h_basis.am[i] == 0) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi));
-        h_basis.norm[j] = h_basis.norm[j] * cnorm;
+    } else if (h_basis.meta_data[i].angular_moment == 0) {
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        cnorm = exp(0.75 * log(2.0 * h_basis.contraction_exp[j] / pi));
+        h_basis.contraction_coef[j] = h_basis.contraction_coef[j] * cnorm;
       }
 
       // ncgs = ncgs + 1;
       // nsgs[0] = nsgs[0] + 1;
       facs = 0.0;
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        for (k = h_basis.stop_list[i]; k <= j; k++) {
-          aa = h_basis.alpha[j] + h_basis.alpha[k];
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        for (k = h_basis.meta_data[i].contraction_begin; k <= j; k++) {
+          aa = h_basis.contraction_exp[j] + h_basis.contraction_exp[k];
           fac = aa * sqrt(aa);
-          dum = h_basis.norm[j] * h_basis.norm[k] / fac;
+          dum = h_basis.contraction_coef[j] * h_basis.contraction_coef[k] / fac;
           if (j != k) {
             dum = dum + dum;
           }
@@ -395,24 +369,24 @@ void Basis::normalize() {
       pi32 = 5.56832799683170;
       facs = 1.0 / sqrt(facs * pi32);
 
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        h_basis.norm[j] = h_basis.norm[j] * facs;
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        h_basis.contraction_coef[j] = h_basis.contraction_coef[j] * facs;
       }
-    } else if (h_basis.am[i] == 1) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi));
-        cnorm = cnorm * sqrt(4.0 * h_basis.alpha[j]);
-        h_basis.norm[j] = h_basis.norm[j] * cnorm;
+    } else if (h_basis.meta_data[i].angular_moment == 1) {
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        cnorm = exp(0.75 * log(2.0 * h_basis.contraction_exp[j] / pi));
+        cnorm = cnorm * sqrt(4.0 * h_basis.contraction_exp[j]);
+        h_basis.contraction_coef[j] = h_basis.contraction_coef[j] * cnorm;
       }
       // ncgs = ncgs + 3;
       // nsgs[0] = nsgs[0] + 3;
 
       facs = 0.0;
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        for (k = h_basis.stop_list[i]; k <= j; k++) {
-          aa = h_basis.alpha[j] + h_basis.alpha[k];
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        for (k = h_basis.meta_data[i].contraction_begin; k <= j; k++) {
+          aa = h_basis.contraction_exp[j] + h_basis.contraction_exp[k];
           fac = aa * sqrt(aa);
-          dum = 0.5 * h_basis.norm[j] * h_basis.norm[k] / (aa * fac);
+          dum = 0.5 * h_basis.contraction_coef[j] * h_basis.contraction_coef[k] / (aa * fac);
           if (j != k) {
             dum = dum + dum;
           }
@@ -422,31 +396,31 @@ void Basis::normalize() {
       pi32 = 5.56832799683170;
       facs = 1.0 / sqrt(facs * pi32);
 
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        h_basis.norm[j] = h_basis.norm[j] * facs;
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        h_basis.contraction_coef[j] = h_basis.contraction_coef[j] * facs;
       }
-    } else if (h_basis.am[i] == 2) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi)) * 4.0 * h_basis.alpha[j];
+    } else if (h_basis.meta_data[i].angular_moment == 2) {
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        cnorm = exp(0.75 * log(2.0 * h_basis.contraction_exp[j] / pi)) * 4.0 * h_basis.contraction_exp[j];
         cnorm = cnorm / sqrt(3.0);
-        h_basis.norm[j] = h_basis.norm[j] * cnorm;  // dxx
+        h_basis.contraction_coef[j] = h_basis.contraction_coef[j] * cnorm;  // dxx
       }
       // ncgs = ncgs + 6;
       // nsgs[0] = nsgs[0] + 5;
-    } else if (h_basis.am[i] == 3) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi)) * pow(4.0 * h_basis.alpha[j], 1.5);
+    } else if (h_basis.meta_data[i].angular_moment == 3) {
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        cnorm = exp(0.75 * log(2.0 * h_basis.contraction_exp[j] / pi)) * pow(4.0 * h_basis.contraction_exp[j], 1.5);
         cnorm = cnorm / sqrt(15.0);
-        h_basis.norm[j] = h_basis.norm[j] * cnorm;  // dxx
+        h_basis.contraction_coef[j] = h_basis.contraction_coef[j] * cnorm;  // dxx
       }
 
       // ncgs = ncgs + 10;
       // nsgs[0] = nsgs[0] + 7;
-    } else if (h_basis.am[i] == 4) {
-      for (j = h_basis.stop_list[i]; j < h_basis.stop_list[i + 1]; j++) {
-        cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j] / pi)) * pow(4.0 * h_basis.alpha[j], 2.0);
+    } else if (h_basis.meta_data[i].angular_moment == 4) {
+      for (j = h_basis.meta_data[i].contraction_begin; j < h_basis.meta_data[i].contraction_end; j++) {
+        cnorm = exp(0.75 * log(2.0 * h_basis.contraction_exp[j] / pi)) * pow(4.0 * h_basis.contraction_exp[j], 2.0);
         cnorm = cnorm / sqrt(7.0 * 15.0);
-        h_basis.norm[j] = h_basis.norm[j] * cnorm;  // dxx
+        h_basis.contraction_coef[j] = h_basis.contraction_coef[j] * cnorm;  // dxx
       }
       // ncgs = ncgs + 15;
       // nsgs[0] = nsgs[0] + 9;

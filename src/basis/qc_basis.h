@@ -6,26 +6,21 @@
 
 #ifndef QC_BASIS_H_
 #define QC_BASIS_H_
+struct BasisMetaData{
+  int angular_moment;
+  int contraction_begin;
+  int contraction_end;
+  int ao_begin;
+  double pos[3];
+};
+
 struct BasisData {
-  int iocc1, iocc2, ivir1, ivir2;
-  int qc_ncgs;      // number of contracted gausians
-  int qc_ngfs;      // number of gasusian functions??
-  int qc_nshl;      // number of shells???
-  int qc_nprm;      // nubmer of primatives
-  bool lspherical;  // true if sperical
-
-  double *alpha;
-  double *norm;
-  double *icgs;  // stores AO amplidutes
-  int *am;
-  int *at;
-  int *stop_list;
-  int *isgs;
-
+  double *contraction_exp;
+  double *contraction_coef;
+  double *ao_amplitudes;  // stores AO amplidutes
   double *nw_co;  // obital coefs from nwchem
 
-  double *pos;
-  double *apos;
+  BasisMetaData *meta_data;
 };
 
 class Basis {
@@ -61,11 +56,8 @@ class Basis {
   BasisData h_basis, d_basis;
 
   // from nwchem
-  int nw_nsets;   // numbe of basis sets
   int nw_nbf;     // number of basis fcns
-  int nw_nmo[2];  // number of basis fcns in basis set i
-  int nw_iocc;    // number of occpied orbitals
-  int nw_icore;   // number of core orbitals
+  int nw_nmo;  // number of basis fcns in basis set i
   double *nw_en;  // orbital energies from nwchem
 };
 #endif  // QC_BASIS_H_

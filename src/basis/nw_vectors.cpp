@@ -14,6 +14,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
   int ignoreInt;
   char ignoreChar[256];
   double* occ;
+  int nw_icore, nw_iocc, nw_nsets;
   std::string scftype20;
   std::string title;
   std::string basis_name;
@@ -107,8 +108,8 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
       } else {
         input.read((char*)&ignoreInt, 4);
         //				printf("%#08x\n", ignoreInt); //debug
-        input.read((char*)nw_nmo, ignoreInt);
-        //				std::cout << "nw_nmo: " << nw_nmo[0] << std::endl; //debug
+        input.read((char*)&nw_nmo, ignoreInt);
+        //				std::cout << "nw_nmo: " << nw_nmo << std::endl; //debug
         input.read((char*)&ignoreInt, 4);
         //				printf("%#08x\n\n", ignoreInt); //debug
       }
@@ -137,17 +138,16 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
 
       input >> nw_nsets >> nw_nbf;
 
-      nw_nmo[0] = 0;
-      nw_nmo[1] = 0;
+      nw_nmo = 0;
 
       for (i = 0; i < nw_nsets; i++) {
-        input >> nw_nmo[i];
+        input >> nw_nmo;
       }
     }
     std::cout << "nw_vectors: nbf " << nw_nbf << std::endl;
     std::cout << "nw_vectors: nmo ";
     for (i = 0; i < nw_nsets; i++) {
-      std::cout << nw_nmo[i] << " ";
+      std::cout << nw_nmo << " ";
     }
     std::cout << std::endl;
     std::cout.flush();
@@ -157,17 +157,17 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&nw_nsets, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nw_nbf, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&nw_nmo, 2, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&nw_nmo, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
 
-  h_basis.icgs = new double[nw_nbf];
+  h_basis.ao_amplitudes = new double[nw_nbf];
   occ = new double[nw_nbf];
   nw_en = new double[nw_nbf];
-  h_basis.nw_co = new double[nw_nbf * nw_nmo[0]];
+  h_basis.nw_co = new double[nw_nbf * nw_nmo];
   /*
 	nw_co = new double*[nw_nbf];
 	for(i=0;i<nw_nbf;i++) {
-		nw_co[i] = new double[nw_nmo[0]];
+		nw_co[i] = new double[nw_nmo];
 	}
 	*/
 
@@ -195,7 +195,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
       //			printf("%#08x\n\n", ignoreInt); //debug
 
       int index = 0;
-      for (i = 0; i < nw_nmo[0]; i++) {
+      for (i = 0; i < nw_nmo; i++) {
         double temp[nw_nbf];
         input.read((char*)&ignoreInt, 4);
         //				printf("%#08x\t%i\n", ignoreInt, ignoreInt); //debug
@@ -218,7 +218,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
       }
 
       int index = 0;
-      for (i = 0; i < nw_nmo[0]; i++) {
+      for (i = 0; i < nw_nmo; i++) {
         for (j = 0; j < nw_nbf; j++) {
           input >> h_basis.nw_co[index];
           index++;
@@ -241,7 +241,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
   MPI_Bcast(&nw_iocc, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nw_icore, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(nw_en, nw_nbf, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.nw_co, nw_nbf * nw_nmo[0], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.nw_co, nw_nbf * nw_nmo, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 #endif
 
   //orbital_check();
@@ -254,7 +254,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
   iocc1 = nw_icore;
   iocc2 = nw_iocc + 1;
   ivir1 = nw_iocc + 1;
-  ivir2 = nw_nmo[0];
+  ivir2 = nw_nmo;
 
   if (qc_ngfs != nw_nbf) {
     std::cerr << "You might use the different basis sets or geometry" << std::endl;
