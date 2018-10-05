@@ -38,9 +38,7 @@ int main(int argc, char* argv[]) {
   Molec molec;
   molec.read(mpi_info, iops.sopns[KEYS::GEOM]);
 
-  Basis basis;
-  basis.read(iops, mpi_info, molec);
-  basis.nw_vectors_read(mpi_info, molec, iops);
+  Basis basis(iops, mpi_info, molec);
 
   GTO_Weight mc_basis;
   mc_basis.read(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);

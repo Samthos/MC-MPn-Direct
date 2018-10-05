@@ -11,15 +11,15 @@
 void Basis::gpu_alloc(int mc_pair_num, Molec &molec) {
   cudaError_t_Assert(cudaMalloc((void **)&d_basis.ao_amplitudes, sizeof(double) * nw_nbf * mc_pair_num * 2), __FILE__, __LINE__);
 
-  cudaError_t_Assert(cudaMalloc((void **)&d_basis.contraction_exp, sizeof(double) * qc_nprm), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMalloc((void **)&d_basis.contraction_coef, sizeof(double) * qc_nprm), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMalloc((void **)&d_basis.contraction_exp, sizeof(double) * nPrimatives), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMalloc((void **)&d_basis.contraction_coef, sizeof(double) * nPrimatives), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMalloc((void **)&d_basis.nw_co, sizeof(double) * nw_nbf * nw_nmo[0]), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMalloc((void **)&d_basis.meta_data, sizeof(BasisMetaData) * qc_nshl), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMalloc((void **)&d_basis.meta_data, sizeof(BasisMetaData) * nShells), __FILE__, __LINE__);
 
-  cudaError_t_Assert(cudaMemcpy(d_basis.contraction_exp, h_basis.contraction_exp, sizeof(double) * qc_nprm, cudaMemcpyHostToDevice), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMemcpy(d_basis.contraction_coef, h_basis.contraction_coef, sizeof(double) * qc_nprm, cudaMemcpyHostToDevice), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMemcpy(d_basis.contraction_exp, h_basis.contraction_exp, sizeof(double) * nPrimatives, cudaMemcpyHostToDevice), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMemcpy(d_basis.contraction_coef, h_basis.contraction_coef, sizeof(double) * nPrimatives, cudaMemcpyHostToDevice), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMemcpy(d_basis.nw_co, h_basis.nw_co, sizeof(double) * nw_nbf * nw_nmo[0], cudaMemcpyHostToDevice), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMemcpy(d_basis.meta_data, h_basis.meta_data, sizeof(BasisMetaData) * qc_nshl, cudaMemcpyHostToDevice), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMemcpy(d_basis.meta_data, h_basis.meta_data, sizeof(BasisMetaData) * nShells, cudaMemcpyHostToDevice), __FILE__, __LINE__);
 }
 void Basis::gpu_free() {
   cudaError_t_Assert(cudaFree(d_basis.ao_amplitudes), __FILE__, __LINE__);
@@ -135,13 +135,13 @@ void Basis::device_psi_get(double *occ1,
   cublasStatusAssert(cublasCreate(&handle), __FILE__, __LINE__);
 
   dim3 blockSize(256, 1, 1);
-  dim3 gridSize((mc_pair_num * 2 + 255) / 256, qc_nshl, 1);
+  dim3 gridSize((mc_pair_num * 2 + 255) / 256, nShells, 1);
 
   //copy pos onto GPU
   cudaError_t_Assert(cudaMemcpy(d_basis.pos, pos, sizeof(double) * mc_pair_num * 6, cudaMemcpyHostToDevice), __FILE__, __LINE__);
 
   //calculate ao amplitudes
-  device_cgs_get<<<gridSize, blockSize>>>(mc_pair_num * 2, qc_nshl, d_basis);
+  device_cgs_get<<<gridSize, blockSize>>>(mc_pair_num * 2, nShells, d_basis);
   cudaError_t_Assert(cudaPeekAtLastError(), __FILE__, __LINE__);
 
   //calculate mo amplitudes

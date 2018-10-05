@@ -7,7 +7,7 @@
 #endif
 #include "qc_basis.h"
 
-void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
+void Basis::nw_vectors_read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   int i, j;
   long long titleLength;
   long long basisTitleLength;
@@ -256,7 +256,7 @@ void Basis::nw_vectors_read(MPI_info& mpi_info, Molec& molec, IOPs& iops) {
   ivir1 = nw_iocc + 1;
   ivir2 = nw_nmo;
 
-  if (qc_ngfs != nw_nbf) {
+  if (qc_nbf != nw_nbf) {
     std::cerr << "You might use the different basis sets or geometry" << std::endl;
     exit(EXIT_FAILURE);
   }

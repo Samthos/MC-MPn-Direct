@@ -24,33 +24,27 @@ struct BasisData {
 };
 
 class Basis {
- private:
-  double ang[15], cf[7], cg[11];
-
  public:
-  Basis();
+  Basis(IOPs &, MPI_info &, Molec &);
   ~Basis();
-  Basis(const Basis &);
-  Basis &operator=(const Basis &);
+  Basis(const Basis&);
+  Basis &operator=(const Basis);
+  friend void swap(Basis&, Basis&);
 
   // read write
-  void read(IOPs &, MPI_info &, Molec &);
-  void normalize();
-  void nw_vectors_read(MPI_info &, Molec &, IOPs &);
   void gpu_alloc(int, Molec &);
   void gpu_free();
 
   // get psi vals
-  void host_psi_get(double *, double *, Molec &);
-  void host_cgs_get(double *, Molec &);
+  void host_psi_get(double *, double *);
+  void host_cgs_get(double *);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 
   // basis set info
   int iocc1, iocc2, ivir1, ivir2;
-  int qc_ncgs;      // number of contracted gausians
-  int qc_ngfs;      // number of gasusian functions??
-  int qc_nshl;      // number of shells???
-  int qc_nprm;      // nubmer of primatives
+  int qc_nbf;      // number basis functions
+  int nShells;      // number of shells???
+  int nPrimatives;      // nubmer of primatives
   bool lspherical;  // true if sperical
 
   BasisData h_basis, d_basis;
@@ -59,5 +53,11 @@ class Basis {
   int nw_nbf;     // number of basis fcns
   int nw_nmo;  // number of basis fcns in basis set i
   double *nw_en;  // orbital energies from nwchem
+
+ private:
+  double ang[15], cf[7], cg[11];
+  void read(IOPs &, MPI_info &, Molec &);
+  void nw_vectors_read(IOPs &, MPI_info &, Molec &);
+  void normalize();
 };
 #endif  // QC_BASIS_H_

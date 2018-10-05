@@ -12,8 +12,8 @@ void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 void Basis::gpu_free() {
 }
 
-void Basis::host_psi_get(double* pos, double* psi, Molec& molec) {
-  host_cgs_get(pos, molec);
+void Basis::host_psi_get(double* pos, double* psi) {
+  host_cgs_get(pos);
 
   std::fill(psi, psi+ivir2, 0.0);
 
@@ -24,12 +24,12 @@ void Basis::host_psi_get(double* pos, double* psi, Molec& molec) {
               0.0, psi+iocc1, 1);
 }
 
-void Basis::host_cgs_get(double* pos, Molec& molec) {
+void Basis::host_cgs_get(double* pos) {
   int ic, iat, iam;
   double r2, rad;
   double x, y, z;
 
-  for (int shell = 0; shell < qc_nshl; shell++) {
+  for (int shell = 0; shell < nShells; shell++) {
     iam = h_basis.meta_data[shell].angular_moment;
 
     x = pos[0] - h_basis.meta_data[shell].pos[0];

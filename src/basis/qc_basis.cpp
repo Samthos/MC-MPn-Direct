@@ -13,7 +13,10 @@
 #include "qc_basis.h"
 #include "../atom_znum.h"
 
-Basis::Basis() {
+Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
+  read(iops, mpi_info, molec);
+  nw_vectors_read(iops, mpi_info, molec);
+
   cf[0] = sqrt(2.5) * 0.5;
   cf[1] = sqrt(2.5) * 1.5;
   cf[2] = sqrt(15.0);
@@ -43,14 +46,13 @@ Basis::~Basis() {
   delete[] h_basis.contraction_coef;
 }
 Basis::Basis(const Basis& param) {
-  qc_nprm = param.qc_nprm;
-  qc_ncgs = param.qc_ncgs;
-  qc_ngfs = param.qc_ngfs;
-  qc_nshl = param.qc_nshl;
+  nPrimatives = param.nPrimatives;
+  qc_nbf = param.qc_nbf;
+  nShells = param.nShells;
   lspherical = param.lspherical;
 
-  h_basis.meta_data = new BasisMetaData[qc_nshl];
-  std::copy(param.h_basis.meta_data, param.h_basis.meta_data + qc_nshl, h_basis.meta_data);
+  h_basis.meta_data = new BasisMetaData[nShells];
+  std::copy(param.h_basis.meta_data, param.h_basis.meta_data + nShells, h_basis.meta_data);
 
   iocc1 = param.iocc1;
   iocc2 = param.iocc2;
@@ -68,43 +70,34 @@ Basis::Basis(const Basis& param) {
   h_basis.nw_co = new double[nw_nbf * nw_nmo];
   std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo * nw_nbf, h_basis.nw_co);
 
-  h_basis.contraction_exp = new double[qc_nprm];
-  h_basis.contraction_coef = new double[qc_nprm];
-  std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + qc_nprm, h_basis.contraction_exp);
-  std::copy(param.h_basis.contraction_coef, param.h_basis.contraction_coef + qc_nprm, h_basis.contraction_coef);
+  h_basis.contraction_exp = new double[nPrimatives];
+  h_basis.contraction_coef = new double[nPrimatives];
+  std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + nPrimatives, h_basis.contraction_exp);
+  std::copy(param.h_basis.contraction_coef, param.h_basis.contraction_coef + nPrimatives, h_basis.contraction_coef);
 }
-Basis& Basis::operator=(const Basis& param) {
-  qc_nprm = param.qc_nprm;
-  qc_ncgs = param.qc_ncgs;
-  qc_ngfs = param.qc_ngfs;
-  qc_nshl = param.qc_nshl;
-  lspherical = param.lspherical;
-
-  h_basis.meta_data = new BasisMetaData[qc_nshl];
-  std::copy(param.h_basis.meta_data, param.h_basis.meta_data + qc_nshl, h_basis.meta_data);
-
-  iocc1 = param.iocc1;
-  iocc2 = param.iocc2;
-  ivir1 = param.ivir1;
-  ivir2 = param.ivir2;
-
-  // from nwchem
-  nw_nbf = param.nw_nbf;
-  nw_nmo = param.nw_nmo;
-
-  h_basis.ao_amplitudes = new double[nw_nbf];
-  nw_en = new double[nw_nbf];
-  std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);
-
-  h_basis.nw_co = new double[nw_nbf * nw_nmo];
-  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nbf * nw_nmo, h_basis.nw_co);
-
-  h_basis.contraction_exp = new double[qc_nprm];
-  h_basis.contraction_coef = new double[qc_nprm];
-  std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + qc_nprm, h_basis.contraction_exp);
-  std::copy(param.h_basis.contraction_coef, param.h_basis.contraction_coef + qc_nprm, h_basis.contraction_coef);
-
+Basis& Basis::operator=(Basis param) {
+  std::swap(*this, param);
   return *this;
+}
+void swap(Basis& a, Basis& b) {
+  std::swap(a.nPrimatives, b.nPrimatives);
+  std::swap(a.qc_nbf, b.qc_nbf);
+  std::swap(a.nShells, b.nShells);
+  std::swap(a.lspherical, b.lspherical);
+  std::swap(a.h_basis.meta_data, b.h_basis.meta_data);
+  std::swap(a.iocc1, b.iocc1);
+  std::swap(a.iocc2, b.iocc2);
+  std::swap(a.ivir1, b.ivir1);
+  std::swap(a.ivir2, b.ivir2);
+
+  std::swap(a.nw_nbf, b.nw_nbf);
+  std::swap(a.nw_nmo, b.nw_nmo);
+
+  std::swap(a.h_basis.ao_amplitudes, b.h_basis.ao_amplitudes);
+  std::swap(a.nw_en, b.nw_en);
+  std::swap(a.h_basis.nw_co, b.h_basis.nw_co);
+  std::swap(a.h_basis.contraction_exp, b.h_basis.contraction_exp);
+  std::swap(a.h_basis.contraction_coef, b.h_basis.contraction_coef);
 }
 
 void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
@@ -186,21 +179,20 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   MPI_Bcast(&nprm, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
 
-  qc_nprm = nprm;
-  qc_ncgs = ncgs;
-  qc_nshl = nshl;
+  nPrimatives = nprm;
+  nShells = nshl;
 
   if (iops.bopns[KEYS::SPHERICAL]) {
     lspherical = true;
-    qc_ngfs = nsgs;
+    qc_nbf = nsgs;
   } else {
     lspherical = false;
-    qc_ngfs = ncgs;
+    qc_nbf = ncgs;
   }
 
-  h_basis.contraction_exp = new double[qc_nprm];
-  h_basis.contraction_coef = new double[qc_nprm];
-  h_basis.meta_data = new BasisMetaData[qc_nshl];
+  h_basis.contraction_exp = new double[nPrimatives];
+  h_basis.contraction_coef = new double[nPrimatives];
+  h_basis.meta_data = new BasisMetaData[nShells];
 
   nprm = 0;
   nshl = 0;
@@ -280,15 +272,15 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
 #ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.contraction_exp, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.contraction_coef, qc_nprm, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(h_basis.meta_data, qc_nshl * sizeof(BasisMetaData), MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.contraction_exp, nPrimatives, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.contraction_coef, nPrimatives, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(h_basis.meta_data, nShells * sizeof(BasisMetaData), MPI_CHAR, 0, MPI_COMM_WORLD);
 #endif
 
   normalize();
 
   /*
-  for (i = 0; i < qc_nprm; i++) {
+  for (i = 0; i < nPrimatives; i++) {
 #ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
@@ -297,7 +289,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
         fflush(stdout);
       }
   }
-  for (i = 0; i < qc_nprm; i++) {
+  for (i = 0; i < nPrimatives; i++) {
 #ifdef HAVE_MPI
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
@@ -313,8 +305,8 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 #endif
 
   // if (mpi_info.taskid == 0) {
-  //   std::cout << "NSHL\t" << qc_nshl << "\t" << mpi_info.taskid << std::endl;
-  //   std::cout << "NGFS\t" << qc_ngfs << "\t" << mpi_info.taskid << std::endl;
+  //   std::cout << "NSHL\t" << nShells << "\t" << mpi_info.taskid << std::endl;
+  //   std::cout << "NGFS\t" << qc_nbf << "\t" << mpi_info.taskid << std::endl;
   //   std::cout << "NCGS\t" << qc_ncgs << "\t" << mpi_info.taskid << std::endl;
   // }
 }
@@ -324,7 +316,7 @@ void Basis::normalize() {
   double cnorm, aa, dum, fac, facs, pi32;
   constexpr double pi = 3.141592653589793;
 
-  for (i = 0; i < qc_nshl; i++) {  // number of shells on the atom
+  for (i = 0; i < nShells; i++) {  // number of shells on the atom
     if (h_basis.meta_data[i].angular_moment == -1) {
       /*
       qc_shl_list[nshl[0]].ncgs = 4;
