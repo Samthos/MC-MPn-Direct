@@ -19,7 +19,7 @@ double el_pair_typ::r12() {
   double r12;
   std::array<double, 3> dr{};
   std::transform(pos1.begin(), pos1.end(), pos2.begin(), dr.begin(),
-                 std::minus<double>());
+                 std::minus<>());
   r12 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
   return sqrt(r12);
 }
@@ -64,7 +64,7 @@ void el_pair_typ::mc_move_scheme(Random& rand,
     // compute distance bewteen the centers
     std::transform(mc_basis.mcBasisList[a1].center.begin(), mc_basis.mcBasisList[a1].center.end(),
                    mc_basis.mcBasisList[a2].center.begin(), dr.begin(),
-                   std::minus<double>());
+                   std::minus<>());
     double rab = sqrt(std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0));
 
     // sample z coordinate
@@ -88,14 +88,14 @@ void el_pair_typ::mc_move_scheme(Random& rand,
   // compute center of the two gaussians
   std::transform(mc_basis.mcBasisList[a1].center.begin(), mc_basis.mcBasisList[a1].center.end(),
                  mc_basis.mcBasisList[a2].center.begin(), dr.begin(),
-                 std::plus<double>());
+                 std::plus<>());
   std::for_each(dr.begin(), dr.end(), [](double&x){x/=2;});
 
   // if centers are not then same, then rotate
   if (a1 != a2) {
     std::array<double, 3> rb(mc_basis.mcBasisList[a1].center);
 
-    std::transform(rb.begin(), rb.end(), dr.begin(), rb.begin(), std::minus<double>());
+    std::transform(rb.begin(), rb.end(), dr.begin(), rb.begin(), std::minus<>());
     double rb_norm = sqrt(std::inner_product(rb.begin(), rb.end(), rb.begin(), 0.0));
 
     double r_p = acos(rb[2]/rb_norm);
@@ -117,12 +117,11 @@ void el_pair_typ::mc_move_scheme(Random& rand,
   }
 
   // shift result to original center
-  std::transform(pos1.begin(), pos1.end(), dr.begin(), pos1.begin(), std::plus<double>());
-  std::transform(pos2.begin(), pos2.end(), dr.begin(), pos2.begin(), std::plus<double>());
+  std::transform(pos1.begin(), pos1.end(), dr.begin(), pos1.begin(), std::plus<>());
+  std::transform(pos2.begin(), pos2.end(), dr.begin(), pos2.begin(), std::plus<>());
 
   wgt = mc_basis.weight(pos1, pos2);
   rv = 1.0 / (r12()*wgt);
-  is_new = true;
 
 #ifndef NDEBUG
   std::cout << "pos";

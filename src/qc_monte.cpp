@@ -24,11 +24,6 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4) : mp
     it.init(ivir2);
   }
 
-  //init wavefunctions walkers
-  for (auto &it : el_pair_list) {
-    it.is_new = true;
-  }
-
   basis.gpu_alloc(iops.iopns[KEYS::MC_NPAIR], molec);
 }
 

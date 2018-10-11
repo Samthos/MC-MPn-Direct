@@ -21,12 +21,10 @@ class el_pair_typ {
 
  public:
   void init(const int);
-  void pos_init(const Molec&, Random&);
   void mc_move_scheme(Random&, const Molec&, const GTO_Weight&);
 
   std::array<double, 3> pos1, pos2;
   std::vector<double> psi1, psi2;
   double wgt, rv;
-  bool is_new;
 };
 #endif  // EL_PAIR_H_

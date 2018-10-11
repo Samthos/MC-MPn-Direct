@@ -63,7 +63,6 @@ void OVPs::free() {
 void OVPs::update_ovps(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   // copy wave function to psi/occ/vir objects
   for (auto ip = 0; ip < mc_pair_num; ip++) {
-    if (el_pair_list[ip].is_new) {
       d_ovps.rv[ip] = el_pair_list[ip].rv;
       for (auto am = iocc1; am < iocc2; am++) {
         d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
@@ -76,7 +75,6 @@ void OVPs::update_ovps(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
         d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
         d_ovps.vir1[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
         d_ovps.vir2[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-      }
     }
   }
 
@@ -360,20 +358,18 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
 
   //copy weights from el_pair_list to host arrays
   for (ip = 0; ip < mc_pair_num; ip++) {
-    if (el_pair_list[ip].is_new) {
-      d_ovps.rv[ip] = el_pair_list[ip].rv;
-      for (am = iocc1; am < iocc2; am++) {
-        d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-        d_ovps.occ1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.occ2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-      }
-      for (am = ivir1; am < ivir2; am++) {
-        d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-        d_ovps.vir1[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.vir2[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-      }
+    d_ovps.rv[ip] = el_pair_list[ip].rv;
+    for (am = iocc1; am < iocc2; am++) {
+      d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
+      d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
+      d_ovps.occ1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
+      d_ovps.occ2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
+    }
+    for (am = ivir1; am < ivir2; am++) {
+      d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
+      d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
+      d_ovps.vir1[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
+      d_ovps.vir2[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
     }
   }
   //copy wave functions from host to device;
