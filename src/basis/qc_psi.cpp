@@ -6,28 +6,49 @@
 
 #include "../blas_calls.h"
 #include "qc_basis.h"
+#include "../el_pair.h"
 
 void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 }
 void Basis::gpu_free() {
 }
 
-void Basis::host_psi_get(double* pos, double* psi) {
-  host_cgs_get(pos);
+void Basis::host_psi_get(std::vector<el_pair_typ>& el_pair) {
+  for (auto &walker : el_pair) {
+    host_cgs_get(walker.pos1);
 
-  std::fill(psi, psi+ivir2, 0.0);
+    cblas_dgemv(CblasRowMajor, CblasNoTrans,
+                ivir2-iocc1, nw_nbf,
+                1.0, h_basis.nw_co + iocc1*nw_nbf, ivir2,
+                h_basis.ao_amplitudes, 1,
+                0.0, walker.psi1.data()+iocc1, 1);
 
-  cblas_dgemv(CblasRowMajor, CblasNoTrans,
-              ivir2-iocc1, nw_nbf,
-              1.0, h_basis.nw_co + iocc1*nw_nbf, ivir2,
-              h_basis.ao_amplitudes, 1,
-              0.0, psi+iocc1, 1);
+    host_cgs_get(walker.pos2);
+
+    cblas_dgemv(CblasRowMajor, CblasNoTrans,
+                ivir2-iocc1, nw_nbf,
+                1.0, h_basis.nw_co + iocc1*nw_nbf, ivir2,
+                h_basis.ao_amplitudes, 1,
+                0.0, walker.psi2.data()+iocc1, 1);
+  }
+
+  for (auto ip = 0; ip < mc_pair_num; ip++) {
+    for (auto am = iocc1; am < iocc2; am++) {
+      h_basis.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi1[am];
+      h_basis.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi2[am];
+    }
+    for (auto am = ivir1; am < ivir2; am++) {
+      h_basis.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi1[am];
+      h_basis.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi2[am];
+    }
+  }
 }
 
-void Basis::host_cgs_get(double* pos) {
+void Basis::host_cgs_get(std::array<double, 3> &pos) {
   int ic, iat, iam;
   double r2, rad;
   double x, y, z;
+  double ang[15];
 
   for (int shell = 0; shell < nShells; shell++) {
     iam = h_basis.meta_data[shell].angular_moment;

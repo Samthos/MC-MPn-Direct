@@ -17,25 +17,20 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   read(iops, mpi_info, molec);
   nw_vectors_read(iops, mpi_info, molec);
 
-  cf[0] = sqrt(2.5) * 0.5;
-  cf[1] = sqrt(2.5) * 1.5;
-  cf[2] = sqrt(15.0);
-  cf[3] = sqrt(1.5) * 0.5;
-  cf[4] = sqrt(6.0);
-  cf[5] = 1.5;
-  cf[6] = sqrt(15.0) * 0.5;
-
-  cg[0] = 2.9580398915498085;  // (3, 1, 0) (1, 3, 0)
-  cg[1] = 6.2749501990055672;
-  cg[2] = 2.0916500663351894;
-  cg[3] = 1.1180339887498949;
-  cg[4] = 6.7082039324993694;
-  cg[5] = 2.3717082451262845;
-  cg[6] = 3.1622776601683795;
-  cg[7] = 0.55901699437494745;
-  cg[8] = 3.3541019662496847;
-  cg[9] = 0.73950997288745213;
-  cg[10] = 4.4370598373247132;
+  mc_pair_num = iops.iopns[KEYS::MC_NPAIR];
+  h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
+  h_basis.psi1 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.psi2 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.psiTau1 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.psiTau2 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.occ1 = h_basis.psi1;
+  h_basis.occ2 = h_basis.psi2;
+  h_basis.vir1 = h_basis.psi1 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.vir2 = h_basis.psi2 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.occTau1 = h_basis.psiTau1;
+  h_basis.occTau2 = h_basis.psiTau2;
+  h_basis.virTau1 = h_basis.psiTau1 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.virTau2 = h_basis.psiTau2 + (ivir1-iocc1) * mc_pair_num;
 }
 Basis::~Basis() {
   delete[] nw_en;
@@ -44,6 +39,19 @@ Basis::~Basis() {
   delete[] h_basis.ao_amplitudes;
   delete[] h_basis.contraction_exp;
   delete[] h_basis.contraction_coef;
+
+  delete[] h_basis.psi1;
+  delete[] h_basis.psi2;
+  delete[] h_basis.psiTau1;
+  delete[] h_basis.psiTau2;
+  h_basis.occ1 = nullptr;
+  h_basis.occ2 = nullptr;
+  h_basis.vir1 = nullptr;
+  h_basis.vir2 = nullptr;
+  h_basis.occTau1 = nullptr;
+  h_basis.occTau2 = nullptr;
+  h_basis.virTau1 = nullptr;
+  h_basis.virTau2 = nullptr;
 }
 Basis::Basis(const Basis& param) {
   nPrimatives = param.nPrimatives;
@@ -63,7 +71,21 @@ Basis::Basis(const Basis& param) {
   nw_nbf = param.nw_nbf;
   nw_nmo = param.nw_nmo;
 
-  h_basis.ao_amplitudes = new double[nw_nbf];
+  mc_pair_num = param.mc_pair_num;
+  h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
+  h_basis.psi1 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.psi2 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.psiTau1 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.psiTau2 = new double[(ivir2-iocc1) * mc_pair_num];
+  h_basis.occ1 = h_basis.psi1;
+  h_basis.occ2 = h_basis.psi2;
+  h_basis.vir1 = h_basis.psi1 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.vir2 = h_basis.psi2 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.occTau1 = h_basis.psiTau1;
+  h_basis.occTau2 = h_basis.psiTau2;
+  h_basis.virTau1 = h_basis.psiTau1 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.virTau2 = h_basis.psiTau2 + (ivir1-iocc1) * mc_pair_num;
+
   nw_en = new double[nw_nbf];
   std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);
 
@@ -98,6 +120,19 @@ void swap(Basis& a, Basis& b) {
   std::swap(a.h_basis.nw_co, b.h_basis.nw_co);
   std::swap(a.h_basis.contraction_exp, b.h_basis.contraction_exp);
   std::swap(a.h_basis.contraction_coef, b.h_basis.contraction_coef);
+
+  std::swap(a.h_basis.psi1, b.h_basis.psi1);
+  std::swap(a.h_basis.psi2, b.h_basis.psi2);
+  std::swap(a.h_basis.psiTau1, b.h_basis.psiTau1);
+  std::swap(a.h_basis.psiTau2, b.h_basis.psiTau2);
+  std::swap(a.h_basis.occ1, b.h_basis.occ1);
+  std::swap(a.h_basis.occ2, b.h_basis.occ2);
+  std::swap(a.h_basis.vir1, b.h_basis.vir1);
+  std::swap(a.h_basis.vir2, b.h_basis.vir2);
+  std::swap(a.h_basis.occTau1, b.h_basis.occTau1);
+  std::swap(a.h_basis.occTau2, b.h_basis.occTau2);
+  std::swap(a.h_basis.virTau1, b.h_basis.virTau1);
+  std::swap(a.h_basis.virTau2, b.h_basis.virTau2);
 }
 
 void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {

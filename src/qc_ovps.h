@@ -96,7 +96,7 @@ class OVPs {
  public:
   void init(const int dimm, const int mc_pair_num_, const Basis &basis);
   void free();
-  void update_ovps(el_pair_typ *el_pair_list, Stochastic_Tau &tau);
+  void update_ovps(BasisData&, el_pair_typ *el_pair_list, Stochastic_Tau &tau);
 
   void init_02(int, int, int, int, const Basis &);
   void alloc_02();

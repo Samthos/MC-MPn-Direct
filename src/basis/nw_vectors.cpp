@@ -160,7 +160,6 @@ void Basis::nw_vectors_read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   MPI_Bcast(&nw_nmo, 1, MPI_INT, 0, MPI_COMM_WORLD);
 #endif
 
-  h_basis.ao_amplitudes = new double[nw_nbf];
   occ = new double[nw_nbf];
   nw_en = new double[nw_nbf];
   h_basis.nw_co = new double[nw_nbf * nw_nmo];

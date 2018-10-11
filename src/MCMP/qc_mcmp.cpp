@@ -78,13 +78,13 @@ void MP2::energy() {
 }
 
 void MP3::energy() {
-  ovps.update_ovps(&el_pair_list[0], tau);
+  ovps.update_ovps(basis.h_basis, &el_pair_list[0], tau);
   mcmp2_energy(emp[0], control[0]);
   mcmp3_energy(emp[1], control[1]);
 }
 
 void MP4::energy() {
-  ovps.update_ovps(&el_pair_list[0], tau);
+  ovps.update_ovps(basis.h_basis, &el_pair_list[0], tau);
   mcmp2_energy(emp[0], control[0]);
   mcmp3_energy(emp[1], control[1]);
   mcmp4_energy(emp[2], control[2]);
