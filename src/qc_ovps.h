@@ -13,18 +13,12 @@
 class OVPS_SET {
  public:
   OVPS_SET() = default;
-  OVPS_SET(int mc_pair_num_, int n1_, int n2_) :
-      mc_pair_num(mc_pair_num_), n1(n1_), n2(n2_)
-  {
-    s_11.resize(mc_pair_num*mc_pair_num);
-    s_12.resize(mc_pair_num*mc_pair_num);
-    s_21.resize(mc_pair_num*mc_pair_num);
-    s_22.resize(mc_pair_num*mc_pair_num);
+  OVPS_SET(int mc_pair_num_, int n1_, int n2_) {
+    resize(mc_pair_num_, n1_, n2_);
   }
   void resize(int mc_pair_num_, int n1_, int n2_) {
     mc_pair_num = mc_pair_num_;
-    n1 = n1_;
-    n2 = n2_;
+    n =  n2_ - n1_;
 
     s_11.resize(mc_pair_num*mc_pair_num);
     s_12.resize(mc_pair_num*mc_pair_num);
@@ -36,24 +30,24 @@ class OVPS_SET {
     double beta = 0.0;
 
     cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans,
-                    mc_pair_num, mc_pair_num, n2 - n1,
+                    mc_pair_num, mc_pair_num, n,
                     alpha, psi1Tau, mc_pair_num,
                     psi1, mc_pair_num,
                     beta, s_11.data(), mc_pair_num);
     cblas_dgemm_sym(CblasColMajor, CblasNoTrans, CblasTrans,
-                    mc_pair_num, mc_pair_num, n2 - n1,
+                    mc_pair_num, mc_pair_num, n,
                     alpha, psi2Tau, mc_pair_num,
                     psi2, mc_pair_num,
                     beta, s_22.data(), mc_pair_num);
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
-                mc_pair_num, mc_pair_num, n2 - n1,
+                mc_pair_num, mc_pair_num, n,
                 alpha, psi1Tau, mc_pair_num,
                 psi2, mc_pair_num,
                 beta, s_21.data(), mc_pair_num);
     Transpose(s_21.data(), mc_pair_num, s_12.data());
   }
 
-  int mc_pair_num, n1, n2;
+  int mc_pair_num, n;
   std::vector<double> s_11, s_12, s_21, s_22;
 };
 
