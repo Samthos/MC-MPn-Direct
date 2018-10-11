@@ -14,33 +14,27 @@ void Basis::gpu_free() {
 }
 
 void Basis::host_psi_get(std::vector<el_pair_typ>& el_pair) {
-  for (auto &walker : el_pair) {
-    host_cgs_get(walker.pos1);
+  //for (auto &walker : el_pair) {
+  for (auto walker = 0; walker < el_pair.size(); ++walker) {
+    host_cgs_get(el_pair[walker].pos1);
 
     cblas_dgemv(CblasRowMajor, CblasNoTrans,
-                ivir2-iocc1, nw_nbf,
-                1.0, h_basis.nw_co + iocc1*nw_nbf, ivir2,
-                h_basis.ao_amplitudes, 1,
-                0.0, walker.psi1.data()+iocc1, 1);
+        ivir2-iocc1, nw_nbf,
+        1.0,
+        h_basis.nw_co + iocc1*nw_nbf, ivir2,
+        h_basis.ao_amplitudes, 1,
+        0.0,
+        h_basis.psi1+walker*(ivir2-iocc1), 1);
 
-    host_cgs_get(walker.pos2);
+    host_cgs_get(el_pair[walker].pos2);
 
     cblas_dgemv(CblasRowMajor, CblasNoTrans,
-                ivir2-iocc1, nw_nbf,
-                1.0, h_basis.nw_co + iocc1*nw_nbf, ivir2,
-                h_basis.ao_amplitudes, 1,
-                0.0, walker.psi2.data()+iocc1, 1);
-  }
-
-  for (auto ip = 0; ip < mc_pair_num; ip++) {
-    for (auto am = iocc1; am < iocc2; am++) {
-      h_basis.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi1[am];
-      h_basis.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi2[am];
-    }
-    for (auto am = ivir1; am < ivir2; am++) {
-      h_basis.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi1[am];
-      h_basis.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair[ip].psi2[am];
-    }
+        ivir2-iocc1, nw_nbf,
+        1.0,
+        h_basis.nw_co + iocc1*nw_nbf, ivir2,
+        h_basis.ao_amplitudes, 1,
+        0.0,
+        h_basis.psi2+walker*(ivir2-iocc1), 1);
   }
 }
 

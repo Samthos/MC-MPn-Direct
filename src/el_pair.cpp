@@ -11,8 +11,6 @@
 #include "el_pair.h"
 
 void el_pair_typ::init(const int ivir2) {
-  psi1.resize(ivir2);
-  psi2.resize(ivir2);
 }
 
 double el_pair_typ::r12() {

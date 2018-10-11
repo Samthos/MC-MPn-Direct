@@ -25,12 +25,12 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   h_basis.psiTau2 = new double[(ivir2-iocc1) * mc_pair_num];
   h_basis.occ1 = h_basis.psi1;
   h_basis.occ2 = h_basis.psi2;
-  h_basis.vir1 = h_basis.psi1 + (ivir1-iocc1) * mc_pair_num;
-  h_basis.vir2 = h_basis.psi2 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.vir1 = h_basis.psi1 + (ivir1-iocc1);
+  h_basis.vir2 = h_basis.psi2 + (ivir1-iocc1);
   h_basis.occTau1 = h_basis.psiTau1;
   h_basis.occTau2 = h_basis.psiTau2;
-  h_basis.virTau1 = h_basis.psiTau1 + (ivir1-iocc1) * mc_pair_num;
-  h_basis.virTau2 = h_basis.psiTau2 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.virTau1 = h_basis.psiTau1 + (ivir1-iocc1);
+  h_basis.virTau2 = h_basis.psiTau2 + (ivir1-iocc1);
 }
 Basis::~Basis() {
   delete[] nw_en;
@@ -79,12 +79,12 @@ Basis::Basis(const Basis& param) {
   h_basis.psiTau2 = new double[(ivir2-iocc1) * mc_pair_num];
   h_basis.occ1 = h_basis.psi1;
   h_basis.occ2 = h_basis.psi2;
-  h_basis.vir1 = h_basis.psi1 + (ivir1-iocc1) * mc_pair_num;
-  h_basis.vir2 = h_basis.psi2 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.vir1 = h_basis.psi1 + (ivir1-iocc1);
+  h_basis.vir2 = h_basis.psi2 + (ivir1-iocc1);
   h_basis.occTau1 = h_basis.psiTau1;
   h_basis.occTau2 = h_basis.psiTau2;
-  h_basis.virTau1 = h_basis.psiTau1 + (ivir1-iocc1) * mc_pair_num;
-  h_basis.virTau2 = h_basis.psiTau2 + (ivir1-iocc1) * mc_pair_num;
+  h_basis.virTau1 = h_basis.psiTau1 + (ivir1-iocc1);
+  h_basis.virTau2 = h_basis.psiTau2 + (ivir1-iocc1);
 
   nw_en = new double[nw_nbf];
   std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);

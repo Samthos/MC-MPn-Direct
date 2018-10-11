@@ -24,7 +24,6 @@ class el_pair_typ {
   void mc_move_scheme(Random&, const Molec&, const GTO_Weight&);
 
   std::array<double, 3> pos1, pos2;
-  std::vector<double> psi1, psi2;
   double wgt, rv;
 };
 #endif  // EL_PAIR_H_

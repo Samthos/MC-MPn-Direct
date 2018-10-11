@@ -21,7 +21,6 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
   double b_resk, emp2b;
 
   auto tau_values = tau.get_exp_tau(0, 0);
-  std::vector<double> psi1Tau(ivir2), psi2Tau(ivir2);
 
   emp2 = 0.0;
   std::fill(control.begin(), control.end(), 0.0);
@@ -29,14 +28,12 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
 
   double emp2_rvj;
   std::vector<double> control_j(control.size());
-  for (auto it = el_pair_list.begin(); it != el_pair_list.end(); it++) {
+  for (auto it = 0; it < el_pair_list.size(); ++it) {
     emp2_rvj = 0;
     std::fill(control_j.begin(), control_j.end(), 0.0);
-    std::transform(it->psi1.begin(), it->psi1.end(), tau_values.begin(),
-                   psi1Tau.begin(), std::multiplies<double>());
-    std::transform(it->psi2.begin(), it->psi2.end(), tau_values.begin(),
-                   psi2Tau.begin(), std::multiplies<double>());
-    for (auto jt = it + 1; jt != el_pair_list.end(); jt++) {
+    std::transform(basis.h_basis.psi1 + it * (ivir2-iocc1), basis.h_basis.psi1 + (it+1) * (ivir2-iocc1), tau_values.begin() + iocc1, basis.h_basis.psiTau1, std::multiplies<>());
+    std::transform(basis.h_basis.psi2 + it * (ivir2-iocc1), basis.h_basis.psi2 + (it+1) * (ivir2-iocc1), tau_values.begin() + iocc1, basis.h_basis.psiTau2, std::multiplies<>());
+    for (auto jt = it + 1; jt != el_pair_list.size(); jt++) {
       o_13 = 0.0;
       o_14 = 0.0;
       o_23 = 0.0;
@@ -46,17 +43,17 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
       v_23 = 0.0;
       v_24 = 0.0;
 
-      for (im = iocc1; im < iocc2; im++) {
-        o_13 = o_13 + psi1Tau[im] * jt->psi1[im];
-        o_14 = o_14 + psi1Tau[im] * jt->psi2[im];
-        o_23 = o_23 + psi2Tau[im] * jt->psi1[im];
-        o_24 = o_24 + psi2Tau[im] * jt->psi2[im];
+      for (im = 0; im < iocc2-iocc1; im++) {
+        o_13 = o_13 + basis.h_basis.psiTau1[im] * basis.h_basis.psi1[jt * (ivir2-iocc1) + (im)];
+        o_14 = o_14 + basis.h_basis.psiTau1[im] * basis.h_basis.psi2[jt * (ivir2-iocc1) + (im)];
+        o_23 = o_23 + basis.h_basis.psiTau2[im] * basis.h_basis.psi1[jt * (ivir2-iocc1) + (im)];
+        o_24 = o_24 + basis.h_basis.psiTau2[im] * basis.h_basis.psi2[jt * (ivir2-iocc1) + (im)];
       }
-      for (am = ivir1; am < ivir2; am++) {
-        v_13 = v_13 + psi1Tau[am] * jt->psi1[am];
-        v_14 = v_14 + psi1Tau[am] * jt->psi2[am];
-        v_23 = v_23 + psi2Tau[am] * jt->psi1[am];
-        v_24 = v_24 + psi2Tau[am] * jt->psi2[am];
+      for (am = iocc2-iocc1; am < ivir2-iocc1; am++) {
+        v_13 = v_13 + basis.h_basis.psiTau1[am] * basis.h_basis.psi1[jt * (ivir2-iocc1) + (am)];
+        v_14 = v_14 + basis.h_basis.psiTau1[am] * basis.h_basis.psi2[jt * (ivir2-iocc1) + (am)];
+        v_23 = v_23 + basis.h_basis.psiTau2[am] * basis.h_basis.psi1[jt * (ivir2-iocc1) + (am)];
+        v_24 = v_24 + basis.h_basis.psiTau2[am] * basis.h_basis.psi2[jt * (ivir2-iocc1) + (am)];
       }
 
       a_resk = (o_13 * o_24 * v_13 * v_24);
@@ -65,21 +62,21 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
       a_resk = a_resk + (o_14 * o_23 * v_14 * v_23);
       b_resk = b_resk + (o_13 * o_24 * v_14 * v_23);
 
-      emp2a = a_resk * jt->rv;
-      emp2b = b_resk * jt->rv;
+      emp2a = a_resk * el_pair_list[jt].rv;
+      emp2b = b_resk * el_pair_list[jt].rv;
       emp2_rvj = emp2_rvj - 2.0 * emp2a + emp2b;
-      control_j[0] = control_j[0] + a_resk / jt->wgt;
-      control_j[1] = control_j[1] + b_resk / jt->wgt;
+      control_j[0] = control_j[0] + a_resk / el_pair_list[jt].wgt;
+      control_j[1] = control_j[1] + b_resk / el_pair_list[jt].wgt;
 
-     control_j[2] = control_j[2] + a_resk / jt->wgt;
-     control_j[3] = control_j[3] + b_resk / jt->wgt;
+     control_j[2] = control_j[2] + a_resk / el_pair_list[jt].wgt;
+     control_j[3] = control_j[3] + b_resk / el_pair_list[jt].wgt;
 
-     control_j[4] = control_j[4] + a_resk * jt->rv;
-     control_j[5] = control_j[5] + b_resk * jt->rv;
+     control_j[4] = control_j[4] + a_resk * el_pair_list[jt].rv;
+     control_j[5] = control_j[5] + b_resk * el_pair_list[jt].rv;
     }
-    emp2 += emp2_rvj * it->rv;
-    std::transform(control_j.begin(), control_j.begin()+2, control.begin(), control.begin(), [&](double x, double y) { return y + x * it->rv; });
-    std::transform(control_j.begin()+2, control_j.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x / it->wgt; });
+    emp2 += emp2_rvj * el_pair_list[it].rv;
+    std::transform(control_j.begin(), control_j.begin()+2, control.begin(), control.begin(), [&](double x, double y) { return y + x * el_pair_list[it].rv; });
+    std::transform(control_j.begin()+2, control_j.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
   }
 
   auto tau_wgt = tau.get_wgt(1);
