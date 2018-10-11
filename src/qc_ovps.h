@@ -32,14 +32,16 @@ class OVPS_SET {
     double alpha = 1.0;
     double beta = 0.0;
 
-    my_cblas_dgemm_sym(CblasColMajor, CblasTrans, CblasNoTrans,
+    // The first two dgemm's could be replaced by dsyrkx
+    // if cblas ever implements it
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
         mc_pair_num, mc_pair_num, inner,
         alpha,
         psi1Tau, lda,
         psi1, lda,
         beta,
         s_11.data(), mc_pair_num);
-    my_cblas_dgemm_sym(CblasColMajor, CblasTrans, CblasNoTrans,
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
         mc_pair_num, mc_pair_num, inner,
         alpha,
         psi2Tau, lda,
