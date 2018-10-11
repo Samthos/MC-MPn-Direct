@@ -51,6 +51,7 @@ set(GPU_EXTRA_SOURCES
 
 add_executable(MC_MPn_Direct ${source} ${CPU_EXTRA_SOURCES})
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
 IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to MC_MPn_Direct")
     target_compile_definitions(MC_MPn_Direct PUBLIC -DHAVE_MPI)

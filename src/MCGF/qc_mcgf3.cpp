@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "cblas.h"
 #include "../blas_calls.h"
 #include "../qc_monte.h"
 
@@ -276,7 +277,7 @@ void GF::mcgf3_local_energy_full(int band) {
   // en3c = contraction_exp en3_12c . IdentityVector
   //  contraction_exp = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
-  //  cblas_dgemv(CblasColMajor, CblasNoTrans,
+  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
   //      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::MC_NPAIR],
   //      ovps.d_ovps.one, 1,
@@ -302,7 +303,7 @@ void GF::mcgf3_local_energy_full(int band) {
   // en3c = contraction_exp en3_22c . IdentityVector
   //  contraction_exp = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
-  //  cblas_dgemv(CblasColMajor, CblasNoTrans,
+  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
   //      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::MC_NPAIR],
   //      ovps.d_ovps.one, 1,
@@ -445,7 +446,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   // en3c = contraction_exp en3_12cCore . IdentityVector
   //  contraction_exp = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
-  //  cblas_dgemv(CblasColMajor, CblasNoTrans,
+  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
   //      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::MC_NPAIR],
   //      ovps.d_ovps.one, 1,
@@ -471,7 +472,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   // en3c = contraction_exp en3_22cCore . IdentityVector
   //  contraction_exp = tau.get_wgt(2) / static_cast<double>(nsamp);
   //  beta  = 0.00;
-  //  cblas_dgemv(CblasColMajor, CblasNoTrans,
+  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
   //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
   //      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::MC_NPAIR],
   //      ovps.d_ovps.one, 1,

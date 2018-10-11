@@ -4,9 +4,11 @@
 #include <cmath>
 #include <iostream>
 
+#include "cblas.h"
 #include "../blas_calls.h"
 #include "qc_basis.h"
 #include "../el_pair.h"
+
 
 void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 }

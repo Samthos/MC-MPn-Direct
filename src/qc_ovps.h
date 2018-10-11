@@ -5,8 +5,10 @@
 #include "el_pair.h"
 #include "basis/qc_basis.h"
 #include "qc_random.h"
-#include "blas_calls.h"
 #include "tau_integrals.h"
+
+#include "cblas.h"
+#include "blas_calls.h"
 
 #ifndef QC_OVPS_H_
 #define QC_OVPS_H_
@@ -30,14 +32,14 @@ class OVPS_SET {
     double alpha = 1.0;
     double beta = 0.0;
 
-    cblas_dgemm_sym(CblasColMajor, CblasTrans, CblasNoTrans,
+    my_cblas_dgemm_sym(CblasColMajor, CblasTrans, CblasNoTrans,
         mc_pair_num, mc_pair_num, inner,
         alpha,
         psi1Tau, lda,
         psi1, lda,
         beta,
         s_11.data(), mc_pair_num);
-    cblas_dgemm_sym(CblasColMajor, CblasTrans, CblasNoTrans,
+    my_cblas_dgemm_sym(CblasColMajor, CblasTrans, CblasNoTrans,
         mc_pair_num, mc_pair_num, inner,
         alpha,
         psi2Tau, lda,

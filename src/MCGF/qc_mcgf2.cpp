@@ -1,3 +1,4 @@
+#include "cblas.h"
 #include "../blas_calls.h"
 #include "../qc_monte.h"
 
