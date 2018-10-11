@@ -53,6 +53,7 @@ class OVPS_SET {
 
 struct OVPS_ARRAY {
   double *psi1, *psi2;
+  double *psiTau1, *psiTau2;
   double *occ1, *occ2, *vir1, *vir2;
   double *occTau1, *occTau2, *virTau1, *virTau2;
 

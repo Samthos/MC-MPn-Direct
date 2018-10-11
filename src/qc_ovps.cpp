@@ -35,46 +35,46 @@ void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
     }
   }
 
-  d_ovps.occ1 = new double[mc_pair_num * (iocc2 - iocc1)];
-  d_ovps.occ2 = new double[mc_pair_num * (iocc2 - iocc1)];
-  d_ovps.vir1 = new double[mc_pair_num * (ivir2 - ivir1)];
-  d_ovps.vir2 = new double[mc_pair_num * (ivir2 - ivir1)];
   d_ovps.psi1 = new double[mc_pair_num * (ivir2 - iocc1)];
   d_ovps.psi2 = new double[mc_pair_num * (ivir2 - iocc1)];
-  d_ovps.occTau1 = new double[mc_pair_num * (iocc2 - iocc1)];
-  d_ovps.occTau2 = new double[mc_pair_num * (iocc2 - iocc1)];
-  d_ovps.virTau1 = new double[mc_pair_num * (ivir2 - ivir1)];
-  d_ovps.virTau2 = new double[mc_pair_num * (ivir2 - ivir1)];
+  d_ovps.psiTau1 = new double[mc_pair_num * (ivir2 - iocc1)];
+  d_ovps.psiTau2 = new double[mc_pair_num * (ivir2 - iocc1)];
+  d_ovps.occ1 = d_ovps.psi1;
+  d_ovps.occ2 = d_ovps.psi2;
+  d_ovps.vir1 = d_ovps.psi1 + (ivir1-iocc1) * mc_pair_num;
+  d_ovps.vir2 = d_ovps.psi2 + (ivir1-iocc1) * mc_pair_num;
+  d_ovps.occTau1 = d_ovps.psiTau1;
+  d_ovps.occTau2 = d_ovps.psiTau2;
+  d_ovps.virTau1 = d_ovps.psiTau1 + (ivir1-iocc1) * mc_pair_num;
+  d_ovps.virTau2 = d_ovps.psiTau2 + (ivir1-iocc1) * mc_pair_num;
   d_ovps.rv = new double[mc_pair_num];
 }
 void OVPs::free() {
-  delete[] d_ovps.occ1;
-  delete[] d_ovps.occ2;
-  delete[] d_ovps.vir1;
-  delete[] d_ovps.vir2;
   delete[] d_ovps.psi1;
   delete[] d_ovps.psi2;
-  delete[] d_ovps.occTau1;
-  delete[] d_ovps.occTau2;
-  delete[] d_ovps.virTau1;
-  delete[] d_ovps.virTau2;
+  delete[] d_ovps.psiTau1;
+  delete[] d_ovps.psiTau2;
+  d_ovps.occ1 = nullptr;
+  d_ovps.occ2 = nullptr;
+  d_ovps.vir1 = nullptr;
+  d_ovps.vir2 = nullptr;
+  d_ovps.occTau1 = nullptr;
+  d_ovps.occTau2 = nullptr;
+  d_ovps.virTau1 = nullptr;
+  d_ovps.virTau2 = nullptr;
   delete[] d_ovps.rv;
 }
 void OVPs::update_ovps(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   // copy wave function to psi/occ/vir objects
   for (auto ip = 0; ip < mc_pair_num; ip++) {
-      d_ovps.rv[ip] = el_pair_list[ip].rv;
-      for (auto am = iocc1; am < iocc2; am++) {
-        d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-        d_ovps.occ1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.occ2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-      }
-      for (auto am = ivir1; am < ivir2; am++) {
-        d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
-        d_ovps.vir1[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
-        d_ovps.vir2[(am - ivir1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
+    d_ovps.rv[ip] = el_pair_list[ip].rv;
+    for (auto am = iocc1; am < iocc2; am++) {
+      d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
+      d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
+    }
+    for (auto am = ivir1; am < ivir2; am++) {
+      d_ovps.psi1[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi1[am];
+      d_ovps.psi2[(am - iocc1) * mc_pair_num + ip] = el_pair_list[ip].psi2[am];
     }
   }
 
@@ -82,12 +82,9 @@ void OVPs::update_ovps(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
   for (auto stop = 0; stop < o_set.size(); stop++) {
     for (auto start = 0; start < o_set[stop].size(); start++) {
       auto t_val = tau.get_exp_tau(stop, start);
-      Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
-      Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
+      Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - iocc1, d_ovps.psi1, mc_pair_num, &t_val[iocc1], 1, d_ovps.psiTau1, mc_pair_num);
+      Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - iocc1, d_ovps.psi2, mc_pair_num, &t_val[iocc1], 1, d_ovps.psiTau2, mc_pair_num);
       o_set[stop][start].update(d_ovps.occ1, d_ovps.occ2, d_ovps.occTau1, d_ovps.occTau2);
-
-      Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau1, mc_pair_num);
-      Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau2, mc_pair_num);
       v_set[stop][start].update(d_ovps.vir1, d_ovps.vir2, d_ovps.virTau1, d_ovps.virTau2);
     }
   }
