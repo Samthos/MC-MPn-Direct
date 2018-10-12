@@ -1,7 +1,5 @@
 // Copyright 2017
 
-#include "cblas.h"
-
 #ifndef BLAS_CALLS_H_
 #define BLAS_CALLS_H_
 
