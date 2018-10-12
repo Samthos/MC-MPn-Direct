@@ -50,10 +50,11 @@ void OVPs::update_ovps(BasisData& basis, el_pair_typ* el_pair_list, Stochastic_T
   for (auto stop = 0; stop < o_set.size(); stop++) {
     for (auto start = 0; start < o_set[stop].size(); start++) {
       auto t_val = tau.get_exp_tau(stop, start);
+      std::transform(t_val.begin(), t_val.end(), t_val.begin(), sqrt);
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.psi1, ivir2 - iocc1, &t_val[iocc1], 1, basis.psiTau1, ivir2 - iocc1);
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.psi2, ivir2 - iocc1, &t_val[iocc1], 1, basis.psiTau2, ivir2 - iocc1);
-      o_set[stop][start].update(basis.occ1, basis.occ2, basis.occTau1, basis.occTau2);
-      v_set[stop][start].update(basis.vir1, basis.vir2, basis.virTau1, basis.virTau2);
+      o_set[stop][start].update(basis.occTau1, basis.occTau2);
+      v_set[stop][start].update(basis.virTau1, basis.virTau2);
     }
   }
 }

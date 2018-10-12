@@ -35,3 +35,11 @@ void Transpose(const double*A, int m, double *B) {
     }
   }
 }
+
+void set_Upper_from_Lower(double *A, int m) {
+  for (int col = 0; col < m; ++col) {
+    for (int row = col+1; row < m; ++row) {
+      A[row * m + col] = A[col * m + row];
+    }
+  }
+}

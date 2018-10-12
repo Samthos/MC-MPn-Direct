@@ -28,31 +28,29 @@ class OVPS_SET {
     s_21.resize(mc_pair_num*mc_pair_num);
     s_22.resize(mc_pair_num*mc_pair_num);
   }
-  void update(double *psi1, double *psi2, double *psi1Tau, double *psi2Tau) {
+  void update(double *psi1Tau, double *psi2Tau) {
     double alpha = 1.0;
     double beta = 0.0;
 
-    // The first two dgemm's could be replaced by dsyrkx
-    // if cblas ever implements it
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-        mc_pair_num, mc_pair_num, inner,
+    cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+        mc_pair_num, inner,
         alpha,
         psi1Tau, lda,
-        psi1, lda,
         beta,
         s_11.data(), mc_pair_num);
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-        mc_pair_num, mc_pair_num, inner,
+    set_Upper_from_Lower(s_11.data(), mc_pair_num);
+    cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+        mc_pair_num, inner,
         alpha,
         psi2Tau, lda,
-        psi2, lda,
         beta,
         s_22.data(), mc_pair_num);
+    set_Upper_from_Lower(s_22.data(), mc_pair_num);
     cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
         mc_pair_num, mc_pair_num, inner,
         alpha,
         psi1Tau, lda,
-        psi2, lda,
+        psi2Tau, lda,
         beta,
         s_21.data(), mc_pair_num);
     Transpose(s_21.data(), mc_pair_num, s_12.data());

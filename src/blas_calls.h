@@ -13,7 +13,7 @@ void Ddgmm(const enum DDGMM_SIDE Side,
            const double *A, int lda,
            const double *x, int incx,
            double *C, int ldc);
-
 void Transpose(const double*A, int m, double *B);
+void set_Upper_from_Lower(double *A, int m);
 
 #endif  // BLAS_CALLS_H_
