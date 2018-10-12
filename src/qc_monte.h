@@ -121,8 +121,9 @@ class MP3 : public MP {
     cv.emplace_back(ControlVariate(6, {0, 0, 0, 0, 0, 0}));
 
     // set up MP3 control variates
-    control.emplace_back(std::vector<double>(18));
-    cv.emplace_back(ControlVariate(18, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
+    control.emplace_back(std::vector<double>(36));
+    cv.emplace_back(ControlVariate(36, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
   }
   ~MP3() {
     ovps.free();
@@ -145,8 +146,9 @@ class MP4 : public MP {
     cv.emplace_back(ControlVariate(6, {0, 0, 0, 0, 0, 0}));
 
     // set up MP3 control variates
-    control.emplace_back(std::vector<double>(18));
-    cv.emplace_back(ControlVariate(18, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
+    control.emplace_back(std::vector<double>(36));
+    cv.emplace_back(ControlVariate(36, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
 
     // set up MP4 control variates
     control.emplace_back(std::vector<double>(12));

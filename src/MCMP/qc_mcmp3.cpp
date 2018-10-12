@@ -24,12 +24,12 @@ void Prep_IK(std::vector<double>& A_ij,
     }
   }
 }
-std::array<double, 4> mcmp3_helper(unsigned int mc_pair_num, double constant,
+std::array<double, 7> mcmp3_helper(unsigned int mc_pair_num, double constant,
     std::vector<double>& A_ij_1, std::vector<double>& A_ij_2,
     std::vector<double>& A_ik_1, std::vector<double>& A_ik_2,
     std::vector<double>& A_jk_1, std::vector<double>& A_jk_2,
     std::vector<double>& rv, std::vector<double>& wgt) {
-  std::array<double, 4> en;
+  std::array<double, 7> en;
   std::vector<double> A_ij(mc_pair_num * mc_pair_num);
   std::vector<double> A_ik(mc_pair_num * mc_pair_num);
   std::vector<double> A_jk(mc_pair_num * mc_pair_num);
@@ -38,7 +38,6 @@ std::array<double, 4> mcmp3_helper(unsigned int mc_pair_num, double constant,
   std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
 
   Prep_IK(A_ij, A_jk, rv, A_ik, mc_pair_num);
-
 
   Ddgmm(DDGMM_SIDE_RIGHT,
       mc_pair_num, mc_pair_num,
@@ -69,9 +68,9 @@ std::array<double, 4> mcmp3_helper(unsigned int mc_pair_num, double constant,
       A_ik.data(), mc_pair_num,
       rv.data(), 1,
       0.0,
-      A_ij.data(), 1);
-  en[0] = constant * std::inner_product(rv.begin(), rv.end(), A_ij.begin(), 0.0);
-  en[1] = constant * std::inner_product(wgt.begin(), wgt.end(), A_ij.begin(), 0.0);
+      A_jk.data(), 1);
+  en[0] = constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0);
+  en[1] = constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0);
 
   cblas_dgemv(CblasColMajor,
       CblasTrans,
@@ -80,14 +79,60 @@ std::array<double, 4> mcmp3_helper(unsigned int mc_pair_num, double constant,
       A_ik.data(), mc_pair_num,
       wgt.data(), 1,
       0.0,
-      A_ij.data(), 1);
-  en[2] = constant * std::inner_product(rv.begin(), rv.end(), A_ij.begin(), 0.0);
-  en[3] = constant * std::inner_product(wgt.begin(), wgt.end(), A_ij.begin(), 0.0);
+      A_jk.data(), 1);
+  en[2] = constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0);
+  en[3] = constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0);
+
+
+
+  std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
+  Prep_IK(A_ij, A_jk, wgt, A_ik, mc_pair_num);
+
+  Ddgmm(DDGMM_SIDE_RIGHT,
+      mc_pair_num, mc_pair_num,
+      A_jk.data(), mc_pair_num,
+      wgt.data(), 1,
+      A_jk.data(), mc_pair_num);
+
+  cblas_dgemm(CblasColMajor,
+      CblasNoTrans, CblasNoTrans,
+      mc_pair_num, mc_pair_num, mc_pair_num,
+      1.0,
+      A_jk.data(), mc_pair_num,
+      A_ij.data(), mc_pair_num,
+      1.0,
+      A_ik.data(), mc_pair_num);
+
+  std::transform(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin(), std::multiplies<>());
+  std::transform(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin(), std::multiplies<>());
+  for (int i = 0; i < mc_pair_num * mc_pair_num; i += mc_pair_num+1) {
+    A_ik[i] = 0;
+  }
+  cblas_dgemv(CblasColMajor,
+      CblasTrans,
+      mc_pair_num, mc_pair_num,
+      1.0,
+      A_ik.data(), mc_pair_num,
+      rv.data(), 1,
+      0.0,
+      A_jk.data(), 1);
+  en[4] = constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0);
+
+  cblas_dgemv(CblasColMajor,
+      CblasTrans,
+      mc_pair_num, mc_pair_num,
+      1.0,
+      A_ik.data(), mc_pair_num,
+      wgt.data(), 1,
+      0.0,
+      A_jk.data(), 1);
+  en[5] = constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0);
+  en[6] = constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0);
   return en;
 }
 
 void MP::mcmp3_energy(double& emp3, std::vector<double>& control) {
-  std::array<double, 4> en3;
+  std::array<double, 7> en3;
   emp3 = 0.0;
   std::fill(control.begin(), control.end(), 0.0);
 
