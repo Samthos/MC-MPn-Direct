@@ -1,31 +1,16 @@
-#include <iostream>
-
+#include <functional>
 #include "blas_calls.h"
 
-#ifndef OFFSET
-#define OFFSET(N, incX) ((incX) > 0 ? 0 : ((N)-1) * (-(incX)))
-#endif
-
-typedef int INDEX;
-
 void Ddgmm(const enum DDGMM_SIDE Side,
-           int m, int n,
-           const double *A, int lda,
-           const double *x, int incx,
-           double *C, int ldc) {
-  if (Side == DDGMM_SIDE_LEFT) {
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        C[i * ldc + j] = x[j * incx] * A[i * lda + j];
-      }
-    }
-  } else if (Side == DDGMM_SIDE_RIGHT) {
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        C[i * ldc + j] = x[i * incx] * A[i * lda + j];
-      }
-    }
-  }
+    int m, int n,
+    const double *A, int lda,
+    const double *x, int incx,
+    double *C, int ldc) {
+  Ddgmm(Side,
+      m, n,
+      A, lda,
+      x, incx,
+      C, ldc, std::multiplies<>());
 }
 
 void Transpose(const double*A, int m, double *B) {
