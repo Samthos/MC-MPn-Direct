@@ -134,7 +134,7 @@ double mcmp4_ij_helper(int mc_pair_num, double constant,
   control[2 + offset] +=  std::inner_product(rv.begin(), rv.end(), r_w.begin(), 0.0) * constant;
 }
 double mcmp4_ij_helper_t1(int mc_pair_num, double constant,
-    double& emp4, std::vector<double>& control,
+    double& emp4, std::vector<double>& control, int offset,
     std::vector<double>& rv, std::vector<double>& wgt,
     std::vector<double>& ik_1, std::vector<double>& ik_2, std::vector<double>& ik_3,
     std::vector<double>& jk,
@@ -145,10 +145,10 @@ double mcmp4_ij_helper_t1(int mc_pair_num, double constant,
   auto jl = saxpy(jl_1, jl_2);
   std::transform(ik.begin(), ik.end(), ik_3.begin(), ik.begin(), std::multiplies<>());
   std::transform(jl.begin(), jl.end(), jl_3.begin(), jl.begin(), std::multiplies<>());
-  mcmp4_ij_helper(mc_pair_num, constant, emp4, control, 0, rv, wgt, ik, jk, il, jl);
+  mcmp4_ij_helper(mc_pair_num, constant, emp4, control, offset, rv, wgt, ik, jk, il, jl);
 }
 double mcmp4_ij_helper_t2(int mc_pair_num, double constant,
-    double& emp4, std::vector<double>& control,
+    double& emp4, std::vector<double>& control, int offset,
     std::vector<double>& rv, std::vector<double>& wgt,
     std::vector<double>& ik_1, std::vector<double>& ik_2,
     std::vector<double>& jk_1, std::vector<double>& jk_2,
@@ -159,10 +159,10 @@ double mcmp4_ij_helper_t2(int mc_pair_num, double constant,
   auto jk = saxpy(jk_1, jk_2);
   auto il = saxpy(il_1, il_2);
   auto jl = saxpy(jl_1, jl_2);
-  mcmp4_ij_helper(mc_pair_num, constant, emp4, control, 0, rv, wgt,  ik, jk, il, jl);
+  mcmp4_ij_helper(mc_pair_num, constant, emp4, control, offset, rv, wgt,  ik, jk, il, jl);
 }
 double mcmp4_ij_helper_t3(int mc_pair_num, double constant,
-    double& emp4, std::vector<double>& control,
+    double& emp4, std::vector<double>& control, int offset,
     std::vector<double>& rv, std::vector<double>& wgt,
     std::vector<double> ik,
     std::vector<double>& jk_1, std::vector<double>& jk_2, std::vector<double>& jk_3,
@@ -173,7 +173,7 @@ double mcmp4_ij_helper_t3(int mc_pair_num, double constant,
   std::transform(jk.begin(), jk.end(), jk_3.begin(), jk.begin(), std::multiplies<>());
   auto il = saxpy(il_1, il_2);
   std::transform(il.begin(), il.end(), il_3.begin(), il.begin(), std::multiplies<>());
-  mcmp4_ij_helper(mc_pair_num, constant, emp4, control, 0, rv, wgt, ik, jk, il, jl);
+  mcmp4_ij_helper(mc_pair_num, constant, emp4, control, offset, rv, wgt, ik, jk, il, jl);
 }
 void MP::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control) {
   std::vector<double> rv(iops.iopns[KEYS::MC_NPAIR]);
@@ -186,116 +186,239 @@ void MP::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control) {
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
       ovps.v_set[2][0].s_21, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22);
   */
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
 
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
       ovps.v_set[2][0].s_21, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, 0, rv, wgt,
       ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
       ovps.v_set[2][0].s_22, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -2, emp4, control, 0, rv, wgt,
       ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -16, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -16, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
 
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_12, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 2, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22,
       ovps.v_set[2][0].s_11, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11);
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.v_set[1][0].s_11, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], 8, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11);
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.v_set[1][0].s_12, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_12, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22,
       ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11);
-  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, rv, wgt,
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR], -4, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_11, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11);
+}
+void MP::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control) {
+  std::vector<double> rv(iops.iopns[KEYS::MC_NPAIR]);
+  std::vector<double> wgt(iops.iopns[KEYS::MC_NPAIR]);
+  std::transform(el_pair_list.begin(), el_pair_list.end(), rv.begin(), [](el_pair_typ ept){return ept.rv;});
+  std::transform(el_pair_list.begin(), el_pair_list.end(), wgt.begin(), [](el_pair_typ ept){return 1.0/ept.wgt;});
+
+
+  /*
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22,
+      ovps.v_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
+      */
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
+      ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21,
+      ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12, ovps.v_set[2][2].s_21);
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_21, ovps.v_set[1][1].s_21,
+      ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],  -2, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
+      ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_12);
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],  -2, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_21, ovps.v_set[1][1].s_21,
+      ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12, ovps.v_set[2][2].s_21);
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],  -8, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
+      ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],  -8, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21,
+      ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t1(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
+      ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_12);
+
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   1, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
+    ovps.v_set[2][0].s_21, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   1, emp4, control, 3, rv, wgt,
+    ovps.v_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
+    ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   2, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   2, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   2, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   2, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   8, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   8, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   8, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],   8, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -2, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
+    ovps.v_set[2][0].s_22, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -2, emp4, control, 3, rv, wgt,
+    ovps.v_set[0][0].s_22, ovps.v_set[0][0].s_11, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
+    ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -4, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -4, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -4, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -4, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -4, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -4, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR],  -4, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], -16, emp4, control, 3, rv, wgt,
+    ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
+    ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
+
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_21, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
+      ovps.v_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_22, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
+      ovps.v_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
+      ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],   4, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
+      ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],  -2, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_22, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
+      ovps.v_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],  -2, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
+      ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],  -8, emp4, control, 3, rv, wgt,
+      ovps.o_set[0][0].s_21, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
+      ovps.v_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
+  mcmp4_ij_helper_t3(iops.iopns[KEYS::MC_NPAIR],  -8, emp4, control, 3, rv, wgt,
+      ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
+      ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
 }
 
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
@@ -304,7 +427,7 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
 
   emp4 = 0.0;
   mcmp4_energy_ij_fast(emp4, control);
-  mcmp4_energy_ik(emp4, control);
+  mcmp4_energy_ik_fast(emp4, control);
   mcmp4_energy_il(emp4, control);
   mcmp4_energy_ijkl(emp4, control);
 
