@@ -90,6 +90,7 @@ class MP : public QC_monte {
   void mcmp4_energy_ik(double&, std::vector<double>&);
   void mcmp4_energy_il(double&, std::vector<double>&);
   void mcmp4_energy_ijkl(double&, std::vector<double>&);
+  void mcmp4_energy_ijkl_fast(double&, std::vector<double>&);
 };
 
 class MP2 : public MP {

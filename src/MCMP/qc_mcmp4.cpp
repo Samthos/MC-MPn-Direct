@@ -430,10 +430,92 @@ std::vector<double> contract(int mc_pair_num, const std::vector<double>& A, cons
       1.0,
       Av.data(), mc_pair_num,
       B.data(), mc_pair_num,
-      1.0,
+      0.0,
       results.data(), mc_pair_num);
   return results;
 }
+double contract_jk(
+    int mc_pair_num, int i,
+    const std::vector<double>& T, const std::vector<double>& rv,
+    const std::vector<double>& jk, const std::vector<double>& ik, const std::vector<double>& ij
+    ) {
+  std::vector<double> ri(rv.size());
+  std::vector<double> R(rv.size());
+
+  auto S = saxpy(T, jk);
+
+  std::transform(rv.begin(), rv.end(), ik.begin() + i * mc_pair_num, ri.begin(), std::multiplies<>());
+  cblas_dgemv(CblasColMajor,
+      CblasTrans,
+      mc_pair_num, mc_pair_num,
+      1.0,
+      S.data(), mc_pair_num,
+      ri.data(), 1,
+      0.0,
+      R.data(), 1);
+
+  std::transform(rv.begin(), rv.end(), ij.begin() + i * mc_pair_num, ri.begin(), std::multiplies<>());
+  return std::inner_product(R.begin(), R.end(), ri.begin(), 0.0);
+}
+void MP::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control) {
+  int mpn = iops.iopns[KEYS::MC_NPAIR];
+  std::vector<double> ri(mpn);
+
+  std::vector<double> T_r(mpn * mpn);
+  std::vector<double> T_w(mpn * mpn);
+
+  std::vector<double> rv(mpn);
+  std::vector<double> wgt(mpn);
+  std::transform(el_pair_list.begin(), el_pair_list.end(), rv.begin(), [](el_pair_typ ept){return ept.rv;});
+  std::transform(el_pair_list.begin(), el_pair_list.end(), wgt.begin(), [](el_pair_typ ept){return 1.0/ept.wgt;});
+
+
+  std::vector<double> ik(mpn*mpn);
+  std::transform(ovps.o_set[2][0].s_22.begin(), ovps.o_set[2][0].s_22.end(), ovps.o_set[2][0].s_11.begin(), ik.begin(), std::multiplies<>());
+
+  std::vector<std::vector<double>> jk(8, std::vector<double>(mpn*mpn));
+  std::transform(ovps.o_set[1][1].s_22.begin(), ovps.o_set[1][1].s_22.end(), ovps.v_set[1][1].s_22.begin(), jk[0].begin(), std::multiplies<>());
+  std::transform(ovps.o_set[1][1].s_12.begin(), ovps.o_set[1][1].s_12.end(), ovps.v_set[1][1].s_22.begin(), jk[1].begin(), std::multiplies<>());
+  std::transform(ovps.o_set[1][1].s_22.begin(), ovps.o_set[1][1].s_22.end(), ovps.v_set[1][1].s_21.begin(), jk[2].begin(), std::multiplies<>());
+  std::transform(ovps.o_set[1][1].s_12.begin(), ovps.o_set[1][1].s_12.end(), ovps.v_set[1][1].s_21.begin(), jk[3].begin(), std::multiplies<>());
+  std::transform(ovps.o_set[1][1].s_22.begin(), ovps.o_set[1][1].s_22.end(), ovps.v_set[1][1].s_22.begin(), jk[4].begin(), std::multiplies<>());
+  std::transform(ovps.o_set[1][1].s_12.begin(), ovps.o_set[1][1].s_12.end(), ovps.v_set[1][1].s_22.begin(), jk[5].begin(), std::multiplies<>());
+  std::transform(ovps.o_set[1][1].s_22.begin(), ovps.o_set[1][1].s_22.end(), ovps.v_set[1][1].s_21.begin(), jk[6].begin(), std::multiplies<>());
+  std::transform(ovps.o_set[1][1].s_12.begin(), ovps.o_set[1][1].s_12.end(), ovps.v_set[1][1].s_21.begin(), jk[7].begin(), std::multiplies<>());
+
+  double en4;
+  for (int i = 0; i < mpn; ++i) {
+    std::transform(rv.begin(), rv.end(), ik.begin() + i * mpn, ri.begin(), std::multiplies<>());
+    T_r = contract(mpn, ovps.v_set[2][2].s_11, ovps.v_set[2][1].s_12, ri);
+    std::transform(wgt.begin(), wgt.end(), ik.begin() + i * mpn, ri.begin(), std::multiplies<>());
+    T_w = contract(mpn, ovps.v_set[2][2].s_11, ovps.v_set[2][1].s_12, ri);
+
+    en4 = 0.00;
+    en4 +=  4 * contract_jk(mpn, i, T_r, rv, jk[0], ovps.v_set[1][0].s_21, ovps.v_set[0][0].s_11);
+    en4 += -2 * contract_jk(mpn, i, T_r, rv, jk[1], ovps.v_set[1][0].s_21, ovps.v_set[0][0].s_12);
+    en4 += -2 * contract_jk(mpn, i, T_r, rv, jk[2], ovps.v_set[1][0].s_22, ovps.v_set[0][0].s_11);
+    en4 +=  4 * contract_jk(mpn, i, T_r, rv, jk[3], ovps.v_set[1][0].s_22, ovps.v_set[0][0].s_12);
+    en4 += -8 * contract_jk(mpn, i, T_r, rv, jk[4], ovps.v_set[1][0].s_11, ovps.v_set[0][0].s_21);
+    en4 +=  4 * contract_jk(mpn, i, T_r, rv, jk[5], ovps.v_set[1][0].s_11, ovps.v_set[0][0].s_22);
+    en4 +=  4 * contract_jk(mpn, i, T_r, rv, jk[6], ovps.v_set[1][0].s_12, ovps.v_set[0][0].s_21);
+    en4 += -2 * contract_jk(mpn, i, T_r, rv, jk[7], ovps.v_set[1][0].s_12, ovps.v_set[0][0].s_22);
+    emp4 += en4 * rv[i];
+    control[9] += en4 * wgt[i];
+
+    en4 = 0;
+    en4 +=  4 * contract_jk(mpn, i, T_w, rv, jk[0], ovps.v_set[1][0].s_21, ovps.v_set[0][0].s_11);
+    en4 += -2 * contract_jk(mpn, i, T_w, rv, jk[1], ovps.v_set[1][0].s_21, ovps.v_set[0][0].s_12);
+    en4 += -2 * contract_jk(mpn, i, T_w, rv, jk[2], ovps.v_set[1][0].s_22, ovps.v_set[0][0].s_11);
+    en4 +=  4 * contract_jk(mpn, i, T_w, rv, jk[3], ovps.v_set[1][0].s_22, ovps.v_set[0][0].s_12);
+    en4 += -8 * contract_jk(mpn, i, T_w, rv, jk[4], ovps.v_set[1][0].s_11, ovps.v_set[0][0].s_21);
+    en4 +=  4 * contract_jk(mpn, i, T_w, rv, jk[5], ovps.v_set[1][0].s_11, ovps.v_set[0][0].s_22);
+    en4 +=  4 * contract_jk(mpn, i, T_w, rv, jk[6], ovps.v_set[1][0].s_12, ovps.v_set[0][0].s_21);
+    en4 += -2 * contract_jk(mpn, i, T_w, rv, jk[7], ovps.v_set[1][0].s_12, ovps.v_set[0][0].s_22);
+    control[10] += en4 * rv[i];
+    control[11] += en4 * wgt[i];
+  }
+}
+
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   MP4_Engine mp4(el_pair_list);
   emp4 = 0.0;
@@ -442,8 +524,24 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   mp4.energy(emp4, control, ovps);
   //mcmp4_energy_ij(emp4, control);
   //mcmp4_energy_ik(emp4, control);
-  mcmp4_energy_il(emp4, control);
+  //mcmp4_energy_il(emp4, control);
+  //mcmp4_energy_ijkl_fast(emp4, control);
+
   mcmp4_energy_ijkl(emp4, control);
+  // printf("%12.6f : ", emp4);
+  // for (const auto &item : control) {
+  //   printf("%12.6f", item);
+  // }
+  // printf("\n");
+
+  //emp4 = 0.0;
+  //std::fill(control.begin(), control.end(), 0.0);
+  //mcmp4_energy_ijkl_fast(emp4, control);
+  // printf("%12.6f : ", emp4);
+  // for (const auto &item : control) {
+  //   printf("%12.6f", item);
+  // }
+  // printf("\n");
 
   auto tau_wgt = tau.get_wgt(3);
   std::transform(control.begin(), control.end(), control.begin(),
@@ -671,9 +769,9 @@ void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
     }
     emp4       += en_jkl * el_pair_list[it].rv;
 
-    control[9] += ct_jkl / el_pair_list[it].wgt;
-    control[10] += ct_jkl / el_pair_list[it].wgt;
-    control[11] += en_jkl * el_pair_list[it].rv;
+    control[9] += en_jkl / el_pair_list[it].wgt;
+    control[10] += ct_jkl * el_pair_list[it].rv;
+    control[11] += ct_jkl / el_pair_list[it].wgt;
   }
 }
 
