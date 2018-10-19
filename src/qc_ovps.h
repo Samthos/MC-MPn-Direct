@@ -39,6 +39,8 @@ class OVPS_SET {
         beta,
         s_11.data(), mc_pair_num);
     set_Upper_from_Lower(s_11.data(), mc_pair_num);
+    cblas_dscal(mc_pair_num, 0.0, s_11.data(), mc_pair_num+1);
+
     cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
         mc_pair_num, inner,
         alpha,
@@ -46,6 +48,8 @@ class OVPS_SET {
         beta,
         s_22.data(), mc_pair_num);
     set_Upper_from_Lower(s_22.data(), mc_pair_num);
+    cblas_dscal(mc_pair_num, 0.0, s_22.data(), mc_pair_num+1);
+
     cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
         mc_pair_num, mc_pair_num, inner,
         alpha,
@@ -53,6 +57,7 @@ class OVPS_SET {
         psi2Tau, lda,
         beta,
         s_21.data(), mc_pair_num);
+    cblas_dscal(mc_pair_num, 0.0, s_21.data(), mc_pair_num+1);
     Transpose(s_21.data(), mc_pair_num, s_12.data());
   }
 

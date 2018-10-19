@@ -10,20 +10,6 @@
 #include "../blas_calls.h"
 #include "../qc_monte.h"
 
-void Prep_IK(std::vector<double>& A_ij,
-    std::vector<double>& A_jk,
-    std::vector<double>& rv,
-    std::vector<double>& A_ik,
-    int mc_pair_num) {
-  for (int tidx = 0; tidx < mc_pair_num; ++tidx) {
-    for (int tidy = 0; tidy < mc_pair_num; ++tidy) {
-      int index = tidx * mc_pair_num + tidy;
-      A_ik[index] = 0;
-      A_ik[index] -= A_ij[tidx*mc_pair_num + tidx] * A_jk[tidx*mc_pair_num + tidy] * rv[tidx];
-      A_ik[index] -= A_ij[tidx*mc_pair_num + tidy] * A_jk[tidy*mc_pair_num + tidy] * rv[tidy];
-    }
-  }
-}
 std::array<double, 7> mcmp3_helper(unsigned int mc_pair_num, double constant,
     std::vector<double>& A_ij_1, std::vector<double>& A_ij_2,
     std::vector<double>& A_ik_1, std::vector<double>& A_ik_2,
@@ -37,8 +23,6 @@ std::array<double, 7> mcmp3_helper(unsigned int mc_pair_num, double constant,
   std::transform(A_ij_1.begin(), A_ij_1.end(), A_ij_2.begin(), A_ij.begin(), std::multiplies<>());
   std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
 
-  Prep_IK(A_ij, A_jk, rv, A_ik, mc_pair_num);
-
   Ddgmm(DDGMM_SIDE_RIGHT,
       mc_pair_num, mc_pair_num,
       A_jk.data(), mc_pair_num,
@@ -51,15 +35,11 @@ std::array<double, 7> mcmp3_helper(unsigned int mc_pair_num, double constant,
       1.0,
       A_jk.data(), mc_pair_num,
       A_ij.data(), mc_pair_num,
-      1.0,
+      0.0,
       A_ik.data(), mc_pair_num);
 
   std::transform(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin(), std::multiplies<>());
   std::transform(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin(), std::multiplies<>());
-
-  for (int i = 0; i < mc_pair_num * mc_pair_num; i += mc_pair_num+1) {
-    A_ik[i] = 0;
-  }
 
   cblas_dgemv(CblasColMajor,
       CblasTrans,
@@ -83,10 +63,7 @@ std::array<double, 7> mcmp3_helper(unsigned int mc_pair_num, double constant,
   en[2] = constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0);
   en[3] = constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0);
 
-
-
   std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
-  Prep_IK(A_ij, A_jk, wgt, A_ik, mc_pair_num);
 
   Ddgmm(DDGMM_SIDE_RIGHT,
       mc_pair_num, mc_pair_num,
@@ -100,14 +77,11 @@ std::array<double, 7> mcmp3_helper(unsigned int mc_pair_num, double constant,
       1.0,
       A_jk.data(), mc_pair_num,
       A_ij.data(), mc_pair_num,
-      1.0,
+      0.0,
       A_ik.data(), mc_pair_num);
 
   std::transform(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin(), std::multiplies<>());
   std::transform(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin(), std::multiplies<>());
-  for (int i = 0; i < mc_pair_num * mc_pair_num; i += mc_pair_num+1) {
-    A_ik[i] = 0;
-  }
   cblas_dgemv(CblasColMajor,
       CblasTrans,
       mc_pair_num, mc_pair_num,
