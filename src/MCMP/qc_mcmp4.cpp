@@ -9,8 +9,7 @@ class MP4_Engine {
       mpn(el_pair.size()),
       rv(mpn), wgt(mpn), r_r(mpn), r_w(mpn), en_r(mpn), en_w(mpn),
       ik_(mpn * mpn), jk_(mpn * mpn), il_(mpn * mpn), jl_(mpn * mpn),
-      ij_ptr(8), ik_ptr(8), jk_ptr(8),
-      ij_data(8, std::vector<double>(mpn*mpn)), ik_data(8, std::vector<double>(mpn*mpn)), jk_data(8, std::vector<double>(mpn*mpn)),
+      ext_ptr(8), ext_data(8, std::vector<double>(mpn*mpn)),
       i_kl(mpn * mpn), j_kl(mpn * mpn),
       ij_rk(mpn * mpn), ij_rl(mpn * mpn), ij_wl(mpn * mpn),
       T_r(mpn * mpn), T_w(mpn * mpn), Av(mpn * mpn) {
@@ -70,6 +69,14 @@ class MP4_Engine {
       const std::vector<const std::vector<double>*> jk_1, const std::vector<const std::vector<double>*> jk_2,
       const std::vector<double>& jl,
       const std::vector<double>& kl);
+  void mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& control,
+      const std::vector<double> constants,
+      const std::vector<const std::vector<double>*> ij,
+      const std::vector<const std::vector<double>*> ik_1, const std::vector<const std::vector<double>*> ik_2,
+      const std::vector<double>& il,
+      const std::vector<const std::vector<double>*> jk,
+      const std::vector<double>& jl_1, const std::vector<double>& jl_2,
+      const std::vector<double>& kl);
   void mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPs& ovps);
 
   int mpn;
@@ -85,12 +92,8 @@ class MP4_Engine {
   std::vector<double> il_;
   std::vector<double> jl_;
 
-  std::vector<const std::vector<double>*> ij_ptr;
-  std::vector<const std::vector<double>*> ik_ptr;
-  std::vector<const std::vector<double>*> jk_ptr;
-  std::vector<std::vector<double>> ij_data;
-  std::vector<std::vector<double>> ik_data;
-  std::vector<std::vector<double>> jk_data;
+  std::vector<const std::vector<double>*> ext_ptr;
+  std::vector<std::vector<double>> ext_data;
 
   std::vector<double> i_kl;
   std::vector<double> j_kl;
@@ -473,9 +476,9 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
     ) {
   double en, ct;
   for (int i = 0; i < mpn; ++i) {
-    std::transform(rv.begin(), rv.end(), il_.begin() + i * mpn, r_r.begin(), std::multiplies<>());
+    std::transform(rv.begin(), rv.end(), il.begin() + i * mpn, r_r.begin(), std::multiplies<>());
     contract(T_r, kl, jl, r_r);
-    std::transform(wgt.begin(), wgt.end(), il_.begin() + i * mpn, r_r.begin(), std::multiplies<>());
+    std::transform(wgt.begin(), wgt.end(), il.begin() + i * mpn, r_r.begin(), std::multiplies<>());
     contract(T_w, kl, jl, r_r);
 
     en = 0.0;
@@ -501,25 +504,31 @@ void MP4_Engine::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& control
   std::transform(il_1.begin(), il_1.end(), il_2.begin(), il_.begin(), std::multiplies<>());
 
   for (auto i = 0ull; i < jk_1.size(); ++i) {
-    std::transform(jk_1[i]->begin(), jk_1[i]->end(), jk_2[i]->begin(), jk_data[i].begin(), std::multiplies<>());
-    jk_ptr[i] = &jk_data[i];
+    std::transform(jk_1[i]->begin(), jk_1[i]->end(), jk_2[i]->begin(), ext_data[i].begin(), std::multiplies<>());
+    ext_ptr[i] = &ext_data[i];
   }
 
-  mcmp4_energy_ijkl_helper(emp4, control, constants, ij, ik, il_, jk_ptr, jl, kl);
+  mcmp4_energy_ijkl_helper(emp4, control, constants, ij, ik, il_, ext_ptr, jl, kl);
+}
+void MP4_Engine::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& control,
+    const std::vector<double> constants,
+    const std::vector<const std::vector<double>*> ij,
+    const std::vector<const std::vector<double>*> ik_1, const std::vector<const std::vector<double>*> ik_2,
+    const std::vector<double>& il,
+    const std::vector<const std::vector<double>*> jk,
+    const std::vector<double>& jl_1, const std::vector<double>& jl_2,
+    const std::vector<double>& kl) {
+
+  for (auto i = 0ull; i < ik_1.size(); ++i) {
+    std::transform(ik_1[i]->begin(), ik_1[i]->end(), ik_2[i]->begin(), ext_data[i].begin(), std::multiplies<>());
+    ext_ptr[i] = &ext_data[i];
+  }
+
+  std::transform(jl_1.begin(), jl_1.end(), jl_2.begin(), jl_.begin(), std::multiplies<>());
+
+  mcmp4_energy_ijkl_helper(emp4, control, constants, ij, ext_ptr, il, jk, jl_, kl);
 }
 void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
-
-  /*
-  mcmp4_energy_ijkl_t1(emp4, control,
-      { 4, -2, -2, 4, -8, 4, 4, -2},
-      {&ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_21, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_21, &ovps.v_set[0][0].s_22},
-      {&ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_11, &ovps.v_set[1][0].s_11, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_12},
-      ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11,
-      {&ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_12, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_12, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_12, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_12},
-      {&ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_21, &ovps.v_set[1][1].s_21, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_21, &ovps.v_set[1][1].s_21},
-      ovps.v_set[2][1].s_12, ovps.v_set[2][2].s_11);
-  */
-
   mcmp4_energy_ijkl_t1(emp4, control,
       { -2, -2, -2, 4, 4, 4, 4, -8},
       {&ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_21, &ovps.v_set[0][0].s_21},
@@ -600,6 +609,98 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
       {&ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_22},
       {&ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_22},
       ovps.o_set[2][1].s_12, ovps.o_set[2][2].s_11);
+
+
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {2, 2, 2, -4, -4, -4, -4, 8},
+      {&ovps.o_set[0][0].s_11, &ovps.o_set[0][0].s_21, &ovps.o_set[0][0].s_22, &ovps.o_set[0][0].s_11, &ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_21, &ovps.o_set[0][0].s_22, &ovps.o_set[0][0].s_12},
+      {&ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_22},
+      {&ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22},
+      ovps.v_set[2][0].s_12 ,
+      {&ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_21, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_21, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_11, &ovps.v_set[1][1].s_11},
+      ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22,
+      ovps.v_set[2][2].s_11);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {-4, 4, 4, 8, -8, -8},
+      {&ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22},
+      {&ovps.v_set[1][0].s_12, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22, &ovps.v_set[1][0].s_11, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      {&ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_11},
+      ovps.o_set[2][0].s_12,
+      {&ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_21, &ovps.v_set[1][1].s_22},
+      ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11,
+      ovps.v_set[2][2].s_12);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {-2, -2, 2, 4, 4, -4},
+      {&ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_22},
+      {&ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_11, &ovps.o_set[1][0].s_11},
+      {&ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      ovps.v_set[2][0].s_12,
+      {&ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.v_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_22},
+      ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_11,
+      ovps.o_set[2][2].s_11);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {2, -2, -2, -4, 4, 4},
+      {&ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22},
+      {&ovps.v_set[1][0].s_12, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22, &ovps.v_set[1][0].s_11, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      {&ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_11},
+      ovps.o_set[2][0].s_12,
+      {&ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_11, &ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_11, &ovps.v_set[1][1].s_12},
+      ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21,
+      ovps.v_set[2][2].s_12);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {-2, 2, 4, 4, -4, -8},
+      {&ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_11, &ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_11},
+      {&ovps.o_set[1][0].s_11, &ovps.o_set[1][0].s_11, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_22},
+      {&ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_12, &ovps.v_set[1][0].s_22},
+      ovps.v_set[2][0].s_12,
+      {&ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.v_set[1][1].s_12, &ovps.o_set[1][1].s_21},
+      ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_21,
+      ovps.o_set[2][2].s_11);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {2, -2, -2, -4, 4, 4},
+      {&ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22},
+      {&ovps.v_set[1][0].s_12, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22, &ovps.v_set[1][0].s_11, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      {&ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_11},
+      ovps.o_set[2][0].s_12 ,
+      {&ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_21, &ovps.v_set[1][1].s_22},
+      ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12,
+      ovps.v_set[2][2].s_11);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {4, 4, -4, -8, -8, 8},
+      {&ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_22, &ovps.v_set[0][0].s_22},
+      {&ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_11, &ovps.o_set[1][0].s_11},
+      {&ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      ovps.v_set[2][0].s_11,
+      {&ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.v_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_22},
+      ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_12,
+      ovps.o_set[2][2].s_11);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {2, -2, -4, 4, 4, -8},
+      {&ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_12},
+      {&ovps.v_set[1][0].s_11, &ovps.o_set[1][0].s_22, &ovps.v_set[1][0].s_12, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      {&ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_11, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_21, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_22},
+      ovps.o_set[2][0].s_12,
+      {&ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_11, &ovps.v_set[1][1].s_11},
+      ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22,
+      ovps.v_set[2][2].s_11);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {-2, -2, 2, 4, 4, -4},
+      {&ovps.o_set[0][0].s_11, &ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_22, &ovps.o_set[0][0].s_11, &ovps.o_set[0][0].s_21, &ovps.v_set[0][0].s_22},
+      {&ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_12, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_11, &ovps.o_set[1][0].s_11},
+      {&ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      ovps.v_set[2][0].s_11,
+      {&ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.v_set[1][1].s_12, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_22, &ovps.v_set[1][1].s_12},
+      ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_22,
+      ovps.o_set[2][2].s_11);
+  mcmp4_energy_ijkl_t2(emp4, control,
+      {2, 2, 2, -4, -4, -4, -4, 8},
+      {&ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_21, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_21, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_12},
+      {&ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_21, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22, &ovps.o_set[1][0].s_22},
+      {&ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_12, &ovps.v_set[1][0].s_22, &ovps.v_set[1][0].s_22},
+      ovps.o_set[2][0].s_12 ,
+      {&ovps.o_set[1][1].s_12, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_12, &ovps.o_set[1][1].s_22, &ovps.o_set[1][1].s_11, &ovps.o_set[1][1].s_21, &ovps.o_set[1][1].s_11},
+      ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22,
+      ovps.o_set[2][2].s_11);
 }
 
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
