@@ -12,6 +12,17 @@
 #include "../qc_monte.h"
 
 void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
+  /* This functions computes the second-order MP2 energy for a single MC steps
+   * The traces of the HF greens's functions are computed in-place in this function.
+   * If higher order corrections are desired, the mcmp2_energy fucntions is more appropriate as it does not compute the HF green's function traces
+   *
+   * The wavefunction psi is obtained from the basis varaible declared in the MP class
+   * The imaginary tiem varaiables are obtained from tau_values declared in the MP class
+   *
+   * Input Parameters:
+   *   emp2: reference to double. stores the energy calcaulted by this function
+   *   control: reference to vector<double>. stores the control varaites to the mp2 energy for calcaulted by this function.
+   */
   int im, am;
   double icount2;
 
@@ -43,6 +54,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
       v_23 = 0.0;
       v_24 = 0.0;
 
+      // compute the traces of the the HF green's functions
       for (im = 0; im < iocc2-iocc1; im++) {
         o_13 = o_13 + basis.h_basis.psiTau1[im] * basis.h_basis.psi1[jt * (ivir2-iocc1) + (im)];
         o_14 = o_14 + basis.h_basis.psiTau1[im] * basis.h_basis.psi2[jt * (ivir2-iocc1) + (im)];
@@ -56,6 +68,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
         v_24 = v_24 + basis.h_basis.psiTau2[am] * basis.h_basis.psi2[jt * (ivir2-iocc1) + (am)];
       }
 
+      // compute the energy
       a_resk = (o_13 * o_24 * v_13 * v_24);
       b_resk = (o_14 * o_23 * v_13 * v_24);
 
@@ -68,11 +81,11 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
       control_j[0] = control_j[0] + a_resk / el_pair_list[jt].wgt;
       control_j[1] = control_j[1] + b_resk / el_pair_list[jt].wgt;
 
-     control_j[2] = control_j[2] + a_resk / el_pair_list[jt].wgt;
-     control_j[3] = control_j[3] + b_resk / el_pair_list[jt].wgt;
+      control_j[2] = control_j[2] + a_resk / el_pair_list[jt].wgt;
+      control_j[3] = control_j[3] + b_resk / el_pair_list[jt].wgt;
 
-     control_j[4] = control_j[4] + a_resk * el_pair_list[jt].rv;
-     control_j[5] = control_j[5] + b_resk * el_pair_list[jt].rv;
+      control_j[4] = control_j[4] + a_resk * el_pair_list[jt].rv;
+      control_j[5] = control_j[5] + b_resk * el_pair_list[jt].rv;
     }
     emp2 += emp2_rvj * el_pair_list[it].rv;
     std::transform(control_j.begin(), control_j.begin()+2, control.begin(), control.begin(), [&](double x, double y) { return y + x * el_pair_list[it].rv; });
@@ -115,11 +128,11 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control) {
       control_j[0] = control_j[0] + a_resk / el_pair_list[jt].wgt;
       control_j[1] = control_j[1] + b_resk / el_pair_list[jt].wgt;
 
-     control_j[2] = control_j[2] + a_resk / el_pair_list[jt].wgt;
-     control_j[3] = control_j[3] + b_resk / el_pair_list[jt].wgt;
+      control_j[2] = control_j[2] + a_resk / el_pair_list[jt].wgt;
+      control_j[3] = control_j[3] + b_resk / el_pair_list[jt].wgt;
 
-     control_j[4] = control_j[4] + a_resk * el_pair_list[jt].rv;
-     control_j[5] = control_j[5] + b_resk * el_pair_list[jt].rv;
+      control_j[4] = control_j[4] + a_resk * el_pair_list[jt].rv;
+      control_j[5] = control_j[5] + b_resk * el_pair_list[jt].rv;
     }
     emp2 += emp2_rvj * el_pair_list[it].rv;
     std::transform(control_j.begin(), control_j.begin()+2, control.begin(), control.begin(), [&](double x, double y) { return y + x * el_pair_list[it].rv; });

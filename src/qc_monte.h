@@ -142,7 +142,7 @@ class MP4 : public MP {
 
     emp.resize(3);
 
-    std::array<int, 3> n_cv = {6, 36, 12};
+    std::array<int, 3> n_cv = {6, 36, 30};
     for (int n : n_cv) {
       control.emplace_back(std::vector<double>(n));
       cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
