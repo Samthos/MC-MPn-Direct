@@ -262,5 +262,4 @@ class ControlVariate {
   arma::vec exact_cv;
 };
 
-
 #endif //MC_MP2_DIRECT_CONTROL_VARIATE_H

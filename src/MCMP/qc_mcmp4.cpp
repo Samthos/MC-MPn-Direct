@@ -247,119 +247,120 @@ void MP4_Engine::mcmp4_ij_helper_t3(double constant,
   mcmp4_ij_helper(constant, emp4, control, offset, ik, jk_, il_, jl);
 }
 void MP4_Engine::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
+  constexpr int offset = 0;
   /*
   mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
       ovps.v_set[2][0].s_21, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22);
   */
-  mcmp4_ij_helper_t1(-4, emp4, control, 0,
+  mcmp4_ij_helper_t1(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t1(-4, emp4, control, 0,
+  mcmp4_ij_helper_t1(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t1(-4, emp4, control, 0,
+  mcmp4_ij_helper_t1(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t1(-4, emp4, control, 0,
+  mcmp4_ij_helper_t1(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t1(2, emp4, control, 0,
+  mcmp4_ij_helper_t1(2, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t1(2, emp4, control, 0,
+  mcmp4_ij_helper_t1(2, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t1(8, emp4, control, 0,
+  mcmp4_ij_helper_t1(8, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t1(8, emp4, control, 0,
+  mcmp4_ij_helper_t1(8, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
 
-  mcmp4_ij_helper_t2(1, emp4, control, 0,
+  mcmp4_ij_helper_t2(1, emp4, control, offset,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
       ovps.v_set[2][0].s_21, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22);
-  mcmp4_ij_helper_t2(1, emp4, control, 0,
+  mcmp4_ij_helper_t2(1, emp4, control, offset,
       ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(2, emp4, control, 0,
+  mcmp4_ij_helper_t2(2, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(2, emp4, control, 0,
+  mcmp4_ij_helper_t2(2, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(2, emp4, control, 0,
+  mcmp4_ij_helper_t2(2, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(2, emp4, control, 0,
+  mcmp4_ij_helper_t2(2, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(8, emp4, control, 0,
+  mcmp4_ij_helper_t2(8, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(8, emp4, control, 0,
+  mcmp4_ij_helper_t2(8, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t2(8, emp4, control, 0,
+  mcmp4_ij_helper_t2(8, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(8, emp4, control, 0,
+  mcmp4_ij_helper_t2(8, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t2(-2, emp4, control, 0,
+  mcmp4_ij_helper_t2(-2, emp4, control, offset,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
       ovps.v_set[2][0].s_22, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22);
-  mcmp4_ij_helper_t2(-2, emp4, control, 0,
+  mcmp4_ij_helper_t2(-2, emp4, control, offset,
       ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(-4, emp4, control, 0,
+  mcmp4_ij_helper_t2(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(-4, emp4, control, 0,
+  mcmp4_ij_helper_t2(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(-4, emp4, control, 0,
+  mcmp4_ij_helper_t2(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(-4, emp4, control, 0,
+  mcmp4_ij_helper_t2(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_22);
-  mcmp4_ij_helper_t2(-4, emp4, control, 0,
+  mcmp4_ij_helper_t2(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_21);
-  mcmp4_ij_helper_t2(-4, emp4, control, 0,
+  mcmp4_ij_helper_t2(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t2(-4, emp4, control, 0,
+  mcmp4_ij_helper_t2(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_12);
-  mcmp4_ij_helper_t2(-16, emp4, control, 0,
+  mcmp4_ij_helper_t2(-16, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.v_set[2][1].s_11);
 
-  mcmp4_ij_helper_t3(2, emp4, control, 0,
+  mcmp4_ij_helper_t3(2, emp4, control, offset,
       ovps.v_set[1][0].s_22, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_12, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(2, emp4, control, 0,
+  mcmp4_ij_helper_t3(2, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22,
       ovps.v_set[2][0].s_11, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11);
-  mcmp4_ij_helper_t3(8, emp4, control, 0,
+  mcmp4_ij_helper_t3(8, emp4, control, offset,
       ovps.v_set[1][0].s_11, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(8, emp4, control, 0,
+  mcmp4_ij_helper_t3(8, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11);
-  mcmp4_ij_helper_t3(-4, emp4, control, 0,
+  mcmp4_ij_helper_t3(-4, emp4, control, offset,
       ovps.v_set[1][0].s_12, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(-4, emp4, control, 0,
+  mcmp4_ij_helper_t3(-4, emp4, control, offset,
       ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_22,
       ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][0].s_12, ovps.v_set[2][1].s_11);
-  mcmp4_ij_helper_t3(-4, emp4, control, 0,
+  mcmp4_ij_helper_t3(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22,
       ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][1].s_11);
-  mcmp4_ij_helper_t3(-4, emp4, control, 0,
+  mcmp4_ij_helper_t3(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_11, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11);
 }
@@ -369,114 +370,115 @@ void MP4_Engine::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22,
       ovps.v_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
       */
-  mcmp4_ij_helper_t1(  4, emp4, control, 3,
+  constexpr int offset = 3;
+  mcmp4_ij_helper_t1(  4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
       ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t1(  4, emp4, control, 3,
+  mcmp4_ij_helper_t1(  4, emp4, control, offset,
       ovps.v_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12, ovps.v_set[2][2].s_21);
-  mcmp4_ij_helper_t1(  4, emp4, control, 3,
+  mcmp4_ij_helper_t1(  4, emp4, control, offset,
       ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_21, ovps.v_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t1( -2, emp4, control, 3,
+  mcmp4_ij_helper_t1( -2, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
       ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_12);
-  mcmp4_ij_helper_t1( -2, emp4, control, 3,
+  mcmp4_ij_helper_t1( -2, emp4, control, offset,
       ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_21, ovps.v_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12, ovps.v_set[2][2].s_21);
-  mcmp4_ij_helper_t1( -8, emp4, control, 3,
+  mcmp4_ij_helper_t1( -8, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
       ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t1( -8, emp4, control, 3,
+  mcmp4_ij_helper_t1( -8, emp4, control, offset,
       ovps.v_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21,
       ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t1(  4, emp4, control, 3,
+  mcmp4_ij_helper_t1(  4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
       ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_12);
 
-  mcmp4_ij_helper_t2(  1, emp4, control, 3,
+  mcmp4_ij_helper_t2(  1, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
     ovps.v_set[2][0].s_21, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
-  mcmp4_ij_helper_t2(  1, emp4, control, 3,
+  mcmp4_ij_helper_t2(  1, emp4, control, offset,
     ovps.v_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
     ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t2(  2, emp4, control, 3,
+  mcmp4_ij_helper_t2(  2, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_ij_helper_t2(  2, emp4, control, 3,
+  mcmp4_ij_helper_t2(  2, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t2(  2, emp4, control, 3,
+  mcmp4_ij_helper_t2(  2, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_ij_helper_t2(  2, emp4, control, 3,
+  mcmp4_ij_helper_t2(  2, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t2(  8, emp4, control, 3,
+  mcmp4_ij_helper_t2(  8, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t2(  8, emp4, control, 3,
+  mcmp4_ij_helper_t2(  8, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_ij_helper_t2(  8, emp4, control, 3,
+  mcmp4_ij_helper_t2(  8, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t2(  8, emp4, control, 3,
+  mcmp4_ij_helper_t2(  8, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_ij_helper_t2( -2, emp4, control, 3,
+  mcmp4_ij_helper_t2( -2, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_22, ovps.o_set[1][1].s_11,
     ovps.v_set[2][0].s_22, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
-  mcmp4_ij_helper_t2( -2, emp4, control, 3,
+  mcmp4_ij_helper_t2( -2, emp4, control, offset,
     ovps.v_set[0][0].s_22, ovps.v_set[0][0].s_11, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
     ovps.o_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t2( -4, emp4, control, 3,
+  mcmp4_ij_helper_t2( -4, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t2( -4, emp4, control, 3,
+  mcmp4_ij_helper_t2( -4, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_ij_helper_t2( -4, emp4, control, 3,
+  mcmp4_ij_helper_t2( -4, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t2( -4, emp4, control, 3,
+  mcmp4_ij_helper_t2( -4, emp4, control, offset,
     ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_ij_helper_t2( -4, emp4, control, 3,
+  mcmp4_ij_helper_t2( -4, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_ij_helper_t2( -4, emp4, control, 3,
+  mcmp4_ij_helper_t2( -4, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_11, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_ij_helper_t2( -4, emp4, control, 3,
+  mcmp4_ij_helper_t2( -4, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_ij_helper_t2(-16, emp4, control, 3,
+  mcmp4_ij_helper_t2(-16, emp4, control, offset,
     ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_21,
     ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
 
-  mcmp4_ij_helper_t3(  4, emp4, control, 3,
+  mcmp4_ij_helper_t3(  4, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
       ovps.v_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
-  mcmp4_ij_helper_t3(  4, emp4, control, 3,
+  mcmp4_ij_helper_t3(  4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
       ovps.v_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
-  mcmp4_ij_helper_t3(  4, emp4, control, 3,
+  mcmp4_ij_helper_t3(  4, emp4, control, offset,
       ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t3(  4, emp4, control, 3,
+  mcmp4_ij_helper_t3(  4, emp4, control, offset,
       ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t3( -2, emp4, control, 3,
+  mcmp4_ij_helper_t3( -2, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11,
       ovps.v_set[2][0].s_11, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
-  mcmp4_ij_helper_t3( -2, emp4, control, 3,
+  mcmp4_ij_helper_t3( -2, emp4, control, offset,
       ovps.v_set[0][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_12, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_ij_helper_t3( -8, emp4, control, 3,
+  mcmp4_ij_helper_t3( -8, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.o_set[1][1].s_22, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11,
       ovps.v_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][0].s_12, ovps.o_set[2][2].s_11);
-  mcmp4_ij_helper_t3( -8, emp4, control, 3,
+  mcmp4_ij_helper_t3( -8, emp4, control, offset,
       ovps.v_set[0][0].s_12, ovps.v_set[1][1].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_21,
       ovps.o_set[2][0].s_22, ovps.v_set[2][0].s_22, ovps.o_set[2][0].s_11, ovps.v_set[2][2].s_11);
 }
@@ -562,114 +564,115 @@ void MP4_Engine::mcmp4_il_helper_t3(double constant,
   mcmp4_il_helper(constant, emp4, control, offset, ij, jl_, ik_, kl);
 }
 void MP4_Engine::mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
-  mcmp4_il_helper_t1( 2, emp4, control, 6,
+  constexpr int offset = 6;
+  mcmp4_il_helper_t1( 2, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12,
       ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12, ovps.v_set[2][2].s_21);
-  mcmp4_il_helper_t1( 2, emp4, control, 6,
+  mcmp4_il_helper_t1( 2, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[0][0].s_21, ovps.v_set[2][1].s_11,
       ovps.o_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_12);
-  mcmp4_il_helper_t1( 8, emp4, control, 6,
+  mcmp4_il_helper_t1( 8, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12,
       ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t1( 8, emp4, control, 6,
+  mcmp4_il_helper_t1( 8, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t1( -4, emp4, control, 6,
+  mcmp4_il_helper_t1( -4, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12,
       ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t1( -4, emp4, control, 6,
+  mcmp4_il_helper_t1( -4, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12,
       ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12, ovps.v_set[2][2].s_21);
-  mcmp4_il_helper_t1( -4, emp4, control, 6,
+  mcmp4_il_helper_t1( -4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.v_set[2][1].s_11,
       ovps.o_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_12);
-  mcmp4_il_helper_t1( -4, emp4, control, 6,
+  mcmp4_il_helper_t1( -4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.v_set[0][0].s_21, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_11);
 
-  mcmp4_il_helper_t2( 1, emp4, control, 6,
+  mcmp4_il_helper_t2( 1, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22,
       ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t2( 1, emp4, control, 6,
+  mcmp4_il_helper_t2( 1, emp4, control, offset,
       ovps.v_set[0][0].s_12, ovps.v_set[0][0].s_21, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
-  mcmp4_il_helper_t2( 2, emp4, control, 6,
+  mcmp4_il_helper_t2( 2, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_il_helper_t2( 2, emp4, control, 6,
+  mcmp4_il_helper_t2( 2, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_21,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t2( 2, emp4, control, 6,
+  mcmp4_il_helper_t2( 2, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_21,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_il_helper_t2( 2, emp4, control, 6,
+  mcmp4_il_helper_t2( 2, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_11,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t2( 8, emp4, control, 6,
+  mcmp4_il_helper_t2( 8, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t2( 8, emp4, control, 6,
+  mcmp4_il_helper_t2( 8, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_il_helper_t2( 8, emp4, control, 6,
+  mcmp4_il_helper_t2( 8, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t2( 8, emp4, control, 6,
+  mcmp4_il_helper_t2( 8, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_11,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_il_helper_t2( -2, emp4, control, 6,
+  mcmp4_il_helper_t2( -2, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22,
       ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t2( -2, emp4, control, 6,
+  mcmp4_il_helper_t2( -2, emp4, control, offset,
       ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
-  mcmp4_il_helper_t2( -4, emp4, control, 6,
+  mcmp4_il_helper_t2( -4, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_21,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t2( -4, emp4, control, 6,
+  mcmp4_il_helper_t2( -4, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_il_helper_t2( -4, emp4, control, 6,
+  mcmp4_il_helper_t2( -4, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t2( -4, emp4, control, 6,
+  mcmp4_il_helper_t2( -4, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_21,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_il_helper_t2( -4, emp4, control, 6,
+  mcmp4_il_helper_t2( -4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_21);
-  mcmp4_il_helper_t2( -4, emp4, control, 6,
+  mcmp4_il_helper_t2( -4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_11,
       ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_22);
-  mcmp4_il_helper_t2( -4, emp4, control, 6,
+  mcmp4_il_helper_t2( -4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_11,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12);
-  mcmp4_il_helper_t2(-16, emp4, control, 6,
+  mcmp4_il_helper_t2(-16, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_11);
 
-  mcmp4_il_helper_t3( 2, emp4, control, 6,
+  mcmp4_il_helper_t3( 2, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t3( 2, emp4, control, 6,
+  mcmp4_il_helper_t3( 2, emp4, control, offset,
       ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11);
-  mcmp4_il_helper_t3( 8, emp4, control, 6,
+  mcmp4_il_helper_t3( 8, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t3( 8, emp4, control, 6,
+  mcmp4_il_helper_t3( 8, emp4, control, offset,
       ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_12, ovps.v_set[2][1].s_21,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11);
-  mcmp4_il_helper_t3( -4, emp4, control, 6,
+  mcmp4_il_helper_t3( -4, emp4, control, offset,
       ovps.o_set[0][0].s_21, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][0].s_22, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t3( -4, emp4, control, 6,
+  mcmp4_il_helper_t3( -4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_12,
       ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[2][2].s_11);
-  mcmp4_il_helper_t3( -4, emp4, control, 6,
+  mcmp4_il_helper_t3( -4, emp4, control, offset,
       ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11);
-  mcmp4_il_helper_t3( -4, emp4, control, 6,
+  mcmp4_il_helper_t3( -4, emp4, control, offset,
       ovps.v_set[0][0].s_22, ovps.o_set[2][1].s_12, ovps.v_set[2][1].s_12, ovps.v_set[2][1].s_21,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][0].s_12, ovps.o_set[2][2].s_11);
 }
@@ -703,6 +706,7 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
     const std::vector<double>& kl
     ) {
   double en, ct;
+  constexpr int offset = 9;
   for (int i = 0; i < mpn; ++i) {
     std::transform(rv.begin(), rv.end(), il.begin() + i * mpn, r_r.begin(), std::multiplies<>());
     contract(T_r, kl, CblasTrans, jl, r_r);
@@ -716,9 +720,9 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
       ct += constants[eqn] * contract_jk(i, T_w, rv, *(jk[eqn]), *(ik[eqn]), *(ij[eqn]));
     }
     emp4 += en * rv[i];
-    control[9] += en * wgt[i];
-    control[10] += ct * rv[i];
-    control[11] += ct * wgt[i];
+    control[offset + 0] += en * wgt[i];
+    control[offset + 1] += ct * rv[i];
+    control[offset + 2] += ct * wgt[i];
   }
 }
 void MP4_Engine::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& control,

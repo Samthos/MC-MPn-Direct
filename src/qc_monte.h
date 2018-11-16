@@ -142,18 +142,11 @@ class MP4 : public MP {
 
     emp.resize(3);
 
-    // set up MP2 control variates
-    control.emplace_back(std::vector<double>(6));
-    cv.emplace_back(ControlVariate(6, {0, 0, 0, 0, 0, 0}));
-
-    // set up MP3 control variates
-    control.emplace_back(std::vector<double>(36));
-    cv.emplace_back(ControlVariate(36, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
-
-    // set up MP4 control variates
-    control.emplace_back(std::vector<double>(12));
-    cv.emplace_back(ControlVariate(12, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
+    std::array<int, 3> n_cv = {6, 36, 12};
+    for (int n : n_cv) {
+      control.emplace_back(std::vector<double>(n));
+      cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
+    }
   }
   ~MP4() {
     ovps.free();
