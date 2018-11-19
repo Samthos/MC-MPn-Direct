@@ -772,11 +772,11 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
   double jr_kr_lr, jr_kr_lw, jr_kw_lr, jr_kw_lw, jw_kr_lr, jw_kr_lw, jw_kw_lr, jw_kw_lw;
   constexpr int offset = 36;
   for (int i = 0; i < mpn; ++i) {
-    std::transform(rv.begin(), rv.end(), il.begin() + i * mpn, r_r.begin(), std::multiplies<>());
-    contract(T_r, kl, CblasTrans, jl, r_r);
+    std::transform(rv.begin(), rv.end(), il.begin() + i * mpn, en_r.begin(), std::multiplies<>());
+    contract(T_r, kl, CblasTrans, jl, en_r);
     
-    std::transform(wgt.begin(), wgt.end(), il.begin() + i * mpn, r_r.begin(), std::multiplies<>());
-    contract(T_w, kl, CblasTrans, jl, r_r);
+    std::transform(wgt.begin(), wgt.end(), il.begin() + i * mpn, en_r.begin(), std::multiplies<>());
+    contract(T_w, kl, CblasTrans, jl, en_r);
 
     jr_kr_lr = 0; jr_kr_lw = 0; jr_kw_lr = 0; jr_kw_lw = 0;
     jw_kr_lr = 0; jw_kr_lw = 0; jw_kw_lr = 0; jw_kw_lw = 0;
