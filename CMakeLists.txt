@@ -10,13 +10,13 @@ set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
 find_package(MPI)
 find_package(Armadillo REQUIRED)
-find_package(BLAS)
+find_package(BLAS REQUIRED)
 
 execute_process(
-        COMMAND git log -1 --format=%h
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_COMMIT_HASH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND git log -1 --format=%h
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 add_definitions("-DVERSION=\"${GIT_COMMIT_HASH}\"")
 
@@ -24,6 +24,11 @@ add_definitions("-DVERSION=\"${GIT_COMMIT_HASH}\"")
 option(NDEBUG "NDEBUG" OFF)
 if(${NDEBUG})
     add_definitions(-DNDEBUG)
+endif()
+
+option(NOCV "NOCV" OFF)
+if(${NOCV})
+  add_definitions(-DNOCV)
 endif()
 
 #add_subdirectory(test)

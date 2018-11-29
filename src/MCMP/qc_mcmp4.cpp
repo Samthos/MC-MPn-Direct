@@ -166,11 +166,13 @@ void MP4_Engine::mcmp4_ij_helper(double constant,
 
   // ij_rk = ik . diagonal( rv ) . kj
   contract(ij_rk, jk, CblasTrans, ik, rv);
-  contract(ij_wk, jk, CblasTrans, ik, wgt);
+  contract(ij_rl, jl, CblasTrans, il, rv);
 
   // ij_rl = il . diagonal( rv ) . lj
-  contract(ij_rl, jl, CblasTrans, il, rv);
+#ifndef NOCV
+  contract(ij_wk, jk, CblasTrans, ik, wgt);
   contract(ij_wl, jl, CblasTrans, il, wgt);
+#endif
 
   // i_kl = ik * il
   std::transform(ik.begin(), ik.end(), il.begin(), i_kl.begin(), std::multiplies<>());
@@ -186,6 +188,7 @@ void MP4_Engine::mcmp4_ij_helper(double constant,
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
   emp4 += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;                   // r r r r
+#ifndef NOCV
   control[0 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r r
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
@@ -233,6 +236,7 @@ void MP4_Engine::mcmp4_ij_helper(double constant,
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
   control[10 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w w
   control[11 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w w
+#endif
 }
 void MP4_Engine::mcmp4_ij_helper_t1(double constant,
     double& emp4, std::vector<double>& control, int offset,
@@ -523,9 +527,10 @@ void MP4_Engine::mcmp4_il_helper(double constant,
   contract(ij_rl, jl, CblasNoTrans, ij, rv);
   contract(ij_rk, kl, CblasNoTrans, ik, rv);
 
+#ifndef NOCV
   contract(ij_wl, jl, CblasNoTrans, ij, wgt);
   contract(ij_wk, kl, CblasNoTrans, ik, wgt);
-
+#endif
 
   // build jrkr
   contract(T_r, j_kl, CblasNoTrans, i_kl, r_r);
@@ -536,6 +541,7 @@ void MP4_Engine::mcmp4_il_helper(double constant,
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
   emp4 += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant; // r r r r
+#ifndef NOCV
   control[0 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r r
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
@@ -551,7 +557,6 @@ void MP4_Engine::mcmp4_il_helper(double constant,
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
   control[3 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r r
-//control[4 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w r r
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
   control[4 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r w
@@ -564,7 +569,6 @@ void MP4_Engine::mcmp4_il_helper(double constant,
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
   control[6 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w r
-//control[4 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r r w r
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
   control[7 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w w
@@ -578,11 +582,11 @@ void MP4_Engine::mcmp4_il_helper(double constant,
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
   control[9 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w r
-//control[4 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w r
 
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
   control[10 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w w
   control[11 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w w
+#endif
 }
 void MP4_Engine::mcmp4_il_helper_t1(double constant,
     double& emp4, std::vector<double>& control, int offset,
@@ -746,16 +750,20 @@ std::array<double, 4> MP4_Engine::contract_jk(
   std::transform(rv.begin(), rv.end(), ik.begin() + walker * mpn, ij_rk.begin(), std::multiplies<>());
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, Av.data(), mpn, ij_rk.data(), 1, 0.0, en_r.data(), 1); // kr ?l
 
+#ifndef NOCV
   std::transform(wgt.begin(), wgt.end(), ik.begin() + walker * mpn, ij_wk.begin(), std::multiplies<>());
   cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, Av.data(), mpn, ij_wk.data(), 1, 0.0, en_w.data(), 1); // kw ?l
+#endif
 
   std::transform(rv.begin(), rv.end(), ij.begin() + walker * mpn, ij_rk.begin(), std::multiplies<>());
   out[0] = std::inner_product(en_r.begin(), en_r.end(), ij_rk.begin(), 0.0); // jr kr l?
+#ifndef NOCV
   out[1] = std::inner_product(en_w.begin(), en_w.end(), ij_rk.begin(), 0.0); // jr kw l?
 
   std::transform(wgt.begin(), wgt.end(), ij.begin() + walker * mpn, ij_wk.begin(), std::multiplies<>());
   out[2] = std::inner_product(en_r.begin(), en_r.end(), ij_wk.begin(), 0.0); // jw kr l?
   out[3] = std::inner_product(en_w.begin(), en_w.end(), ij_wk.begin(), 0.0); // jw kw l?
+#endif
 
   return out;
 }
@@ -770,19 +778,21 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
     ) {
   std::array<double, 4> contracted_jk;
   double jr_kr_lr, jr_kr_lw, jr_kw_lr, jr_kw_lw, jw_kr_lr, jw_kr_lw, jw_kw_lr, jw_kw_lw;
-  constexpr int offset = 36;
   for (int i = 0; i < mpn; ++i) {
     std::transform(rv.begin(), rv.end(), il.begin() + i * mpn, en_r.begin(), std::multiplies<>());
     contract(T_r, kl, CblasTrans, jl, en_r);
-    
+
+#ifndef NOCV
     std::transform(wgt.begin(), wgt.end(), il.begin() + i * mpn, en_r.begin(), std::multiplies<>());
     contract(T_w, kl, CblasTrans, jl, en_r);
+#endif
 
     jr_kr_lr = 0; jr_kr_lw = 0; jr_kw_lr = 0; jr_kw_lw = 0;
     jw_kr_lr = 0; jw_kr_lw = 0; jw_kw_lr = 0; jw_kw_lw = 0;
     for (auto eqn = 0ull; eqn < constants.size(); ++eqn) {
       contracted_jk = contract_jk(i, T_r, *(jk[eqn]), *(ik[eqn]), *(ij[eqn]));
       jr_kr_lr += constants[eqn] * contracted_jk[0] ;
+#ifndef NOCV
       jr_kw_lr += constants[eqn] * contracted_jk[1];
       jw_kr_lr += constants[eqn] * contracted_jk[2];
       jw_kw_lr += constants[eqn] * contracted_jk[3];
@@ -792,8 +802,10 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
       jr_kw_lw += constants[eqn] * contracted_jk[2];
       jw_kr_lw += constants[eqn] * contracted_jk[1];
       jw_kw_lw += constants[eqn] * contracted_jk[3];
+#endif
     }
     emp4        += jr_kr_lr * rv[i];
+#ifndef NOCV
     control[36] += jr_kr_lw * rv[i];
     control[37] += jw_kr_lw * rv[i];
     control[38] += jr_kw_lw * rv[i];
@@ -806,6 +818,7 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
     control[45] += jr_kw_lw * wgt[i];
     control[46] += jw_kw_lr * wgt[i];
     control[47] += jw_kw_lw * wgt[i];
+#endif
   }
 }
 void MP4_Engine::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& control,
@@ -1119,9 +1132,12 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   MP4_Engine mp4(el_pair_list);
   emp4 = 0.0;
+#ifndef NOCV
   std::fill(control.begin(), control.end(), 0.0);
+#endif
 
-   mp4.energy(emp4, control, ovps);
+
+  mp4.energy(emp4, control, ovps);
   /*
   printf("%12.6f : ", emp4);
   for (const auto &item : control) {
@@ -1148,16 +1164,15 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   printf("\n");
   */
 
-  auto tau_wgt = tau.get_wgt(3);
-  std::transform(control.begin(), control.end(), control.begin(), [&](double x) { return x * tau_wgt; });
-  emp4 *= tau_wgt;
-
-  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
-  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
-  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
-  nsamp *= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 3);
-  emp4 /= nsamp;
-  std::transform(control.begin(), control.end(), control.begin(), [&nsamp](double x) { return x / nsamp; });
+  auto nsamp_tauwgt = tau.get_wgt(3);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 3);
+  emp4 *= nsamp_tauwgt;
+#ifndef NOCV
+  std::transform(control.begin(), control.end(), control.begin(), [&nsamp_tauwgt](double x) { return x * nsamp_tauwgt; });
+#endif
 }
 
 void MP::mcmp4_energy_ij(double& emp4, std::vector<double>& control) {

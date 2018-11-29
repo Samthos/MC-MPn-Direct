@@ -96,11 +96,14 @@ class MP : public QC_monte {
 class MP2 : public MP {
  public:
   MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    tau.resize(1, basis);
+    std::array<int, 1> n_cv = {6};
+    tau.resize(n_cv.size(), basis);
+    emp.resize(n_cv.size());
 
-    emp.resize(1);
-    control.emplace_back(std::vector<double>(6));
-    cv.emplace_back(ControlVariate(6, {0, 0, 0, 0, 0, 0}));
+    for (int n : n_cv) {
+      control.emplace_back(std::vector<double>(n));
+      cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
+    }
   }
   ~MP2() {}
 
@@ -111,20 +114,15 @@ class MP2 : public MP {
 class MP3 : public MP {
  public:
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    ovps.init(2, iops.iopns[KEYS::MC_NPAIR], basis);
+    std::array<int, 2> n_cv = {6, 36};
 
-    tau.resize(2, basis);
-
-    emp.resize(2);
-    
-    // set up MP2 control variates
-    control.emplace_back(std::vector<double>(6));
-    cv.emplace_back(ControlVariate(6, {0, 0, 0, 0, 0, 0}));
-
-    // set up MP3 control variates
-    control.emplace_back(std::vector<double>(36));
-    cv.emplace_back(ControlVariate(36, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
+    ovps.init(n_cv.size(), iops.iopns[KEYS::MC_NPAIR], basis);
+    tau.resize(n_cv.size(), basis);
+    emp.resize(n_cv.size());
+    for (int n : n_cv) {
+      control.emplace_back(std::vector<double>(n));
+      cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
+    }
   }
   ~MP3() {
     ovps.free();
@@ -137,12 +135,11 @@ class MP3 : public MP {
 class MP4 : public MP {
  public:
   MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    ovps.init(3, iops.iopns[KEYS::MC_NPAIR], basis);
-    tau.resize(3, basis);
-
-    emp.resize(3);
-
     std::array<int, 3> n_cv = {6, 36, 48};
+
+    ovps.init(n_cv.size(), iops.iopns[KEYS::MC_NPAIR], basis);
+    tau.resize(n_cv.size(), basis);
+    emp.resize(n_cv.size());
     for (int n : n_cv) {
       control.emplace_back(std::vector<double>(n));
       cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));

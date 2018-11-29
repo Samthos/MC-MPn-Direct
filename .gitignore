@@ -1,7 +1,5 @@
 calculations/
-cmake-build-debug/
-cmake-build-ndebug/
-cmake-build-release/
+cmake-build-*/
 release/
 *.swp
 .idea
