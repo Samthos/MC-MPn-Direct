@@ -31,5 +31,12 @@ if(${NOCV})
   add_definitions(-DNOCV)
 endif()
 
+set(MP2CV 0 CACHE String "Sets MP2CV level")
+add_definitions(-DMP2CV=${MP2CV})
+set(MP3CV 0 CACHE String "Sets MP3CV level")
+add_definitions(-DMP3CV=${MP3CV})
+set(MP4CV 0 CACHE String "Sets MP4CV level")
+add_definitions(-DMP4CV=${MP4CV})
+
 #add_subdirectory(test)
 add_subdirectory(src)

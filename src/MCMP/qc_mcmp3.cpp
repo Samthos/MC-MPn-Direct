@@ -56,9 +56,11 @@ void mcmp3_helper(
       0.0,
       A_jk.data(), 1);
   en3 += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * r
-#ifndef NOCV
+#if MP3CV >= 1
   control[offset + 0] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * r
+#endif
 
+#if MP3CV >= 2
   // A_ik . wgt
   cblas_dgemv(CblasColMajor,
       CblasTrans,
@@ -70,7 +72,9 @@ void mcmp3_helper(
       A_jk.data(), 1);
   control[offset + 1] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * w
   control[offset + 2] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * w
+#endif
 
+#if MP3CV >= 3
   // recompute A_jk
   std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
 
@@ -122,7 +126,7 @@ void mcmp3_helper(
 
 void MP::mcmp3_energy(double& emp3, std::vector<double>& control) {
   emp3 = 0.0;
-#ifndef NOCV
+#if MP3CV >= 1
   std::fill(control.begin(), control.end(), 0.0);
 #endif
 
@@ -151,7 +155,7 @@ void MP::mcmp3_energy(double& emp3, std::vector<double>& control) {
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
   emp3 = emp3 * nsamp_tauwgt;
-#ifndef NOCV
+#if MP3CV >= 1
   std::transform(control.begin(), control.end(), control.begin(), [nsamp_tauwgt](double x) { return x * nsamp_tauwgt; });
 #endif
 }
