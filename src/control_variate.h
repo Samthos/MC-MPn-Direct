@@ -158,7 +158,7 @@ class ControlVariate {
       cov_c = e_c2 - e_c1 * e_c1.t();
 
       // calcalate scaling coeficent for contrl variates
-      arma::Col<double> alpha = arma::solve(cov_c, cov_xc);
+      alpha = arma::solve(cov_c, cov_xc);
 
       // calcaulte control varaiate averate
       e_cv = e_x[0] - arma::dot(alpha, e_c1 - exact_cv);
@@ -183,39 +183,67 @@ class ControlVariate {
     os << "\t\"Steps\" : " << TotalSamples << ",\n";
 
     // print E[x]
-    os << "\t\"EX\" : " << e_x[0] << ",\n";
+    os << "\t\"EX\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[0] << ",\n";
 
     // print Var[x]
-    os << "\t\"EX2\" : " << e_x[1] << ",\n";
+    os << "\t\"EX2\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[1] << ",\n";
 
     // print vector of E[cv]
-    os << "\t\"EC\" : [" << e_c1[0];
+    os << "\t\"EC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c1[0];
     for (auto i=1; i < e_c1.size(); i++) {
-      os << ",\n\t\t" << e_c1[i];
+      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c1[i];
     }
     os << "\n\t],\n";
 
-    // print Cov[x, cv]
-    os << "\t\"EXC\" : [" << e_xc[0];
+    // print E[x * cv]
+    os << "\t\"EXC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_xc[0];
     for (auto i=1; i < e_xc.size(); i++) {
-      os << ",\n\t\t" << e_xc[i];
+      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_xc[i];
     }
     os << "\n\t],\n";
 
-    // print Cov[cv, cv]
+    // print Cov[x * cv]
+    os << "\t\"COVXC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_xc[0];
+    for (auto i=1; i < cov_xc.size(); i++) {
+      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_xc[i];
+    }
+    os << "\n\t],\n";
+
+    // print alpha
+    os << "\t\"alpha\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << alpha[0];
+    for (auto i=1; i < alpha.size(); i++) {
+      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << alpha[i];
+    }
+    os << "\n\t],\n";
+
+    // print E[cv.T * cv]
     os << "\t\"ECC\" : [";
     for (auto row = 0; row < e_c2.n_rows; row++) {
       if (row != 0) {
         os << "],";
       }
 
-      os << "\n\t\t[" << e_c2(row, 0);
+      os << "\n\t\t[" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c2(row, 0);
       for (auto col = 1; col < e_c2.n_cols; col++) {
-        os << ", " << e_c2(row, col);
+        os << ", " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c2(row, col);
+      }
+    }
+    os << "]],\n";
+
+    // print E[cv.T * cv]
+    os << "\t\"COVCC\" : [";
+    for (auto row = 0; row < cov_c.n_rows; row++) {
+      if (row != 0) {
+        os << "],";
+      }
+
+      os << "\n\t\t[" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_c(row, 0);
+      for (auto col = 1; col < cov_c.n_cols; col++) {
+        os << ", " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_c(row, col);
       }
     }
     os << "]]\n";
-    
+
     os << "}";
 
     // close stream
@@ -260,6 +288,7 @@ class ControlVariate {
 
   // exact value of control variates
   arma::vec exact_cv;
+  arma::Col<double> alpha;
 };
 
 #endif //MC_MP2_DIRECT_CONTROL_VARIATE_H
