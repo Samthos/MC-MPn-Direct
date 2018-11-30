@@ -261,7 +261,7 @@ void Basis::nw_vectors_read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   }
 
   // print orbital energies to <JOBNAME>.orbital_energies
-  if (mpi_info.sys_master) {
+  if (mpi_info.sys_master && iops.iopns[KEYS::TASK] != TASKS::MP) {
     std::stringstream ss;
     std::string str;
     std::ofstream output;

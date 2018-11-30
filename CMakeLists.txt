@@ -26,11 +26,6 @@ if(${NDEBUG})
     add_definitions(-DNDEBUG)
 endif()
 
-option(NOCV "NOCV" OFF)
-if(${NOCV})
-  add_definitions(-DNOCV)
-endif()
-
 set(MP2CV 0 CACHE String "Sets MP2CV level")
 add_definitions(-DMP2CV=${MP2CV})
 set(MP3CV 0 CACHE String "Sets MP3CV level")

@@ -26,6 +26,15 @@ class Timer {
     stop = std::chrono::high_resolution_clock::now();
     span = std::chrono::duration_cast<std::chrono::duration<double>>(stop - start);
   }
+  std::chrono::high_resolution_clock::time_point StartTime() {
+    return start;
+  }
+  std::chrono::high_resolution_clock::time_point EndTime() {
+    return stop;
+  }
+  double Span() {
+    return span.count();
+  }
   friend std::ostream& operator<< (std::ostream& os, Timer& timer) {
     timer.Stop();
     if (0 == timer.master) {

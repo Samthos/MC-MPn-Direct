@@ -24,6 +24,7 @@ void MP::monte_energy() {
   if (mpi_info.sys_master) {
     mcTimer.Start();
     stepTimer.Start();
+    print_mc_head(mcTimer.StartTime());
 
     for (auto i = 0; i < emp.size(); i++) {
       std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
@@ -66,7 +67,8 @@ void MP::monte_energy() {
       cv[i].to_json(filename);
   }
   if (mpi_info.sys_master) {
-    std::cout << "Spent " << mcTimer << " second preforming MC integration" << std::endl;
+    mcTimer.Stop();
+    print_mc_tail(mcTimer.Span(), mcTimer.EndTime());
     for (auto i = 0; i < emp.size(); i++) {
       output[i].close();
     }
