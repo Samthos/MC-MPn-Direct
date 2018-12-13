@@ -135,7 +135,7 @@ class MP3 : public MP {
 class MP4 : public MP {
  public:
   MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    std::array<int, 3> n_cv = {6, 36, 48};
+    std::array<int, 3> n_cv = {6, 36, 72};
 
     ovps.init(n_cv.size(), iops.iopns[KEYS::MC_NPAIR], basis);
     tau.resize(n_cv.size(), basis);

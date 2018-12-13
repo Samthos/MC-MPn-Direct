@@ -80,7 +80,7 @@ class MP4_Engine {
   std::array<double, 4> contract_jk(int walker,
       const std::vector<double>& T,
       const std::vector<double>& jk, const std::vector<double>& ik, const std::vector<double>& ij);
-  void mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& control,
+  void mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& control, int offset,
       const std::vector<double>& constants,
       const std::vector<const std::vector<double>*>& ij,
       const std::vector<const std::vector<double>*>& ik,
@@ -775,15 +775,14 @@ std::array<double, 4> MP4_Engine::contract_jk(
 
   return out;
 }
-void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& control,
+void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& constants,
     const std::vector<const std::vector<double>*>& ij,
     const std::vector<const std::vector<double>*>& ik,
     const std::vector<double>& il,
     const std::vector<const std::vector<double>*>& jk,
     const std::vector<double>& jl,
-    const std::vector<double>& kl
-    ) {
+    const std::vector<double>& kl) {
   std::array<double, 4> contracted_jk;
   double jr_kr_lr, jr_kr_lw, jr_kw_lr, jr_kw_lw, jw_kr_lr, jw_kr_lw, jw_kw_lr, jw_kw_lw;
   for (int i = 0; i < mpn; ++i) {
@@ -818,24 +817,24 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
     }
     emp4        += jr_kr_lr * rv[i];
 #if MP4CV >= 1
-    control[40] += jr_kr_lr * wgt[i];
+    control[offset + 4] += jr_kr_lr * wgt[i];
 #endif
 #if MP4CV >= 2
-    control[42] += jr_kw_lr * wgt[i];
+    control[offset + 6] += jr_kw_lr * wgt[i];
 #endif
 #if MP4CV >= 3
-    control[44] += jw_kr_lr * wgt[i];
-    control[46] += jw_kw_lr * wgt[i];
+    control[offset + 8] += jw_kr_lr * wgt[i];
+    control[offset + 10] += jw_kw_lr * wgt[i];
 #endif
 #if MP4CV >= 4
-    control[36] += jr_kr_lw * rv[i];
-    control[37] += jw_kr_lw * rv[i];
-    control[38] += jr_kw_lw * rv[i];
-    control[39] += jw_kw_lw * rv[i];
-    control[41] += jr_kr_lw * wgt[i];
-    control[43] += jw_kr_lw * wgt[i];
-    control[45] += jr_kw_lw * wgt[i];
-    control[47] += jw_kw_lw * wgt[i];
+    control[offset + 0] += jr_kr_lw * rv[i];
+    control[offset + 1] += jw_kr_lw * rv[i];
+    control[offset + 2] += jr_kw_lw * rv[i];
+    control[offset + 3] += jw_kw_lw * rv[i];
+    control[offset + 5] += jr_kr_lw * wgt[i];
+    control[offset + 7] += jw_kr_lw * wgt[i];
+    control[offset + 9] += jr_kw_lw * wgt[i];
+    control[offset + 11] += jw_kw_lw * wgt[i];
 #endif
   }
 }
@@ -854,7 +853,7 @@ void MP4_Engine::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& control
     ext_ptr[i] = &ext_data[i];
   }
 
-  mcmp4_energy_ijkl_helper(emp4, control, constants, ij, ik, il_, ext_ptr, jl, kl);
+  mcmp4_energy_ijkl_helper(emp4, control, 36, constants, ij, ik, il_, ext_ptr, jl, kl);
 }
 void MP4_Engine::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& control,
     const std::vector<double> constants,
@@ -872,7 +871,7 @@ void MP4_Engine::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& control
 
   std::transform(jl_1.begin(), jl_1.end(), jl_2.begin(), jl_.begin(), std::multiplies<>());
 
-  mcmp4_energy_ijkl_helper(emp4, control, constants, ij, ext_ptr, il, jk, jl_, kl);
+  mcmp4_energy_ijkl_helper(emp4, control, 48, constants, ij, ext_ptr, il, jk, jl_, kl);
 }
 void MP4_Engine::mcmp4_energy_ijkl_t3(double& emp4, std::vector<double>& control,
     const std::vector<double> constants,
@@ -889,7 +888,7 @@ void MP4_Engine::mcmp4_energy_ijkl_t3(double& emp4, std::vector<double>& control
 
   std::transform(kl_1.begin(), kl_1.end(), kl_2.begin(), jl_.begin(), std::multiplies<>());
 
-  mcmp4_energy_ijkl_helper(emp4, control, constants, ext_ptr, ik, il, jk, jl, jl_);
+  mcmp4_energy_ijkl_helper(emp4, control, 60, constants, ext_ptr, ik, il, jk, jl, jl_);
 }
 void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
   mcmp4_energy_ijkl_t1(emp4, control,
