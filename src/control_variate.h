@@ -176,75 +176,77 @@ class ControlVariate {
     // call update function
     update();
 
-    // open json
-    os << "{\n";
+    if (0 == master) {
+      // open json
+      os << "{\n";
 
-    // print number of steps
-    os << "\t\"Steps\" : " << TotalSamples << ",\n";
+      // print number of steps
+      os << "\t\"Steps\" : " << TotalSamples << ",\n";
 
-    // print E[x]
-    os << "\t\"EX\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[0] << ",\n";
+      // print E[x]
+      os << "\t\"EX\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[0] << ",\n";
 
-    // print Var[x]
-    os << "\t\"EX2\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[1] << ",\n";
+      // print Var[x]
+      os << "\t\"EX2\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[1] << ",\n";
 
-    // print vector of E[cv]
-    os << "\t\"EC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c1[0];
-    for (auto i=1; i < e_c1.size(); i++) {
-      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c1[i];
-    }
-    os << "\n\t],\n";
-
-    // print E[x * cv]
-    os << "\t\"EXC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_xc[0];
-    for (auto i=1; i < e_xc.size(); i++) {
-      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_xc[i];
-    }
-    os << "\n\t],\n";
-
-    // print Cov[x * cv]
-    os << "\t\"COVXC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_xc[0];
-    for (auto i=1; i < cov_xc.size(); i++) {
-      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_xc[i];
-    }
-    os << "\n\t],\n";
-
-    // print alpha
-    os << "\t\"alpha\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << alpha[0];
-    for (auto i=1; i < alpha.size(); i++) {
-      os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << alpha[i];
-    }
-    os << "\n\t],\n";
-
-    // print E[cv.T * cv]
-    os << "\t\"ECC\" : [";
-    for (auto row = 0; row < e_c2.n_rows; row++) {
-      if (row != 0) {
-        os << "],";
+      // print vector of E[cv]
+      os << "\t\"EC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c1[0];
+      for (auto i = 1; i < e_c1.size(); i++) {
+        os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c1[i];
       }
+      os << "\n\t],\n";
 
-      os << "\n\t\t[" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c2(row, 0);
-      for (auto col = 1; col < e_c2.n_cols; col++) {
-        os << ", " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c2(row, col);
+      // print E[x * cv]
+      os << "\t\"EXC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_xc[0];
+      for (auto i = 1; i < e_xc.size(); i++) {
+        os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_xc[i];
       }
+      os << "\n\t],\n";
+
+      // print Cov[x * cv]
+      os << "\t\"COVXC\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_xc[0];
+      for (auto i = 1; i < cov_xc.size(); i++) {
+        os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_xc[i];
+      }
+      os << "\n\t],\n";
+
+      // print alpha
+      os << "\t\"alpha\" : [" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << alpha[0];
+      for (auto i = 1; i < alpha.size(); i++) {
+        os << ",\n\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << alpha[i];
+      }
+      os << "\n\t],\n";
+
+      // print E[cv.T * cv]
+      os << "\t\"ECC\" : [";
+      for (auto row = 0; row < e_c2.n_rows; row++) {
+        if (row != 0) {
+          os << "],";
+        }
+
+        os << "\n\t\t[" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c2(row, 0);
+        for (auto col = 1; col < e_c2.n_cols; col++) {
+          os << ", " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_c2(row, col);
+        }
+      }
+      os << "]],\n";
+
+      // print E[cv.T * cv]
+      os << "\t\"COVCC\" : [";
+      for (auto row = 0; row < cov_c.n_rows; row++) {
+        if (row != 0) {
+          os << "],";
+        }
+
+        os << "\n\t\t[" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_c(row, 0);
+        for (auto col = 1; col < cov_c.n_cols; col++) {
+          os << ", " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_c(row, col);
+        }
+      }
+      os << "]]\n";
+
+      os << "}";
     }
-    os << "]],\n";
-
-    // print E[cv.T * cv]
-    os << "\t\"COVCC\" : [";
-    for (auto row = 0; row < cov_c.n_rows; row++) {
-      if (row != 0) {
-        os << "],";
-      }
-
-      os << "\n\t\t[" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_c(row, 0);
-      for (auto col = 1; col < cov_c.n_cols; col++) {
-        os << ", " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cov_c(row, col);
-      }
-    }
-    os << "]]\n";
-
-    os << "}";
 
     // close stream
     os.close();
