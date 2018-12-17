@@ -75,7 +75,16 @@ class MP : public QC_monte {
   void monte_energy();
   virtual void energy() = 0;
  protected:
-  MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {
+  MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, std::vector<int> cv_sizes) : QC_monte(p1, p2, p3, p4, p5) {
+    tau.resize(cv_sizes.size(), basis);
+    emp.resize(cv_sizes.size());
+    for (int n : cv_sizes) {
+      control.emplace_back(std::vector<double>(n));
+      cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
+    }
+    cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
+    control.emplace_back(std::vector<double>(cv_sizes.back()));
+    cv.emplace_back(ControlVariate(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
   }
 
   std::vector<double> emp;
@@ -95,16 +104,7 @@ class MP : public QC_monte {
 
 class MP2 : public MP {
  public:
-  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    std::array<int, 1> n_cv = {6};
-    tau.resize(n_cv.size(), basis);
-    emp.resize(n_cv.size());
-
-    for (int n : n_cv) {
-      control.emplace_back(std::vector<double>(n));
-      cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
-    }
-  }
+  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5, {6}) {}
   ~MP2() {}
 
  protected:
@@ -113,16 +113,8 @@ class MP2 : public MP {
 
 class MP3 : public MP {
  public:
-  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    std::array<int, 2> n_cv = {6, 36};
-
-    ovps.init(n_cv.size(), iops.iopns[KEYS::MC_NPAIR], basis);
-    tau.resize(n_cv.size(), basis);
-    emp.resize(n_cv.size());
-    for (int n : n_cv) {
-      control.emplace_back(std::vector<double>(n));
-      cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
-    }
+  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5, {6, 36}) {
+    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
   ~MP3() {
     ovps.free();
@@ -134,16 +126,8 @@ class MP3 : public MP {
 
 class MP4 : public MP {
  public:
-  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5) {
-    std::array<int, 3> n_cv = {6, 36, 72};
-
-    ovps.init(n_cv.size(), iops.iopns[KEYS::MC_NPAIR], basis);
-    tau.resize(n_cv.size(), basis);
-    emp.resize(n_cv.size());
-    for (int n : n_cv) {
-      control.emplace_back(std::vector<double>(n));
-      cv.emplace_back(ControlVariate(n, std::vector<double>(n, 0.0)));
-    }
+  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5, {6, 36, 72}) {
+    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
   ~MP4() {
     ovps.free();
