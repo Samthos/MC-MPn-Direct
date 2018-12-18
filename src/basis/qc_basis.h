@@ -42,7 +42,7 @@ class Basis {
 
   // get psi vals
   void host_psi_get(std::vector<el_pair_typ>& el_pair);
-  void host_cgs_get(std::array<double, 3>&);
+  void host_cgs_get(const std::array<double, 3>&, const int);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 
   // basis set info
