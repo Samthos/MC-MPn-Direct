@@ -10,21 +10,16 @@
 
 #include "el_pair.h"
 
-void el_pair_typ::init(const int ivir2) {
-}
-
-double el_pair_typ::r12() {
+double Electron_Pair_List::r12(const Electron_Pair& el_pair) {
   double r12;
   std::array<double, 3> dr{};
-  std::transform(pos1.begin(), pos1.end(), pos2.begin(), dr.begin(),
+  std::transform(el_pair.pos1.begin(), el_pair.pos1.end(), el_pair.pos2.begin(), dr.begin(),
                  std::minus<>());
   r12 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
   return sqrt(r12);
 }
 
-void el_pair_typ::mc_move_scheme(Random& rand,
-                                 const Molec& molec,
-                                 const GTO_Weight& mc_basis) {
+void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& rand, const Molec& molec, const GTO_Weight& mc_basis) {
 #ifndef NDEBUG
   static int count = 0;
   static int step = 0;
@@ -76,12 +71,12 @@ void el_pair_typ::mc_move_scheme(Random& rand,
     phi = acos(1.0-2.0*rand.uniform(0.0, 1.0));
   }
 
-  pos1[0] = x - r * cos(theta) * sin(phi) / (2.0 * alpha);
-  pos1[1] = y - r * sin(theta) * sin(phi) / (2.0 * alpha);
-  pos1[2] = z - r * cos(phi) / (2.0 * alpha);
-  pos2[0] = x + r * cos(theta) * sin(phi) / (2.0 * beta);
-  pos2[1] = y + r * sin(theta) * sin(phi) / (2.0 * beta);
-  pos2[2] = z + r * cos(phi) / (2.0 * beta);
+  el_pair.pos1[0] = x - r * cos(theta) * sin(phi) / (2.0 * alpha);
+  el_pair.pos1[1] = y - r * sin(theta) * sin(phi) / (2.0 * alpha);
+  el_pair.pos1[2] = z - r * cos(phi) / (2.0 * alpha);
+  el_pair.pos2[0] = x + r * cos(theta) * sin(phi) / (2.0 * beta);
+  el_pair.pos2[1] = y + r * sin(theta) * sin(phi) / (2.0 * beta);
+  el_pair.pos2[2] = z + r * cos(phi) / (2.0 * beta);
 
   // compute center of the two gaussians
   std::transform(mc_basis.mcBasisList[a1].center.begin(), mc_basis.mcBasisList[a1].center.end(),
@@ -99,27 +94,27 @@ void el_pair_typ::mc_move_scheme(Random& rand,
     double r_p = acos(rb[2]/rb_norm);
     double r_t = atan2(rb[1], rb[0]);
 
-    x = pos1[0]; z = pos1[2];
-    pos1[0] = z * sin(r_p) + x * cos(r_p);
-    pos1[2] = z * cos(r_p) - x * sin(r_p);
-    x = pos2[0]; z = pos2[2];
-    pos2[0] = z * sin(r_p) + x * cos(r_p);
-    pos2[2] = z * cos(r_p) - x * sin(r_p);
+    x = el_pair.pos1[0]; z = el_pair.pos1[2];
+    el_pair.pos1[0] = z * sin(r_p) + x * cos(r_p);
+    el_pair.pos1[2] = z * cos(r_p) - x * sin(r_p);
+    x = el_pair.pos2[0]; z = el_pair.pos2[2];
+    el_pair.pos2[0] = z * sin(r_p) + x * cos(r_p);
+    el_pair.pos2[2] = z * cos(r_p) - x * sin(r_p);
 
-    x = pos1[0]; y = pos1[1];
-    pos1[0] = x * cos(r_t) - y * sin(r_t);
-    pos1[1] = x * sin(r_t) + y * cos(r_t);
-    x = pos2[0]; y = pos2[1];
-    pos2[0] = x * cos(r_t) - y * sin(r_t);
-    pos2[1] = x * sin(r_t) + y * cos(r_t);
+    x = el_pair.pos1[0]; y = el_pair.pos1[1];
+    el_pair.pos1[0] = x * cos(r_t) - y * sin(r_t);
+    el_pair.pos1[1] = x * sin(r_t) + y * cos(r_t);
+    x = el_pair.pos2[0]; y = el_pair.pos2[1];
+    el_pair.pos2[0] = x * cos(r_t) - y * sin(r_t);
+    el_pair.pos2[1] = x * sin(r_t) + y * cos(r_t);
   }
 
   // shift result to original center
-  std::transform(pos1.begin(), pos1.end(), dr.begin(), pos1.begin(), std::plus<>());
-  std::transform(pos2.begin(), pos2.end(), dr.begin(), pos2.begin(), std::plus<>());
+  std::transform(el_pair.pos1.begin(), el_pair.pos1.end(), dr.begin(), el_pair.pos1.begin(), std::plus<>());
+  std::transform(el_pair.pos2.begin(), el_pair.pos2.end(), dr.begin(), el_pair.pos2.begin(), std::plus<>());
 
-  wgt = mc_basis.weight(pos1, pos2);
-  rv = 1.0 / (r12()*wgt);
+  el_pair.wgt = mc_basis.weight(el_pair.pos1, el_pair.pos2);
+  el_pair.rv = 1.0 / (r12(el_pair)*el_pair.wgt);
 
 #ifndef NDEBUG
   std::cout << "pos";
@@ -130,13 +125,13 @@ void el_pair_typ::mc_move_scheme(Random& rand,
     std::cout << it;
   }
   std::cout << "\"";
-  std::cout << "," << pos1[0];
-  std::cout << "," << pos1[1];
-  std::cout << "," << pos1[2];
-  std::cout << "," << pos2[0];
-  std::cout << "," << pos2[1];
-  std::cout << "," << pos2[2];
-  std::cout << "," << r12();
+  std::cout << "," << el_pair.pos1[0];
+  std::cout << "," << el_pair.pos1[1];
+  std::cout << "," << el_pair.pos1[2];
+  std::cout << "," << el_pair.pos2[0];
+  std::cout << "," << el_pair.pos2[1];
+  std::cout << "," << el_pair.pos2[2];
+  std::cout << "," << r12(el_pair);
   /*
   std::cout << "," << x;
   std::cout << "," << y;
@@ -147,22 +142,21 @@ void el_pair_typ::mc_move_scheme(Random& rand,
   /*
   std::cout << theta << " ";
   */
-  std::cout << "," << wgt << std::endl;
+  std::cout << "," << el_pair.wgt << std::endl;
 #endif  // NDEBUG
 }
-
-double CDF(const double& rho, const double& c, const double& erf_c) {
+double Direct_Electron_Pair_List::CDF(const double& rho, const double& c, const double& erf_c) {
   return (2.0 * erf_c + erf(rho - c) - erf(rho + c)) / (2.0 * erf_c);
 }
-double PDF(const double& rho, const double& c, const double& erf_c) {
+double Direct_Electron_Pair_List::PDF(const double& rho, const double& c, const double& erf_c) {
   constexpr double sqrt_pi = 1.772453850905516;
   return exp(-(c+rho)*(c+rho)) * (exp(4*c*rho)-1.0) / (sqrt_pi * erf_c);
 }
-double PDF_Prime(const double& rho, const double& c, const double& erf_c) {
+double Direct_Electron_Pair_List::PDF_Prime(const double& rho, const double& c, const double& erf_c) {
   constexpr double sqrt_pi = 1.772453850905516;
   return 2.0 * exp(-(c+rho)*(c+rho)) * (c+rho + (c-rho)*exp(4*c*rho)) / (sqrt_pi * erf_c);
 }
-double el_pair_typ::calculate_r(double p, double alpha, double beta, double a) {
+double Direct_Electron_Pair_List::calculate_r(double p, double alpha, double beta, double a) {
   auto gamma = sqrt(alpha * beta / ( alpha + beta));
   auto c = a * gamma;
   auto erf_c = erf(c);
@@ -183,7 +177,7 @@ double el_pair_typ::calculate_r(double p, double alpha, double beta, double a) {
   }
   return rho * 2.0 * gamma;
 }
-double el_pair_typ::calculate_phi(double p, double r, double alpha, double beta, double a) {
+double Direct_Electron_Pair_List::calculate_phi(double p, double r, double alpha, double beta, double a) {
   constexpr double sqrt_pi = 1.772453850905516;
   auto gamma = sqrt(alpha * beta / ( alpha + beta));
   auto c = a * gamma;

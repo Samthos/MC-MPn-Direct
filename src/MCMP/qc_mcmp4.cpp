@@ -5,7 +5,7 @@
 #include "cblas.h"
 class MP4_Engine {
  public:
-  MP4_Engine(std::vector<el_pair_typ>& el_pair) :
+  MP4_Engine(Electron_Pair_List& el_pair) :
       mpn(el_pair.size()),
       rv(mpn), wgt(mpn), r_r(mpn), r_w(mpn), w_w(mpn), en_r(mpn), en_w(mpn),
       ij_(mpn * mpn), ik_(mpn * mpn), il_(mpn * mpn), jk_(mpn * mpn), jl_(mpn * mpn), kl_(mpn * mpn),
@@ -13,8 +13,8 @@ class MP4_Engine {
       i_kl(mpn * mpn), j_kl(mpn * mpn),
       ij_rk(mpn * mpn), ij_wk(mpn * mpn), ij_rl(mpn * mpn), ij_wl(mpn * mpn),
       T_r(mpn * mpn), T_w(mpn * mpn), Av(mpn * mpn) {
-    std::transform(el_pair.begin(), el_pair.end(), rv.begin(), [](el_pair_typ ept){return ept.rv;});
-    std::transform(el_pair.begin(), el_pair.end(), wgt.begin(), [](el_pair_typ ept){return 1.0/ept.wgt;});
+    std::transform(el_pair.begin(), el_pair.end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});
+    std::transform(el_pair.begin(), el_pair.end(), wgt.begin(), [](Electron_Pair ept){return 1.0/ept.wgt;});
 
     std::transform(rv.begin(), rv.end(), rv.begin(), r_r.begin(), std::multiplies<>());
     std::transform(rv.begin(), rv.end(), wgt.begin(), r_w.begin(), std::multiplies<>());

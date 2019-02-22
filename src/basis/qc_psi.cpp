@@ -15,7 +15,7 @@ void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 void Basis::gpu_free() {
 }
 
-void Basis::host_psi_get(std::vector<el_pair_typ>& el_pair) {
+void Basis::host_psi_get(Electron_Pair_List& el_pair) {
   //for (auto &walker : el_pair) {
   for (auto walker = 0; walker < el_pair.size(); ++walker) {
     host_cgs_get(el_pair[walker].pos1, walker);

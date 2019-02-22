@@ -110,21 +110,21 @@ class OVPs {
  public:
   void init(const int dimm, const int mc_pair_num_, const Basis &basis);
   void free();
-  void update_ovps(BasisData&, el_pair_typ *el_pair_list, Stochastic_Tau &tau);
+  void update_ovps(BasisData&, const Electron_Pair_List& el_pair_list, Stochastic_Tau &tau);
 
   void init_02(int, int, int, int, const Basis &);
   void alloc_02();
   void free_tau_02();
   void free_02();
   void zero_energy_arrays_02();
-  void update_ovps_02(el_pair_typ *, Stochastic_Tau&);
+  void update_ovps_02(Electron_Pair*, Stochastic_Tau&);
 
   void init_03(int, int, int, int, const Basis &);
   void alloc_03();
   void free_tau_03();
   void free_03();
   void zero_energy_arrays_03();
-  void update_ovps_03(el_pair_typ *, Stochastic_Tau&);
+  void update_ovps_03(Electron_Pair*, Stochastic_Tau&);
 
   std::vector<std::vector<OVPS_SET>> o_set, v_set;
   OVPS_ARRAY ovps, d_ovps;

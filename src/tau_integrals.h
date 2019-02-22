@@ -5,10 +5,6 @@
 #ifndef MC_MP3_DIRECT_TAU_INTEGRALS_H
 #define MC_MP3_DIRECT_TAU_INTEGRALS_H
 
-#ifdef HAVE_CUDA
-#include <cuda_runtime_api.h>
-#endif
-
 #include <algorithm>
 #include "basis/qc_basis.h"
 #include "qc_random.h"
@@ -19,13 +15,7 @@ class Stochastic_Tau {
   Stochastic_Tau(const Stochastic_Tau& tau) {
     throw std::runtime_error("copy constructor for stochastic tau class called");
   }
-  ~Stochastic_Tau() {
-#ifdef HAVE_CUDA
-    if (d_allocated) {
-      cudaFree(d_scratch);
-    }
-#endif
-  }
+  ~Stochastic_Tau() {}
 
   void resize(int dimm, Basis& basis) {
     iocc1 = basis.iocc1;
@@ -46,13 +36,6 @@ class Stochastic_Tau {
 
     scratch.resize(ivir2);
     lambda = 2.0 * (evals[ivir1] - evals[iocc2 - 1]);
-#ifdef HAVE_CUDA
-    if (d_allocated) {
-      cudaFree(d_scratch);
-    }
-    cudaMalloc((void**) &d_scratch, sizeof(double) * ivir2);
-    d_allocated = true;
-#endif
   }
   void new_tau(Random& random) {
     // generate new tau point and weights
@@ -81,17 +64,6 @@ class Stochastic_Tau {
     }
   }
   double *get_exp_tau_device(int stop, int start) {
-#ifdef HAVE_CUDA
-    if (start == stop) {
-      cudaMemcpy(d_scratch, exp_tau[start].data(), sizeof(double) * exp_tau[start].size(), cudaMemcpyHostToDevice);
-    } else {
-      std::fill(scratch.begin(), scratch.end(), 1.0);
-      for (auto it = start; it <= stop; it++) {
-        std::transform(scratch.begin(), scratch.end(), exp_tau[it].begin(), scratch.begin(), std::multiplies<double>());
-      }
-      cudaMemcpy(d_scratch, scratch.data(), sizeof(double) * scratch.size(), cudaMemcpyHostToDevice);
-    }
-#endif
     return d_scratch;
   }
   double get_gfn_tau(int stop, int start, int offset, int conjugate) {

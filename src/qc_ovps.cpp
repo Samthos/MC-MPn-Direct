@@ -40,7 +40,7 @@ void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
 void OVPs::free() {
   delete[] d_ovps.rv;
 }
-void OVPs::update_ovps(BasisData& basis, el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
+void OVPs::update_ovps(BasisData& basis, const Electron_Pair_List& el_pair_list, Stochastic_Tau& tau) {
   // copy wave function to psi/occ/vir objects
   for (auto ip = 0; ip < mc_pair_num; ip++) {
     d_ovps.rv[ip] = el_pair_list[ip].rv;
@@ -317,7 +317,7 @@ void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int 
   }
 }
 
-void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
+void OVPs::update_ovps_02(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
   int ip, am;
   double alpha = 1.00;
   double beta = 0.00;
@@ -356,7 +356,7 @@ void OVPs::update_ovps_02(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
     }
   }
 }
-void OVPs::update_ovps_03(el_pair_typ* el_pair_list, Stochastic_Tau& tau) {
+void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
   double alpha = 1.00;
   double beta = 0.00;
 

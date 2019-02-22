@@ -41,20 +41,21 @@ class GFStats {
 
 class QC_monte {
  protected:
-  std::vector<el_pair_typ> el_pair_list;
-
-  int nDeriv;
-  int numBand, offBand;
-  int iocc1, iocc2, ivir1, ivir2;
-
   MPI_info mpi_info;
   IOPs iops;
   Molec molec;
   Basis basis;
   GTO_Weight mc_basis;
+
+  Direct_Electron_Pair_List el_pair_list;
   Random random;
   OVPs ovps;
   Stochastic_Tau tau;
+
+  int nDeriv;
+  int numBand, offBand;
+  int iocc1, iocc2, ivir1, ivir2;
+
 
   void update_wavefunction();
   void move_walkers();
