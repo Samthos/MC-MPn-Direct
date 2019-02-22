@@ -14,7 +14,7 @@
 
 #include "qc_random.h"
 
-void Random::seed(int param) {
+Random::Random(int param) {
   int taskid;
   uniform_distribution = std::uniform_real_distribution<double>(0.00, 1.00);
 

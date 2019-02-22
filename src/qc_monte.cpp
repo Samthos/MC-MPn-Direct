@@ -8,8 +8,10 @@
 
 
 QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4) :
-    mpi_info(p0), iops(p1), molec(p2), basis(p3), mc_basis(p4), el_pair_list(iops.iopns[KEYS::MC_NPAIR]) {
-  random.seed(iops.iopns[KEYS::DEBUG]);
+    mpi_info(p0), iops(p1), molec(p2), basis(p3), mc_basis(p4),
+    random(iops.iopns[KEYS::DEBUG]),
+    el_pair_list(iops.iopns[KEYS::MC_NPAIR]) {
+    // el_pair_list(iops.iopns[KEYS::MC_NPAIR], iops.dopns[KEYS::MC_DELX], random, molec, mc_basis) {
 
   numBand = iops.iopns[KEYS::NUM_BAND];
   offBand = iops.iopns[KEYS::OFF_BAND];

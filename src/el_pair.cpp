@@ -10,7 +10,7 @@
 
 #include "el_pair.h"
 
-double Electron_Pair_List::r12(const Electron_Pair& el_pair) {
+double Electron_Pair_List::calculate_r12(const Electron_Pair &el_pair) {
   double r12;
   std::array<double, 3> dr{};
   std::transform(el_pair.pos1.begin(), el_pair.pos1.end(), el_pair.pos2.begin(), dr.begin(),
@@ -114,7 +114,7 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
   std::transform(el_pair.pos2.begin(), el_pair.pos2.end(), dr.begin(), el_pair.pos2.begin(), std::plus<>());
 
   el_pair.wgt = mc_basis.weight(el_pair.pos1, el_pair.pos2);
-  el_pair.rv = 1.0 / (r12(el_pair)*el_pair.wgt);
+  el_pair.rv = 1.0 / (calculate_r12(el_pair)*el_pair.wgt);
 
 #ifndef NDEBUG
   std::cout << "pos";
@@ -188,4 +188,82 @@ double Direct_Electron_Pair_List::calculate_phi(double p, double r, double alpha
   phi = - 2 * c * rho / (c*c + rho*rho + phi);
   phi = acos(1.0/phi);
   return phi;
+}
+
+void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Random &random, const Molec &molec, const GTO_Weight& weight) {
+  int atom;
+  double amp1, amp2, theta1, theta2;
+  std::array<double, 3> pos;
+  constexpr double pi = 6.283185307179586;
+
+  atom = molec.natom * random.get_rand();
+  pos[0] = molec.atom[atom].pos[0];
+  pos[1] = molec.atom[atom].pos[1];
+  pos[2] = molec.atom[atom].pos[2];
+
+  amp1 = sqrt(-0.5 * log(random.get_rand() * 0.2));
+  amp2 = sqrt(-0.5 * log(random.get_rand() * 0.5));
+  theta1 = 2 * pi * random.get_rand();
+  theta2 = pi * random.get_rand();
+
+  electron_pair.pos1[0] = pos[0] + amp1*cos(theta1);
+  electron_pair.pos1[1] = pos[1] + amp1*sin(theta1);
+  electron_pair.pos1[2] = pos[2] + amp2*cos(theta2);
+
+  //elec position 2;
+  atom = molec.natom * random.get_rand();
+  pos[0] = molec.atom[atom].pos[0];
+  pos[1] = molec.atom[atom].pos[1];
+  pos[2] = molec.atom[atom].pos[2];
+
+  amp1 = sqrt(-0.5 * log(random.get_rand() * 0.2));
+  amp2 = sqrt(-0.5 * log(random.get_rand() * 0.5));
+  theta1 = 2 * pi * random.get_rand();
+  theta2 = pi * random.get_rand();
+
+  electron_pair.pos2[0] = pos[0] + amp1*cos(theta1);
+  electron_pair.pos2[1] = pos[1] + amp1*sin(theta1);
+  electron_pair.pos2[2] = pos[2] + amp2*cos(theta2);
+
+  set_weight(electron_pair, weight);
+}
+void Metropolis_Electron_Pair_List::mc_move_scheme(Electron_Pair &electron_pair, Random &random, const Molec &molec, const GTO_Weight &weight) {
+  Electron_Pair trial_electron_pair = electron_pair;
+
+  for (int i = 0; i < 3; i++) {
+    trial_electron_pair.pos1[i] += random.uniform(-move_length, move_length);
+    trial_electron_pair.pos2[i] += random.uniform(-move_length, move_length);
+  }
+
+  set_weight(trial_electron_pair, weight);
+
+  auto ratio = trial_electron_pair.wgt / electron_pair.wgt;
+
+  auto rval = random.uniform(0, 1);
+  if (rval < 1.0E-3) {
+    rval = 1.0E-3;
+  }
+
+  if (ratio > rval) {
+    std::swap(trial_electron_pair, electron_pair);
+    successful_moves++;
+  } else {
+    failed_moves++;
+  }
+}
+void Metropolis_Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const GTO_Weight& weight) {
+  electron_pair.wgt = weight.weight(electron_pair.pos1, electron_pair.pos2);
+  electron_pair.rv = 1.0 / (calculate_r12(electron_pair)*electron_pair.wgt);
+}
+void Metropolis_Electron_Pair_List::rescale_move_length() {
+  double ratio = ((double) failed_moves)/((double) (failed_moves + successful_moves));
+  if (ratio < 0.5) {
+    ratio = std::min(1.0/(2.0*ratio), 1.1);
+  } else {
+    ratio = std::max(0.9, 1.0/(2.0*ratio));
+  }
+  move_length = move_length * ratio;
+  moves_since_rescale = 0;
+  successful_moves = 0;
+  failed_moves = 0;
 }

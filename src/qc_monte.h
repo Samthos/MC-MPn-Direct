@@ -47,8 +47,9 @@ class QC_monte {
   Basis basis;
   GTO_Weight mc_basis;
 
-  Direct_Electron_Pair_List el_pair_list;
   Random random;
+  Direct_Electron_Pair_List el_pair_list;
+  // Metropolis_Electron_Pair_List el_pair_list;
   OVPs ovps;
   Stochastic_Tau tau;
 
@@ -59,8 +60,8 @@ class QC_monte {
 
   void update_wavefunction();
   void move_walkers();
-  void print_mc_head(std::chrono::high_resolution_clock::time_point);
-  void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
+  static void print_mc_head(std::chrono::high_resolution_clock::time_point);
+  static void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
   std::string genFileName(int, int, int, int, int);
 
  public:
