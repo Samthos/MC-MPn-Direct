@@ -165,17 +165,16 @@ double Direct_Electron_Pair_List::calculate_r(double p, double alpha, double bet
   auto rho = c / erf_c;
 
   // calculate itital cdf
-  double cdf = CDF(rho, c, erf_c) - p;
-  double pdf, pdf_prime;
+  double cdf, pdf, pdf_prime;
 
   // iterate until cdf - p is less than 10E-6
-  while (std::abs(cdf) > 10E-6) {
+  do {
     cdf = CDF(rho, c, erf_c) - p;
     pdf = PDF(rho, c, erf_c);
     pdf_prime = PDF_Prime(rho, c, erf_c);
     rho = rho - 2.0 * cdf * pdf / (2.0*pdf*pdf-cdf*pdf_prime);
-  }
-  return rho * 2.0 * gamma;
+  } while (std::abs(cdf) > 10E-6);
+    return rho * 2.0 * gamma;
 }
 double Direct_Electron_Pair_List::calculate_phi(double p, double r, double alpha, double beta, double a) {
   constexpr double sqrt_pi = 1.772453850905516;
