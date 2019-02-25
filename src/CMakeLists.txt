@@ -1,7 +1,12 @@
-include_directories(${ARMADILLO_INCLUDE_DIRS})
-
 set(source
-        MCGF/gf2_core.h MCGF/gf3_core_c.h MCGF/gf3_core_m_1.h MCGF/gf3_core_m_12.h MCGF/gf3_core_m_2.h MCGF/gf3_core_p_1.h MCGF/gf3_core_p_12.h MCGF/gf3_core_p_2.h
+        MCGF/gf2_core.h
+        MCGF/gf3_core_c.h
+        MCGF/gf3_core_m_1.h
+        MCGF/gf3_core_m_12.h
+        MCGF/gf3_core_m_2.h
+        MCGF/gf3_core_p_1.h
+        MCGF/gf3_core_p_12.h
+        MCGF/gf3_core_p_2.h
         MCGF/gf_stats.cpp
         MCGF/qc_gfFullStatisticsHost.cpp
         MCGF/qc_mcgf.cpp
@@ -45,9 +50,19 @@ set(CPU_EXTRA_SOURCES
         )
 
 
+# include_directories(${ARMADILLO_INCLUDE_DIRS})
+
 add_executable(MC_MPn_Direct ${source} ${CPU_EXTRA_SOURCES})
+
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
+
+target_include_directories(MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+
+target_compile_definitions(MC_MPn_Direct PUBLIC -DMP2CV=${MP2CV})
+target_compile_definitions(MC_MPn_Direct PUBLIC -DMP3CV=${MP3CV})
+target_compile_definitions(MC_MPn_Direct PUBLIC -DMP4CV=${MP4CV})
+
 IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to MC_MPn_Direct")
     target_compile_definitions(MC_MPn_Direct PUBLIC -DHAVE_MPI)

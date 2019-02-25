@@ -48,8 +48,11 @@ class QC_monte {
   GTO_Weight mc_basis;
 
   Random random;
+#ifndef ENABLE_METROPOLIS
   Direct_Electron_Pair_List el_pair_list;
-  // Metropolis_Electron_Pair_List el_pair_list;
+#else
+  Metropolis_Electron_Pair_List el_pair_list;
+#endif
   OVPs ovps;
   Stochastic_Tau tau;
 
