@@ -40,7 +40,7 @@ class Stochastic_Tau {
   void new_tau(Random& random) {
     // generate new tau point and weights
     for (auto i = 0; i < tau.size(); i++) {
-      double p = random.get_rand();
+      double p = random.uniform();
       tau[i] = -log(1.0 - p) / lambda;
       wgt[i] = 1.0 / (lambda * (1.0 - p));
 

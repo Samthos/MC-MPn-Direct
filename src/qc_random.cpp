@@ -17,6 +17,7 @@
 Random::Random(int param) {
   int taskid;
   uniform_distribution = std::uniform_real_distribution<double>(0.00, 1.00);
+  normal_distribution = std::normal_distribution<double>(0.0, 1.0);
 
   debug = param;
   if (0 == debug) {
@@ -47,14 +48,12 @@ Random::Random(int param) {
   }
 }
 
-double Random::get_rand() {
+double Random::uniform() {
   return uniform_distribution(g1);
 }
 double Random::uniform(double low, double high) {
-  std::uniform_real_distribution<double> dist(low, high);
-  return dist(g1);
+  return (high-low) * uniform() + low;
 }
 double Random::normal(double mu, double sigma) {
-  std::normal_distribution<double> dist(mu, sigma);
-  return dist(g1);
+  return sigma * normal_distribution(g1) + mu;
 }

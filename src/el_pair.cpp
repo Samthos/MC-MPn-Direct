@@ -33,7 +33,7 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
   std::array<double, 3> dr{};
 
   // choose function to sample;
-  double rnd = rand.uniform(0.0, 1.0);
+  double rnd = rand.uniform();
   auto it = std::lower_bound(std::begin(mc_basis.cum_sum),
                    std::end(mc_basis.cum_sum), rnd);
   auto index = static_cast<int>(std::distance(mc_basis.cum_sum.begin(), it));
@@ -63,12 +63,12 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
     // sample z coordinate
     double mu_z = rab * (alpha - beta) / (2.0*(alpha + beta));
     z = rand.normal(mu_z, gamma);
-    r = calculate_r(rand.uniform(0.0, 1.0), alpha, beta, rab);
-    phi = calculate_phi(rand.uniform(0.0, 1.0), r, alpha, beta, rab);
+    r = calculate_r(rand.uniform(), alpha, beta, rab);
+    phi = calculate_phi(rand.uniform(), r, alpha, beta, rab);
   } else {
     z = rand.normal(0.0, gamma);
-    r = 2.0 * sqrt(-alpha * beta * log(1.0-rand.get_rand()) / (alpha+beta));
-    phi = acos(1.0-2.0*rand.uniform(0.0, 1.0));
+    r = 2.0 * sqrt(-alpha * beta * log(1.0- rand.uniform()) / (alpha+beta));
+    phi = acos(1.0-2.0*rand.uniform());
   }
 
   el_pair.pos1[0] = x - r * cos(theta) * sin(phi) / (2.0 * alpha);
@@ -195,30 +195,30 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
   std::array<double, 3> pos;
   constexpr double pi = 6.283185307179586;
 
-  atom = molec.natom * random.get_rand();
+  atom = molec.natom * random.uniform();
   pos[0] = molec.atom[atom].pos[0];
   pos[1] = molec.atom[atom].pos[1];
   pos[2] = molec.atom[atom].pos[2];
 
-  amp1 = sqrt(-0.5 * log(random.get_rand() * 0.2));
-  amp2 = sqrt(-0.5 * log(random.get_rand() * 0.5));
-  theta1 = 2 * pi * random.get_rand();
-  theta2 = pi * random.get_rand();
+  amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
+  amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));
+  theta1 = 2 * pi * random.uniform();
+  theta2 = pi * random.uniform();
 
   electron_pair.pos1[0] = pos[0] + amp1*cos(theta1);
   electron_pair.pos1[1] = pos[1] + amp1*sin(theta1);
   electron_pair.pos1[2] = pos[2] + amp2*cos(theta2);
 
   //elec position 2;
-  atom = molec.natom * random.get_rand();
+  atom = molec.natom * random.uniform();
   pos[0] = molec.atom[atom].pos[0];
   pos[1] = molec.atom[atom].pos[1];
   pos[2] = molec.atom[atom].pos[2];
 
-  amp1 = sqrt(-0.5 * log(random.get_rand() * 0.2));
-  amp2 = sqrt(-0.5 * log(random.get_rand() * 0.5));
-  theta1 = 2 * pi * random.get_rand();
-  theta2 = pi * random.get_rand();
+  amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
+  amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));
+  theta1 = 2 * pi * random.uniform();
+  theta2 = pi * random.uniform();
 
   electron_pair.pos2[0] = pos[0] + amp1*cos(theta1);
   electron_pair.pos2[1] = pos[1] + amp1*sin(theta1);

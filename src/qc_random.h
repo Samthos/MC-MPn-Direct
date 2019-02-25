@@ -12,13 +12,14 @@
 class Random {
  public:
   explicit Random(int);
-  double get_rand();
+  double uniform();
   double uniform(double, double);
   double normal(double, double);
 
  private:
   std::mt19937 g1;
   std::uniform_real_distribution<double> uniform_distribution;
+  std::normal_distribution<double> normal_distribution;
   int debug;
 };
 #endif  // QC_RANDOM_H_
