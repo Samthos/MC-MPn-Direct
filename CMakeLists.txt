@@ -16,9 +16,13 @@ find_package(CUDA)
 list(APPEND CUDA_NVCC_FLAGS "-std=c++14;-O3;-DVERBOSE")
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
-find_package(MPI)
 find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
+
+option(Enable_MPI "Enables MPI Sampling" Off)
+if (Enable_MPI)
+    find_package(MPI REQUIRED)
+endif()
 
 option(NDEBUG "enables NDEBUG macro" OFF)
 if(${NDEBUG})
