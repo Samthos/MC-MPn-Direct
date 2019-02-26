@@ -42,6 +42,7 @@ class Electron_Pair_List {
 
  protected:
   static double calculate_r12(const Electron_Pair &el_pair);
+  static void set_weight(Electron_Pair&, const GTO_Weight&);
   std::vector<Electron_Pair> electron_pairs;
 };
 
@@ -87,7 +88,6 @@ class Metropolis_Electron_Pair_List : public Electron_Pair_List {
  private:
   static void initialize(Electron_Pair&, Random&, const Molec&, const GTO_Weight&);
   void mc_move_scheme(Electron_Pair&, Random&, const Molec&, const GTO_Weight&);
-  static void set_weight(Electron_Pair&, const GTO_Weight&);
   void rescale_move_length();
 
   double move_length;

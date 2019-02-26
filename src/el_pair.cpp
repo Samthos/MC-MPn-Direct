@@ -18,8 +18,12 @@ double Electron_Pair_List::calculate_r12(const Electron_Pair &el_pair) {
   r12 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
   return sqrt(r12);
 }
+void Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const GTO_Weight& weight) {
+  electron_pair.wgt = weight.weight(electron_pair.pos1, electron_pair.pos2);
+  electron_pair.rv = 1.0 / (calculate_r12(electron_pair)*electron_pair.wgt);
+}
 
-void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& random, const Molec& molec, const GTO_Weight& mc_basis) {
+void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Molec& molec, const GTO_Weight& weight) {
 #ifndef NDEBUG
   static int count = 0;
   static int step = 0;
@@ -34,17 +38,17 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
 
   // choose function to sample;
   double rnd = random.uniform();
-  auto it = std::lower_bound(std::begin(mc_basis.cum_sum),
-                   std::end(mc_basis.cum_sum), rnd);
-  auto index = static_cast<int>(std::distance(mc_basis.cum_sum.begin(), it));
-  auto prim2 = mc_basis.cum_sum_index[index][3];
-  auto prim1 = mc_basis.cum_sum_index[index][2];
-  auto a2 = mc_basis.cum_sum_index[index][1];
-  auto a1 = mc_basis.cum_sum_index[index][0];
+  auto it = std::lower_bound(std::begin(weight.cum_sum),
+                   std::end(weight.cum_sum), rnd);
+  auto index = static_cast<int>(std::distance(weight.cum_sum.begin(), it));
+  auto prim2 = weight.cum_sum_index[index][3];
+  auto prim1 = weight.cum_sum_index[index][2];
+  auto a2 = weight.cum_sum_index[index][1];
+  auto a1 = weight.cum_sum_index[index][0];
 
   // compute some parameters
-  double alpha = mc_basis.mcBasisList[a1].alpha[prim1];
-  double beta  = mc_basis.mcBasisList[a2].alpha[prim2];
+  double alpha = weight.mcBasisList[a1].alpha[prim1];
+  double beta  = weight.mcBasisList[a2].alpha[prim2];
   double gamma = 1.0/sqrt(2.0*(alpha+beta));
 
   // sample x, y, and theta
@@ -55,8 +59,8 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
   double z, r, phi;
   if (a1 != a2) {
     // compute distance bewteen the centers
-    std::transform(mc_basis.mcBasisList[a1].center.begin(), mc_basis.mcBasisList[a1].center.end(),
-                   mc_basis.mcBasisList[a2].center.begin(), dr.begin(),
+    std::transform(weight.mcBasisList[a1].center.begin(), weight.mcBasisList[a1].center.end(),
+                   weight.mcBasisList[a2].center.begin(), dr.begin(),
                    std::minus<>());
     double rab = sqrt(std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0));
 
@@ -71,22 +75,22 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
     phi = acos(1.0-2.0*random.uniform());
   }
 
-  el_pair.pos1[0] = x - r * cos(theta) * sin(phi) / (2.0 * alpha);
-  el_pair.pos1[1] = y - r * sin(theta) * sin(phi) / (2.0 * alpha);
-  el_pair.pos1[2] = z - r * cos(phi) / (2.0 * alpha);
-  el_pair.pos2[0] = x + r * cos(theta) * sin(phi) / (2.0 * beta);
-  el_pair.pos2[1] = y + r * sin(theta) * sin(phi) / (2.0 * beta);
-  el_pair.pos2[2] = z + r * cos(phi) / (2.0 * beta);
+  electron_pair.pos1[0] = x - r * cos(theta) * sin(phi) / (2.0 * alpha);
+  electron_pair.pos1[1] = y - r * sin(theta) * sin(phi) / (2.0 * alpha);
+  electron_pair.pos1[2] = z - r * cos(phi) / (2.0 * alpha);
+  electron_pair.pos2[0] = x + r * cos(theta) * sin(phi) / (2.0 * beta);
+  electron_pair.pos2[1] = y + r * sin(theta) * sin(phi) / (2.0 * beta);
+  electron_pair.pos2[2] = z + r * cos(phi) / (2.0 * beta);
 
   // compute center of the two gaussians
-  std::transform(mc_basis.mcBasisList[a1].center.begin(), mc_basis.mcBasisList[a1].center.end(),
-                 mc_basis.mcBasisList[a2].center.begin(), dr.begin(),
+  std::transform(weight.mcBasisList[a1].center.begin(), weight.mcBasisList[a1].center.end(),
+                 weight.mcBasisList[a2].center.begin(), dr.begin(),
                  std::plus<>());
   std::for_each(dr.begin(), dr.end(), [](double&x){x/=2;});
 
   // if centers are not then same, then rotate
   if (a1 != a2) {
-    std::array<double, 3> rb(mc_basis.mcBasisList[a1].center);
+    std::array<double, 3> rb(weight.mcBasisList[a1].center);
 
     std::transform(rb.begin(), rb.end(), dr.begin(), rb.begin(), std::minus<>());
     double rb_norm = sqrt(std::inner_product(rb.begin(), rb.end(), rb.begin(), 0.0));
@@ -94,44 +98,43 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
     double r_p = acos(rb[2]/rb_norm);
     double r_t = atan2(rb[1], rb[0]);
 
-    x = el_pair.pos1[0]; z = el_pair.pos1[2];
-    el_pair.pos1[0] = z * sin(r_p) + x * cos(r_p);
-    el_pair.pos1[2] = z * cos(r_p) - x * sin(r_p);
-    x = el_pair.pos2[0]; z = el_pair.pos2[2];
-    el_pair.pos2[0] = z * sin(r_p) + x * cos(r_p);
-    el_pair.pos2[2] = z * cos(r_p) - x * sin(r_p);
+    x = electron_pair.pos1[0]; z = electron_pair.pos1[2];
+    electron_pair.pos1[0] = z * sin(r_p) + x * cos(r_p);
+    electron_pair.pos1[2] = z * cos(r_p) - x * sin(r_p);
+    x = electron_pair.pos2[0]; z = electron_pair.pos2[2];
+    electron_pair.pos2[0] = z * sin(r_p) + x * cos(r_p);
+    electron_pair.pos2[2] = z * cos(r_p) - x * sin(r_p);
 
-    x = el_pair.pos1[0]; y = el_pair.pos1[1];
-    el_pair.pos1[0] = x * cos(r_t) - y * sin(r_t);
-    el_pair.pos1[1] = x * sin(r_t) + y * cos(r_t);
-    x = el_pair.pos2[0]; y = el_pair.pos2[1];
-    el_pair.pos2[0] = x * cos(r_t) - y * sin(r_t);
-    el_pair.pos2[1] = x * sin(r_t) + y * cos(r_t);
+    x = electron_pair.pos1[0]; y = electron_pair.pos1[1];
+    electron_pair.pos1[0] = x * cos(r_t) - y * sin(r_t);
+    electron_pair.pos1[1] = x * sin(r_t) + y * cos(r_t);
+    x = electron_pair.pos2[0]; y = electron_pair.pos2[1];
+    electron_pair.pos2[0] = x * cos(r_t) - y * sin(r_t);
+    electron_pair.pos2[1] = x * sin(r_t) + y * cos(r_t);
   }
 
   // shift result to original center
-  std::transform(el_pair.pos1.begin(), el_pair.pos1.end(), dr.begin(), el_pair.pos1.begin(), std::plus<>());
-  std::transform(el_pair.pos2.begin(), el_pair.pos2.end(), dr.begin(), el_pair.pos2.begin(), std::plus<>());
+  std::transform(electron_pair.pos1.begin(), electron_pair.pos1.end(), dr.begin(), electron_pair.pos1.begin(), std::plus<>());
+  std::transform(electron_pair.pos2.begin(), electron_pair.pos2.end(), dr.begin(), electron_pair.pos2.begin(), std::plus<>());
 
-  el_pair.wgt = mc_basis.weight(el_pair.pos1, el_pair.pos2);
-  el_pair.rv = 1.0 / (calculate_r12(el_pair)*el_pair.wgt);
+  set_weight(electron_pair, weight);
 
 #ifndef NDEBUG
   std::cout << "pos";
   std::cout << "," << step ;
   std::cout << "," << count;
   std::cout << ",\"";
-  for (auto &it : mc_basis.cum_sum_index[index]) {
+  for (auto &it : weight.cum_sum_index[index]) {
     std::cout << it;
   }
   std::cout << "\"";
-  std::cout << "," << el_pair.pos1[0];
-  std::cout << "," << el_pair.pos1[1];
-  std::cout << "," << el_pair.pos1[2];
-  std::cout << "," << el_pair.pos2[0];
-  std::cout << "," << el_pair.pos2[1];
-  std::cout << "," << el_pair.pos2[2];
-  std::cout << "," << r12(el_pair);
+  std::cout << "," << electron_pair.pos1[0];
+  std::cout << "," << electron_pair.pos1[1];
+  std::cout << "," << electron_pair.pos1[2];
+  std::cout << "," << electron_pair.pos2[0];
+  std::cout << "," << electron_pair.pos2[1];
+  std::cout << "," << electron_pair.pos2[2];
+  std::cout << "," << r12(electron_pair);
   /*
   std::cout << "," << x;
   std::cout << "," << y;
@@ -142,7 +145,7 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
   /*
   std::cout << theta << " ";
   */
-  std::cout << "," << el_pair.wgt << std::endl;
+  std::cout << "," << electron_pair.wgt << std::endl;
 #endif  // NDEBUG
 }
 double Direct_Electron_Pair_List::CDF(const double& rho, const double& c, const double& erf_c) {
@@ -274,10 +277,6 @@ void Metropolis_Electron_Pair_List::mc_move_scheme(Electron_Pair &electron_pair,
   } else {
     failed_moves++;
   }
-}
-void Metropolis_Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const GTO_Weight& weight) {
-  electron_pair.wgt = weight.weight(electron_pair.pos1, electron_pair.pos2);
-  electron_pair.rv = 1.0 / (calculate_r12(electron_pair)*electron_pair.wgt);
 }
 void Metropolis_Electron_Pair_List::rescale_move_length() {
   double ratio = ((double) failed_moves)/((double) (failed_moves + successful_moves));
