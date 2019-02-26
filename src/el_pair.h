@@ -55,7 +55,7 @@ class Direct_Electron_Pair_List : public Electron_Pair_List {
   }
  private:
   static void mc_move_scheme(Electron_Pair&, Random&, const Molec&, const GTO_Weight&);
-  static double calculate_r(double p, double alpha, double beta, double a);
+  static double calculate_r(Random& random, double alpha, double beta, double a);
   static double calculate_phi(double p, double r, double alpha, double beta, double a);
   static double CDF(const double& rho, const double& c, const double& erf_c);
   static double PDF(const double& rho, const double& c, const double& erf_c);

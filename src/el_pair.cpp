@@ -19,7 +19,7 @@ double Electron_Pair_List::calculate_r12(const Electron_Pair &el_pair) {
   return sqrt(r12);
 }
 
-void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& rand, const Molec& molec, const GTO_Weight& mc_basis) {
+void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& random, const Molec& molec, const GTO_Weight& mc_basis) {
 #ifndef NDEBUG
   static int count = 0;
   static int step = 0;
@@ -33,7 +33,7 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
   std::array<double, 3> dr{};
 
   // choose function to sample;
-  double rnd = rand.uniform();
+  double rnd = random.uniform();
   auto it = std::lower_bound(std::begin(mc_basis.cum_sum),
                    std::end(mc_basis.cum_sum), rnd);
   auto index = static_cast<int>(std::distance(mc_basis.cum_sum.begin(), it));
@@ -48,9 +48,9 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
   double gamma = 1.0/sqrt(2.0*(alpha+beta));
 
   // sample x, y, and theta
-  double x = rand.normal(0.0, gamma);
-  double y = rand.normal(0.0, gamma);
-  double theta = rand.uniform(0.0, TWOPI); // 2*pi
+  double x = random.normal(0.0, gamma);
+  double y = random.normal(0.0, gamma);
+  double theta = random.uniform(0.0, TWOPI); // 2*pi
 
   double z, r, phi;
   if (a1 != a2) {
@@ -62,13 +62,13 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& el_pair, Random& r
 
     // sample z coordinate
     double mu_z = rab * (alpha - beta) / (2.0*(alpha + beta));
-    z = rand.normal(mu_z, gamma);
-    r = calculate_r(rand.uniform(), alpha, beta, rab);
-    phi = calculate_phi(rand.uniform(), r, alpha, beta, rab);
+    z = random.normal(mu_z, gamma);
+    r = calculate_r(random, alpha, beta, rab);
+    phi = calculate_phi(random.uniform(), r, alpha, beta, rab);
   } else {
-    z = rand.normal(0.0, gamma);
-    r = 2.0 * sqrt(-alpha * beta * log(1.0- rand.uniform()) / (alpha+beta));
-    phi = acos(1.0-2.0*rand.uniform());
+    z = random.normal(0.0, gamma);
+    r = 2.0 * sqrt(-alpha * beta * log(1.0- random.uniform()) / (alpha+beta));
+    phi = acos(1.0-2.0*random.uniform());
   }
 
   el_pair.pos1[0] = x - r * cos(theta) * sin(phi) / (2.0 * alpha);
@@ -150,31 +150,56 @@ double Direct_Electron_Pair_List::CDF(const double& rho, const double& c, const 
 }
 double Direct_Electron_Pair_List::PDF(const double& rho, const double& c, const double& erf_c) {
   constexpr double sqrt_pi = 1.772453850905516;
-  return exp(-(c+rho)*(c+rho)) * (exp(4*c*rho)-1.0) / (sqrt_pi * erf_c);
+  double rhopc = rho + c;
+  double rhomc = rho - c;
+  double exp_rhopc = exp(-rhopc * rhopc);
+  double exp_rhomc = exp(-rhomc * rhomc);
+  return (exp_rhomc - exp_rhopc) / (sqrt_pi * erf_c);
 }
 double Direct_Electron_Pair_List::PDF_Prime(const double& rho, const double& c, const double& erf_c) {
   constexpr double sqrt_pi = 1.772453850905516;
-  return 2.0 * exp(-(c+rho)*(c+rho)) * (c+rho + (c-rho)*exp(4*c*rho)) / (sqrt_pi * erf_c);
+  double rhopc = rho + c;
+  double rhomc = rho - c;
+  double exp_rhopc = exp(-rhopc * rhopc);
+  double exp_rhomc = exp(-rhomc * rhomc);
+  return 2.0 * (rhopc * exp_rhopc - rhomc * exp_rhomc) / (sqrt_pi * erf_c);
 }
-double Direct_Electron_Pair_List::calculate_r(double p, double alpha, double beta, double a) {
+double Direct_Electron_Pair_List::calculate_r(Random& random, double alpha, double beta, double a) {
+  constexpr double sqrt_pi = 1.772453850905516;
   auto gamma = sqrt(alpha * beta / ( alpha + beta));
   auto c = a * gamma;
   auto erf_c = erf(c);
 
   // guess rho
-  auto rho = c / erf_c;
+  double rho, p;
+  if (c < 1.25) {
+    // generate guess from r exp(-alpha^2 r^2) (2 alpha^2)
+    // where alpha == sqrt[pi] erc[c] / (2 c)
+    p = random.uniform();
+    rho = 2 * c * sqrt(-log(1-p)) / (sqrt_pi * erf_c);
+  } else {
+    // guess from standard normal
+    rho = random.normal(c, 1 / sqrt(2));
+    p = (1 - erf(c - rho)) / 2;
+    // relfect if rho less than zero
+    if (rho < 0) {
+      rho *= -1;
+    }
+  }
 
   // calculate itital cdf
   double cdf, pdf, pdf_prime;
 
   // iterate until cdf - p is less than 10E-6
+  int iter = 0;
   do {
     cdf = CDF(rho, c, erf_c) - p;
     pdf = PDF(rho, c, erf_c);
     pdf_prime = PDF_Prime(rho, c, erf_c);
     rho = rho - 2.0 * cdf * pdf / (2.0*pdf*pdf-cdf*pdf_prime);
+    iter++;
   } while (std::abs(cdf) > 10E-6);
-    return rho * 2.0 * gamma;
+  return rho * 2.0 * gamma;
 }
 double Direct_Electron_Pair_List::calculate_phi(double p, double r, double alpha, double beta, double a) {
   constexpr double sqrt_pi = 1.772453850905516;
