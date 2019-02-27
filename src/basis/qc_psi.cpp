@@ -15,25 +15,25 @@ void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 void Basis::gpu_free() {
 }
 
-void Basis::host_psi_get(Electron_Pair_List& el_pair) {
+void Basis::host_psi_get(Electron_Pair_List* el_pair) {
   //for (auto &walker : el_pair) {
-  for (auto walker = 0; walker < el_pair.size(); ++walker) {
-    host_cgs_get(el_pair[walker].pos1, walker);
+  for (auto walker = 0; walker < el_pair->size(); ++walker) {
+    host_cgs_get(el_pair->get(walker).pos1, walker);
   }
 
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      el_pair.size(), ivir2 - iocc1, nw_nbf,
+      el_pair->size(), ivir2 - iocc1, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co + iocc1 * nw_nbf, ivir2,
       0.0,
       h_basis.psi1, ivir2-iocc1);
 
-  for (auto walker = 0; walker < el_pair.size(); ++walker) {
-    host_cgs_get(el_pair[walker].pos2, walker);
+  for (auto walker = 0; walker < el_pair->size(); ++walker) {
+    host_cgs_get(el_pair->get(walker).pos2, walker);
   }
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      el_pair.size(), ivir2 - iocc1, nw_nbf,
+      el_pair->size(), ivir2 - iocc1, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co + iocc1 * nw_nbf, ivir2,

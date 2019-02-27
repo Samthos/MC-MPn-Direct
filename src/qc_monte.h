@@ -40,6 +40,13 @@ class GFStats {
 };
 
 class QC_monte {
+ public:
+  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Electron_Pair_List*);
+  ~QC_monte() {
+    basis.gpu_free();
+  }
+  virtual void monte_energy() = 0;
+
  protected:
   MPI_info mpi_info;
   IOPs iops;
@@ -48,11 +55,7 @@ class QC_monte {
   GTO_Weight mc_basis;
 
   Random random;
-#ifndef ENABLE_METROPOLIS
-  Direct_Electron_Pair_List el_pair_list;
-#else
-  Metropolis_Electron_Pair_List el_pair_list;
-#endif
+  Electron_Pair_List* el_pair_list;
   OVPs ovps;
   Stochastic_Tau tau;
 
@@ -66,13 +69,6 @@ class QC_monte {
   static void print_mc_head(std::chrono::high_resolution_clock::time_point);
   static void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
   std::string genFileName(int, int, int, int, int);
-
- public:
-  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4);
-  ~QC_monte() {
-    basis.gpu_free();
-  }
-  virtual void monte_energy() = 0;
 };
 
 class MP : public QC_monte {
@@ -80,7 +76,8 @@ class MP : public QC_monte {
   void monte_energy();
   virtual void energy() = 0;
  protected:
-  MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, std::vector<int> cv_sizes) : QC_monte(p1, p2, p3, p4, p5) {
+  MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep, std::vector<int> cv_sizes) :
+  QC_monte(p1, p2, p3, p4, p5, ep) {
     tau.resize(cv_sizes.size(), basis);
     emp.resize(cv_sizes.size());
     for (int n : cv_sizes) {
@@ -109,7 +106,7 @@ class MP : public QC_monte {
 
 class MP2 : public MP {
  public:
-  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5, {6}) {}
+  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6}) {}
   ~MP2() {}
 
  protected:
@@ -118,7 +115,7 @@ class MP2 : public MP {
 
 class MP3 : public MP {
  public:
-  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5, {6, 36}) {
+  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36}) {
     ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
   ~MP3() {
@@ -131,7 +128,7 @@ class MP3 : public MP {
 
 class MP4 : public MP {
  public:
-  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : MP(p1, p2, p3, p4, p5, {6, 36, 72}) {
+  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36, 72}) {
     ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
   ~MP4() {
@@ -147,7 +144,7 @@ class GF : public  QC_monte {
   void monte_energy();
 
  protected:
-  GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : QC_monte(p1, p2, p3, p4, p5) {}
+  GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : QC_monte(p1, p2, p3, p4, p5, ep) {}
   std::vector<GFStats> qeps;
   virtual void mc_local_energy(const int& step) = 0;
   virtual int full_print(int& step, int checkNum) = 0;
@@ -184,7 +181,7 @@ class GPU_GF2 : public GF {
   void mc_local_energy(std::vector<std::vector<double>>&, int);
 
  public:
-  GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : GF(p1, p2, p3, p4, p5) {
+  GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);
@@ -200,7 +197,7 @@ class GPU_GF2 : public GF {
 
 class GF2 : public GF {
  public:
-  GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : GF(p1, p2, p3, p4, p5) {
+  GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);
@@ -225,7 +222,7 @@ class GPU_GF3 : public GF {
   void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
 
  public:
-  GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : GF(p1, p2, p3, p4, p5) {
+  GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);
@@ -240,7 +237,7 @@ class GPU_GF3 : public GF {
 
 class GF3 : public GF {
  public:
-  GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5) : GF(p1, p2, p3, p4, p5) {
+  GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);

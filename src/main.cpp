@@ -39,23 +39,30 @@ int main(int argc, char* argv[]) {
   GTO_Weight mc_basis;
   mc_basis.read(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);
 
+#ifndef ENABLE_METROPOLIS
+  Direct_Electron_Pair_List el_pair_list(iops.iopns[KEYS::MC_NPAIR]);
+#else
+  Random rnd(iops.iopns[KEYS::DEBUG]);
+  Metropolis_Electron_Pair_List el_pair_list(iops.iopns[KEYS::MC_NPAIR], iops.dopns[KEYS::MC_DELX], rnd, molec, mc_basis);
+#endif
+
   if (iops.iopns[KEYS::TASK] == TASKS::MP) {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      MP2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      MP2 qc_monte(mpi_info, iops, molec, basis, mc_basis, &el_pair_list);
       qc_monte.monte_energy();
     } else if (iops.iopns[KEYS::ORDER] == 3) {
-      MP3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      MP3 qc_monte(mpi_info, iops, molec, basis, mc_basis, &el_pair_list);
       qc_monte.monte_energy();
     } else if (iops.iopns[KEYS::ORDER] == 4) {
-      MP4 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      MP4 qc_monte(mpi_info, iops, molec, basis, mc_basis, &el_pair_list);
       qc_monte.monte_energy();
     }
   } else {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      GF2 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      GF2 qc_monte(mpi_info, iops, molec, basis, mc_basis, &el_pair_list);
       qc_monte.monte_energy();
     } else if (iops.iopns[KEYS::ORDER] == 3) {
-      GF3 qc_monte(mpi_info, iops, molec, basis, mc_basis);
+      GF3 qc_monte(mpi_info, iops, molec, basis, mc_basis, &el_pair_list);
       qc_monte.monte_energy();
     }
   }

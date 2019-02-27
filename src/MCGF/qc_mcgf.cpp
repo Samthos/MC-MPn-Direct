@@ -102,7 +102,7 @@ void GF2::mc_local_energy(const int& step) {
     ovps.zero_energy_arrays_02();
   }
 
-  ovps.update_ovps_02(el_pair_list.data(), tau);
+  ovps.update_ovps_02(el_pair_list->data(), tau);
   mcgf2_local_energy_core();
   for (int band = 0; band < numBand; band++) {
     if (iops.iopns[KEYS::TASK] == TASKS::GF) {
@@ -144,7 +144,7 @@ void GF3::mc_local_energy(const int& step) {
     ovps.zero_energy_arrays_03();
   }
 
-  ovps.update_ovps_03(el_pair_list.data(), tau);
+  ovps.update_ovps_03(el_pair_list->data(), tau);
 
   mcgf2_local_energy_core();
   mcgf3_local_energy_core();

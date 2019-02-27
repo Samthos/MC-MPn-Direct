@@ -5,16 +5,16 @@
 #include "cblas.h"
 class MP4_Engine {
  public:
-  MP4_Engine(Electron_Pair_List& el_pair) :
-      mpn(el_pair.size()),
+  MP4_Engine(Electron_Pair_List* el_pair) :
+      mpn(el_pair->size()),
       rv(mpn), wgt(mpn), r_r(mpn), r_w(mpn), w_w(mpn), en_r(mpn), en_w(mpn),
       ij_(mpn * mpn), ik_(mpn * mpn), il_(mpn * mpn), jk_(mpn * mpn), jl_(mpn * mpn), kl_(mpn * mpn),
       ext_ptr(8), ext_data(8, std::vector<double>(mpn*mpn)),
       i_kl(mpn * mpn), j_kl(mpn * mpn),
       ij_rk(mpn * mpn), ij_wk(mpn * mpn), ij_rl(mpn * mpn), ij_wl(mpn * mpn),
       T_r(mpn * mpn), T_w(mpn * mpn), Av(mpn * mpn) {
-    std::transform(el_pair.begin(), el_pair.end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});
-    std::transform(el_pair.begin(), el_pair.end(), wgt.begin(), [](Electron_Pair ept){return 1.0/ept.wgt;});
+    std::transform(el_pair->begin(), el_pair->end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});
+    std::transform(el_pair->begin(), el_pair->end(), wgt.begin(), [](Electron_Pair ept){return 1.0/ept.wgt;});
 
     std::transform(rv.begin(), rv.end(), rv.begin(), r_r.begin(), std::multiplies<>());
     std::transform(rv.begin(), rv.end(), wgt.begin(), r_w.begin(), std::multiplies<>());
@@ -1216,8 +1216,8 @@ void MP::mcmp4_energy_ij(double& emp4, std::vector<double>& control) {
 
         #include "qc_mcmp4_ij_k.h"
 
-        std::transform(en_kt.begin(), en_kt.end(), en.begin(), en_kt.begin(), [&](double x, double y) {return x + y * el_pair_list[kt].rv;});
-        std::transform(ct_kt.begin(), ct_kt.end(), en.begin(), ct_kt.begin(), [&](double x, double y) {return x + y / el_pair_list[kt].wgt;});
+        std::transform(en_kt.begin(), en_kt.end(), en.begin(), en_kt.begin(), [&](double x, double y) {return x + y * el_pair_list->get(kt).rv;});
+        std::transform(ct_kt.begin(), ct_kt.end(), en.begin(), ct_kt.begin(), [&](double x, double y) {return x + y / el_pair_list->get(kt).wgt;});
       }
 
       std::array<double, 36> en_lt, ct_lt;
@@ -1230,8 +1230,8 @@ void MP::mcmp4_energy_ij(double& emp4, std::vector<double>& control) {
 
         #include "qc_mcmp4_ij_l.h"
 
-        std::transform(en_lt.begin(), en_lt.end(), en.begin(), en_lt.begin(), [&](double x, double y) {return x + y * el_pair_list[lt].rv;});
-        std::transform(ct_lt.begin(), ct_lt.end(), en.begin(), ct_lt.begin(), [&](double x, double y) {return x + y / el_pair_list[lt].wgt;});
+        std::transform(en_lt.begin(), en_lt.end(), en.begin(), en_lt.begin(), [&](double x, double y) {return x + y * el_pair_list->get(lt).rv;});
+        std::transform(ct_lt.begin(), ct_lt.end(), en.begin(), ct_lt.begin(), [&](double x, double y) {return x + y / el_pair_list->get(lt).wgt;});
       }
 
       double kr_lr_corr = 0;
@@ -1248,34 +1248,34 @@ void MP::mcmp4_energy_ij(double& emp4, std::vector<double>& control) {
 
         #include "qc_mcmp4_ij.h"
 
-        kr_lr_corr += en * el_pair_list[kt].rv * el_pair_list[lt].rv;
-        kr_lw_corr += en * el_pair_list[kt].rv / el_pair_list[lt].wgt;
-        kw_lr_corr += en / el_pair_list[kt].wgt * el_pair_list[lt].rv;
-        kw_lw_corr += en / el_pair_list[kt].wgt / el_pair_list[lt].wgt;
+        kr_lr_corr += en * el_pair_list->get(kt).rv * el_pair_list->get(lt).rv;
+        kr_lw_corr += en * el_pair_list->get(kt).rv / el_pair_list->get(lt).wgt;
+        kw_lr_corr += en / el_pair_list->get(kt).wgt * el_pair_list->get(lt).rv;
+        kw_lw_corr += en / el_pair_list->get(kt).wgt / el_pair_list->get(lt).wgt;
       }
 
-      jr_kr_lr_corr += std::inner_product(en_kt.begin(), en_kt.end(), en_lt.begin(), -kr_lr_corr) * el_pair_list[jt].rv;
-      jr_kw_lr_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), en_lt.begin(), -kw_lr_corr) * el_pair_list[jt].rv;
-      jw_kr_lr_corr += std::inner_product(en_kt.begin(), en_kt.end(), en_lt.begin(), -kr_lr_corr) / el_pair_list[jt].wgt;
-      jw_kw_lr_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), en_lt.begin(), -kw_lr_corr) / el_pair_list[jt].wgt;
-      jr_kr_lw_corr += std::inner_product(en_kt.begin(), en_kt.end(), ct_lt.begin(), -kr_lw_corr) * el_pair_list[jt].rv;
-      jr_kw_lw_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), ct_lt.begin(), -kw_lw_corr) * el_pair_list[jt].rv;
-      jw_kr_lw_corr += std::inner_product(en_kt.begin(), en_kt.end(), ct_lt.begin(), -kr_lw_corr) / el_pair_list[jt].wgt;
-      jw_kw_lw_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), ct_lt.begin(), -kw_lw_corr) / el_pair_list[jt].wgt;
+      jr_kr_lr_corr += std::inner_product(en_kt.begin(), en_kt.end(), en_lt.begin(), -kr_lr_corr) * el_pair_list->get(jt).rv;
+      jr_kw_lr_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), en_lt.begin(), -kw_lr_corr) * el_pair_list->get(jt).rv;
+      jw_kr_lr_corr += std::inner_product(en_kt.begin(), en_kt.end(), en_lt.begin(), -kr_lr_corr) / el_pair_list->get(jt).wgt;
+      jw_kw_lr_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), en_lt.begin(), -kw_lr_corr) / el_pair_list->get(jt).wgt;
+      jr_kr_lw_corr += std::inner_product(en_kt.begin(), en_kt.end(), ct_lt.begin(), -kr_lw_corr) * el_pair_list->get(jt).rv;
+      jr_kw_lw_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), ct_lt.begin(), -kw_lw_corr) * el_pair_list->get(jt).rv;
+      jw_kr_lw_corr += std::inner_product(en_kt.begin(), en_kt.end(), ct_lt.begin(), -kr_lw_corr) / el_pair_list->get(jt).wgt;
+      jw_kw_lw_corr += std::inner_product(ct_kt.begin(), ct_kt.end(), ct_lt.begin(), -kw_lw_corr) / el_pair_list->get(jt).wgt;
     }
-    emp4       += jr_kr_lr_corr * el_pair_list[it].rv;
-    control[0]  += jr_kr_lr_corr / el_pair_list[it].wgt;
-    control[1]  += jw_kr_lr_corr / el_pair_list[it].wgt;
-    control[2]  += jr_kr_lw_corr * el_pair_list[it].rv;
-    control[3]  += jr_kr_lw_corr / el_pair_list[it].wgt;
-    control[4]  += jw_kr_lw_corr * el_pair_list[it].rv;
-    control[5]  += jw_kr_lw_corr / el_pair_list[it].wgt;
-    control[6]  += jr_kw_lr_corr / el_pair_list[it].wgt;
-    control[7]  += jw_kw_lr_corr / el_pair_list[it].wgt;
-    control[8]  += jr_kw_lw_corr * el_pair_list[it].rv;
-    control[9]  += jr_kw_lw_corr / el_pair_list[it].wgt;
-    control[10] += jw_kw_lw_corr * el_pair_list[it].rv;
-    control[11] += jw_kw_lw_corr / el_pair_list[it].wgt;
+    emp4       += jr_kr_lr_corr * el_pair_list->get(it).rv;
+    control[0]  += jr_kr_lr_corr / el_pair_list->get(it).wgt;
+    control[1]  += jw_kr_lr_corr / el_pair_list->get(it).wgt;
+    control[2]  += jr_kr_lw_corr * el_pair_list->get(it).rv;
+    control[3]  += jr_kr_lw_corr / el_pair_list->get(it).wgt;
+    control[4]  += jw_kr_lw_corr * el_pair_list->get(it).rv;
+    control[5]  += jw_kr_lw_corr / el_pair_list->get(it).wgt;
+    control[6]  += jr_kw_lr_corr / el_pair_list->get(it).wgt;
+    control[7]  += jw_kw_lr_corr / el_pair_list->get(it).wgt;
+    control[8]  += jr_kw_lw_corr * el_pair_list->get(it).rv;
+    control[9]  += jr_kw_lw_corr / el_pair_list->get(it).wgt;
+    control[10] += jw_kw_lw_corr * el_pair_list->get(it).rv;
+    control[11] += jw_kw_lw_corr / el_pair_list->get(it).wgt;
   }
 }
 void MP::mcmp4_energy_ik(double& emp4, std::vector<double>& control) {
@@ -1302,8 +1302,8 @@ void MP::mcmp4_energy_ik(double& emp4, std::vector<double>& control) {
 
 #include "qc_mcmp4_ik_j.h"
 
-        std::transform(en_jt.begin(), en_jt.end(), en.begin(), en_jt.begin(), [&](double x, double y) {return x + y * el_pair_list[jt].rv;});
-        std::transform(ct_jt.begin(), ct_jt.end(), en.begin(), ct_jt.begin(), [&](double x, double y) {return x + y / el_pair_list[jt].wgt;});
+        std::transform(en_jt.begin(), en_jt.end(), en.begin(), en_jt.begin(), [&](double x, double y) {return x + y * el_pair_list->get(jt).rv;});
+        std::transform(ct_jt.begin(), ct_jt.end(), en.begin(), ct_jt.begin(), [&](double x, double y) {return x + y / el_pair_list->get(jt).wgt;});
       }
 
       std::array<double, 36> en_lt, ct_lt;
@@ -1316,8 +1316,8 @@ void MP::mcmp4_energy_ik(double& emp4, std::vector<double>& control) {
 
 #include "qc_mcmp4_ik_l.h"
 
-        std::transform(en_lt.begin(), en_lt.end(), en.begin(), en_lt.begin(), [&](double x, double y) {return x + y * el_pair_list[lt].rv;});
-        std::transform(ct_lt.begin(), ct_lt.end(), en.begin(), ct_lt.begin(), [&](double x, double y) {return x + y / el_pair_list[lt].wgt;});
+        std::transform(en_lt.begin(), en_lt.end(), en.begin(), en_lt.begin(), [&](double x, double y) {return x + y * el_pair_list->get(lt).rv;});
+        std::transform(ct_lt.begin(), ct_lt.end(), en.begin(), ct_lt.begin(), [&](double x, double y) {return x + y / el_pair_list->get(lt).wgt;});
       }
 
       double jr_lr_corr = 0;
@@ -1334,34 +1334,34 @@ void MP::mcmp4_energy_ik(double& emp4, std::vector<double>& control) {
 
 #include "qc_mcmp4_ik.h"
 
-        jr_lr_corr += en * el_pair_list[jt].rv * el_pair_list[lt].rv;
-        jr_lw_corr += en * el_pair_list[jt].rv / el_pair_list[lt].wgt;
-        jw_lr_corr += en / el_pair_list[jt].wgt * el_pair_list[lt].rv;
-        jw_lw_corr += en / el_pair_list[jt].wgt / el_pair_list[lt].wgt;
+        jr_lr_corr += en * el_pair_list->get(jt).rv * el_pair_list->get(lt).rv;
+        jr_lw_corr += en * el_pair_list->get(jt).rv / el_pair_list->get(lt).wgt;
+        jw_lr_corr += en / el_pair_list->get(jt).wgt * el_pair_list->get(lt).rv;
+        jw_lw_corr += en / el_pair_list->get(jt).wgt / el_pair_list->get(lt).wgt;
       }
 
-      jr_kr_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_lt.begin(), -jr_lr_corr) * el_pair_list[kt].rv;
-      jr_kr_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_lt.begin(), -jr_lw_corr) * el_pair_list[kt].rv;
-      jw_kr_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_lt.begin(), -jw_lr_corr) * el_pair_list[kt].rv;
-      jw_kr_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_lt.begin(), -jw_lw_corr) * el_pair_list[kt].rv;
-      jr_kw_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_lt.begin(), -jr_lr_corr) / el_pair_list[kt].wgt;
-      jr_kw_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_lt.begin(), -jr_lw_corr) / el_pair_list[kt].wgt;
-      jw_kw_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_lt.begin(), -jw_lr_corr) / el_pair_list[kt].wgt;
-      jw_kw_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_lt.begin(), -jw_lw_corr) / el_pair_list[kt].wgt;
+      jr_kr_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_lt.begin(), -jr_lr_corr) * el_pair_list->get(kt).rv;
+      jr_kr_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_lt.begin(), -jr_lw_corr) * el_pair_list->get(kt).rv;
+      jw_kr_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_lt.begin(), -jw_lr_corr) * el_pair_list->get(kt).rv;
+      jw_kr_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_lt.begin(), -jw_lw_corr) * el_pair_list->get(kt).rv;
+      jr_kw_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_lt.begin(), -jr_lr_corr) / el_pair_list->get(kt).wgt;
+      jr_kw_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_lt.begin(), -jr_lw_corr) / el_pair_list->get(kt).wgt;
+      jw_kw_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_lt.begin(), -jw_lr_corr) / el_pair_list->get(kt).wgt;
+      jw_kw_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_lt.begin(), -jw_lw_corr) / el_pair_list->get(kt).wgt;
     }
-    emp4        += jr_kr_lr_corr * el_pair_list[it].rv;
-    control[12] += jr_kr_lr_corr / el_pair_list[it].wgt;
-    control[13] += jr_kw_lr_corr / el_pair_list[it].wgt;
-    control[14] += jr_kr_lw_corr * el_pair_list[it].rv;
-    control[15] += jr_kr_lw_corr / el_pair_list[it].wgt;
-    control[16] += jr_kw_lw_corr * el_pair_list[it].rv;
-    control[17] += jr_kw_lw_corr / el_pair_list[it].wgt;
-    control[18] += jw_kr_lr_corr / el_pair_list[it].wgt;
-    control[19] += jw_kw_lr_corr / el_pair_list[it].wgt;
-    control[20] += jw_kr_lw_corr * el_pair_list[it].rv;
-    control[21] += jw_kr_lw_corr / el_pair_list[it].wgt;
-    control[22] += jw_kw_lw_corr * el_pair_list[it].rv;
-    control[23] += jw_kw_lw_corr / el_pair_list[it].wgt;
+    emp4        += jr_kr_lr_corr * el_pair_list->get(it).rv;
+    control[12] += jr_kr_lr_corr / el_pair_list->get(it).wgt;
+    control[13] += jr_kw_lr_corr / el_pair_list->get(it).wgt;
+    control[14] += jr_kr_lw_corr * el_pair_list->get(it).rv;
+    control[15] += jr_kr_lw_corr / el_pair_list->get(it).wgt;
+    control[16] += jr_kw_lw_corr * el_pair_list->get(it).rv;
+    control[17] += jr_kw_lw_corr / el_pair_list->get(it).wgt;
+    control[18] += jw_kr_lr_corr / el_pair_list->get(it).wgt;
+    control[19] += jw_kw_lr_corr / el_pair_list->get(it).wgt;
+    control[20] += jw_kr_lw_corr * el_pair_list->get(it).rv;
+    control[21] += jw_kr_lw_corr / el_pair_list->get(it).wgt;
+    control[22] += jw_kw_lw_corr * el_pair_list->get(it).rv;
+    control[23] += jw_kw_lw_corr / el_pair_list->get(it).wgt;
   }
 }
 void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
@@ -1388,8 +1388,8 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
 
 #include "qc_mcmp4_il_k.h"
 
-        std::transform(en_kt.begin(), en_kt.end(), en.begin(), en_kt.begin(), [&](double x, double y) {return x + y * el_pair_list[kt].rv;});
-        std::transform(ct_kt.begin(), ct_kt.end(), en.begin(), ct_kt.begin(), [&](double x, double y) {return x + y / el_pair_list[kt].wgt;});
+        std::transform(en_kt.begin(), en_kt.end(), en.begin(), en_kt.begin(), [&](double x, double y) {return x + y * el_pair_list->get(kt).rv;});
+        std::transform(ct_kt.begin(), ct_kt.end(), en.begin(), ct_kt.begin(), [&](double x, double y) {return x + y / el_pair_list->get(kt).wgt;});
       }
 
       std::array<double, 36> en_jt, ct_jt;
@@ -1402,8 +1402,8 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
 
 #include "qc_mcmp4_il_j.h"
 
-        std::transform(en_jt.begin(), en_jt.end(), en.begin(), en_jt.begin(), [&](double x, double y) {return x + y * el_pair_list[jt].rv;});
-        std::transform(ct_jt.begin(), ct_jt.end(), en.begin(), ct_jt.begin(), [&](double x, double y) {return x + y / el_pair_list[jt].wgt;});
+        std::transform(en_jt.begin(), en_jt.end(), en.begin(), en_jt.begin(), [&](double x, double y) {return x + y * el_pair_list->get(jt).rv;});
+        std::transform(ct_jt.begin(), ct_jt.end(), en.begin(), ct_jt.begin(), [&](double x, double y) {return x + y / el_pair_list->get(jt).wgt;});
       }
 
       double jr_kr_corr = 0;
@@ -1420,34 +1420,34 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
 
 #include "qc_mcmp4_il.h"
 
-        jr_kr_corr += en * el_pair_list[jt].rv  * el_pair_list[kt].rv;
-        jr_kw_corr += en * el_pair_list[jt].rv  / el_pair_list[kt].wgt;
-        jw_kr_corr += en / el_pair_list[jt].wgt * el_pair_list[kt].rv;
-        jw_kw_corr += en / el_pair_list[jt].wgt / el_pair_list[kt].wgt;
+        jr_kr_corr += en * el_pair_list->get(jt).rv  * el_pair_list->get(kt).rv;
+        jr_kw_corr += en * el_pair_list->get(jt).rv  / el_pair_list->get(kt).wgt;
+        jw_kr_corr += en / el_pair_list->get(jt).wgt * el_pair_list->get(kt).rv;
+        jw_kw_corr += en / el_pair_list->get(jt).wgt / el_pair_list->get(kt).wgt;
       }
 
-      jr_kr_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_kt.begin(), -jr_kr_corr) * el_pair_list[lt].rv;
-      jr_kr_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_kt.begin(), -jr_kr_corr) / el_pair_list[lt].wgt;
-      jr_kw_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_kt.begin(), -jr_kw_corr) * el_pair_list[lt].rv;
-      jr_kw_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_kt.begin(), -jr_kw_corr) / el_pair_list[lt].wgt;
-      jw_kw_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_kt.begin(), -jw_kw_corr) * el_pair_list[lt].rv;
-      jw_kw_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_kt.begin(), -jw_kw_corr) / el_pair_list[lt].wgt;
-      jw_kr_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_kt.begin(), -jw_kr_corr) * el_pair_list[lt].rv;
-      jw_kr_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_kt.begin(), -jw_kr_corr) / el_pair_list[lt].wgt;
+      jr_kr_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_kt.begin(), -jr_kr_corr) * el_pair_list->get(lt).rv;
+      jr_kr_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), en_kt.begin(), -jr_kr_corr) / el_pair_list->get(lt).wgt;
+      jr_kw_lr_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_kt.begin(), -jr_kw_corr) * el_pair_list->get(lt).rv;
+      jr_kw_lw_corr += std::inner_product(en_jt.begin(), en_jt.end(), ct_kt.begin(), -jr_kw_corr) / el_pair_list->get(lt).wgt;
+      jw_kw_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_kt.begin(), -jw_kw_corr) * el_pair_list->get(lt).rv;
+      jw_kw_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), ct_kt.begin(), -jw_kw_corr) / el_pair_list->get(lt).wgt;
+      jw_kr_lr_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_kt.begin(), -jw_kr_corr) * el_pair_list->get(lt).rv;
+      jw_kr_lw_corr += std::inner_product(ct_jt.begin(), ct_jt.end(), en_kt.begin(), -jw_kr_corr) / el_pair_list->get(lt).wgt;
     }
-    emp4       += jr_kr_lr_corr * el_pair_list[it].rv;
-    control[24] += jr_kr_lr_corr / el_pair_list[it].wgt;
-    control[25] += jr_kr_lw_corr / el_pair_list[it].wgt;
-    control[26] += jr_kr_lw_corr * el_pair_list[it].rv;
-    control[27] += jw_kr_lr_corr / el_pair_list[it].wgt;
-    control[28] += jw_kr_lw_corr / el_pair_list[it].wgt;
-    control[29] += jw_kr_lw_corr * el_pair_list[it].rv;
-    control[30] += jr_kw_lr_corr / el_pair_list[it].wgt;
-    control[31] += jr_kw_lw_corr / el_pair_list[it].wgt;
-    control[32] += jr_kw_lw_corr * el_pair_list[it].rv;
-    control[33] += jw_kw_lr_corr / el_pair_list[it].wgt;
-    control[34] += jw_kw_lw_corr / el_pair_list[it].wgt;
-    control[35] += jw_kw_lw_corr * el_pair_list[it].rv;
+    emp4       += jr_kr_lr_corr * el_pair_list->get(it).rv;
+    control[24] += jr_kr_lr_corr / el_pair_list->get(it).wgt;
+    control[25] += jr_kr_lw_corr / el_pair_list->get(it).wgt;
+    control[26] += jr_kr_lw_corr * el_pair_list->get(it).rv;
+    control[27] += jw_kr_lr_corr / el_pair_list->get(it).wgt;
+    control[28] += jw_kr_lw_corr / el_pair_list->get(it).wgt;
+    control[29] += jw_kr_lw_corr * el_pair_list->get(it).rv;
+    control[30] += jr_kw_lr_corr / el_pair_list->get(it).wgt;
+    control[31] += jr_kw_lw_corr / el_pair_list->get(it).wgt;
+    control[32] += jr_kw_lw_corr * el_pair_list->get(it).rv;
+    control[33] += jw_kw_lr_corr / el_pair_list->get(it).wgt;
+    control[34] += jw_kw_lw_corr / el_pair_list->get(it).wgt;
+    control[35] += jw_kw_lw_corr * el_pair_list->get(it).rv;
   }
 }
 void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
@@ -1485,38 +1485,38 @@ void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
 
           #include "qc_mcmp4_ijkl.h"
 
-          std::transform(en_l.begin(), en_l.end(), en.begin(), en_l.begin(), [&](double x, double y){return x + y * el_pair_list[lt].rv;});
-          std::transform(ct_l.begin(), ct_l.end(), en.begin(), ct_l.begin(), [&](double x, double y){return x + y / el_pair_list[lt].wgt;});
+          std::transform(en_l.begin(), en_l.end(), en.begin(), en_l.begin(), [&](double x, double y){return x + y * el_pair_list->get(lt).rv;});
+          std::transform(ct_l.begin(), ct_l.end(), en.begin(), ct_l.begin(), [&](double x, double y){return x + y / el_pair_list->get(lt).wgt;});
         }
         double en_l_t = 0;
         double ct_l_t = 0;
 #include "qc_mcmp4_ijk.h"
-        kr_lr += en_l_t * el_pair_list[kt].rv;
-        kr_lw += ct_l_t * el_pair_list[kt].rv;
-        kw_lr += en_l_t / el_pair_list[kt].wgt;
-        kw_lw += ct_l_t / el_pair_list[kt].wgt;
+        kr_lr += en_l_t * el_pair_list->get(kt).rv;
+        kr_lw += ct_l_t * el_pair_list->get(kt).rv;
+        kw_lr += en_l_t / el_pair_list->get(kt).wgt;
+        kw_lw += ct_l_t / el_pair_list->get(kt).wgt;
       }
-      jr_kr_lr += kr_lr * el_pair_list[jt].rv;
-      jr_kr_lw += kr_lw * el_pair_list[jt].rv;
-      jr_kw_lr += kw_lr * el_pair_list[jt].rv;
-      jr_kw_lw += kw_lw * el_pair_list[jt].rv;
-      jw_kr_lr += kr_lr / el_pair_list[jt].wgt;
-      jw_kr_lw += kr_lw / el_pair_list[jt].wgt;
-      jw_kw_lr += kw_lr / el_pair_list[jt].wgt;
-      jw_kw_lw += kw_lw / el_pair_list[jt].wgt;
+      jr_kr_lr += kr_lr * el_pair_list->get(jt).rv;
+      jr_kr_lw += kr_lw * el_pair_list->get(jt).rv;
+      jr_kw_lr += kw_lr * el_pair_list->get(jt).rv;
+      jr_kw_lw += kw_lw * el_pair_list->get(jt).rv;
+      jw_kr_lr += kr_lr / el_pair_list->get(jt).wgt;
+      jw_kr_lw += kr_lw / el_pair_list->get(jt).wgt;
+      jw_kw_lr += kw_lr / el_pair_list->get(jt).wgt;
+      jw_kw_lw += kw_lw / el_pair_list->get(jt).wgt;
     }
-    emp4       += jr_kr_lr * el_pair_list[it].rv;
-    control[36] += jr_kr_lw * el_pair_list[it].rv;
-    control[37] += jr_kw_lw * el_pair_list[it].rv;
-    control[38] += jw_kr_lw * el_pair_list[it].rv;
-    control[39] += jw_kw_lw * el_pair_list[it].rv;
-    control[40] += jr_kr_lr / el_pair_list[it].wgt;
-    control[41] += jr_kr_lw / el_pair_list[it].wgt;
-    control[42] += jr_kw_lr / el_pair_list[it].wgt;
-    control[43] += jr_kw_lw / el_pair_list[it].wgt;
-    control[44] += jw_kr_lr / el_pair_list[it].wgt;
-    control[45] += jw_kr_lw / el_pair_list[it].wgt;
-    control[46] += jw_kw_lr / el_pair_list[it].wgt;
-    control[47] += jw_kw_lw / el_pair_list[it].wgt;
+    emp4       += jr_kr_lr * el_pair_list->get(it).rv;
+    control[36] += jr_kr_lw * el_pair_list->get(it).rv;
+    control[37] += jr_kw_lw * el_pair_list->get(it).rv;
+    control[38] += jw_kr_lw * el_pair_list->get(it).rv;
+    control[39] += jw_kw_lw * el_pair_list->get(it).rv;
+    control[40] += jr_kr_lr / el_pair_list->get(it).wgt;
+    control[41] += jr_kr_lw / el_pair_list->get(it).wgt;
+    control[42] += jr_kw_lr / el_pair_list->get(it).wgt;
+    control[43] += jr_kw_lw / el_pair_list->get(it).wgt;
+    control[44] += jw_kr_lr / el_pair_list->get(it).wgt;
+    control[45] += jw_kr_lw / el_pair_list->get(it).wgt;
+    control[46] += jw_kw_lr / el_pair_list->get(it).wgt;
+    control[47] += jw_kw_lw / el_pair_list->get(it).wgt;
   }
 }

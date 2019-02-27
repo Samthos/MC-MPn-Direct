@@ -24,7 +24,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
    *   control: reference to vector<double>. stores the control varaites to the mp2 energy for calcaulted by this function.
    */
   int im, am;
-  double icount2 = static_cast<double>(el_pair_list.size()) * static_cast<double>(el_pair_list.size() - 1);
+  double icount2 = static_cast<double>(el_pair_list->size()) * static_cast<double>(el_pair_list->size() - 1);
 
   double o_13, o_14, o_23, o_24;
   double v_13, v_14, v_23, v_24;
@@ -42,14 +42,14 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
   std::array<double, 2> en_wj{0, 0};
 #endif
 
-  for (auto it = 0; it < el_pair_list.size(); ++it) {
+  for (auto it = 0; it < el_pair_list->size(); ++it) {
     en_rj.fill(0.0);
 #if MP2CV >= 2
     en_wj.fill(0.0);
 #endif
     std::transform(basis.h_basis.psi1 + it * (ivir2-iocc1), basis.h_basis.psi1 + (it+1) * (ivir2-iocc1), tau_values.begin() + iocc1, basis.h_basis.psiTau1, std::multiplies<>());
     std::transform(basis.h_basis.psi2 + it * (ivir2-iocc1), basis.h_basis.psi2 + (it+1) * (ivir2-iocc1), tau_values.begin() + iocc1, basis.h_basis.psiTau2, std::multiplies<>());
-    for (auto jt = it + 1; jt != el_pair_list.size(); jt++) {
+    for (auto jt = it + 1; jt != el_pair_list->size(); jt++) {
       o_13 = 0.0;
       o_14 = 0.0;
       o_23 = 0.0;
@@ -80,24 +80,24 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
       en[0] = en[0] + (o_14 * o_23 * v_14 * v_23);
       en[1] = en[1] + (o_13 * o_24 * v_14 * v_23);
 
-      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list[jt].rv;});
+      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->get(jt).rv;});
 #if MP2CV >= 2
-      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list[jt].wgt;});
+      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list->get(jt).wgt;});
 #endif
     }
-    emp2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list[it].rv;
+    emp2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->get(it).rv;
 #if MP2CV >= 1
-    std::transform(en_rj.begin(), en_rj.end(), control.begin()+0, control.begin()+0, [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
+    std::transform(en_rj.begin(), en_rj.end(), control.begin()+0, control.begin()+0, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
 #endif
 #if MP2CV >= 2
-    std::transform(en_wj.begin(), en_wj.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x * el_pair_list[it].rv; });
-    std::transform(en_wj.begin(), en_wj.end(), control.begin()+4, control.begin()+4, [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
+    std::transform(en_wj.begin(), en_wj.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x * el_pair_list->get(it).rv; });
+    std::transform(en_wj.begin(), en_wj.end(), control.begin()+4, control.begin()+4, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
 #endif
   }
 
   auto tau_wgt = tau.get_wgt(1);
-  tau_wgt /= static_cast<double>(el_pair_list.size());
-  tau_wgt /= static_cast<double>(el_pair_list.size() - 1);
+  tau_wgt /= static_cast<double>(el_pair_list->size());
+  tau_wgt /= static_cast<double>(el_pair_list->size() - 1);
   emp2 = emp2 * tau_wgt;
 #if MP2CV >= 1
   std::transform(control.begin(), control.end(), control.begin(), [&](double c) { return c * tau_wgt; });
@@ -130,23 +130,23 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control) {
       en[0] = en[0] + (ovps.o_set[0][0].s_12[ijIndex] * ovps.o_set[0][0].s_21[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
       en[1] = en[1] + (ovps.o_set[0][0].s_11[ijIndex] * ovps.o_set[0][0].s_22[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
 
-      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list[jt].rv;});
+      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->get(jt).rv;});
 #if MP2CV >= 2
-      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list[jt].wgt;});
+      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list->get(jt).wgt;});
 #endif
     }
-    emp2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list[it].rv;
+    emp2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->get(it).rv;
 #if MP2CV >= 1
-    std::transform(en_rj.begin(), en_rj.end(), control.begin()+0, control.begin()+0, [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
+    std::transform(en_rj.begin(), en_rj.end(), control.begin()+0, control.begin()+0, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
 #endif
 #if MP2CV >= 2
-    std::transform(en_wj.begin(), en_wj.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x * el_pair_list[it].rv; });
-    std::transform(en_wj.begin(), en_wj.end(), control.begin()+4, control.begin()+4, [&](double x, double y) { return y + x / el_pair_list[it].wgt; });
+    std::transform(en_wj.begin(), en_wj.end(), control.begin()+2, control.begin()+2, [&](double x, double y) { return y + x * el_pair_list->get(it).rv; });
+    std::transform(en_wj.begin(), en_wj.end(), control.begin()+4, control.begin()+4, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
 #endif
   }
   auto tau_wgt = tau.get_wgt(1);
-  tau_wgt /= static_cast<double>(el_pair_list.size());
-  tau_wgt /= static_cast<double>(el_pair_list.size() - 1);
+  tau_wgt /= static_cast<double>(el_pair_list->size());
+  tau_wgt /= static_cast<double>(el_pair_list->size() - 1);
   emp2 = emp2 * tau_wgt;
 #if MP2CV >= 1
   std::transform(control.begin(), control.end(), control.begin(), [&](double c) { return c * tau_wgt; });

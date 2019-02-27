@@ -7,14 +7,10 @@
 #include "qc_monte.h"
 
 
-QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4) :
+QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Electron_Pair_List* ep) :
     mpi_info(p0), iops(p1), molec(p2), basis(p3), mc_basis(p4),
-    random(iops.iopns[KEYS::DEBUG]),
-#ifndef ENABLE_METROPOLIS
-    el_pair_list(iops.iopns[KEYS::MC_NPAIR]) {
-#else
-    el_pair_list(iops.iopns[KEYS::MC_NPAIR], iops.dopns[KEYS::MC_DELX], random, molec, mc_basis) {
-#endif
+    random(iops.iopns[KEYS::DEBUG]), el_pair_list(ep)
+  {
 
   numBand = iops.iopns[KEYS::NUM_BAND];
   offBand = iops.iopns[KEYS::OFF_BAND];
@@ -29,7 +25,7 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4) :
   basis.gpu_alloc(iops.iopns[KEYS::MC_NPAIR], molec);
 }
 void QC_monte::move_walkers() {
-  el_pair_list.move(random, molec, mc_basis);
+  el_pair_list->move(random, molec, mc_basis);
 }
 
 void QC_monte::print_mc_head(std::chrono::high_resolution_clock::time_point mc_start) {

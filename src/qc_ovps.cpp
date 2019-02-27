@@ -40,10 +40,10 @@ void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
 void OVPs::free() {
   delete[] d_ovps.rv;
 }
-void OVPs::update_ovps(BasisData& basis, const Electron_Pair_List& el_pair_list, Stochastic_Tau& tau) {
+void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* el_pair_list, Stochastic_Tau& tau) {
   // copy wave function to psi/occ/vir objects
   for (auto ip = 0; ip < mc_pair_num; ip++) {
-    d_ovps.rv[ip] = el_pair_list[ip].rv;
+    d_ovps.rv[ip] = el_pair_list->get(ip).rv;
   }
 
   // update green's function trace objects

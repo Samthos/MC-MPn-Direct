@@ -33,6 +33,9 @@ class Electron_Pair_List {
   const Electron_Pair& operator [] (int i) const {
     return electron_pairs[i];
   }
+  const Electron_Pair& get(int i) const {
+    return electron_pairs[i];
+  }
   std::vector<Electron_Pair>::iterator begin() {
     return electron_pairs.begin();
   }

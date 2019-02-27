@@ -73,6 +73,7 @@ void MP::monte_energy() {
       stepTimer.Start();
     }
 #else
+    /*
     if (0 == step % 128) {
       for (auto i = 0; i < emp.size(); i++) {
         output[i] << cv[i] << "\t";
@@ -83,11 +84,10 @@ void MP::monte_energy() {
       output.back().flush();
       stepTimer.Start();
     }
-    /*
+    */
     for (auto i = 0; i < emp.size(); i++) {
       output[i].write(reinterpret_cast<const char *>(&emp[i]), sizeof(double));
     }
-    */
 #endif
   }
 
