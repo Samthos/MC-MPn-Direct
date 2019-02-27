@@ -61,7 +61,7 @@ void MP::monte_energy() {
     cv.back().add(std::accumulate(emp.begin(), emp.end(), 0.0), control.back());
 
     // print if i is a multiple of 128
-#ifndef ENABLE_METROPOLIS
+#ifndef FULL_PRINTING
     if (0 == step % 128) {
       for (auto i = 0; i < emp.size(); i++) {
         output[i] << cv[i] << "\t";
@@ -73,18 +73,6 @@ void MP::monte_energy() {
       stepTimer.Start();
     }
 #else
-    /*
-    if (0 == step % 128) {
-      for (auto i = 0; i < emp.size(); i++) {
-        output[i] << cv[i] << "\t";
-        output[i] << stepTimer << "\n";
-        output[i].flush();
-      }
-      output.back() << cv.back() << "\t" << stepTimer << "\n";
-      output.back().flush();
-      stepTimer.Start();
-    }
-    */
     for (auto i = 0; i < emp.size(); i++) {
       output[i].write(reinterpret_cast<const char *>(&emp[i]), sizeof(double));
     }

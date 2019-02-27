@@ -29,9 +29,9 @@ if(${NDEBUG})
     add_definitions(-DNDEBUG)
 endif()
 
-option(Enable_Metropolis "Enables Metropolis Sampling" Off)
-if (Enable_Metropolis)
-    add_definitions(-DENABLE_METROPOLIS)
+option(Enable_Full_Print "Enables Printing of the full energy sequence" Off)
+if (Enable_Full_Print)
+    add_definitions(-DFULL_PRINTING)
 endif()
 
 set(MP2CV 0 CACHE String "Sets MP2CV level")
