@@ -10,6 +10,7 @@
 #include "weight_function.h"
 #include "qc_geom.h"
 #include "qc_random.h"
+#include "qc_input.h"
 
 #ifndef EL_PAIR_H_
 #define EL_PAIR_H_
@@ -48,6 +49,9 @@ class Electron_Pair_List {
   static void set_weight(Electron_Pair&, const GTO_Weight&);
   std::vector<Electron_Pair> electron_pairs;
 };
+
+Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight);
+void destroy_sampler(Electron_Pair_List*, SAMPLERS::SAMPLERS);
 
 class Direct_Electron_Pair_List : public Electron_Pair_List {
  public:

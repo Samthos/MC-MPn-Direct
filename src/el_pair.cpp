@@ -23,6 +23,24 @@ void Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const GTO_Weig
   electron_pair.rv = 1.0 / (calculate_r12(electron_pair)*electron_pair.wgt);
 }
 
+Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight) {
+  Electron_Pair_List* electron_pair_list = nullptr;
+  if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
+    electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR]);
+  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::METROPOLIS) {
+    Random rnd(iops.iopns[KEYS::DEBUG]);
+    electron_pair_list = new Metropolis_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
+  }
+  return electron_pair_list;
+}
+void destroy_sampler(Electron_Pair_List* electron_pair_list, SAMPLERS::SAMPLERS sampler) {
+  if (sampler == SAMPLERS::DIRECT) {
+    delete reinterpret_cast<Direct_Electron_Pair_List*>(electron_pair_list);
+  } else if (sampler == SAMPLERS::METROPOLIS) {
+    delete reinterpret_cast<Metropolis_Electron_Pair_List*>(electron_pair_list);
+  }
+}
+
 void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Molec& molec, const GTO_Weight& weight) {
 #ifndef NDEBUG
   static int count = 0;

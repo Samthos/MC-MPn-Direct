@@ -31,7 +31,14 @@ enum KeyVal {
   OFF_BAND,
   DIFFS,
   ORDER,
-  CPU
+  CPU,
+  SAMPLER
+};
+}
+namespace SAMPLERS {
+enum SAMPLERS {
+  DIRECT,
+  METROPOLIS
 };
 }
 namespace TASKS {

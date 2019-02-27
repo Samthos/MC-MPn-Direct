@@ -28,6 +28,7 @@ IOPs::IOPs() {
   iopns[KEYS::ORDER] = 2;
   iopns[KEYS::TASK] = TASKS::MP;
   iopns[KEYS::CPU] = true;
+  iopns[KEYS::SAMPLER] = SAMPLERS::DIRECT;
 
   sopns[KEYS::GEOM] = "geom.xyz";
   sopns[KEYS::BASIS] = "basis.dat";
@@ -48,7 +49,7 @@ void IOPs::read(const MPI_info& mpi_info,
       "JOBNAME", "SPHERICAL", "MC_TRIAL", "MC_NPAIR", "MC_DELX",  //  0-4
       "GEOM", "BASIS", "MC_BASIS", "NBLOCK", "MOVECS",            //  5-9
       "DEBUG", "MC_PAIR_GROUPS", "TASK", "NUM_BAND", "OFF_BAND",  // 10-14
-      "DIFFS", "ORDER", "CPU"};
+      "DIFFS", "ORDER", "CPU", "SAMPLER"};
   const std::vector<std::string> taskVals = {
       "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
 
@@ -171,6 +172,16 @@ void IOPs::read(const MPI_info& mpi_info,
                 sopns[keyval] = key;
               }
               break;
+            case KEYS::SAMPLER:
+              if (key == "DIRECT") {
+                iopns[keyval] = SAMPLERS::DIRECT;
+              } else if (key == "METROPOLIS") {
+                iopns[keyval] = SAMPLERS::METROPOLIS;
+              } else {
+                std::cerr << key << " is not a vaild sampler\n";
+              }
+              keySet = false;
+              break;
             case KEYS::DEBUG:
               iopns[keyval] = stoi(key, nullptr);
               keySet = false;
@@ -213,6 +224,8 @@ void IOPs::print(const MPI_info& mpi_info,
                  const std::string& file) {
   const std::vector<std::string> taskVals = {
       "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
+  const std::vector<std::string> samplers = {
+      "DIRECT", "METROPOLIS"};
 
   if (mpi_info.sys_master) {
     std::cout << std::endl;
@@ -224,6 +237,7 @@ void IOPs::print(const MPI_info& mpi_info,
     std::cout << " MC_NPAIR: " << iopns[KEYS::MC_NPAIR] << std::endl;
     std::cout << " MC_DELX: " << dopns[KEYS::MC_DELX] << std::endl;
     std::cout << " SPHERICAL: " << bopns[KEYS::SPHERICAL] << std::endl;
+    std::cout << " SAMPLER: " << samplers[iopns[KEYS::SAMPLER]] << std::endl;
 #ifdef QUAD_TAU
     std::cout << " quadrature tau" << std::endl;
 #else
