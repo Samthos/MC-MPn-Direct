@@ -18,6 +18,7 @@ struct Electron_Pair {
   std::array<double, 3> pos1, pos2;
   double wgt, rv;
 };
+std::ostream& operator << (std::ostream& os, const Electron_Pair& electron_pair);
 
 class Electron_Pair_List {
  public:

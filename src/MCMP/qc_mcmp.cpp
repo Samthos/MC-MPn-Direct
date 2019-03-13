@@ -73,9 +73,19 @@ void MP::monte_energy() {
       stepTimer.Start();
     }
 #else
-    for (auto i = 0; i < emp.size(); i++) {
-      output[i].write(reinterpret_cast<const char *>(&emp[i]), sizeof(double));
+    output.back() << step << ",";
+    for (double i : emp) {
+      output.back() << std::setprecision(std::numeric_limits<double>::digits10 + 1)<< i << ",";
     }
+    for (auto it = 0; it < cv.size()-1; it++) {
+      output.back() << cv[it];
+    }
+    for (int i = 0; i < el_pair_list->size(); i++) {
+      output.back() << el_pair_list->get(i);
+    }
+    output.back() << tau.get_tau(0) << ",";
+    output.back() << tau.get_tau(1);
+    output.back() << "\n";
 #endif
   }
 

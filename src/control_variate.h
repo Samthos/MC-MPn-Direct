@@ -255,12 +255,17 @@ class ControlVariate {
   friend std::ostream& operator<< (std::ostream& os, ControlVariate& cv) {
     cv.update();
     if (0 == cv.master) {
+#ifndef FULL_PRINTING
       os << cv.nSamples << "\t";
       os << std::setprecision(7);
       os << cv.e_x[0] << "\t";
       os << cv.error << "\t";
       os << cv.e_cv << "\t";
       os << cv.error_cv;
+#else
+      os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cv.e_x[0] << ",";
+      os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cv.error << ",";
+#endif
     }
     return os;
   }

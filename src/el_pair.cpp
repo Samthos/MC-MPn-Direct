@@ -10,6 +10,17 @@
 
 #include "el_pair.h"
 
+std::ostream& operator << (std::ostream& os, const Electron_Pair& electron_pair) {
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.pos1[0] << ",";
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.pos1[1] << ",";
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.pos1[2] << ",";
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.pos2[0] << ",";
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.pos2[1] << ",";
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.pos2[2] << ",";
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.wgt << ",";
+  return os;
+}
+
 double Electron_Pair_List::calculate_r12(const Electron_Pair &el_pair) {
   double r12;
   std::array<double, 3> dr{};
