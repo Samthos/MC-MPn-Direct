@@ -24,6 +24,7 @@ class Electron_Pair_List {
  public:
   explicit Electron_Pair_List(int size) : electron_pairs(size) {}
   virtual void move(Random&, const Molec&, const GTO_Weight&) = 0;
+  virtual bool requires_blocking() = 0;
 
   // functions to emulate vector interface
   std::size_t size() {
@@ -62,6 +63,9 @@ class Direct_Electron_Pair_List : public Electron_Pair_List {
       mc_move_scheme(electron_pair, random, molec, weight);
     }
   }
+  bool requires_blocking() override {
+    return false;
+  }
  private:
   static void mc_move_scheme(Electron_Pair&, Random&, const Molec&, const GTO_Weight&);
   static double calculate_r(Random& random, double alpha, double beta, double a);
@@ -92,6 +96,9 @@ class Metropolis_Electron_Pair_List : public Electron_Pair_List {
       mc_move_scheme(electron_pair, random, molec, weight);
     }
     moves_since_rescale++;
+  }
+  bool requires_blocking() override {
+    return true;
   }
  private:
   static void initialize(Electron_Pair&, Random&, const Molec&, const GTO_Weight&);

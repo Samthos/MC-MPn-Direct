@@ -147,35 +147,6 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Ran
   std::transform(electron_pair.pos2.begin(), electron_pair.pos2.end(), dr.begin(), electron_pair.pos2.begin(), std::plus<>());
 
   set_weight(electron_pair, weight);
-
-#ifndef NDEBUG
-  std::cout << "pos";
-  std::cout << "," << step ;
-  std::cout << "," << count;
-  std::cout << ",\"";
-  for (auto &it : weight.cum_sum_index[index]) {
-    std::cout << it;
-  }
-  std::cout << "\"";
-  std::cout << "," << electron_pair.pos1[0];
-  std::cout << "," << electron_pair.pos1[1];
-  std::cout << "," << electron_pair.pos1[2];
-  std::cout << "," << electron_pair.pos2[0];
-  std::cout << "," << electron_pair.pos2[1];
-  std::cout << "," << electron_pair.pos2[2];
-  std::cout << "," << r12(electron_pair);
-  /*
-  std::cout << "," << x;
-  std::cout << "," << y;
-  std::cout << "," << z;
-  */
-  std::cout << ","  << r;
-  std::cout << ","  << phi;
-  /*
-  std::cout << theta << " ";
-  */
-  std::cout << "," << electron_pair.wgt << std::endl;
-#endif  // NDEBUG
 }
 double Direct_Electron_Pair_List::CDF(const double& rho, const double& c, const double& erf_c) {
   return (2.0 * erf_c + erf(rho - c) - erf(rho + c)) / (2.0 * erf_c);

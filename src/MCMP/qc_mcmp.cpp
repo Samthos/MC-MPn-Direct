@@ -53,22 +53,22 @@ void MP::monte_energy() {
     // accumulate
     auto cv_back = control.back().begin();
     for (auto it = 0; it < cv.size()-1; it++) {
-      cv[it].add(emp[it], control[it]);
+      cv[it]->add(emp[it], control[it]);
       std::copy(control[it].begin(), control[it].end(), cv_back);
       cv_back += control[it].size();
       // std::cout << std::distance(control.back().begin(), cv_back) << std::endl;
     }
-    cv.back().add(std::accumulate(emp.begin(), emp.end(), 0.0), control.back());
+    cv.back()->add(std::accumulate(emp.begin(), emp.end(), 0.0), control.back());
 
     // print if i is a multiple of 128
 #ifndef FULL_PRINTING
     if (0 == step % 128) {
       for (auto i = 0; i < emp.size(); i++) {
-        output[i] << cv[i] << "\t";
+        output[i] << *cv[i] << "\t";
         output[i] << stepTimer << "\n";
         output[i].flush();
       }
-      output.back() << cv.back() << "\t" << stepTimer << "\n";
+      output.back() << *cv.back() << "\t" << stepTimer << "\n";
       output.back().flush();
       stepTimer.Start();
     }
@@ -91,11 +91,11 @@ void MP::monte_energy() {
 
   for (auto i = 0; i < emp.size(); i++) {
       std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
-      cv[i].to_json(filename);
+      cv[i]->to_json(filename);
   }
   {
     std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
-    cv.back().to_json(filename);
+    cv.back()->to_json(filename);
   }
   if (mpi_info.sys_master) {
     mcTimer.Stop();

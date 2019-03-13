@@ -16,7 +16,21 @@
 #include "mpi.h"
 #endif
 
-class ControlVariate {
+class Accumulator {
+ public:
+  virtual size_t size() = 0;
+  virtual void add(double x, const std::vector<double>& c) = 0;
+  virtual void update() = 0;
+  virtual void to_json(std::string fname) = 0;
+  virtual std::ostream& write(std::ostream& os) = 0;
+
+  friend std::ostream& operator << (std::ostream& os, Accumulator& accumulator) {
+    return accumulator.write(os);
+  }
+ private:
+};
+
+class ControlVariate : public Accumulator {
  public:
   ControlVariate(size_t nControlVariates, const std::vector<double>& ExactCV) {
 #ifdef HAVE_MPI
@@ -114,7 +128,7 @@ class ControlVariate {
     return exact_cv[i];
   }
 
-  void add(double x, const std::vector<double>& c) {
+  void add(double x, const std::vector<double>& c) override {
     arma::vec c_(c);
 
     s_x[0] += x;
@@ -126,7 +140,7 @@ class ControlVariate {
     s_c2 += c_ * c_.t();
     nSamples++;
   }
-  void update() {
+  void update() override {
     // calculate averages
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
@@ -169,7 +183,7 @@ class ControlVariate {
       error_cv = sqrt(var_cv / static_cast<double>(TotalSamples));
     }
   }
-  void to_json(std::string fname) {
+  void to_json(std::string fname) override {
     // open stream
     std::ofstream os(fname + ".json");
 
@@ -251,23 +265,26 @@ class ControlVariate {
     // close stream
     os.close();
   }
-
-  friend std::ostream& operator<< (std::ostream& os, ControlVariate& cv) {
-    cv.update();
-    if (0 == cv.master) {
+  std::ostream& write(std::ostream& os) override {
+    update();
+    if (0 == master) {
 #ifndef FULL_PRINTING
-      os << cv.nSamples << "\t";
+      os << nSamples << "\t";
       os << std::setprecision(7);
-      os << cv.e_x[0] << "\t";
-      os << cv.error << "\t";
-      os << cv.e_cv << "\t";
-      os << cv.error_cv;
+      os << e_x[0] << "\t";
+      os << error << "\t";
+      os << e_cv << "\t";
+      os << error_cv;
 #else
-      os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cv.e_x[0] << ",";
-      os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << cv.error << ",";
+      os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[0] << ",";
+      os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << error << ",";
 #endif
     }
     return os;
+  }
+
+  friend std::ostream& operator<< (std::ostream& os, ControlVariate& cv) {
+    return cv.write(os);
   }
  private:
   int master;
@@ -298,4 +315,132 @@ class ControlVariate {
   arma::Col<double> alpha;
 };
 
+class BlockingAccumulator : public Accumulator {
+ public:
+  BlockingAccumulator(size_t nControlVariates, const std::vector<double>& ExactCV) {
+    master = 0;
+#ifdef HAVE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &master);
+#endif
+    nSamples = 0;
+    TotalSamples = 0;
+
+    s_x1 = 0;
+    s_x2.resize(1);
+    s_x2.fill(0);
+
+    e_x1 = 0;
+  }
+  BlockingAccumulator() : BlockingAccumulator(0, {}) {}
+
+  void add(double x, const std::vector<double>& c) override {
+    uint32_t block = 0;
+    uint32_t blockPower2 = 1;
+
+    nSamples++;
+
+    s_x1 += x;
+    s_x2[0] += x*x;
+
+    if (block < s_block.size()-1) {
+      s_block.resize(block+2);
+      s_x2.resize(block+2);
+    }
+    s_block[block+1] += x;
+
+    block++;
+    blockPower2 *= 2;
+    while ((nSamples & (blockPower2-1)) == 0 && block < s_block.size()) {
+      s_block[block] /= 2;
+      s_x2[block] += s_block[block] * s_block[block];
+
+      if (block < s_block.size()-1) {
+        s_block.resize(block+2);
+        s_x2.resize(block+2);
+      }
+      s_block[block+1] += s_block[block];
+
+      s_block[block] = 0;
+
+      block++;
+      blockPower2 *= 2;
+    }
+  }
+  void update() override {
+    // calculate averages
+    if (s_x2.size() != e_x2.size()) {
+      e_x2.resize(s_x2.size());
+    }
+#ifdef HAVE_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Reduce(&nSamples, &TotalSamples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&s_x1, &e_x1, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(s_x2.memptr(), e_x2.memptr(), s_x2.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    e_x1  = e_x1 / static_cast<double>(TotalSamples);
+    e_x2  = e_x2 / static_cast<double>(TotalSamples);
+#else
+    TotalSamples = nSamples;
+    e_x1  = s_x1 / static_cast<double>(TotalSamples);
+    e_x2  = s_x2 / static_cast<double>(TotalSamples);
+#endif
+
+    if (0 == master) {
+      // calculate variance and derived
+      var = e_x2 - e_x1 * e_x1;
+      std = sqrt(var);
+      error = sqrt(var / static_cast<double>(TotalSamples));
+    }
+  }
+  void to_json(std::string fname) override {
+    // open stream
+    std::ofstream os(fname + ".json");
+
+    // call update function
+    update();
+
+    if (0 == master) {
+      // open json
+      os << "{\n";
+
+      // print number of steps
+      os << "\t\"Steps\" : " << TotalSamples << ",\n";
+
+      // print E[x]
+      os << "\t\"EX\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x1 << ",\n";
+
+      // print Var[x]
+      os << "\t\"EX2\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x2 << ",\n";
+
+      os << "}";
+    }
+
+    // close stream
+    os.close();
+  }
+  std::ostream& write(std::ostream& os) override {
+    update();
+    if (0 == master) {
+      os << nSamples << "\t";
+      os << std::setprecision(7);
+      os << e_x1 << "\t";
+      os << error;
+    }
+    return os;
+  }
+ private:
+  int master;
+  unsigned long long int nSamples;
+  unsigned long long int TotalSamples;
+
+  double s_x1;
+  arma::vec s_x2;
+  arma::vec s_block;
+
+  // averages
+  double e_x1;
+  arma::vec e_x2;
+
+  // statistics
+  arma::vec var, std, error;
+};
 #endif //MC_MP2_DIRECT_CONTROL_VARIATE_H
