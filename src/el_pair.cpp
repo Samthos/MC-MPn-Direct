@@ -44,13 +44,6 @@ Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight)
   }
   return electron_pair_list;
 }
-void destroy_sampler(Electron_Pair_List* electron_pair_list, SAMPLERS::SAMPLERS sampler) {
-  if (sampler == SAMPLERS::DIRECT) {
-    delete reinterpret_cast<Direct_Electron_Pair_List*>(electron_pair_list);
-  } else if (sampler == SAMPLERS::METROPOLIS) {
-    delete reinterpret_cast<Metropolis_Electron_Pair_List*>(electron_pair_list);
-  }
-}
 
 void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Molec& molec, const GTO_Weight& weight) {
 #ifndef NDEBUG

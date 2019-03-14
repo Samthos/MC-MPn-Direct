@@ -59,6 +59,7 @@ void MP::monte_energy() {
       // std::cout << std::distance(control.back().begin(), cv_back) << std::endl;
     }
     cv.back()->add(std::accumulate(emp.begin(), emp.end(), 0.0), control.back());
+    std::cout << "STEP " << mpi_info.taskid << " " << step << " " << emp.front() << "\n";
 
     // print if i is a multiple of 128
 #ifndef FULL_PRINTING

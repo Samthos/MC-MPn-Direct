@@ -23,6 +23,7 @@ std::ostream& operator << (std::ostream& os, const Electron_Pair& electron_pair)
 class Electron_Pair_List {
  public:
   explicit Electron_Pair_List(int size) : electron_pairs(size) {}
+  virtual ~Electron_Pair_List() = default;
   virtual void move(Random&, const Molec&, const GTO_Weight&) = 0;
   virtual bool requires_blocking() = 0;
 
@@ -53,11 +54,11 @@ class Electron_Pair_List {
 };
 
 Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight);
-void destroy_sampler(Electron_Pair_List*, SAMPLERS::SAMPLERS);
 
 class Direct_Electron_Pair_List : public Electron_Pair_List {
  public:
   explicit Direct_Electron_Pair_List(int size) : Electron_Pair_List(size) {}
+  ~Direct_Electron_Pair_List() override = default;
   void move(Random& random, const Molec& molec, const GTO_Weight& weight) override {
     for (Electron_Pair &electron_pair : electron_pairs) {
       mc_move_scheme(electron_pair, random, molec, weight);
@@ -88,6 +89,7 @@ class Metropolis_Electron_Pair_List : public Electron_Pair_List {
       move(random, molec, weight);
     }
   }
+  ~Metropolis_Electron_Pair_List() override = default;
   void move(Random& random, const Molec& molec, const GTO_Weight& weight) override {
     if (moves_since_rescale == 1'000) {
       rescale_move_length();

@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  destroy_sampler(el_pair_list, static_cast<SAMPLERS::SAMPLERS>(iops.iopns[KEYS::SAMPLER]));
+  delete el_pair_list;
 
 #ifdef HAVE_MPI
   MPI_Finalize();

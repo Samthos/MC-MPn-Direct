@@ -80,21 +80,29 @@ class MP : public QC_monte {
   QC_monte(p1, p2, p3, p4, p5, ep) {
     tau.resize(cv_sizes.size(), basis);
     emp.resize(cv_sizes.size());
-    for (int n : cv_sizes) {
-      control.emplace_back(std::vector<double>(n));
-      cv.push_back(new ControlVariate(n, std::vector<double>(n, 0.0)));
+
+    if (ep->requires_blocking()) {
+      for (int n : cv_sizes) {
+        control.emplace_back(std::vector<double>(n));
+        cv.push_back(new BlockingAccumulator(n, std::vector<double>(n, 0.0)));
+      }
+      cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
+      control.emplace_back(std::vector<double>(cv_sizes.back()));
+      cv.push_back(new BlockingAccumulator(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
+    } else {
+      for (int n : cv_sizes) {
+        control.emplace_back(std::vector<double>(n));
+        cv.push_back(new ControlVariate(n, std::vector<double>(n, 0.0)));
+      }
+      cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
+      control.emplace_back(std::vector<double>(cv_sizes.back()));
+      cv.push_back(new ControlVariate(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
     }
-    cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
-    control.emplace_back(std::vector<double>(cv_sizes.back()));
-    cv.push_back(new ControlVariate(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
   }
   ~MP() {
-    /*
-     * Should probably delete or clean up accumulator
-    for (int i = 0; i < cv.size(); i++) {
-      delete cv[i];
+    for (auto &item : cv) {
+      delete item;
     }
-    */
   }
 
 

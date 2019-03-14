@@ -18,11 +18,11 @@
 
 class Accumulator {
  public:
-  virtual size_t size() = 0;
   virtual void add(double x, const std::vector<double>& c) = 0;
   virtual void update() = 0;
   virtual void to_json(std::string fname) = 0;
   virtual std::ostream& write(std::ostream& os) = 0;
+  virtual ~Accumulator() = default;
 
   friend std::ostream& operator << (std::ostream& os, Accumulator& accumulator) {
     return accumulator.write(os);
@@ -56,6 +56,7 @@ class ControlVariate : public Accumulator {
     cov_c.zeros(nControlVariates, nControlVariates);
   }
   ControlVariate() : ControlVariate(0, {}) {}
+  ~ControlVariate() = default;
 
   // getters
   unsigned long long int getNumberOfSteps() {
@@ -283,9 +284,6 @@ class ControlVariate : public Accumulator {
     return os;
   }
 
-  friend std::ostream& operator<< (std::ostream& os, ControlVariate& cv) {
-    return cv.write(os);
-  }
  private:
   int master;
   unsigned long long int nSamples;
@@ -326,12 +324,28 @@ class BlockingAccumulator : public Accumulator {
     TotalSamples = 0;
 
     s_x1 = 0;
+    e_x1 = 0;
+
     s_x2.resize(1);
     s_x2.fill(0);
 
-    e_x1 = 0;
+    s_block.resize(1);
+    s_block.fill(0);
+
+    e_x2.resize(1);
+    e_x2.fill(0);
+
+    var.resize(1);
+    var.fill(0);
+
+    std.resize(1);
+    std.fill(0);
+
+    error.resize(1);
+    error.fill(0);
   }
   BlockingAccumulator() : BlockingAccumulator(0, {}) {}
+  ~BlockingAccumulator() = default;
 
   void add(double x, const std::vector<double>& c) override {
     uint32_t block = 0;
@@ -342,7 +356,7 @@ class BlockingAccumulator : public Accumulator {
     s_x1 += x;
     s_x2[0] += x*x;
 
-    if (block < s_block.size()-1) {
+    if (s_block.n_elem-1 <= block) {
       s_block.resize(block+2);
       s_x2.resize(block+2);
     }
@@ -354,7 +368,7 @@ class BlockingAccumulator : public Accumulator {
       s_block[block] /= 2;
       s_x2[block] += s_block[block] * s_block[block];
 
-      if (block < s_block.size()-1) {
+      if (s_block.n_elem-1 <= block) {
         s_block.resize(block+2);
         s_x2.resize(block+2);
       }
@@ -371,24 +385,35 @@ class BlockingAccumulator : public Accumulator {
     if (s_x2.size() != e_x2.size()) {
       e_x2.resize(s_x2.size());
     }
+    arma::vec block_sample(s_x2.size());
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&nSamples, &TotalSamples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(&s_x1, &e_x1, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(s_x2.memptr(), e_x2.memptr(), s_x2.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    e_x1  = e_x1 / static_cast<double>(TotalSamples);
-    e_x2  = e_x2 / static_cast<double>(TotalSamples);
+
+    block_sample[0] = TotalSamples;
+    for (int block = 1; block < block_sample.n_elem; block++) {
+      block_sample[block] = block_sample[block-1] / 2;
+    }
+
+    e_x1  = e_x1 / block_sample[0];
+    e_x2  = e_x2 / block_sample;
 #else
     TotalSamples = nSamples;
-    e_x1  = s_x1 / static_cast<double>(TotalSamples);
-    e_x2  = s_x2 / static_cast<double>(TotalSamples);
+    block_sample[0] = TotalSamples;
+    for (int block = 1; block < block_sample.n_elem; block++) {
+      block_sample[block] = block_sample[block-1] / 2;
+    }
+    e_x1  = s_x1 / block_sample[0];
+    e_x2  = s_x2 / block_sample;
 #endif
 
     if (0 == master) {
       // calculate variance and derived
       var = e_x2 - e_x1 * e_x1;
       std = sqrt(var);
-      error = sqrt(var / static_cast<double>(TotalSamples));
+      error = sqrt(var / block_sample);
     }
   }
   void to_json(std::string fname) override {
@@ -423,7 +448,10 @@ class BlockingAccumulator : public Accumulator {
       os << nSamples << "\t";
       os << std::setprecision(7);
       os << e_x1 << "\t";
-      os << error;
+      for (int block = 0; block < error.n_elem; ++block) {
+        os << std::setprecision(7);
+        os << error[block] << "\t";
+      }
     }
     return os;
   }
