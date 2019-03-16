@@ -323,42 +323,43 @@ class BlockingAccumulator : public Accumulator {
     nSamples = 0;
     TotalSamples = 0;
 
-    s_x1 = 0;
-    e_x1 = 0;
-
-    s_x2.resize(1);
-    s_x2.fill(0);
-
-    s_block.resize(1);
-    s_block.fill(0);
-
-    e_x2.resize(1);
-    e_x2.fill(0);
-
-    var.resize(1);
-    var.fill(0);
-
-    std.resize(1);
-    std.fill(0);
-
-    error.resize(1);
-    error.fill(0);
+    resize(1);
   }
   BlockingAccumulator() : BlockingAccumulator(0, {}) {}
   ~BlockingAccumulator() = default;
 
+  void resize(int new_size) {
+    int old_size = s_x1.n_elem;
+    s_x1.resize(new_size);
+    e_x1.resize(new_size);
+    s_x2.resize(new_size);
+    s_block.resize(new_size);
+    e_x2.resize(new_size);
+    var.resize(new_size);
+    std.resize(new_size);
+    error.resize(new_size);
+    for (; old_size < new_size; old_size++) {
+      s_x1[old_size] = 0;
+      e_x1[old_size] = 0;
+      s_x2[old_size] = 0;
+      s_block[old_size] = 0;
+      e_x2[old_size] = 0;
+      var[old_size] = 0;
+      std[old_size] = 0;
+      error[old_size] = 0;
+    }
+  }
   void add(double x, const std::vector<double>& c) override {
     uint32_t block = 0;
     uint32_t blockPower2 = 1;
 
     nSamples++;
 
-    s_x1 += x;
+    s_x1[0] += x;
     s_x2[0] += x*x;
 
     if (s_block.n_elem-1 <= block) {
-      s_block.resize(block+2);
-      s_x2.resize(block+2);
+      resize(block+2);
     }
     s_block[block+1] += x;
 
@@ -366,11 +367,11 @@ class BlockingAccumulator : public Accumulator {
     blockPower2 *= 2;
     while ((nSamples & (blockPower2-1)) == 0 && block < s_block.size()) {
       s_block[block] /= 2;
+      s_x1[block] += s_block[block];
       s_x2[block] += s_block[block] * s_block[block];
 
       if (s_block.n_elem-1 <= block) {
-        s_block.resize(block+2);
-        s_x2.resize(block+2);
+        resize(block+2);
       }
       s_block[block+1] += s_block[block];
 
@@ -382,14 +383,11 @@ class BlockingAccumulator : public Accumulator {
   }
   void update() override {
     // calculate averages
-    if (s_x2.size() != e_x2.size()) {
-      e_x2.resize(s_x2.size());
-    }
-    arma::vec block_sample(s_x2.size());
+    arma::vec block_sample(s_x1.n_elem);
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Reduce(&nSamples, &TotalSamples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(&s_x1, &e_x1, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(s_x1.memptr(), e_x1.memptr(), s_x1.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(s_x2.memptr(), e_x2.memptr(), s_x2.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
     block_sample[0] = TotalSamples;
@@ -397,7 +395,7 @@ class BlockingAccumulator : public Accumulator {
       block_sample[block] = block_sample[block-1] / 2;
     }
 
-    e_x1  = e_x1 / block_sample[0];
+    e_x1  = e_x1 / block_sample;
     e_x2  = e_x2 / block_sample;
 #else
     TotalSamples = nSamples;
@@ -411,7 +409,7 @@ class BlockingAccumulator : public Accumulator {
 
     if (0 == master) {
       // calculate variance and derived
-      var = e_x2 - e_x1 * e_x1;
+      var = e_x2 - (e_x1 % e_x1);
       std = sqrt(var);
       error = sqrt(var / block_sample);
     }
@@ -447,9 +445,8 @@ class BlockingAccumulator : public Accumulator {
     if (0 == master) {
       os << nSamples << "\t";
       os << std::setprecision(7);
-      os << e_x1 << "\t";
+      os << e_x1[0] << "\t";
       for (int block = 0; block < error.n_elem; ++block) {
-        os << std::setprecision(7);
         os << error[block] << "\t";
       }
     }
@@ -460,12 +457,12 @@ class BlockingAccumulator : public Accumulator {
   unsigned long long int nSamples;
   unsigned long long int TotalSamples;
 
-  double s_x1;
+  arma::vec s_x1;
   arma::vec s_x2;
   arma::vec s_block;
 
   // averages
-  double e_x1;
+  arma::vec e_x1;
   arma::vec e_x2;
 
   // statistics
