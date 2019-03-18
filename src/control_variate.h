@@ -155,11 +155,11 @@ class ControlVariate : public Accumulator {
     e_c2 = e_c2 / static_cast<double>(TotalSamples);
     e_xc = e_xc / static_cast<double>(TotalSamples);
 #else
-    TotalSamples = nSamples;
-    e_x  = s_x  / static_cast<double>(nSamples);
-    e_c1 = s_c1 / static_cast<double>(nSamples);
-    e_c2 = s_c2 / static_cast<double>(nSamples);
-    e_xc = s_xc / static_cast<double>(nSamples);
+    total_samples = n_samples;
+    e_x  = s_x  / static_cast<double>(n_samples);
+    e_c1 = s_c1 / static_cast<double>(n_samples);
+    e_c2 = s_c2 / static_cast<double>(n_samples);
+    e_xc = s_xc / static_cast<double>(n_samples);
 #endif
 
     if (0 == master) {
@@ -317,11 +317,13 @@ class BlockingAccumulator : public Accumulator {
  public:
   BlockingAccumulator(size_t nControlVariates, const std::vector<double>& ExactCV) {
     master = 0;
+    comm_size = 1;
 #ifdef HAVE_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &master);
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 #endif
-    nSamples = 0;
-    TotalSamples = 0;
+    n_samples = 0;
+    total_samples = 0;
 
     resize(1);
   }
@@ -353,7 +355,7 @@ class BlockingAccumulator : public Accumulator {
     uint32_t block = 0;
     uint32_t blockPower2 = 1;
 
-    nSamples++;
+    n_samples++;
 
     s_x1[0] += x;
     s_x2[0] += x*x;
@@ -365,7 +367,7 @@ class BlockingAccumulator : public Accumulator {
 
     block++;
     blockPower2 *= 2;
-    while ((nSamples & (blockPower2-1)) == 0 && block < s_block.size()) {
+    while ((n_samples & (blockPower2-1)) == 0 && block < s_block.size()) {
       s_block[block] /= 2;
       s_x1[block] += s_block[block];
       s_x2[block] += s_block[block] * s_block[block];
@@ -383,29 +385,25 @@ class BlockingAccumulator : public Accumulator {
   }
   void update() override {
     // calculate averages
-    arma::vec block_sample(s_x1.n_elem);
 #ifdef HAVE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Reduce(&nSamples, &TotalSamples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&n_samples, &total_samples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(s_x1.memptr(), e_x1.memptr(), s_x1.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(s_x2.memptr(), e_x2.memptr(), s_x2.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+#else
+    total_samples = n_samples;
+    std::copy(s_x1.begin(), s_x1.end(), e_x1.begin());
+    std::copy(s_x2.begin(), s_x2.end(), e_x2.begin());
+#endif
 
-    block_sample[0] = TotalSamples;
-    for (int block = 1; block < block_sample.n_elem; block++) {
-      block_sample[block] = block_sample[block-1] / 2;
+    arma::vec block_sample(s_x1.n_elem);
+    for (unsigned long long int block = 0, pow_two_block = 1; block < block_sample.n_elem; block++, pow_two_block <<= 1ull) {
+      block_sample[block] = n_samples / (pow_two_block);
     }
+    block_sample *= comm_size;
 
     e_x1  = e_x1 / block_sample;
     e_x2  = e_x2 / block_sample;
-#else
-    TotalSamples = nSamples;
-    block_sample[0] = TotalSamples;
-    for (int block = 1; block < block_sample.n_elem; block++) {
-      block_sample[block] = block_sample[block-1] / 2;
-    }
-    e_x1  = s_x1 / block_sample[0];
-    e_x2  = s_x2 / block_sample;
-#endif
 
     if (0 == master) {
       // calculate variance and derived
@@ -426,7 +424,7 @@ class BlockingAccumulator : public Accumulator {
       os << "{\n";
 
       // print number of steps
-      os << "\t\"Steps\" : " << TotalSamples << ",\n";
+      os << "\t\"Steps\" : " << total_samples << ",\n";
 
       // print E[x]
       os << "\t\"EX\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x1 << ",\n";
@@ -443,7 +441,7 @@ class BlockingAccumulator : public Accumulator {
   std::ostream& write(std::ostream& os) override {
     update();
     if (0 == master) {
-      os << nSamples << "\t";
+      os << n_samples << "\t";
       os << std::setprecision(7);
       os << e_x1[0] << "\t";
       for (int block = 0; block < error.n_elem; ++block) {
@@ -454,8 +452,9 @@ class BlockingAccumulator : public Accumulator {
   }
  private:
   int master;
-  unsigned long long int nSamples;
-  unsigned long long int TotalSamples;
+  int comm_size;
+  unsigned long long int n_samples;
+  unsigned long long int total_samples;
 
   arma::vec s_x1;
   arma::vec s_x2;
