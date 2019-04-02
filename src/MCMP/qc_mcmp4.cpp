@@ -761,13 +761,12 @@ std::array<double, 4> MP4_Engine::contract_jk(
   std::transform(rv.begin(), rv.end(), ij.begin() + walker * mpn, ij_rk.begin(), std::multiplies<>());
   out[0] = std::inner_product(en_r.begin(), en_r.end(), ij_rk.begin(), 0.0); // jr kr l?
 #if MP4CV >= 2
+  std::transform(wgt.begin(), wgt.end(), ik.begin() + walker * mpn, ij_wk.begin(), std::multiplies<>());
+  cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, Av.data(), mpn, ij_wk.data(), 1, 0.0, en_w.data(), 1); // kw ?l
   out[1] = std::inner_product(en_w.begin(), en_w.end(), ij_rk.begin(), 0.0); // jr kw l?
 #endif
 
 #if MP4CV >= 3
-  std::transform(wgt.begin(), wgt.end(), ik.begin() + walker * mpn, ij_wk.begin(), std::multiplies<>());
-  cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, Av.data(), mpn, ij_wk.data(), 1, 0.0, en_w.data(), 1); // kw ?l
-
   std::transform(wgt.begin(), wgt.end(), ij.begin() + walker * mpn, ij_wk.begin(), std::multiplies<>());
   out[2] = std::inner_product(en_r.begin(), en_r.end(), ij_wk.begin(), 0.0); // jw kr l?
   out[3] = std::inner_product(en_w.begin(), en_w.end(), ij_wk.begin(), 0.0); // jw kw l?
@@ -790,8 +789,8 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
     contract(T_r, kl, CblasTrans, jl, en_r);
 
 #if MP4CV >= 4
-    std::transform(wgt.begin(), wgt.end(), il.begin() + i * mpn, en_r.begin(), std::multiplies<>());
-    contract(T_w, kl, CblasTrans, jl, en_r);
+    std::transform(wgt.begin(), wgt.end(), il.begin() + i * mpn, en_w.begin(), std::multiplies<>());
+    contract(T_w, kl, CblasTrans, jl, en_w);
 #endif
 
     jr_kr_lr = 0; jr_kr_lw = 0; jr_kw_lr = 0; jr_kw_lw = 0;
@@ -810,8 +809,8 @@ void MP4_Engine::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& con
 #if MP4CV >= 4
       contracted_jk = contract_jk(i, T_w, *(jk[eqn]), *(ik[eqn]), *(ij[eqn]));
       jr_kr_lw += constants[eqn] * contracted_jk[0];
-      jr_kw_lw += constants[eqn] * contracted_jk[2];
-      jw_kr_lw += constants[eqn] * contracted_jk[1];
+      jr_kw_lw += constants[eqn] * contracted_jk[1];
+      jw_kr_lw += constants[eqn] * contracted_jk[2];
       jw_kw_lw += constants[eqn] * contracted_jk[3];
 #endif
     }
@@ -972,7 +971,6 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
       {&ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_22, &ovps.v_set[1][1].s_12, &ovps.v_set[1][1].s_22},
       ovps.o_set[2][1].s_12, ovps.o_set[2][2].s_11);
 
-
   mcmp4_energy_ijkl_t2(emp4, control,
       {2, 2, 2, -4, -4, -4, -4, 8},
       {&ovps.o_set[0][0].s_11, &ovps.o_set[0][0].s_21, &ovps.o_set[0][0].s_22, &ovps.o_set[0][0].s_11, &ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_21, &ovps.o_set[0][0].s_22, &ovps.o_set[0][0].s_12},
@@ -1064,6 +1062,7 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
       ovps.v_set[2][1].s_11, ovps.v_set[2][1].s_22,
       ovps.o_set[2][2].s_11);
 
+
   mcmp4_energy_ijkl_t3(emp4, control,
       { -2, -2, -2, 4, 4, 4, 4, -8},
       {&ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_22, &ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_12, &ovps.o_set[0][0].s_22, &ovps.o_set[0][0].s_22, &ovps.o_set[0][0].s_22},
@@ -1149,36 +1148,24 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   MP4_Engine mp4(el_pair_list);
   emp4 = 0.0;
-#ifndef NOCV
+#if MP4CV >= 1
   std::fill(control.begin(), control.end(), 0.0);
 #endif
 
-
   mp4.energy(emp4, control, ovps);
-  /*
-  printf("%12.6f : ", emp4);
-  for (const auto &item : control) {
-    printf("%12.6f", item);
-  }
-  printf("\n");
-  emp4 = 0;
-  std::fill(control.begin(), control.end(), 0.0);
-   */
 
   /*
-  emp4 = 0.0;
-  std::fill(control.begin(), control.end(), 0.0);
-  mcmp4_energy_ij(emp4, control);
-  mcmp4_energy_ik(emp4, control);
-  mcmp4_energy_il(emp4, control);
-  mcmp4_energy_ijkl(emp4, control);
-  */
-  /*
-  printf("%12.6f : ", emp4);
-  for (const auto &item : control) {
-    printf("%12.6f", item);
+  double emp4_debug = 0.0;
+  std::vector<double> control_debug(control.size(), 0.0);
+  mcmp4_energy_ij(emp4_debug, control_debug);
+  mcmp4_energy_ik(emp4_debug, control_debug);
+  mcmp4_energy_il(emp4_debug, control_debug);
+  mcmp4_energy_ijkl(emp4_debug, control_debug);
+  printf("xxx: %14.6f %14.6f\n", emp4, emp4_debug);
+  int iter = 0;
+  for (auto control_it = control.begin(), debug_it = control_debug.begin(); control_it != control.end(); control_it++, debug_it++) {
+    printf("xxx: %2i %14.6f %14.6f\n", iter++, *control_it, *debug_it);
   }
-  printf("\n");
   */
 
   auto nsamp_tauwgt = tau.get_wgt(3);
@@ -1187,11 +1174,18 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 3);
   emp4 *= nsamp_tauwgt;
-#ifndef NOCV
+#if MP4CV >= 1
   std::transform(control.begin(), control.end(), control.begin(), [&nsamp_tauwgt](double x) { return x * nsamp_tauwgt; });
 #endif
 }
 
+/*
+WARNING:
+WARNING: Don't delete the four following function.
+WARNING: They are a much slower reference implementation of MC-MP4
+WARNING: The MP4 class and the following should produce the exact same output 
+WARNING:
+*/
 void MP::mcmp4_energy_ij(double& emp4, std::vector<double>& control) {
   // ij contracted sums
   for (auto it = 0; it < iops.iopns[KEYS::MC_NPAIR]; it++) {
@@ -1453,21 +1447,21 @@ void MP::mcmp4_energy_il(double& emp4, std::vector<double>& control) {
 void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
   // fourth order sums
   for (auto it = 0; it < iops.iopns[KEYS::MC_NPAIR]; it++) {
-    double jr_kr_lr = 0;
-    double jr_kr_lw = 0;
-    double jr_kw_lr = 0;
-    double jr_kw_lw = 0;
-    double jw_kr_lr = 0;
-    double jw_kr_lw = 0;
-    double jw_kw_lr = 0;
-    double jw_kw_lw = 0;
+    std::array<double, 3> jr_kr_lr; jr_kr_lr.fill(0.0);
+    std::array<double, 3> jr_kr_lw; jr_kr_lw.fill(0.0);
+    std::array<double, 3> jr_kw_lr; jr_kw_lr.fill(0.0);
+    std::array<double, 3> jr_kw_lw; jr_kw_lw.fill(0.0);
+    std::array<double, 3> jw_kr_lr; jw_kr_lr.fill(0.0);
+    std::array<double, 3> jw_kr_lw; jw_kr_lw.fill(0.0);
+    std::array<double, 3> jw_kw_lr; jw_kw_lr.fill(0.0);
+    std::array<double, 3> jw_kw_lw; jw_kw_lw.fill(0.0);
     for (auto jt = 0; jt < iops.iopns[KEYS::MC_NPAIR]; jt++) {
       auto ij = it * iops.iopns[KEYS::MC_NPAIR] + jt;
 
-      double kr_lr = 0;
-      double kr_lw = 0;
-      double kw_lr = 0;
-      double kw_lw = 0;
+      std::array<double, 3> kr_lr; kr_lr.fill(0.0);
+      std::array<double, 3> kr_lw; kr_lw.fill(0.0);
+      std::array<double, 3> kw_lr; kw_lr.fill(0.0);
+      std::array<double, 3> kw_lw; kw_lw.fill(0.0);
       for (auto kt = 0; kt < iops.iopns[KEYS::MC_NPAIR]; kt++) {
         auto ik = it * iops.iopns[KEYS::MC_NPAIR] + kt;
         auto jk = jt * iops.iopns[KEYS::MC_NPAIR] + kt;
@@ -1488,35 +1482,41 @@ void MP::mcmp4_energy_ijkl(double& emp4, std::vector<double>& control) {
           std::transform(en_l.begin(), en_l.end(), en.begin(), en_l.begin(), [&](double x, double y){return x + y * el_pair_list->get(lt).rv;});
           std::transform(ct_l.begin(), ct_l.end(), en.begin(), ct_l.begin(), [&](double x, double y){return x + y / el_pair_list->get(lt).wgt;});
         }
-        double en_l_t = 0;
-        double ct_l_t = 0;
+        std::array<double, 3> en_l_t; en_l_t.fill(0.0);
+        std::array<double, 3> ct_l_t; ct_l_t.fill(0.0);
 #include "qc_mcmp4_ijk.h"
-        kr_lr += en_l_t * el_pair_list->get(kt).rv;
-        kr_lw += ct_l_t * el_pair_list->get(kt).rv;
-        kw_lr += en_l_t / el_pair_list->get(kt).wgt;
-        kw_lw += ct_l_t / el_pair_list->get(kt).wgt;
+        for (int group = 0; group < 3; group++) {
+          kr_lr[group] += en_l_t[group] * el_pair_list->get(kt).rv;
+          kr_lw[group] += ct_l_t[group] * el_pair_list->get(kt).rv;
+          kw_lr[group] += en_l_t[group] / el_pair_list->get(kt).wgt;
+          kw_lw[group] += ct_l_t[group] / el_pair_list->get(kt).wgt;
+        }
       }
-      jr_kr_lr += kr_lr * el_pair_list->get(jt).rv;
-      jr_kr_lw += kr_lw * el_pair_list->get(jt).rv;
-      jr_kw_lr += kw_lr * el_pair_list->get(jt).rv;
-      jr_kw_lw += kw_lw * el_pair_list->get(jt).rv;
-      jw_kr_lr += kr_lr / el_pair_list->get(jt).wgt;
-      jw_kr_lw += kr_lw / el_pair_list->get(jt).wgt;
-      jw_kw_lr += kw_lr / el_pair_list->get(jt).wgt;
-      jw_kw_lw += kw_lw / el_pair_list->get(jt).wgt;
+      for (int group = 0; group < 3; group++) {
+        jr_kr_lr[group] += kr_lr[group] * el_pair_list->get(jt).rv;
+        jr_kr_lw[group] += kr_lw[group] * el_pair_list->get(jt).rv;
+        jr_kw_lr[group] += kw_lr[group] * el_pair_list->get(jt).rv;
+        jr_kw_lw[group] += kw_lw[group] * el_pair_list->get(jt).rv;
+        jw_kr_lr[group] += kr_lr[group] / el_pair_list->get(jt).wgt;
+        jw_kr_lw[group] += kr_lw[group] / el_pair_list->get(jt).wgt;
+        jw_kw_lr[group] += kw_lr[group] / el_pair_list->get(jt).wgt;
+        jw_kw_lw[group] += kw_lw[group] / el_pair_list->get(jt).wgt;
+      }
     }
-    emp4       += jr_kr_lr * el_pair_list->get(it).rv;
-    control[36] += jr_kr_lw * el_pair_list->get(it).rv;
-    control[37] += jr_kw_lw * el_pair_list->get(it).rv;
-    control[38] += jw_kr_lw * el_pair_list->get(it).rv;
-    control[39] += jw_kw_lw * el_pair_list->get(it).rv;
-    control[40] += jr_kr_lr / el_pair_list->get(it).wgt;
-    control[41] += jr_kr_lw / el_pair_list->get(it).wgt;
-    control[42] += jr_kw_lr / el_pair_list->get(it).wgt;
-    control[43] += jr_kw_lw / el_pair_list->get(it).wgt;
-    control[44] += jw_kr_lr / el_pair_list->get(it).wgt;
-    control[45] += jw_kr_lw / el_pair_list->get(it).wgt;
-    control[46] += jw_kw_lr / el_pair_list->get(it).wgt;
-    control[47] += jw_kw_lw / el_pair_list->get(it).wgt;
+    for (int group = 0; group < 3; group++) {
+      emp4             += jr_kr_lr[group] * el_pair_list->get(it).rv;
+      control[36 + 12 * group + 0] += jr_kr_lw[group] * el_pair_list->get(it).rv;
+      control[36 + 12 * group + 1] += jw_kr_lw[group] * el_pair_list->get(it).rv;
+      control[36 + 12 * group + 2] += jr_kw_lw[group] * el_pair_list->get(it).rv;
+      control[36 + 12 * group + 3] += jw_kw_lw[group] * el_pair_list->get(it).rv;
+      control[36 + 12 * group + 4] += jr_kr_lr[group] / el_pair_list->get(it).wgt;
+      control[36 + 12 * group + 5] += jr_kr_lw[group] / el_pair_list->get(it).wgt;
+      control[36 + 12 * group + 6] += jr_kw_lr[group] / el_pair_list->get(it).wgt;
+      control[36 + 12 * group + 7] += jw_kr_lw[group] / el_pair_list->get(it).wgt;
+      control[36 + 12 * group + 8] += jw_kr_lr[group] / el_pair_list->get(it).wgt;
+      control[36 + 12 * group + 9] += jr_kw_lw[group] / el_pair_list->get(it).wgt;
+      control[36 + 12 * group +10] += jw_kw_lr[group] / el_pair_list->get(it).wgt;
+      control[36 + 12 * group +11] += jw_kw_lw[group] / el_pair_list->get(it).wgt;
+    }
   }
 }

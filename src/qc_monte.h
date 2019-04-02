@@ -124,10 +124,10 @@ class MP : public QC_monte {
 class MP2 : public MP {
  public:
   MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6}) {}
-  ~MP2() {}
+  ~MP2() = default;
 
  protected:
-  void energy();
+  void energy() override;
 };
 
 class MP3 : public MP {
@@ -140,7 +140,7 @@ class MP3 : public MP {
   }
 
  protected:
-  void energy();
+  void energy() override;
 };
 
 class MP4 : public MP {
@@ -153,12 +153,12 @@ class MP4 : public MP {
   }
 
  protected:
-  void energy();
+  void energy() override;
 };
 
 class GF : public  QC_monte {
  public:
-  void monte_energy();
+  void monte_energy() override;
 
  protected:
   GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : QC_monte(p1, p2, p3, p4, p5, ep) {}
