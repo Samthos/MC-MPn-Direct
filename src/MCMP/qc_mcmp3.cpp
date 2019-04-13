@@ -125,11 +125,6 @@ void mcmp3_helper(
 }
 
 void MP::mcmp3_energy(double& emp3, std::vector<double>& control) {
-  emp3 = 0.0;
-#if MP3CV >= 1
-  std::fill(control.begin(), control.end(), 0.0);
-#endif
-
   std::vector<double> rv(iops.iopns[KEYS::MC_NPAIR]);
   std::vector<double> wgt(iops.iopns[KEYS::MC_NPAIR]);
   std::transform(el_pair_list->begin(), el_pair_list->end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});

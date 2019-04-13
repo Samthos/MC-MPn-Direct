@@ -1147,10 +1147,6 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
 
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   MP4_Engine mp4(el_pair_list);
-  emp4 = 0.0;
-#if MP4CV >= 1
-  std::fill(control.begin(), control.end(), 0.0);
-#endif
 
   mp4.energy(emp4, control, ovps);
 
