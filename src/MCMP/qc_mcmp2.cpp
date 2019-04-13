@@ -29,7 +29,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
   double o_13, o_14, o_23, o_24;
   double v_13, v_14, v_23, v_24;
 
-  auto tau_values = tau.get_exp_tau(0, 0);
+  auto tau_values = tau->get_exp_tau(0, 0);
 
   emp2 = 0.0;
 #if MP2CV >= 1
@@ -95,7 +95,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control) {
 #endif
   }
 
-  auto tau_wgt = tau.get_wgt(1);
+  auto tau_wgt = tau->get_wgt(1);
   tau_wgt /= static_cast<double>(el_pair_list->size());
   tau_wgt /= static_cast<double>(el_pair_list->size() - 1);
   emp2 = emp2 * tau_wgt;
@@ -144,7 +144,7 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control) {
     std::transform(en_wj.begin(), en_wj.end(), control.begin()+4, control.begin()+4, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
 #endif
   }
-  auto tau_wgt = tau.get_wgt(1);
+  auto tau_wgt = tau->get_wgt(1);
   tau_wgt /= static_cast<double>(el_pair_list->size());
   tau_wgt /= static_cast<double>(el_pair_list->size() - 1);
   emp2 = emp2 * tau_wgt;

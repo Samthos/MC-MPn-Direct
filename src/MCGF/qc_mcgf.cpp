@@ -36,7 +36,7 @@ void GF::monte_energy() {
     update_wavefunction();
 
     // generate new tau values
-    tau.new_tau(random);
+    tau->new_tau(random);
 
     //calculate energies
     mc_local_energy(step);

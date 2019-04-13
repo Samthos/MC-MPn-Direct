@@ -68,7 +68,7 @@ void GF::mc_gf2_statistics(int band, int step) {
         ovps.d_ovps.en2[band][diff],
         [&](double a, double b) { return alpha * a + beta * b; });
 
-    diffMultiplier *= tau.get_tau(0);
+    diffMultiplier *= tau->get_tau(0);
   }
 }
 
@@ -163,8 +163,8 @@ void GF::mc_gf3_statistics(int band, int step) {
           ovps.d_ovps.en3[band][diff],
           [&](double a, double b) { return alpha * a + beta * b; });
     }
-    diffMultiplier[0] *= tau.get_tau(0);
-    diffMultiplier[1] *= tau.get_tau(1);
+    diffMultiplier[0] *= tau->get_tau(0);
+    diffMultiplier[1] *= tau->get_tau(1);
     diffMultiplier[2] *= diffMultiplier[0] * diffMultiplier[1];
   }
 }

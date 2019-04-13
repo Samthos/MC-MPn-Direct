@@ -1168,7 +1168,7 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   }
   */
 
-  auto nsamp_tauwgt = tau.get_wgt(3);
+  auto nsamp_tauwgt = tau->get_wgt(3);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);

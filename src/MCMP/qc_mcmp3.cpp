@@ -150,7 +150,7 @@ void MP::mcmp3_energy(double& emp3, std::vector<double>& control) {
   mcmp3_helper(emp3, control, 30,iops.iopns[KEYS::MC_NPAIR], -1, ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
 
   // divide by number of RW samples
-  auto nsamp_tauwgt = tau.get_wgt(2);
+  auto nsamp_tauwgt = tau->get_wgt(2);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);

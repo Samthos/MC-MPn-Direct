@@ -45,7 +45,7 @@ void MP::monte_energy() {
     update_wavefunction();
 
     // generate new tau point
-    tau.new_tau(random);
+    tau->new_tau(random);
 
     // calcaulte energy for step
     energy();

@@ -9,15 +9,27 @@
 #include "basis/qc_basis.h"
 #include "qc_random.h"
 
-class Stochastic_Tau {
+class Tau {
+ public:
+  virtual void resize(int dimm, Basis& basis) = 0;
+  virtual void new_tau(Random& random) = 0;
+  virtual std::vector<double> get_exp_tau(int, int) = 0;
+  virtual double get_gfn_tau(int, int, int ,int) = 0;
+  virtual double get_wgt(int) = 0;
+  virtual double get_tau(int) = 0;
+ protected:
+
+};
+
+ class Stochastic_Tau : public Tau {
  public:
   Stochastic_Tau() = default;
   Stochastic_Tau(const Stochastic_Tau& tau) {
     throw std::runtime_error("copy constructor for stochastic tau class called");
   }
-  ~Stochastic_Tau() {}
+  ~Stochastic_Tau() = default;
 
-  void resize(int dimm, Basis& basis) {
+  void resize(int dimm, Basis& basis) override {
     iocc1 = basis.iocc1;
     iocc2 = basis.iocc2;
     ivir1 = basis.ivir1;
@@ -37,7 +49,7 @@ class Stochastic_Tau {
     scratch.resize(ivir2);
     lambda = 2.0 * (evals[ivir1] - evals[iocc2 - 1]);
   }
-  void new_tau(Random& random) {
+  void new_tau(Random& random) override {
     // generate new tau point and weights
     for (auto i = 0; i < tau.size(); i++) {
       double p = random.uniform();
@@ -52,21 +64,18 @@ class Stochastic_Tau {
       }
     }
   }
-  std::vector<double> get_exp_tau(int stop, int start) {
+  std::vector<double> get_exp_tau(int stop, int start) override {
     if (start == stop) {
       return exp_tau[start];
     } else {
       std::fill(scratch.begin(), scratch.end(), 1.0);
       for (auto it = start; it <= stop; it++) {
-        std::transform(scratch.begin(), scratch.end(), exp_tau[it].begin(), scratch.begin(), std::multiplies<double>());
+        std::transform(scratch.begin(), scratch.end(), exp_tau[it].begin(), scratch.begin(), std::multiplies<>());
       }
       return scratch;
     }
   }
-  double *get_exp_tau_device(int stop, int start) {
-    return d_scratch;
-  }
-  double get_gfn_tau(int stop, int start, int offset, int conjugate) {
+  double get_gfn_tau(int stop, int start, int offset, int conjugate) override {
     double s(1.0);
     if (start == stop) {
       s = exp_tau[start][iocc2 + offset];
@@ -82,10 +91,10 @@ class Stochastic_Tau {
     }
     return s;
   }
-  double get_wgt(int dimm) {
-    return std::accumulate(wgt.begin(), wgt.begin()+dimm, 1.0, std::multiplies<double>());
+  double get_wgt(int dimm) override {
+    return std::accumulate(wgt.begin(), wgt.begin()+dimm, 1.0, std::multiplies<>());
   }
-  double get_tau(int index) {
+  double get_tau(int index) override {
     return tau[index];
   }
 
@@ -97,9 +106,6 @@ class Stochastic_Tau {
   std::vector<double> wgt;
   std::vector<double> scratch;
   std::vector<std::vector<double>> exp_tau;
-
-  double* d_scratch;
-  bool d_allocated;
 };
 
 /*

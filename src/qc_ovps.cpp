@@ -40,7 +40,7 @@ void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
 void OVPs::free() {
   delete[] d_ovps.rv;
 }
-void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* el_pair_list, Stochastic_Tau& tau) {
+void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* el_pair_list, Tau* tau) {
   // copy wave function to psi/occ/vir objects
   for (auto ip = 0; ip < mc_pair_num; ip++) {
     d_ovps.rv[ip] = el_pair_list->get(ip).rv;
@@ -49,7 +49,7 @@ void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* el_pair_list, Stoch
   // update green's function trace objects
   for (auto stop = 0; stop < o_set.size(); stop++) {
     for (auto start = 0; start < o_set[stop].size(); start++) {
-      auto t_val = tau.get_exp_tau(stop, start);
+      auto t_val = tau->get_exp_tau(stop, start);
       std::transform(t_val.begin(), t_val.end(), t_val.begin(), sqrt);
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.psi1, ivir2 - iocc1, &t_val[iocc1], 1, basis.psiTau1, ivir2 - iocc1);
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.psi2, ivir2 - iocc1, &t_val[iocc1], 1, basis.psiTau2, ivir2 - iocc1);
@@ -317,7 +317,7 @@ void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int 
   }
 }
 
-void OVPs::update_ovps_02(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
+void OVPs::update_ovps_02(Electron_Pair* el_pair_list, Tau* tau) {
   int ip, am;
   double alpha = 1.00;
   double beta = 0.00;
@@ -330,7 +330,7 @@ void OVPs::update_ovps_02(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
   }
   //copy wave functions from host to device;
   {
-    auto t_val = tau.get_exp_tau(0, 0);
+    auto t_val = tau->get_exp_tau(0, 0);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_13, mc_pair_num);
@@ -356,7 +356,7 @@ void OVPs::update_ovps_02(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
     }
   }
 }
-void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
+void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Tau* tau) {
   double alpha = 1.00;
   double beta = 0.00;
 
@@ -365,7 +365,7 @@ void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
   freq_indp_gf(d_ovps, mc_pair_num, iocc2 - iocc1, offBand, numBand);
 
   {
-    auto t_val = tau.get_exp_tau(1, 1);
+    auto t_val = tau->get_exp_tau(1, 1);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_35, mc_pair_num);
@@ -383,7 +383,7 @@ void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Stochastic_Tau& tau) {
 
 
   {
-    auto t_val = tau.get_exp_tau(1, 0);
+    auto t_val = tau->get_exp_tau(1, 0);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
     Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_15, mc_pair_num);

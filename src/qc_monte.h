@@ -57,7 +57,7 @@ class QC_monte {
   Random random;
   Electron_Pair_List* el_pair_list;
   OVPs ovps;
-  Stochastic_Tau tau;
+  Tau* tau;
 
   int nDeriv;
   int numBand, offBand;
@@ -78,7 +78,7 @@ class MP : public QC_monte {
  protected:
   MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep, std::vector<int> cv_sizes) :
   QC_monte(p1, p2, p3, p4, p5, ep) {
-    tau.resize(cv_sizes.size(), basis);
+    tau->resize(cv_sizes.size(), basis);
     emp.resize(cv_sizes.size());
 
     if (ep->requires_blocking()) {
@@ -162,6 +162,7 @@ class GF : public  QC_monte {
 
  protected:
   GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : QC_monte(p1, p2, p3, p4, p5, ep) {}
+
   std::vector<GFStats> qeps;
   virtual void mc_local_energy(const int& step) = 0;
   virtual int full_print(int& step, int checkNum) = 0;
@@ -220,7 +221,7 @@ class GF2 : public GF {
                  basis);
 
     ovps.alloc_02();
-    tau.resize(2, basis);
+    tau->resize(2, basis);
 
     qeps.reserve(1);
     qeps.emplace_back(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
@@ -259,7 +260,7 @@ class GF3 : public GF {
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);
     ovps.alloc_03();
-    tau.resize(2, basis);
+    tau->resize(2, basis);
 
     qeps.reserve(2);
     qeps.emplace_back(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
