@@ -42,8 +42,9 @@ class GFStats {
 class QC_monte {
  public:
   QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Electron_Pair_List*);
-  ~QC_monte() {
+  virtual ~QC_monte() {
     basis.gpu_free();
+    delete tau;
   }
   virtual void monte_energy() = 0;
 

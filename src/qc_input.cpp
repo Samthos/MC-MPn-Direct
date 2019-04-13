@@ -29,6 +29,7 @@ IOPs::IOPs() {
   iopns[KEYS::TASK] = TASKS::MP;
   iopns[KEYS::CPU] = true;
   iopns[KEYS::SAMPLER] = SAMPLERS::DIRECT;
+  iopns[KEYS::TAU_INTEGRATION] = TAU_INTEGRATION::STOCHASTIC;
 
   sopns[KEYS::GEOM] = "geom.xyz";
   sopns[KEYS::BASIS] = "basis.dat";
@@ -49,7 +50,7 @@ void IOPs::read(const MPI_info& mpi_info,
       "JOBNAME", "SPHERICAL", "MC_TRIAL", "MC_NPAIR", "MC_DELX",  //  0-4
       "GEOM", "BASIS", "MC_BASIS", "NBLOCK", "MOVECS",            //  5-9
       "DEBUG", "MC_PAIR_GROUPS", "TASK", "NUM_BAND", "OFF_BAND",  // 10-14
-      "DIFFS", "ORDER", "CPU", "SAMPLER"};
+      "DIFFS", "ORDER", "CPU", "SAMPLER", "TAU_INTEGRATION"};
   const std::vector<std::string> taskVals = {
       "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
 
@@ -182,6 +183,16 @@ void IOPs::read(const MPI_info& mpi_info,
               }
               keySet = false;
               break;
+            case KEYS::TAU_INTEGRATION:
+              if (key == "STOCHASTIC") {
+                iopns[keyval] = TAU_INTEGRATION::STOCHASTIC;
+              } else if (key == "QUADRATURE") {
+                iopns[keyval] = TAU_INTEGRATION::QUADRATURE;
+              } else {
+                std::cerr << key << " is not a vaild tau integration method\n";
+              }
+              keySet = false;
+              break;
             case KEYS::DEBUG:
               iopns[keyval] = stoi(key, nullptr);
               keySet = false;
@@ -226,6 +237,8 @@ void IOPs::print(const MPI_info& mpi_info,
       "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
   const std::vector<std::string> samplers = {
       "DIRECT", "METROPOLIS"};
+  const std::vector<std::string> tau_integrations = {
+      "STOCHASTIC", "QUADRATURE"};
 
   if (mpi_info.sys_master) {
     std::cout << std::endl;
@@ -238,11 +251,7 @@ void IOPs::print(const MPI_info& mpi_info,
     std::cout << " MC_DELX: " << dopns[KEYS::MC_DELX] << std::endl;
     std::cout << " SPHERICAL: " << bopns[KEYS::SPHERICAL] << std::endl;
     std::cout << " SAMPLER: " << samplers[iopns[KEYS::SAMPLER]] << std::endl;
-#ifdef QUAD_TAU
-    std::cout << " quadrature tau" << std::endl;
-#else
-    std::cout << " Stocahstic tau" << std::endl;
-#endif
+    std::cout << " TAU_INTEGRATION: " << tau_integrations[iopns[KEYS::TAU_INTEGRATION]]  << std::endl;
     if (iopns[KEYS::DEBUG] == 1) {
       std::cout << " RNG in debug mode" << std::endl;
     }

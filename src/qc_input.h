@@ -32,13 +32,20 @@ enum KeyVal {
   DIFFS,
   ORDER,
   CPU,
-  SAMPLER
+  SAMPLER,
+  TAU_INTEGRATION
 };
 }
 namespace SAMPLERS {
 enum SAMPLERS {
   DIRECT,
   METROPOLIS
+};
+}
+namespace TAU_INTEGRATION {
+enum METHODS{
+  STOCHASTIC,
+  QUADRATURE
 };
 }
 namespace TASKS {
