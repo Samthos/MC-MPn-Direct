@@ -5,6 +5,8 @@
 #ifndef MC_MP3_DIRECT_TAU_INTEGRALS_H
 #define MC_MP3_DIRECT_TAU_INTEGRALS_H
 
+#include <iostream>
+
 #include <algorithm>
 #include "basis/qc_basis.h"
 #include "qc_random.h"
@@ -29,6 +31,8 @@ class Tau {
   virtual double get_wgt(int) = 0;
   virtual double get_tau(int) = 0;
   virtual bool next() = 0;
+  virtual bool is_new(int) = 0;
+
  protected:
   int iocc1, iocc2, ivir1, ivir2;
   std::vector<double> evals;
@@ -105,6 +109,9 @@ class Stochastic_Tau : public Tau {
   bool next() override {
     return false;
   }
+  bool is_new(int i) override {
+    return true;
+  }
 
  private:
   double lambda;
@@ -174,9 +181,10 @@ class Quadrature_Tau : public Tau {
 
   void resize(int dimm) override {
     indices.resize(dimm);
+    std::fill(indices.begin(), indices.end(), 0);
   }
   void new_tau(Random& random) override {}
-  std::vector<double> get_exp_tau(int start, int stop) override {
+  std::vector<double> get_exp_tau(int stop, int start) override {
     if (start == stop) {
       int index = indices[start];
       return exp_tau[index];
@@ -234,6 +242,9 @@ class Quadrature_Tau : public Tau {
       return false;
     }
     return true;
+  }
+  bool is_new(int i) override {
+    return indices[i] == 0;
   }
  private:
   std::vector<int> indices;

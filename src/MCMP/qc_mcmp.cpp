@@ -114,7 +114,9 @@ void MP2::energy() {
 
 void MP3::energy() {
   ovps.update_ovps(basis.h_basis, el_pair_list, tau);
-  mcmp2_energy(emp[0], control[0]);
+  if (tau->is_new(1)) {
+    mcmp2_energy(emp[0], control[0]);
+  }
   mcmp3_energy(emp[1], control[1]);
 }
 
