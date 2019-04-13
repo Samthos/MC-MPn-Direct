@@ -155,11 +155,11 @@ class ControlVariate : public Accumulator {
     e_c2 = e_c2 / static_cast<double>(TotalSamples);
     e_xc = e_xc / static_cast<double>(TotalSamples);
 #else
-    total_samples = n_samples;
-    e_x  = s_x  / static_cast<double>(n_samples);
-    e_c1 = s_c1 / static_cast<double>(n_samples);
-    e_c2 = s_c2 / static_cast<double>(n_samples);
-    e_xc = s_xc / static_cast<double>(n_samples);
+    TotalSamples = nSamples;
+    e_x  = s_x  / static_cast<double>(nSamples);
+    e_c1 = s_c1 / static_cast<double>(nSamples);
+    e_c2 = s_c2 / static_cast<double>(nSamples);
+    e_xc = s_xc / static_cast<double>(nSamples);
 #endif
 
     if (0 == master) {
