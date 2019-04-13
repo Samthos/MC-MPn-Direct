@@ -244,7 +244,7 @@ class Quadrature_Tau : public Tau {
     return true;
   }
   bool is_new(int i) override {
-    return indices[i] == 0;
+    return std::all_of(indices.begin() + i, indices.end(), [](int index){return index == 0;});
   }
  private:
   std::vector<int> indices;

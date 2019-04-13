@@ -23,8 +23,8 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Elec
 
   //initialize walkers
   basis.gpu_alloc(iops.iopns[KEYS::MC_NPAIR], molec);
-  // tau = new Stochastic_Tau(basis);
-  tau = new Quadrature_Tau(basis);
+  tau = new Stochastic_Tau(basis);
+  // tau = new Quadrature_Tau(basis);
 }
 
 void QC_monte::move_walkers() {

@@ -1145,10 +1145,12 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
       ovps.o_set[2][1].s_11, ovps.v_set[2][2].s_11, ovps.v_set[2][2].s_22);
 }
 
-void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
+void MP::mcmp4_energy(double& emp4, std::vector<double>& control4) {
   MP4_Engine mp4(el_pair_list);
+  double en4 = 0.0;
+  std::vector<double> ctrl(control4.size(), 0.0);
 
-  mp4.energy(emp4, control, ovps);
+  mp4.energy(en4, ctrl, ovps);
 
   /*
   double emp4_debug = 0.0;
@@ -1169,9 +1171,9 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control) {
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
   nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 3);
-  emp4 *= nsamp_tauwgt;
+  emp4 = emp4 + en4 * nsamp_tauwgt;
 #if MP4CV >= 1
-  std::transform(control.begin(), control.end(), control.begin(), [&nsamp_tauwgt](double x) { return x * nsamp_tauwgt; });
+  std::transform(ctrl.begin(), ctrl.end(), control4.begin(), control4.begin(), [&](double c, double total) { return total + c * nsamp_tauwgt; });
 #endif
 }
 
