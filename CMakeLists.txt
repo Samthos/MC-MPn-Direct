@@ -34,9 +34,9 @@ if (Enable_Full_Print)
     add_definitions(-DFULL_PRINTING)
 endif()
 
-set(MP2CV 0 CACHE String "Sets MP2CV level")
-set(MP3CV 0 CACHE String "Sets MP3CV level")
-set(MP4CV 0 CACHE String "Sets MP4CV level")
+set(MP2CV 0 CACHE STRING "Sets MP2CV level")
+set(MP3CV 0 CACHE STRING "Sets MP3CV level")
+set(MP4CV 0 CACHE STRING "Sets MP4CV level")
 
 add_subdirectory(src)
 add_subdirectory(util)

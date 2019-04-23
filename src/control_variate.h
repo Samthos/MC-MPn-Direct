@@ -413,13 +413,13 @@ class BlockingAccumulator : public Accumulator {
     }
   }
   void to_json(std::string fname) override {
-    // open stream
-    std::ofstream os(fname + ".json");
 
     // call update function
     update();
 
     if (0 == master) {
+    // open stream
+      std::ofstream os(fname + ".json");
       // open json
       os << "{\n";
 
@@ -427,16 +427,27 @@ class BlockingAccumulator : public Accumulator {
       os << "\t\"Steps\" : " << total_samples << ",\n";
 
       // print E[x]
-      os << "\t\"EX\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x1 << ",\n";
+      os << "\t\"EX\" : [\n";
+      for (auto it = e_x1.begin(); it != e_x1.end(); it++) {
+        if (it != e_x1.begin()) {
+          os << ",\n";
+        }
+        os << "\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << *it;
+      }
+      os << "],\n";
 
       // print Var[x]
-      os << "\t\"EX2\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x2 << ",\n";
+      os << "\t\"EX2\" : [\n";
+      for (auto it = e_x2.begin(); it != e_x2.end(); it++) {
+        if (it != e_x2.begin()) {
+          os << ",\n";
+        }
+        os << "\t\t" << std::setprecision(std::numeric_limits<double>::digits10 + 1) << *it;
+      }
+      os << "]\n";
 
       os << "}";
     }
-
-    // close stream
-    os.close();
   }
   std::ostream& write(std::ostream& os) override {
     update();
