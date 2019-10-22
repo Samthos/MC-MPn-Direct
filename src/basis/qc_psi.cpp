@@ -25,7 +25,7 @@ void Basis::host_psi_get(Electron_Pair_List* el_pair) {
       el_pair->size(), ivir2 - iocc1, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co + iocc1 * nw_nbf, ivir2,
+      h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,
       0.0,
       h_basis.psi1, ivir2-iocc1);
 
@@ -36,7 +36,7 @@ void Basis::host_psi_get(Electron_Pair_List* el_pair) {
       el_pair->size(), ivir2 - iocc1, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co + iocc1 * nw_nbf, ivir2,
+      h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,
       0.0,
       h_basis.psi2, ivir2-iocc1);
 }
