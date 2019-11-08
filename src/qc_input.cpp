@@ -186,6 +186,8 @@ void IOPs::read(const MPI_info& mpi_info,
             case KEYS::TAU_INTEGRATION:
               if (key == "STOCHASTIC") {
                 iopns[keyval] = TAU_INTEGRATION::STOCHASTIC;
+              } else if (key == "SUPER_STOCH") {
+                iopns[keyval] = TAU_INTEGRATION::SUPER_STOCH;
               } else if (key == "QUADRATURE") {
                 iopns[keyval] = TAU_INTEGRATION::QUADRATURE;
               } else {
@@ -238,7 +240,7 @@ void IOPs::print(const MPI_info& mpi_info,
   const std::vector<std::string> samplers = {
       "DIRECT", "METROPOLIS"};
   const std::vector<std::string> tau_integrations = {
-      "STOCHASTIC", "QUADRATURE"};
+      "STOCHASTIC", "QUADRATURE", "SUPER_STOCH"};
 
   if (mpi_info.sys_master) {
     std::cout << std::endl;

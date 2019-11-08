@@ -25,6 +25,8 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Elec
   basis.gpu_alloc(iops.iopns[KEYS::MC_NPAIR], molec);
   if (iops.iopns[KEYS::TAU_INTEGRATION] == TAU_INTEGRATION::STOCHASTIC) {
     tau = new Stochastic_Tau(basis);
+  } else if (iops.iopns[KEYS::TAU_INTEGRATION] == TAU_INTEGRATION::SUPER_STOCH){
+    tau = new Super_Stochastic_Tau(basis);
   } else if (iops.iopns[KEYS::TAU_INTEGRATION] == TAU_INTEGRATION::QUADRATURE){
     tau = new Quadrature_Tau(basis);
   }

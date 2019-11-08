@@ -45,7 +45,8 @@ enum SAMPLERS {
 namespace TAU_INTEGRATION {
 enum METHODS{
   STOCHASTIC,
-  QUADRATURE
+  QUADRATURE,
+  SUPER_STOCH
 };
 }
 namespace TASKS {
