@@ -197,7 +197,7 @@ class Super_Stochastic_Tau : public Tau {
     pdf.resize(last - first);
     cdf.resize(last - first);
 
-    std::transform(evals.begin() + first, evals.begin() + last, pdf.begin(), [](double x) {return std::abs(1/x);});
+    std::transform(evals.begin() + first, evals.begin() + last, pdf.begin(), [](double x) {return std::abs(1/(x*x));});
     auto normalization = 1.0 / std::accumulate(pdf.begin(), pdf.end(), 0.0);
     std::transform(pdf.begin(), pdf.end(), pdf.begin(), [normalization](double x) {return x * normalization;});
 
