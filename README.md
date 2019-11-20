@@ -1,10 +1,10 @@
 # MC-MPn
 
-One Paragraph of project description goes here
+TBD
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
 
 ### Prerequisites
 
@@ -68,6 +68,7 @@ NWChem provides a utility called mov2asc that will convert the binary into an as
 See keywords for how to specify the movecs format.
 
 ####  The MC-Basis Set
+TBD
 
 ### Keywords
 These are option to be specified in the input file. See the examples subdirectory of the project tree for examples of valid input files.
