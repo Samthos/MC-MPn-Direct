@@ -39,4 +39,3 @@ set(MP3CV 0 CACHE STRING "Sets MP3CV level")
 set(MP4CV 0 CACHE STRING "Sets MP4CV level")
 
 add_subdirectory(src)
-add_subdirectory(util)
