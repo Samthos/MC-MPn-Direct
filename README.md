@@ -50,7 +50,11 @@ There are several files needed to run a calculation with MC-MPN
 1. An input file (typically ending in mcin).
 2. The molecular orbital coefficients and molecule orbital energies from an RHF calculation output by [**NWChem**](http://www.NWChem-sw.org/index.php/Main_Page). These are stored in the **movecs** file.
 3. The molecular geometry stored in the [xyz format](https://en.wikipedia.org/wiki/XYZ_file_format).
-4. The basis set used for the RHF calculation, SAME FORMAT AS NWCHEM. Basis set files can be found in \<NWChem-source-directory\>/src/basis/libraries.
+4. The basis set used for the RHF calculation. Basis set files can be found in \<NWChem-source-directory\>/src/basis/libraries.
+
+  * Basis set format is currently custom (see example/intput/cc-pvdz.basis)
+  * **Will be standardized to NWChem shortly**
+
 5. An MC basis set to build the electron-pair importance function. 
 
 ####  Notes on NWChem
