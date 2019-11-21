@@ -10,9 +10,10 @@ These instructions will get you a copy of the project up and running on your loc
 
 In order to build MC-MPn the following are required
 
-1. c++14 compliant compiler
-2. BLAS (preferable fast, i.e., openblas, mkl, etc.)
-3. Armadillo
+1. [Cmake](https://cmake.org/)
+2. c++14 compliant compiler
+3. A C BLAS implementation (preferable fast, i.e., [openblas](https://github.com/xianyi/OpenBLAS), mkl, etc.)
+4. [Armadillo](http://arma.sourceforge.net/)
 
 Optionally, but highly recommended is an MPI compiler rather than a standard c++ compiler.
 
