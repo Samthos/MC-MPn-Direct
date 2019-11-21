@@ -144,7 +144,7 @@ The range of orbitals is (LUMO - OFF_BAND, ..., LUMO - OFF_BAND + NUM_BAND - 1).
 ### Output
 
 * **STDOUT**: Basis archiving of the simulation
-* **Trajectory Files**: The files archive the trajectory of the simulation. The number of steps in these files is per processor and divided by 1000. 
+* **Trajectory Files**: The files archive the trajectory of the simulation. The number of steps in these files is per processor.
 
   The trajectory files will be named as 
     * \<Jobname\>.2N for MP calculations.
