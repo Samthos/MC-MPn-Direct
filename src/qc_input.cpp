@@ -16,6 +16,13 @@
 #include "qc_input.h"
 
 IOPs::IOPs() {
+  /*
+   * IOPs constructor
+   * initializes variables to mostly rational values
+   *
+   * TODO
+   *  -read values directly instead of setting them
+   */
   bopns[KEYS::SPHERICAL] = true;
   dopns[KEYS::MC_DELX] = 0.1;
   iopns[KEYS::MC_NPAIR] = 16;
@@ -38,8 +45,18 @@ IOPs::IOPs() {
   iopns[KEYS::MOVECS] = 0;  // default is binary
 }
 
-void IOPs::read(const MPI_info& mpi_info,
-                const std::string& file) {
+void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
+  /*
+   * reads and stores options mcin file provided as command line argument
+   *
+   * Arguments
+   *  -MPI_info mpi_info: see qc_mpi.h
+   *  -std::string file: path to mcin file
+   *
+   * TODO
+   *  -should probably read input from a json
+   *  -needs input validation
+   */
   KEYS::KeyVal keyval;
 
   bool keySet;
@@ -104,7 +121,6 @@ void IOPs::read(const MPI_info& mpi_info,
               break;
             case KEYS::JOBNAME:
               sopns[keyval] = key;
-              job_name = key;
               keySet = false;
               break;
             case KEYS::SPHERICAL:
@@ -210,7 +226,6 @@ void IOPs::read(const MPI_info& mpi_info,
             default:
               std::cerr << "KEY \"" << key << "\" NOT RECONGNIZED" << std::endl;
               exit(EXIT_FAILURE);
-              break;
           }
         }
       }
@@ -233,8 +248,17 @@ void IOPs::read(const MPI_info& mpi_info,
 #endif
 }
 
-void IOPs::print(const MPI_info& mpi_info,
-                 const std::string& file) {
+void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
+  /*
+   * prints state of iops
+   *
+   * Arguments
+   *  -MPI_info mpi_info: see qc_mpi.h
+   *  -std::string file: path to mcin file used to set iops values
+   *
+   * TODO
+   *  -should probably read input from a json
+   */
   const std::vector<std::string> taskVals = {
       "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
   const std::vector<std::string> samplers = {

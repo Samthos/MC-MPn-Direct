@@ -14,15 +14,30 @@
 #include "../atom_znum.h"
 
 Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
+  /*
+   * Basis constructor
+   *
+   * Arguments:
+   *  IOPS iops: see qc_input.h
+   *  MPI_info mpi_info: see qc_mpi.h
+   *  Molec molec: geometry of molecule
+   */
+
+  // read basis set
   read(iops, mpi_info, molec);
+
+  // molecular orbital coefficients and energies
   nw_vectors_read(iops, mpi_info, molec);
 
+  // declare memory
   mc_pair_num = iops.iopns[KEYS::MC_NPAIR];
   h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
   h_basis.psi1 = new double[(ivir2-iocc1) * mc_pair_num];
   h_basis.psi2 = new double[(ivir2-iocc1) * mc_pair_num];
   h_basis.psiTau1 = new double[(ivir2-iocc1) * mc_pair_num];
   h_basis.psiTau2 = new double[(ivir2-iocc1) * mc_pair_num];
+
+  // set convince pointers
   h_basis.occ1 = h_basis.psi1;
   h_basis.occ2 = h_basis.psi2;
   h_basis.vir1 = h_basis.psi1 + (ivir1-iocc1);
@@ -33,6 +48,9 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   h_basis.virTau2 = h_basis.psiTau2 + (ivir1-iocc1);
 }
 Basis::~Basis() {
+  /*
+   * Basis destructor
+   */
   delete[] nw_en;
 
   delete[] h_basis.nw_co;
@@ -54,6 +72,9 @@ Basis::~Basis() {
   h_basis.virTau2 = nullptr;
 }
 Basis::Basis(const Basis& param) {
+  /*
+   * Copy constructor
+   */
   nPrimatives = param.nPrimatives;
   qc_nbf = param.qc_nbf;
   nShells = param.nShells;
@@ -98,10 +119,16 @@ Basis::Basis(const Basis& param) {
   std::copy(param.h_basis.contraction_coef, param.h_basis.contraction_coef + nPrimatives, h_basis.contraction_coef);
 }
 Basis& Basis::operator=(Basis param) {
+  /*
+   * copy assignment operator
+   */
   std::swap(*this, param);
   return *this;
 }
 void swap(Basis& a, Basis& b) {
+  /*
+   * swap operator
+   */
   std::swap(a.nPrimatives, b.nPrimatives);
   std::swap(a.qc_nbf, b.qc_nbf);
   std::swap(a.nShells, b.nShells);
@@ -136,6 +163,14 @@ void swap(Basis& a, Basis& b) {
 }
 
 void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
+  /*
+   * reads a basis set; see TKpathTK for an example
+   *
+   * Arguments:
+   *  IOPS iops: see qc_input.h
+   *  MPI_info mpi_info: see qc_mpi.h
+   *  Molec molec: geometry of molecule
+   */
   std::ifstream input;
 
   int i, j, k;

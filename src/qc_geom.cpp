@@ -14,6 +14,13 @@
 #include "qc_geom.h"
 
 void Molec::read(MPI_info& mpi_info, std::string& filename) {
+  /*
+   * Reads geometry from an XYZ file
+   *
+   * Arguments
+   *  -MPI_info mpi_info: see qc_mpi.h
+   *  -std::string filename: path to xyz file
+   */
   const double ang_to_bohr = 1.8897259860;
   int i;
   int znum;

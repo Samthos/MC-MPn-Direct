@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(MC_MP3_Direct LANGUAGES CXX)
+project(MC_MPn LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)

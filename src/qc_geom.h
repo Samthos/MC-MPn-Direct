@@ -1,17 +1,13 @@
-// Copyright 2017
+// Copyright 2019
+#ifndef QC_GEOM_H_
+#define QC_GEOM_H_
 
 #include <array>
 #include <string>
 #include <vector>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "qc_mpi.h"
 
-#ifndef QC_GEOM_H_
-#define QC_GEOM_H_
 struct Atom {
   double pos[3];
   int znum;
