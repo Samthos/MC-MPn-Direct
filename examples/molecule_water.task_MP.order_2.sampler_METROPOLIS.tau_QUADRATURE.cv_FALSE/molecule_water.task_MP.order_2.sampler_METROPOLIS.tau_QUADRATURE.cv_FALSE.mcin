@@ -1,0 +1,14 @@
+JOBNAME molecule_water.task_MP.order_2.sampler_METROPOLIS.tau_QUADRATURE.cv_FALSE
+ORDER 2
+TASK MP
+MC_TRIAL 1024
+MC_NPAIR 16
+DEBUG 1
+SAMPLER METROPOLIS
+TAU_INTEGRATION QUADRATURE
+GEOM ../input/water.xyz
+BASIS ../input/cc-pvdz.basis
+MC_BASIS ../input/cc-pvdz.mc_basis
+MOVECS
+        ../input/water.movecs
+END

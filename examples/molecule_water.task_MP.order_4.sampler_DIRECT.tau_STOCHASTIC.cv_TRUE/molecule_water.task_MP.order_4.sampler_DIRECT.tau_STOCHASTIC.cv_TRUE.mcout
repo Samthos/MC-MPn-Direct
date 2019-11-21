@@ -1,0 +1,51 @@
+MC-GFn program developed by the Hirata lab
+Code compiled from Git-Commit dee9e49
+
+MPI IS RUNNING WITH 1 CPUS
+
+Input read from molecule_water.task_MP.order_4.sampler_DIRECT.tau_STOCHASTIC.cv_TRUE.mcin
+JOBNAME: molecule_water.task_MP.order_4.sampler_DIRECT.tau_STOCHASTIC.cv_TRUE
+ TASK: MP
+ ORDER: 4
+ MC_TRIAL: 1024
+ MC_NPAIR: 16
+ MC_DELX: 0.1
+ SPHERICAL: 1
+ SAMPLER: DIRECT
+ TAU_INTEGRATION: STOCHASTIC
+ RNG in debug mode
+	DIFFS = FALSE
+	Bands: HOMO-0
+Reading geometry from ../input/water.xyz
+Printing input geometry in angstroms
+-----------------------------------------------------------------------------------------------------------
+	Atom	            x                             y                             z
+-----------------------------------------------------------------------------------------------------------
+	 O	            0.0000000000000000            0.0000000000000000           -0.1354460000000000
+	 H	           -0.8668100000000000            0.0000000000000000            0.5417840000000000
+	 H	            0.8668100000000000            0.0000000000000000            0.5417840000000000
+-----------------------------------------------------------------------------------------------------------
+
+
+Basis set: ../input/cc-pvdz.basis
+Reading binary MOVECS from ../input/water.movecs
+nw_vectors: nbf 24
+nw_vectors: nmo 24 
+
+
+Reading MC basis from ../input/cc-pvdz.mc_basis
+-----------------------------------------------------------------------------------------------------------
+	Atom	            contraction_exp                         coef
+-----------------------------------------------------------------------------------------------------------
+	 H	            0.4000000000000000            1.0000000000000000
+	  	            0.1000000000000000            0.1000000000000000
+
+	 O	            1.0000000000000000            6.0000000000000000
+	  	            0.2000000000000000            0.6000000000000000
+
+-----------------------------------------------------------------------------------------------------------
+
+
+Begining MC run at: Wed Nov 20 21:11:43 2019
+Finished MC run at: Wed Nov 20 21:11:52 2019
+Spent 8.775374 second preforming MC integration
