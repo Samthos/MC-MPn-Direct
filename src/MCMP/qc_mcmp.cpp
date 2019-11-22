@@ -58,6 +58,7 @@ void MP::monte_energy() {
 #ifdef DIMER_PRINT
     /*
      * dump all values to dimer ofstream
+     * values are stored in emp and control
      */
 #endif // DIMER_PRINT
 
