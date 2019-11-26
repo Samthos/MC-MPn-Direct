@@ -48,7 +48,7 @@ void Basis::host_cgs_get(const std::array<double, 3> &pos, const int walker) {
   double ang[15];
 
   for (int shell = 0; shell < nShells; shell++) {
-    iam = h_basis.meta_data[shell].angular_moment;
+    iam = h_basis.meta_data[shell].angular_momentum;
 
     x = pos[0] - h_basis.meta_data[shell].pos[0];
     y = pos[1] - h_basis.meta_data[shell].pos[1];
