@@ -66,12 +66,6 @@ void Basis::host_cgs_get(const std::array<double, 3> &pos, const int walker) {
         case 0:
           h_basis.ao_amplitudes[ic + 0] = rad;
           break;
-        case -1:
-          h_basis.ao_amplitudes[ic + 0] = rad;
-          h_basis.ao_amplitudes[ic + 1] = rad * x;
-          h_basis.ao_amplitudes[ic + 2] = rad * y;
-          h_basis.ao_amplitudes[ic + 3] = rad * z;
-          break;
         case 1:
           h_basis.ao_amplitudes[ic + 0] = rad * x;
           h_basis.ao_amplitudes[ic + 1] = rad * y;

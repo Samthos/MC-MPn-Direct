@@ -35,6 +35,42 @@ SHELL::Shell_Type SHELL::string_to_shell_type(const std::string& str) {
     std::exit(EXIT_FAILURE);
   }
 }
+int SHELL::number_of_polynomials(SHELL::Shell_Type shell_type, bool spherical) {
+  if (spherical) {
+    return SHELL::number_of_spherical_polynomials(shell_type);
+  } else {
+    return SHELL::number_of_cartesian_polynomials(shell_type);
+  }
+}
+int SHELL::number_of_polynomials(int shell_type, bool spherical) {
+  return number_of_polynomials(static_cast<SHELL::Shell_Type>(shell_type), spherical);
+}
+int SHELL::number_of_spherical_polynomials(SHELL::Shell_Type shell_type) {
+  int nbf = 0;
+  if (shell_type == SHELL::SP) {
+    nbf += 4;
+  } else {
+    nbf += 2 * shell_type + 1;
+  }
+  return nbf;
+}
+int SHELL::number_of_cartesian_polynomials(SHELL::Shell_Type shell_type) {
+  int nbf = 0;
+  if (shell_type == SHELL::SP) {
+    nbf = 4;
+  } else if (shell_type == SHELL::S) {
+    nbf = 1;
+  } else if (shell_type == SHELL::P) {
+    nbf = 3;
+  } else if (shell_type == SHELL::D) {
+    nbf = 6;
+  } else if (shell_type == SHELL::F) {
+    nbf = 10;
+  } else if (shell_type == SHELL::G) {
+    nbf = 15;
+  }
+  return nbf;
+}
 
 Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   /*
@@ -427,11 +463,8 @@ void Basis::read_new(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
       while (getline(input, str)) {
         std::stringstream ss;
         ss << str;
-        if (str.compare(0, 1, "#") == 0)  // commented line
-        {
-        } else if (str.compare(0, 5, "basis") ==
-            0)  // start of basis data for an atom
-        {
+        if (str.compare(0, 1, "#") == 0) { // commented line
+        } else if (str.compare(0, 5, "basis") == 0) { // start of basis data for an atom
           ss.ignore(5);
           ss >> basisName >> basisType;
 
@@ -486,34 +519,10 @@ void Basis::read_new(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
       for (auto& jt : atomBasis[it.znum].shell) {
         nShells += jt.contracted_gaussian.front().second.size();
         nPrimatives += jt.contracted_gaussian.size() * jt.contracted_gaussian.front().second.size();
-        if (lspherical) {
-          if (jt.shell_type == SHELL::SP) {
-            qc_nbf += 4;
-          } else if (jt.shell_type == SHELL::S) {
-            qc_nbf += jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::P) {
-            qc_nbf += 3 * jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::D) {
-            qc_nbf += 5 * jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::F) {
-            qc_nbf += 7 * jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::G) {
-            qc_nbf += 9 * jt.contracted_gaussian.front().second.size();
-          }
+        if (jt.shell_type == SHELL::SP) {
+          qc_nbf += number_of_polynomials(jt.shell_type, lspherical);
         } else {
-          if (jt.shell_type == SHELL::SP) {
-            qc_nbf += 4;
-          } else if (jt.shell_type == SHELL::S) {
-            qc_nbf += jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::P) {
-            qc_nbf += 3 * jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::D) {
-            qc_nbf += 6 * jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::F) {
-            qc_nbf += 10 * jt.contracted_gaussian.front().second.size();
-          } else if (jt.shell_type == SHELL::G) {
-            qc_nbf += 15 * jt.contracted_gaussian.front().second.size();
-          }
+          qc_nbf += number_of_polynomials(jt.shell_type, lspherical) * jt.contracted_gaussian.front().second.size();
         }
       }
     }
@@ -547,47 +556,22 @@ void Basis::read_new(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
           std::copy(atom.pos, atom.pos + 3, h_basis.meta_data[contraction].pos);
 
           // set angular momentum
-          {
-            if (shell.shell_type == SHELL::SP) {
-              h_basis.meta_data[contraction].angular_momentum = -1;
-            } else if (shell.shell_type == SHELL::S) {
+          if (shell.shell_type == SHELL::SP) {
+            if (shell_contraction == 0) {
               h_basis.meta_data[contraction].angular_momentum = 0;
-            } else if (shell.shell_type == SHELL::P) {
+            } else {
               h_basis.meta_data[contraction].angular_momentum = 1;
-            } else if (shell.shell_type == SHELL::D) {
-              h_basis.meta_data[contraction].angular_momentum = 2;
-            } else if (shell.shell_type == SHELL::F) {
-              h_basis.meta_data[contraction].angular_momentum = 3;
-            } else if (shell.shell_type == SHELL::G) {
-              h_basis.meta_data[contraction].angular_momentum = 4;
             }
+          } else {
+            h_basis.meta_data[contraction].angular_momentum = shell.shell_type;
           }
 
           // set isgs
           if (contraction == 0) {
             h_basis.meta_data[contraction].ao_begin = 0;
           } else {
-            if (lspherical) {
-              if (h_basis.meta_data[contraction - 1].angular_momentum >= 0) {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 2 * h_basis.meta_data[contraction - 1].angular_momentum + 1;
-              } else {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 4;
-              }
-            } else {
-              if (h_basis.meta_data[contraction - 1].angular_momentum == -1) {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 4;
-              } else if (h_basis.meta_data[contraction - 1].angular_momentum == 0) {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 1;
-              } else if (h_basis.meta_data[contraction - 1].angular_momentum == 1) {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 3;
-              } else if (h_basis.meta_data[contraction - 1].angular_momentum == 2) {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 6;
-              } else if (h_basis.meta_data[contraction - 1].angular_momentum == 3) {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 10;
-              } else if (h_basis.meta_data[contraction - 1].angular_momentum == 4) {
-                h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin + 15;
-              }
-            }
+            h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin
+                + SHELL::number_of_polynomials(h_basis.meta_data[contraction - 1].angular_momentum, lspherical);
           }
 
           // copy alpha and norm
