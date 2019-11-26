@@ -476,7 +476,7 @@ void Basis::read_new(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
       std::exit(EXIT_FAILURE);
     }
 
-    normalize_sperical_atom_basis(atomBasis);
+    normalize_spherical_atom_basis(atomBasis);
 
     // count number of primatives is basis set
     qc_nbf = 0;
@@ -487,7 +487,9 @@ void Basis::read_new(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
         nShells += jt.contracted_gaussian.front().second.size();
         nPrimatives += jt.contracted_gaussian.size() * jt.contracted_gaussian.front().second.size();
         if (lspherical) {
-          if (jt.shell_type == SHELL::S) {
+          if (jt.shell_type == SHELL::SP) {
+            qc_nbf += 4;
+          } else if (jt.shell_type == SHELL::S) {
             qc_nbf += jt.contracted_gaussian.front().second.size();
           } else if (jt.shell_type == SHELL::P) {
             qc_nbf += 3 * jt.contracted_gaussian.front().second.size();
@@ -499,7 +501,9 @@ void Basis::read_new(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
             qc_nbf += 9 * jt.contracted_gaussian.front().second.size();
           }
         } else {
-          if (jt.shell_type == SHELL::S) {
+          if (jt.shell_type == SHELL::SP) {
+            qc_nbf += 4;
+          } else if (jt.shell_type == SHELL::S) {
             qc_nbf += jt.contracted_gaussian.front().second.size();
           } else if (jt.shell_type == SHELL::P) {
             qc_nbf += 3 * jt.contracted_gaussian.front().second.size();
@@ -717,7 +721,7 @@ void Basis::normalize() {
   }
 }
 
-void Basis::normalize_sperical_atom_basis(std::vector<AtomBasis>& atomBasis) {
+void Basis::normalize_spherical_atom_basis(std::vector<AtomBasis>& atomBasis) {
   constexpr double pi = 3.141592653589793;
   double cnorm, aa, dum, fac, facs, pi32;
   std::vector<double> norm;
@@ -729,131 +733,152 @@ void Basis::normalize_sperical_atom_basis(std::vector<AtomBasis>& atomBasis) {
       // loop over shells
       for (auto& shell : it.shell) {
         if (shell.shell_type == SHELL::SP)  { // SP shell
-          /*
-          //qc_shl_list[nshl[0]].ncgs = 4;
-          //qc_shl_list[nshl[0]].nsgs = 4;
-
-          //qc_shl_list[nshl[0]].h_basis.norm = new double*[2];
-          //for(j=0;j<2;j++) {
-          //	qc_shl_list[nshl[0]].h_basis.norm[j] = new double[nprim[i]];
-          //}
-
-          //nsgs = nsgs + 4;
-          //ncgs = ncgs + 4;
-
-          //loop over primatives
-          for( unsigned int i = 0; i < shell.alpha.size(); i++)
-          {
-                  //loop over sets
-                  for(auto& kt : shell.coef[i])
-                  {
-                  }
-                  for(j=0;j<nprim[i];j++) {
-                          cnorm = exp(0.75 * log(2.0 * h_basis.alpha[j][i] /
-          pi));
-                          qc_shl_list[nshl[0]].h_basis.alpha[j]  =
-          h_basis.alpha[j][i];
-                          qc_shl_list[nshl[0]].h_basis.norm[1][j] = coef[j][i] *
-          ch_basis.norm;
-                          cnorm = cnorm * sqrt(4.0 * new_alpha[j][i]);
-                          qc_shl_list[nshl[0]].new_norm[2][j]  = coef2[j][i] *
-          cnorm;
-                  }
-          }
-          */
+          normalize_spherical_sp(shell);
         } else if (shell.shell_type == SHELL::S) {
-          // normalize each gaussion in contraction
-          for (auto & kt : shell.contracted_gaussian) {
-            cnorm = pow(2.0 * kt.first / pi, 0.75);
-            for (double & lt : kt.second) {
-              lt *= cnorm;
-            }
-          }
-
-          // calculate normalization of each contraction
-          norm.resize(shell.n_contractions());
-          std::fill(norm.begin(), norm.end(), 0);
-          for (auto first_guassian = shell.contracted_gaussian.begin(); first_guassian != shell.contracted_gaussian.end(); first_guassian++) {
-            for (auto second_guassian = first_guassian; second_guassian != shell.contracted_gaussian.end(); second_guassian++) {
-              for (auto m = 0; m < norm.size(); m++) {
-                aa = first_guassian->first + second_guassian->first;
-                fac = aa * sqrt(aa);
-                dum = first_guassian->second[m] * second_guassian->second[m] / fac;
-                if (first_guassian != second_guassian) {
-                  dum = dum + dum;
-                }
-                norm[m] += dum;
-              }
-            }
-          }
-          pi32 = 5.56832799683170;
-          for (auto& kt : norm) {
-            kt = 1.0 / sqrt(kt * pi32);
-          }
-
-          // apply normalization to each contraction
-          for (auto & kt : shell.contracted_gaussian) {
-            for (auto l = 0; l < kt.second.size(); l++) {
-              kt.second[l] *= norm[l];
-            }
-          }
+          normalize_spherical_s(shell);
         } else if (shell.shell_type == SHELL::P) {
-          // normalize each guassian
-          for (auto & kt : shell.contracted_gaussian) {
-            cnorm = sqrt(4.0 * kt.first) * pow(2.0 * kt.first / pi, 0.75);
-            for (double & lt : kt.second) {
-              lt *= cnorm;
-            }
-          }
-
-          norm.resize(shell.n_contractions());
-          std::fill(norm.begin(), norm.end(), 0);
-          for (auto first_guassian = shell.contracted_gaussian.begin(); first_guassian != shell.contracted_gaussian.end(); first_guassian++) {
-            for (auto second_guassian = first_guassian; second_guassian != shell.contracted_gaussian.end(); second_guassian++) {
-              for (auto m = 0; m < norm.size(); m++) {
-                aa = first_guassian->first + second_guassian->first;
-                fac = aa * aa * sqrt(aa);
-                dum = 0.5 * first_guassian->second[m] * second_guassian->second[m] / fac;
-                if (first_guassian != second_guassian) {
-                  dum = dum + dum;
-                }
-                norm[m] += dum;
-              }
-            }
-          }
-          pi32 = 5.56832799683170;
-          for (auto& kt : norm) {
-            kt = 1.0 / sqrt(kt * pi32);
-          }
-
-          for (auto & kt : shell.contracted_gaussian) {
-            for (auto l = 0; l < kt.second.size(); l++) {
-              kt.second[l] *= norm[l];
-            }
-          }
+          normalize_spherical_p(shell);
         } else if (shell.shell_type == SHELL::D) {
-          for (auto & kt : shell.contracted_gaussian) {
-            cnorm = pow(2.0 * kt.first / pi, 0.75) * 4.0 * kt.first / sqrt(3.0);
-            for (double & lt : kt.second) {
-              lt *= cnorm;
-            }
-          }
+          normalize_spherical_d(shell);
         } else if (shell.shell_type == SHELL::F) {
-          for (auto & kt : shell.contracted_gaussian) {
-            cnorm = pow(2.0 * kt.first / pi, 0.75) * pow(4.0 * kt.first, 1.5) / sqrt(15.0);
-            for (double & lt : kt.second) {
-              lt *= cnorm;
-            }
-          }
+          normalize_spherical_f(shell);
         } else if (shell.shell_type == SHELL::G) {
-          for (auto & kt : shell.contracted_gaussian) {
-            cnorm = pow(2.0 * kt.first / pi, 0.75) * pow(4.0 * kt.first,2.0) / sqrt(105.0);
-            for (double &lt : kt.second) {
-              lt *= cnorm;
-            }
-          }
+          normalize_spherical_g(shell);
         }
       }
+    }
+  }
+}
+
+void Basis::normalize_spherical_sp(SHELL::Shell& shell) {
+  SHELL::Shell s_shell;
+  SHELL::Shell p_shell;
+
+  s_shell.contracted_gaussian.resize(shell.contracted_gaussian.size());
+  p_shell.contracted_gaussian.resize(shell.contracted_gaussian.size());
+  for (int i = 0; i < shell.contracted_gaussian.size(); i++){
+    s_shell.contracted_gaussian[i].first = shell.contracted_gaussian[i].first;
+    p_shell.contracted_gaussian[i].first = shell.contracted_gaussian[i].first;
+
+    s_shell.contracted_gaussian[i].second.resize(1);
+    p_shell.contracted_gaussian[i].second.resize(1);
+
+    s_shell.contracted_gaussian[i].second[0] = shell.contracted_gaussian[i].second[0];
+    p_shell.contracted_gaussian[i].second[0] = shell.contracted_gaussian[i].second[1];
+  }
+
+  normalize_spherical_s(s_shell);
+  normalize_spherical_p(p_shell);
+
+  for (int i = 0; i < shell.contracted_gaussian.size(); i++){
+    shell.contracted_gaussian[i].second[0] = s_shell.contracted_gaussian[i].second[0];
+    shell.contracted_gaussian[i].second[1] = p_shell.contracted_gaussian[i].second[0];
+  }
+}
+
+void Basis::normalize_spherical_s(SHELL::Shell& shell) {
+  constexpr double pi = 3.141592653589793;
+  constexpr double pi32 = 5.56832799683170;
+
+  // normalize each gaussion in contraction
+  for (auto & kt : shell.contracted_gaussian) {
+    double cnorm = pow(2.0 * kt.first / pi, 0.75);
+    for (double & lt : kt.second) {
+      lt *= cnorm;
+    }
+  }
+
+  // calculate normalization of each contraction
+  std::vector<double> norm(shell.n_contractions(), 0.00);
+  for (auto first_guassian = shell.contracted_gaussian.begin(); first_guassian != shell.contracted_gaussian.end(); first_guassian++) {
+    for (auto second_guassian = first_guassian; second_guassian != shell.contracted_gaussian.end(); second_guassian++) {
+      for (auto m = 0; m < norm.size(); m++) {
+        double fac = pow(first_guassian->first + second_guassian->first, 1.5);
+        double dum = first_guassian->second[m] * second_guassian->second[m] / fac;
+        if (first_guassian != second_guassian) {
+          dum = dum + dum;
+        }
+        norm[m] += dum;
+      }
+    }
+  }
+  for (auto& kt : norm) {
+    kt = 1.0 / sqrt(kt * pi32);
+  }
+
+  // apply normalization to each contraction
+  for (auto & kt : shell.contracted_gaussian) {
+    for (auto l = 0; l < kt.second.size(); l++) {
+      kt.second[l] *= norm[l];
+    }
+  }
+}
+
+void Basis::normalize_spherical_p(SHELL::Shell& shell) {
+  constexpr double pi = 3.141592653589793;
+  constexpr double pi32 = 5.56832799683170;
+
+  // normalize each guassian
+  for (auto & kt : shell.contracted_gaussian) {
+    double cnorm = sqrt(4.0 * kt.first) * pow(2.0 * kt.first / pi, 0.75);
+    for (double & lt : kt.second) {
+      lt *= cnorm;
+    }
+  }
+
+  std::vector<double> norm(shell.n_contractions(), 0.00);
+  for (auto first_guassian = shell.contracted_gaussian.begin(); first_guassian != shell.contracted_gaussian.end(); first_guassian++) {
+    for (auto second_guassian = first_guassian; second_guassian != shell.contracted_gaussian.end(); second_guassian++) {
+      for (auto m = 0; m < norm.size(); m++) {
+        double fac = pow(first_guassian->first + second_guassian->first, 2.5);
+        double dum = 0.5 * first_guassian->second[m] * second_guassian->second[m] / fac;
+        if (first_guassian != second_guassian) {
+          dum = dum + dum;
+        }
+        norm[m] += dum;
+      }
+    }
+  }
+  for (auto& kt : norm) {
+    kt = 1.0 / sqrt(kt * pi32);
+  }
+
+  for (auto & kt : shell.contracted_gaussian) {
+    for (auto l = 0; l < kt.second.size(); l++) {
+      kt.second[l] *= norm[l];
+    }
+  }
+}
+
+void Basis::normalize_spherical_d(SHELL::Shell& shell) {
+  constexpr double pi = 3.141592653589793;
+
+  for (auto & kt : shell.contracted_gaussian) {
+    double cnorm = pow(2.0 * kt.first / pi, 0.75) * 4.0 * kt.first / sqrt(3.0);
+    for (double & lt : kt.second) {
+      lt *= cnorm;
+    }
+  }
+}
+
+void Basis::normalize_spherical_f(SHELL::Shell& shell) {
+  constexpr double pi = 3.141592653589793;
+
+  for (auto & kt : shell.contracted_gaussian) {
+    double cnorm = pow(2.0 * kt.first / pi, 0.75) * pow(4.0 * kt.first, 1.5) / sqrt(15.0);
+    for (double & lt : kt.second) {
+      lt *= cnorm;
+    }
+  }
+}
+
+void Basis::normalize_spherical_g(SHELL::Shell& shell) {
+  constexpr double pi = 3.141592653589793;
+
+  for (auto & kt : shell.contracted_gaussian) {
+    double cnorm = pow(2.0 * kt.first / pi, 0.75) * pow(4.0 * kt.first,2.0) / sqrt(105.0);
+    for (double &lt : kt.second) {
+      lt *= cnorm;
     }
   }
 }
