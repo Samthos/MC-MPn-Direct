@@ -83,12 +83,7 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
    */
 
   // read basis set
-#ifdef OLD_BASIS_READ
-  read(iops, mpi_info, molec);
-#else
   read_new(iops, mpi_info, molec);
-#endif
-  dump(iops.sopns[KEYS::JOBNAME]);
 
   // molecular orbital coefficients and energies
   nw_vectors_read(iops, mpi_info, molec);
@@ -509,7 +504,7 @@ void Basis::read_new(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
       std::exit(EXIT_FAILURE);
     }
 
-    normalize_spherical_atom_basis(atomBasis);
+    normalize_atom_basis(atomBasis);
 
     // count number of primatives is basis set
     qc_nbf = 0;
@@ -705,62 +700,47 @@ void Basis::normalize() {
   }
 }
 
-void Basis::normalize_spherical_atom_basis(std::vector<AtomBasis>& atomBasis) {
-  constexpr double pi = 3.141592653589793;
-  double cnorm, aa, dum, fac, facs, pi32;
-  std::vector<double> norm;
-
+void Basis::normalize_atom_basis(std::vector<AtomBasis>& atomBasis) {
   // loop of atomic basis sets
   for (auto& it : atomBasis) {
     // if basis set was read
     if (it.atomCharge != -1) {
       // loop over shells
       for (auto& shell : it.shell) {
-        if (shell.shell_type == SHELL::SP)  { // SP shell
-          normalize_spherical_sp(shell);
-        } else if (shell.shell_type == SHELL::S) {
-          normalize_spherical_s(shell);
-        } else if (shell.shell_type == SHELL::P) {
-          normalize_spherical_p(shell);
-        } else if (shell.shell_type == SHELL::D) {
-          normalize_spherical_d(shell);
-        } else if (shell.shell_type == SHELL::F) {
-          normalize_spherical_f(shell);
-        } else if (shell.shell_type == SHELL::G) {
-          normalize_spherical_g(shell);
+        switch (shell.shell_type) {
+          case SHELL::SP: normalize_sp(shell); break;
+          case SHELL::S: normalize_s(shell); break;
+          case SHELL::P: normalize_p(shell); break;
+          case SHELL::D: normalize_d(shell); break;
+          case SHELL::F: normalize_f(shell); break;
+          case SHELL::G: normalize_g(shell); break;
         }
       }
     }
   }
 }
+void Basis::normalize_sp(SHELL::Shell& shell) {
+  for (int j = 0; j < 2; ++j) {
+    SHELL::Shell temp_shell;
+    temp_shell.contracted_gaussian.resize(shell.contracted_gaussian.size());
+    for (int i = 0; i < shell.contracted_gaussian.size(); i++){
+      temp_shell.contracted_gaussian[i].first = shell.contracted_gaussian[i].first;
+      temp_shell.contracted_gaussian[i].second.resize(1);
+      temp_shell.contracted_gaussian[i].second[0] = shell.contracted_gaussian[i].second[j];
+    }
 
-void Basis::normalize_spherical_sp(SHELL::Shell& shell) {
-  SHELL::Shell s_shell;
-  SHELL::Shell p_shell;
+    if (j == 0) {
+      normalize_s(temp_shell);
+    } else {
+      normalize_p(temp_shell);
+    }
 
-  s_shell.contracted_gaussian.resize(shell.contracted_gaussian.size());
-  p_shell.contracted_gaussian.resize(shell.contracted_gaussian.size());
-  for (int i = 0; i < shell.contracted_gaussian.size(); i++){
-    s_shell.contracted_gaussian[i].first = shell.contracted_gaussian[i].first;
-    p_shell.contracted_gaussian[i].first = shell.contracted_gaussian[i].first;
-
-    s_shell.contracted_gaussian[i].second.resize(1);
-    p_shell.contracted_gaussian[i].second.resize(1);
-
-    s_shell.contracted_gaussian[i].second[0] = shell.contracted_gaussian[i].second[0];
-    p_shell.contracted_gaussian[i].second[0] = shell.contracted_gaussian[i].second[1];
-  }
-
-  normalize_spherical_s(s_shell);
-  normalize_spherical_p(p_shell);
-
-  for (int i = 0; i < shell.contracted_gaussian.size(); i++){
-    shell.contracted_gaussian[i].second[0] = s_shell.contracted_gaussian[i].second[0];
-    shell.contracted_gaussian[i].second[1] = p_shell.contracted_gaussian[i].second[0];
+    for (int i = 0; i < shell.contracted_gaussian.size(); i++){
+      shell.contracted_gaussian[i].second[j] = temp_shell.contracted_gaussian[i].second[0];
+    }
   }
 }
-
-void Basis::normalize_spherical_s(SHELL::Shell& shell) {
+void Basis::normalize_s(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
   constexpr double pi32 = 5.56832799683170;
 
@@ -797,8 +777,7 @@ void Basis::normalize_spherical_s(SHELL::Shell& shell) {
     }
   }
 }
-
-void Basis::normalize_spherical_p(SHELL::Shell& shell) {
+void Basis::normalize_p(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
   constexpr double pi32 = 5.56832799683170;
 
@@ -833,8 +812,7 @@ void Basis::normalize_spherical_p(SHELL::Shell& shell) {
     }
   }
 }
-
-void Basis::normalize_spherical_d(SHELL::Shell& shell) {
+void Basis::normalize_d(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
 
   for (auto & kt : shell.contracted_gaussian) {
@@ -844,8 +822,7 @@ void Basis::normalize_spherical_d(SHELL::Shell& shell) {
     }
   }
 }
-
-void Basis::normalize_spherical_f(SHELL::Shell& shell) {
+void Basis::normalize_f(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
 
   for (auto & kt : shell.contracted_gaussian) {
@@ -855,8 +832,7 @@ void Basis::normalize_spherical_f(SHELL::Shell& shell) {
     }
   }
 }
-
-void Basis::normalize_spherical_g(SHELL::Shell& shell) {
+void Basis::normalize_g(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
 
   for (auto & kt : shell.contracted_gaussian) {
@@ -875,12 +851,21 @@ void Basis::dump(const std::string& fname) {
   os << "iocc2: " << iocc2 << "\n";        // index of HOMO+1
   os << "ivir1: " << ivir1 << "\n";        // index of LUMO
   os << "ivir2: " << ivir2 << "\n";        // index of last virtual to be used + 1
-  os << "qc_nbf: " << qc_nbf << "\n";       // number basis functions
+  os << "qc_nbf: " << qc_nbf << "\t" << nw_nbf << "\n";       // number basis functions
   os << "nShells: " << nShells << "\n";      // number of shells
   os << "nPrimatives: " << nPrimatives << "\n";  // number of primitives
   os << "lspherical: " << lspherical << "\n";  // true if spherical
   for (int i = 0; i < nPrimatives; ++i) {
     os << h_basis.contraction_coef[i] << "\t" << h_basis.contraction_exp[i] << "\n";
+  }
+  for (int i = 0; i < nShells; ++i) {
+    os << h_basis.meta_data[i].ao_begin << "\t";
+    os << h_basis.meta_data[i].contraction_begin << "\t";
+    os << h_basis.meta_data[i].contraction_end << "\t";
+    os << h_basis.meta_data[i].angular_momentum << "\t";
+    os << h_basis.meta_data[i].pos[0] << "\t";
+    os << h_basis.meta_data[i].pos[1] << "\t";
+    os << h_basis.meta_data[i].pos[2] << "\n";
   }
   os << "-----------------------------------------------------------------------------------------------------------\n\n";
 }

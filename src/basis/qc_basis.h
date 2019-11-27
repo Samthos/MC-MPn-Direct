@@ -124,15 +124,13 @@ class Basis {
   void read_new(IOPs &, MPI_info &, Molec &);
   void nw_vectors_read(IOPs &, MPI_info &, Molec &);
   void normalize();
-  static void normalize_spherical_atom_basis(std::vector<AtomBasis>&);
-  static void normalize_spherical_sp(SHELL::Shell& shell);
-  static void normalize_spherical_s(SHELL::Shell& shell);
-  static void normalize_spherical_p(SHELL::Shell& shell);
-  static void normalize_spherical_d(SHELL::Shell& shell);
-  static void normalize_spherical_f(SHELL::Shell& shell);
-  static void normalize_spherical_g(SHELL::Shell& shell);
-
-  void normalize_cartesian_atom_basis(std::vector<AtomBasis>&);
+  static void normalize_atom_basis(std::vector<AtomBasis>&);
+  static void normalize_sp(SHELL::Shell& shell);
+  static void normalize_s(SHELL::Shell& shell);
+  static void normalize_p(SHELL::Shell& shell);
+  static void normalize_d(SHELL::Shell& shell);
+  static void normalize_f(SHELL::Shell& shell);
+  static void normalize_g(SHELL::Shell& shell);
   void dump(const std::string&);
 };
 #endif  // QC_BASIS_H_
