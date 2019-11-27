@@ -121,9 +121,7 @@ class Basis {
                                   4.4370598373247132};
 
   void read(IOPs &, MPI_info &, Molec &);
-  void read_new(IOPs &, MPI_info &, Molec &);
   void nw_vectors_read(IOPs &, MPI_info &, Molec &);
-  void normalize();
   static void normalize_atom_basis(std::vector<AtomBasis>&);
   static void normalize_sp(SHELL::Shell& shell);
   static void normalize_s(SHELL::Shell& shell);
