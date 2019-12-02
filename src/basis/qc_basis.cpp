@@ -58,16 +58,9 @@ int SHELL::number_of_cartesian_polynomials(SHELL::Shell_Type shell_type) {
   int nbf = 0;
   if (shell_type == SHELL::SP) {
     nbf = 4;
-  } else if (shell_type == SHELL::S) {
-    nbf = 1;
-  } else if (shell_type == SHELL::P) {
-    nbf = 3;
-  } else if (shell_type == SHELL::D) {
-    nbf = 6;
-  } else if (shell_type == SHELL::F) {
-    nbf = 10;
-  } else if (shell_type == SHELL::G) {
-    nbf = 15;
+  } else {
+    int l = shell_type;
+    nbf = (l+1) * (l+2) / 2;
   }
   return nbf;
 }

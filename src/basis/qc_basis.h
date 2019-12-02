@@ -129,6 +129,15 @@ class Basis {
   static void normalize_d(SHELL::Shell& shell);
   static void normalize_f(SHELL::Shell& shell);
   static void normalize_g(SHELL::Shell& shell);
+
+  static void evaulate_s(double*, const double&, const double&, const double&, const double&);
+  static void evaulate_p(double*, const double&, const double&, const double&, const double&);
+  static void evaulate_spherical_d(double*, const double&, const double&, const double&, const double&);
+  static void evaulate_spherical_f(double*, const double&, const double&, const double&, const double&);
+  static void evaulate_spherical_g(double*, const double&, const double&, const double&, const double&);
+  static void evaulate_cartesian_d(double*, const double&, const double&, const double&, const double&);
+  static void evaulate_cartesian_f(double*, const double&, const double&, const double&, const double&);
+  static void evaulate_cartesian_g(double*, const double&, const double&, const double&, const double&);
   void dump(const std::string&);
 };
 #endif  // QC_BASIS_H_
