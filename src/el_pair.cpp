@@ -46,15 +46,6 @@ Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight)
 }
 
 void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Molec& molec, const GTO_Weight& weight) {
-#ifndef NDEBUG
-  static int count = 0;
-  static int step = 0;
-  count = (count+1);
-  if (count == 32) {
-    count=0;
-    step++;
-  }
-#endif
   constexpr double TWOPI = 6.283185307179586;
   std::array<double, 3> dr{};
 
@@ -214,7 +205,7 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
   int atom;
   double amp1, amp2, theta1, theta2;
   std::array<double, 3> pos;
-  constexpr double pi = 6.283185307179586;
+  constexpr double twopi = 6.283185307179586;
 
   atom = molec.natom * random.uniform();
   pos[0] = molec.atom[atom].pos[0];
@@ -223,8 +214,8 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
 
   amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
   amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));
-  theta1 = 2 * pi * random.uniform();
-  theta2 = pi * random.uniform();
+  theta1 = twopi * random.uniform();
+  theta2 = 0.5 * twopi * random.uniform();
 
   electron_pair.pos1[0] = pos[0] + amp1*cos(theta1);
   electron_pair.pos1[1] = pos[1] + amp1*sin(theta1);
@@ -238,8 +229,8 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
 
   amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
   amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));
-  theta1 = 2 * pi * random.uniform();
-  theta2 = pi * random.uniform();
+  theta1 = twopi * random.uniform();
+  theta2 = 0.5 * twopi * random.uniform();
 
   electron_pair.pos2[0] = pos[0] + amp1*cos(theta1);
   electron_pair.pos2[1] = pos[1] + amp1*sin(theta1);
