@@ -108,16 +108,16 @@ class OVPs {
   int mc_pair_num, iocc1, iocc2, ivir1, ivir2;
 
  public:
-  void init(const int dimm, const int mc_pair_num_, const Basis &basis);
+  void init(int dimm, int mc_pair_num_, const Basis &basis);
   void free();
-  void update_ovps(BasisData&, Electron_Pair_List* el_pair_list, Tau *tau);
+  void update_ovps(BasisData&, Electron_Pair_List*, Tau*);
 
   void init_02(int, int, int, int, const Basis &);
   void alloc_02();
   void free_tau_02();
   void free_02();
   void zero_energy_arrays_02();
-  void update_ovps_02(Electron_Pair*, Tau*);
+  void update_ovps_02(const BasisData&);
 
   void init_03(int, int, int, int, const Basis &);
   void alloc_03();

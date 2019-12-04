@@ -126,7 +126,7 @@ class MP : public QC_monte {
 class MP2 : public MP {
  public:
   MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6}) {}
-  ~MP2() = default;
+  ~MP2() override = default;
 
  protected:
   void energy() override;
@@ -137,7 +137,7 @@ class MP3 : public MP {
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36}) {
     ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
-  ~MP3() {
+  ~MP3() override {
     ovps.free();
   }
 
@@ -170,7 +170,7 @@ class GF : public  QC_monte {
   virtual int full_print(int& step, int checkNum) = 0;
 
   void mcgf2_local_energy_core();
-  void mcgf2_local_energy(std::vector<double>&, int);
+  void mcgf2_local_energy(std::vector<std::vector<double>>&);
   void mcgf2_local_energy_diff(std::vector<double>&, int);
   void mcgf2_local_energy_full(int);
   void mcgf2_local_energy_full_diff(int);
@@ -218,6 +218,7 @@ class GPU_GF2 : public GF {
 class GF2 : public GF {
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+    ovps.init(1, iops.iopns[KEYS::MC_NPAIR], basis);
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  basis);

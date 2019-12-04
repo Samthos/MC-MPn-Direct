@@ -317,42 +317,23 @@ void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int 
   }
 }
 
-void OVPs::update_ovps_02(Electron_Pair* el_pair_list, Tau* tau) {
+void OVPs::update_ovps_02(const BasisData& basis) {
   int ip, am;
   double alpha = 1.00;
   double beta = 0.00;
 
-  //copy weights from el_pair_list to host arrays
-  std::cerr << "Wave function code needs to be updated in OVPs::update_ovps_02" << std::endl;
-  exit(0);
-  for (ip = 0; ip < mc_pair_num; ip++) {
-    d_ovps.rv[ip] = el_pair_list[ip].rv;
-  }
-  //copy wave functions from host to device;
-  {
-    auto t_val = tau->get_exp_tau(0, 0);
-    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ1, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau1, mc_pair_num);
-    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, iocc2 - iocc1, d_ovps.occ2, mc_pair_num, &t_val[iocc1], 1, d_ovps.occTau2, mc_pair_num);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ1, mc_pair_num, beta, d_ovps.os_13, mc_pair_num);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau2, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_24, mc_pair_num);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, iocc2 - iocc1, alpha, d_ovps.occTau1, mc_pair_num, d_ovps.occ2, mc_pair_num, beta, d_ovps.os_23, mc_pair_num);
-    Transpose(d_ovps.os_23, mc_pair_num, d_ovps.os_14);
-
-    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir1, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau1, mc_pair_num);
-    Ddgmm(DDGMM_SIDE_RIGHT, mc_pair_num, ivir2 - ivir1, d_ovps.vir2, mc_pair_num, &t_val[ivir1], 1, d_ovps.virTau2, mc_pair_num);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir1, mc_pair_num, beta, d_ovps.vs_13, mc_pair_num);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau2, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_24, mc_pair_num);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_23, mc_pair_num);
-    Transpose(d_ovps.vs_23, mc_pair_num, d_ovps.vs_14);
-  }
-
-
   std::fill(d_ovps.ps_24, d_ovps.ps_24 + mc_pair_num * mc_pair_num * numBand, 0.0);
   for (am = 0; am < numBand; am++) {
     if (am - offBand < 0) {  //construct ps_?? and ps_??c for occupied orbitals
-      cblas_dger(CblasColMajor, mc_pair_num, mc_pair_num, alpha, d_ovps.occ2 + (am + iocc2 - iocc1 - offBand) * mc_pair_num, 1, d_ovps.occ2 + (am + iocc2 - iocc1 - offBand) * mc_pair_num, 1, d_ovps.ps_24 + am * mc_pair_num * mc_pair_num, mc_pair_num);
+      cblas_dger(CblasColMajor, mc_pair_num, mc_pair_num,
+          alpha, basis.occ2 + (am + iocc2 - iocc1 - offBand) * mc_pair_num, 1,
+          basis.occ2 + (am + iocc2 - iocc1 - offBand) * mc_pair_num, 1,
+          d_ovps.ps_24 + am * mc_pair_num * mc_pair_num, mc_pair_num);
     } else {  //construct ps_?? and ps_??c for virtualorbitals
-      cblas_dger(CblasColMajor, mc_pair_num, mc_pair_num, alpha, d_ovps.vir2 + (am - offBand) * mc_pair_num, 1, d_ovps.vir2 + (am - offBand) * mc_pair_num, 1, d_ovps.ps_24 + am * mc_pair_num * mc_pair_num, mc_pair_num);
+      cblas_dger(CblasColMajor, mc_pair_num, mc_pair_num,
+          alpha, basis.vir2 + (am - offBand) * mc_pair_num, 1,
+          basis.vir2 + (am - offBand) * mc_pair_num, 1,
+          d_ovps.ps_24 + am * mc_pair_num * mc_pair_num, mc_pair_num);
     }
   }
 }
@@ -360,7 +341,8 @@ void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Tau* tau) {
   double alpha = 1.00;
   double beta = 0.00;
 
-  update_ovps_02(el_pair_list, tau);
+  std::cerr << "broke as hell\n";
+  // update_ovps_02(el_pair_list, tau);
 
   freq_indp_gf(d_ovps, mc_pair_num, iocc2 - iocc1, offBand, numBand);
 
