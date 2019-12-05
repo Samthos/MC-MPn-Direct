@@ -171,7 +171,7 @@ class GF : public  QC_monte {
 
   void mcgf2_local_energy_core();
   void mcgf2_local_energy(std::vector<std::vector<double>>&);
-  void mcgf2_local_energy_diff(std::vector<double>&, int);
+  void mcgf2_local_energy_diff(std::vector<std::vector<double>>&);
   void mcgf2_local_energy_full(int);
   void mcgf2_local_energy_full_diff(int);
 

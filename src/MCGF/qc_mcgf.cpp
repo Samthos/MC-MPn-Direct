@@ -109,7 +109,7 @@ void GF2::mc_local_energy(const int& step) {
   if (iops.iopns[KEYS::TASK] == TASKS::GF) {
     mcgf2_local_energy(qeps[0].qeps);
   } else if (iops.iopns[KEYS::TASK] == TASKS::GFDIFF) {
-    mcgf2_local_energy_diff(qeps[0].qeps[band], band);
+    mcgf2_local_energy_diff(qeps[0].qeps);
   } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
       mcgf2_local_energy_full(band);
     } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
@@ -118,7 +118,6 @@ void GF2::mc_local_energy(const int& step) {
         mc_gf2_statistics(band, step);
       }
     }
-  }
 
   if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
     mc_gf_statistics(step, qeps[0].qeps, ovps.d_ovps.en2, ovps.d_ovps.en2Ex1, ovps.d_ovps.en2Ex2);
@@ -153,7 +152,7 @@ void GF3::mc_local_energy(const int& step) {
     if (iops.iopns[KEYS::TASK] == TASKS::GF) {
       mcgf2_local_energy(qeps[0].qeps);
     } else if (iops.iopns[KEYS::TASK] == TASKS::GFDIFF) {
-      mcgf2_local_energy_diff(qeps[0].qeps[band], band);
+      mcgf2_local_energy_diff(qeps[0].qeps);
     } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
       mcgf2_local_energy_full(band);
     } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {

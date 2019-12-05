@@ -79,33 +79,65 @@ void GF::mcgf2_local_energy(std::vector<std::vector<double>>& egf2) {
 
     egf2[band].front() += en2;
   }
-
 }
-void GF::mcgf2_local_energy_diff(std::vector<double>& egf2, int band) {
-  int ip;
-  int nsamp;
+void GF::mcgf2_local_energy_diff(std::vector<std::vector<double>>& egf2) {
+  double nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = nsamp * (nsamp - 1.0);
   double en2m, en2p;
-
-  en2p = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en2pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en2m = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en2mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-
-  nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
-  en2p = en2p * tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / static_cast<double>(nsamp);
-  en2m = en2m * tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / static_cast<double>(nsamp);
-
-  for (ip = 0; ip < iops.iopns[KEYS::DIFFS]; ip++) {
-    if (ip % 2 == 0) {
-      egf2[ip] += en2p + en2m;
-    } else if (ip % 2 == 1) {
-      egf2[ip] += en2p - en2m;
+  double alpha, beta;
+  double *psi2;
+  for (int band = 0; band < numBand; band++) {
+    if (band-offBand < 0) {
+      psi2 = basis.h_basis.occ2 + (band+iocc2-iocc1-offBand);
+    } else {
+      psi2 = basis.h_basis.vir2 + (band-offBand);
     }
-    en2p = en2p * tau->get_tau(0);
-    en2m = en2m * tau->get_tau(0);
+
+    // ent = en2pCore . psi
+    alpha = tau->get_gfn_tau(0, 0, band-offBand, false);
+    beta = 0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en2pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+
+    // en2p = psi2 . ent
+    en2p = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+
+    // ent = en2mCore . psi
+    alpha = tau->get_gfn_tau(0, 0, band-offBand, true);
+    beta = 0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en2mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+
+    // en2m = psi2 . ent
+    en2m = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+
+    en2p = en2p * tau->get_wgt(1) / nsamp;
+    en2m = en2m * tau->get_wgt(1) / nsamp;
+    for (int diff=0; diff < iops.iopns[KEYS::DIFFS]; diff++){
+      if (diff%2==0) {
+        egf2[band][diff] += en2p+en2m;
+      } else if (diff%2==1) {
+        egf2[band][diff] += en2p-en2m;
+      }
+      en2p = en2p * tau->get_tau(0);
+      en2m = en2m * tau->get_tau(0);
+    }
   }
+
 }
 void GF::mcgf2_local_energy_full(int band) {
   int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
