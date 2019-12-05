@@ -18,6 +18,7 @@ add_definitions("-DVERSION=\"${GIT_COMMIT_HASH}\"")
 
 find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
+find_path(BLAS_INCLUDE_DIRS cblas.h)
 
 option(Enable_MPI "Enables MPI Sampling" Off)
 if (Enable_MPI)
