@@ -81,45 +81,45 @@ struct OVPS_ARRAY {
   double *vs_15, *vs_16, *vs_25, *vs_26;
   double *ps_12c, *ps_22c;
 
-  double *ent;
-  std::vector<std::vector<double *>> en2Ex1;
-  std::vector<std::vector<double *>> en2Ex2;
-  std::vector<std::vector<double *>> en2;
-  double *en2mCore, *en2pCore;
-  double *en2m, *en2p;
+  double *ent, *enCore;
+  std::vector<std::vector<double*>> enBlock;
+  std::vector<double*> enEx1;
+  std::vector<std::vector<double*>> enCov;
 
-  std::vector<std::vector<double *>> en3Ex1;
-  std::vector<std::vector<double *>> en3Ex2;
-  std::vector<std::vector<double *>> en3;
+  double *en2mCore, *en2pCore;
   double *en3_1pCore, *en3_2pCore, *en3_12pCore;
   double *en3_1mCore, *en3_2mCore, *en3_12mCore;
   double *en3_12cCore, *en3_22cCore;
+  double *one, *en3c12, *en3c22;
+
+  double *enGrouped;
+  double *en2m, *en2p;
   double *en3_1p, *en3_2p, *en3_12p;
   double *en3_1m, *en3_2m, *en3_12m;
   double *en3_c;
-  double *one, *en3c12, *en3c22;
 
   double *rv;
 };
 
 class OVPs {
  private:
-  int numBand, offBand, numDiff;
+  int numBand, offBand, numDiff, numBlock;
   int mc_pair_num, iocc1, iocc2, ivir1, ivir2;
+  bool full;
 
  public:
   void init(int dimm, int mc_pair_num_, const Basis &basis);
   void free();
   void update_ovps(BasisData&, Electron_Pair_List*, Tau*);
 
-  void init_02(int, int, int, int, const Basis &);
+  void init_02(int, int, int, int, int, const Basis &, bool);
   void alloc_02();
   void free_tau_02();
   void free_02();
   void zero_energy_arrays_02();
   void update_ovps_02(const BasisData&);
 
-  void init_03(int, int, int, int, const Basis &);
+  void init_03(int, int, int, int, int, const Basis &, bool);
   void alloc_03();
   void free_tau_03();
   void free_03();
