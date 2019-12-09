@@ -57,8 +57,7 @@ void GF::mc_gf_full_diffs(int band, std::vector<double> m) {
     }
   }
 
-  cblas_dgemm(CblasColMajor,
-      CblasNoTrans, CblasNoTrans,
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
       (ivir2-iocc1) * (ivir2-iocc1), iops.iopns[KEYS::DIFFS], m.size(),
       1.0,
       ovps.d_ovps.enGrouped, (ivir2-iocc1) * (ivir2-iocc1),

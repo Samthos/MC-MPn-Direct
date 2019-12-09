@@ -173,42 +173,43 @@ void GF::mcgf2_local_energy_full(int band) {
 }
 
 void GF::mcgf2_local_energy_full_diff(int band) {
-  int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1);
+  double nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = nsamp * (nsamp - 1.0);
   double alpha, beta;
 
   // ent = contraction_exp * en2pCore . psi2
-  alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / static_cast<double>(nsamp);
+  alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / nsamp;
   beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
               ovps.d_ovps.en2pCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, ivir2 - iocc1,
+              basis.h_basis.psi2, ivir2 - iocc1,
               beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // en2p = Transpose[psi2] . ent
   alpha = 1.00;
   beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, ivir2 - iocc1,
+              basis.h_basis.psi2, ivir2 - iocc1,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta, ovps.d_ovps.en2p, ivir2 - iocc1);
 
   // ent = contraction_exp * en2mCore . psi2
-  alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / static_cast<double>(nsamp);
+  alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / nsamp;
   beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
               ovps.d_ovps.en2mCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, ivir2 - iocc1,
+              basis.h_basis.psi2, ivir2 - iocc1,
               beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
   // en2m = Transpose[psi2] . ent
   alpha = 1.00;
   beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, ivir2 - iocc1,
+              basis.h_basis.psi2, ivir2 - iocc1,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta, ovps.d_ovps.en2m, ivir2 - iocc1);
 }
