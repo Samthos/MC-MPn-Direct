@@ -99,7 +99,6 @@ void GF2::mc_local_energy(const int& step) {
   }
 
   ovps.update_ovps(basis.h_basis, el_pair_list, tau);
-  ovps.update_ovps_02(basis.h_basis);
   mcgf2_local_energy_core();
   if(iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
     mcgf2_local_energy(qeps[0].qeps);
@@ -132,34 +131,36 @@ int GF2::full_print(int& step, int checkNum) {
 }
 
 void GF3::mc_local_energy(const int& step) {
-  if (iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFDIFF) {
-    for (auto &it : qeps[0].qeps) {
-      std::fill(it.begin(), it.end(), 0.00);
-    }
-    for (auto &it : qeps[1].qeps) {
-      std::fill(it.begin(), it.end(), 0.00);
-    }
+  for (auto &it : qeps[0].qeps) {
+    std::fill(it.begin(), it.end(), 0.00);
+  }
+  for (auto &it : qeps[1].qeps) {
+    std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps_03(el_pair_list->data(), tau);
+  ovps.update_ovps(basis.h_basis, el_pair_list, tau);
 
   mcgf2_local_energy_core();
   mcgf3_local_energy_core();
-  for (int band = 0; band < numBand; band++) {
-    if (iops.iopns[KEYS::TASK] == TASKS::GF) {
-      mcgf2_local_energy(qeps[0].qeps);
-      mcgf3_local_energy(qeps[1].qeps[band], band);
-    } else if (iops.iopns[KEYS::TASK] == TASKS::GFDIFF) {
-      mcgf2_local_energy_diff(qeps[0].qeps);
-      mcgf3_local_energy_diff(qeps[1].qeps[band], band);
-    } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
-      mcgf2_local_energy_full(band);
-      mcgf3_local_energy_full(band);
-    } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
-      mcgf2_local_energy_full_diff(band);
-      mcgf3_local_energy_full_diff(band);
-    }
+
+  if(iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
+    mcgf2_local_energy(qeps[0].qeps);
+    mcgf3_local_energy(qeps[1].qeps);
+  } else if (iops.iopns[KEYS::TASK] == TASKS::GFDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+    mcgf2_local_energy_diff(qeps[0].qeps);
+    mcgf3_local_energy_diff(qeps[1].qeps);
   }
+  /*
+for (int band = 0; band < numBand; band++) {
+  if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
+    mcgf2_local_energy_full(band);
+    mcgf3_local_energy_full(band);
+  } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+    mcgf2_local_energy_full_diff(band);
+    mcgf3_local_energy_full_diff(band);
+  }
+}
+   */
 
   if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
     mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);

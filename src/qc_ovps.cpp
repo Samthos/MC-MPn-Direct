@@ -222,6 +222,7 @@ void OVPs::zero_energy_arrays_03() {
 }
 
 void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int numBand) {
+  /*
   int tidx, tidy, index, lookup;
   for (tidx = 0; tidx < mc_pair_num; tidx++) {
     for (tidy = 0; tidy < numBand; tidy++) {
@@ -232,14 +233,16 @@ void freq_indp_gf(OVPS_ARRAY ovps, int mc_pair_num, int iocc2, int offBand, int 
         ovps.ps_22c[index] = ovps.occ2[lookup] * ovps.occ2[lookup];
       } else {
         lookup = (tidy - offBand) * mc_pair_num + tidx;
-        ovps.ps_12c[index] = ovps.vir1[lookup] * ovps.vir2[lookup];
-        ovps.ps_22c[index] = ovps.vir2[lookup] * ovps.vir2[lookup];
+         ovps.ps_12c[index] = ovps.vir1[lookup] * ovps.vir2[lookup];
+         ovps.ps_22c[index] = ovps.vir2[lookup] * ovps.vir2[lookup];
       }
     }
   }
+  */
 }
 
 void OVPs::update_ovps_02(const BasisData& basis) {
+  /*
   double alpha = 1.00;
 
   std::fill(d_ovps.ps_24, d_ovps.ps_24 + mc_pair_num * mc_pair_num * numBand, 0.0);
@@ -256,8 +259,10 @@ void OVPs::update_ovps_02(const BasisData& basis) {
           d_ovps.ps_24 + am * mc_pair_num * mc_pair_num, mc_pair_num);
     }
   }
+  */
 }
 void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Tau* tau) {
+  /*
   double alpha = 1.00;
   double beta = 0.00;
 
@@ -300,4 +305,5 @@ void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Tau* tau) {
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, mc_pair_num, mc_pair_num, ivir2 - ivir1, alpha, d_ovps.virTau1, mc_pair_num, d_ovps.vir2, mc_pair_num, beta, d_ovps.vs_25, mc_pair_num);
     Transpose(d_ovps.vs_25, mc_pair_num, d_ovps.vs_16);
   }
+  */
 }

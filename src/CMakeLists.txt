@@ -1,5 +1,4 @@
 set(source
-        MCGF/gf2_core.h
         MCGF/gf3_core_c.h
         MCGF/gf3_core_m_1.h
         MCGF/gf3_core_m_12.h

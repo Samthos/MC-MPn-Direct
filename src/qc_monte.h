@@ -176,8 +176,8 @@ class GF : public  QC_monte {
   void mcgf2_local_energy_full_diff(int);
 
   void mcgf3_local_energy_core();
-  void mcgf3_local_energy(std::vector<double>&, int);
-  void mcgf3_local_energy_diff(std::vector<double>&, int);
+  void mcgf3_local_energy(std::vector<std::vector<double>>&);
+  void mcgf3_local_energy_diff(std::vector<std::vector<double>>&);
   void mcgf3_local_energy_full(int);
   void mcgf3_local_energy_full_diff(int);
 
@@ -257,6 +257,7 @@ class GPU_GF3 : public GF {
 class GF3 : public GF {
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+    ovps.init(2, iops.iopns[KEYS::MC_NPAIR], basis);
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
