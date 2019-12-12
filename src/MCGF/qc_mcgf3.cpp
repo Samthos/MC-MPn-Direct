@@ -260,7 +260,7 @@ void GF::mcgf3_local_energy_core() {
   }
 }
 void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
-  double nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
   nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
   for (int band = 0; band < numBand; band++) {
     double en3 = 0;
@@ -352,79 +352,153 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
   }
 }
 void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
-  /*
-  int ip, dp;
-  int nsamp;
-  double en3t;
-  std::array<double, 7> en3;
+  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
+  for (int band = 0; band < numBand; band++) {
+    int ip, dp;
+    std::array<double, 7> en3{0, 0, 0, 0, 0, 0, 0};
+    double en3t;
+    double alpha, beta;
+    double *psi1, *psi2;
 
-  std::fill(en3.begin(), en3.end(), 0);
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3c12, 1,
-                    ovps.d_ovps.ps_12c + band * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[0] = en3[0] + en3t;
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3c22, 1,
-                    ovps.d_ovps.ps_22c + band * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[0] = en3[0] + en3t;
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_1pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[1] = en3[1] + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_2pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[2] = en3[2] + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_12pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[3] = en3[3] + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_1mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[4] = en3[4] + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_2mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[5] = en3[5] + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_12mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[6] = en3[6] + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
-
-  nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
-  for (auto& it : en3) {
-    it = it * tau->get_wgt(2) / static_cast<double>(nsamp);
-  }
-
-  for (ip = 0; ip < iops.iopns[KEYS::DIFFS]; ip++) {
-    if (ip == 0) {
-      for (dp = 0; dp < 3; dp++) {
-        egf3[ip] += en3[dp + 1] + en3[dp + 4];
-      }
-      egf3[ip] += en3[0];
-    } else if (ip % 2 == 1) {
-      for (dp = 0; dp < 3; dp++) {
-        egf3[ip] += en3[dp + 1] - en3[dp + 4];
-      }
-    } else if (ip % 2 == 0) {
-      for (dp = 0; dp < 3; dp++) {
-        egf3[ip] += en3[dp + 1] + en3[dp + 4];
-      }
+    if (band - offBand < 0) {
+      psi1 = basis.h_basis.occ1 + (band + iocc2 - iocc1 - offBand);
+      psi2 = basis.h_basis.occ2 + (band + iocc2 - iocc1 - offBand);
+    } else {
+      psi1 = basis.h_basis.vir1 + (band - offBand);
+      psi2 = basis.h_basis.vir2 + (band - offBand);
     }
-    auto xx1 = tau->get_tau(0);
-    auto xx2 = tau->get_tau(1);
-    en3[1] = en3[1] * xx1;
-    en3[2] = en3[2] * xx2;
-    en3[3] = en3[3] * xx1 * xx2;
-    en3[4] = en3[4] * xx1;
-    en3[5] = en3[5] * xx2;
-    en3[6] = en3[6] * xx1 * xx2;
+
+    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c12, 1, psi1, ivir2 - iocc1, 0.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c22, 1, psi2, ivir2 - iocc1, 1.0, ovps.d_ovps.ent, 1);
+    en3[0] = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+
+    // ent = en3_1pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[1] = en3[1] + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
+
+    // ent = en3_2pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[2] = en3[2] + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
+
+    // ent = en3_12pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[3] = en3[3] + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
+
+
+    // ent = en3_1mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[4] = en3[4] + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
+
+    // ent = en3_2mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[5] = en3[5] + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
+
+    // ent = en3_12mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[6] = en3[6] + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
+
+    for (auto &it : en3) {
+      it = it * tau->get_wgt(2) / nsamp;
+    }
+
+    for (ip = 0; ip < iops.iopns[KEYS::DIFFS]; ip++) {
+      if (ip == 0) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] + en3[dp + 4];
+        }
+        egf3[band][ip] += en3[0];
+      } else if (ip % 2 == 1) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] - en3[dp + 4];
+        }
+      } else if (ip % 2 == 0) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] + en3[dp + 4];
+        }
+      }
+      en3[1] = en3[1] * tau->get_tau(0);
+      en3[2] = en3[2] * tau->get_tau(1);
+      en3[3] = en3[3] * (tau->get_tau(0) + tau->get_tau(1));
+      en3[4] = en3[4] * tau->get_tau(0);
+      en3[5] = en3[5] * tau->get_tau(1);
+      en3[6] = en3[6] * (tau->get_tau(0) + tau->get_tau(1));
+    }
   }
-   */
 }
 void GF::mcgf3_local_energy_full(int band) {
   /*
