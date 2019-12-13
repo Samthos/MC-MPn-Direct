@@ -9,14 +9,7 @@
 #include "blas_calls.h"
 #include "qc_ovps.h"
 
-void print_out(double* A, int m, int n) {
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
-      printf("%12.8f", A[i * n + j]);
-    }
-    printf("\n");
-  }
-}
+
 
 void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
   mc_pair_num = mc_pair_num_;

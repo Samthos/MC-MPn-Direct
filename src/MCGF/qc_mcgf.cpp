@@ -150,17 +150,18 @@ void GF3::mc_local_energy(const int& step) {
     mcgf2_local_energy_diff(qeps[0].qeps);
     mcgf3_local_energy_diff(qeps[1].qeps);
   }
-  /*
-for (int band = 0; band < numBand; band++) {
-  if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
-    mcgf2_local_energy_full(band);
-    mcgf3_local_energy_full(band);
-  } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
-    mcgf2_local_energy_full_diff(band);
-    mcgf3_local_energy_full_diff(band);
+
+  for (int band = 0; band < numBand; band++) {
+    if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
+      mcgf3_local_energy_full(band);
+    } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+      mcgf3_local_energy_full_diff(band);
+        if (step > 0) {
+          mc_gf_full_diffs(band, {tau->get_tau(0), tau->get_tau(1), tau->get_tau(0) + tau->get_tau(1),
+                                  -tau->get_tau(0), -tau->get_tau(1), -tau->get_tau(0) - tau->get_tau(1), 0.0});
+        }
+    }
   }
-}
-   */
 
   if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
     mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);

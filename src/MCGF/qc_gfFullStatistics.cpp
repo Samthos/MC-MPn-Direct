@@ -31,9 +31,6 @@ void GF::mc_gf_statistics(int step,
             enBlock[band][block+1],
             [](double a, double b) {return 0.5*a + b;});
       }
-      if (block <= 1) {
-        printf("%14.6f", enBlock[0][block][3 * 23 + 3]);
-      }
 
       // enCov = en/step + (step-1)*enCov/(step) i.e update second moment
       dspr_batched((ivir2-iocc1) * (ivir2-iocc1), iops.iopns[KEYS::DIFFS], 1.0, enBlock[band][block], enCov[band][block]);
@@ -44,7 +41,6 @@ void GF::mc_gf_statistics(int step,
       block++;
       blockPower2 *= 2;
     }
-    printf("\n");
   }
 }
 
