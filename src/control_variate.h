@@ -185,13 +185,13 @@ class ControlVariate : public Accumulator {
     }
   }
   void to_json(std::string fname) override {
-    // open stream
-    std::ofstream os(fname + ".json");
-
     // call update function
     update();
 
     if (0 == master) {
+      // open stream
+      std::ofstream os(fname + ".json");
+
       // open json
       os << "{\n";
 
@@ -262,9 +262,6 @@ class ControlVariate : public Accumulator {
 
       os << "}";
     }
-
-    // close stream
-    os.close();
   }
   std::ostream& write(std::ostream& os) override {
     update();
