@@ -8,6 +8,24 @@
 #include "../qc_monte.h"
 
 
+void print_out(bool col_major, double* A, int rows, int cols) {
+  if (col_major) {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        printf("%8.3f", A[i + j * rows]);
+      }
+      printf("\n");
+    }
+  } else {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        printf("%8.3f", A[i * cols + j]);
+      }
+      printf("\n");
+    }
+  }
+}
+
 void vector_multiply(const double* B, double* A, int mc_pair_num) {
   for (int tidy = 0; tidy < mc_pair_num; tidy++) {
     for (int tidx = 0; tidx < mc_pair_num; tidx++) {

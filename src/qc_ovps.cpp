@@ -59,8 +59,6 @@ void OVPs::init_02(int p1, int p2, int p3, int p4, int p5, const Basis &basis, b
   ivir2 = basis.ivir2;
 }
 void OVPs::alloc_02() {
-  d_ovps.ps_24 = new double[mc_pair_num * mc_pair_num * numBand];
-
   d_ovps.en2mCore = new double[mc_pair_num * mc_pair_num];
   d_ovps.en2pCore = new double[mc_pair_num * mc_pair_num];
   d_ovps.enCore = new double[mc_pair_num * mc_pair_num];
@@ -100,8 +98,6 @@ void OVPs::alloc_02() {
 void OVPs::free_tau_02() {
 }
 void OVPs::free_02() {
-  delete[] d_ovps.ps_24;
-
   delete[] d_ovps.ent;
   delete[] d_ovps.enCore;
   delete[] d_ovps.en2mCore;
@@ -141,8 +137,6 @@ void OVPs::init_03(int p1, int p2, int p3, int p4, int p5, const Basis &basis, b
 }
 void OVPs::alloc_03() {
   alloc_02();
-  d_ovps.ps_12c = new double[mc_pair_num * numBand];
-  d_ovps.ps_22c = new double[mc_pair_num * numBand];
 
   d_ovps.en3_1pCore  = new double[mc_pair_num * mc_pair_num];
   d_ovps.en3_2pCore  = new double[mc_pair_num * mc_pair_num];
@@ -181,9 +175,6 @@ void OVPs::free_tau_03() {
 }
 void OVPs::free_03() {
   free_02();
-
-  delete[] d_ovps.ps_12c;
-  delete[] d_ovps.ps_22c;
 
   delete[] d_ovps.en3_1pCore ;
   delete[] d_ovps.en3_2pCore ;

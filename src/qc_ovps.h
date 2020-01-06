@@ -66,21 +66,6 @@ class OVPS_SET {
 };
 
 struct OVPS_ARRAY {
-  double *psi1, *psi2;
-  double *psiTau1, *psiTau2;
-  double *occ1, *occ2, *vir1, *vir2;
-  double *occTau1, *occTau2, *virTau1, *virTau2;
-
-  double *os_13, *os_14, *os_23, *os_24;
-  double *vs_13, *vs_14, *vs_23, *vs_24;
-  double *ps_24;
-
-  double *os_35, *os_36, *os_45, *os_46;
-  double *os_15, *os_16, *os_25, *os_26;
-  double *vs_35, *vs_36, *vs_45, *vs_46;
-  double *vs_15, *vs_16, *vs_25, *vs_26;
-  double *ps_12c, *ps_22c;
-
   double *ent, *enCore;
   std::vector<std::vector<double*>> enBlock;
   std::vector<double*> enEx1;

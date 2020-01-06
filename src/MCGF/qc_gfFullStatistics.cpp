@@ -9,6 +9,14 @@ void GF::mc_gf_statistics(int step,
     std::vector<std::vector<double*>>& enBlock,
     std::vector<double*>& enEx1,
     std::vector<std::vector<double*>>& enCov) {
+  /*
+  auto mode = std::ios::app;
+  if (step == 1) {
+    mode = std::ios::trunc;
+  }
+  std::ofstream os("trajectory_dump", mode);
+  os.write((char*) ovps.d_ovps.enBlock[0][0], sizeof(double) * (basis.ivir2 - basis.iocc1) * (basis.ivir2 - basis.iocc1));
+   */
   for (auto band = 0; band < iops.iopns[KEYS::NUM_BAND]; band++) {
 
     uint32_t block = 0;

@@ -28,6 +28,7 @@ void GF::monte_energy() {
     print_mc_head(mc_start);
   }
 
+  tau->new_tau(random);
   for (auto step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
     // move walkers
     move_walkers();
@@ -169,9 +170,9 @@ void GF3::mc_local_energy(const int& step) {
 }
 
 int GF3::full_print(int& step, int checkNum) {
-  for (auto band = 0; band < numBand; band++) {
-    mc_gf_full_print(band, step, checkNum % 2, 0, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
-  }
-  checkNum += 1;
-  return checkNum;
+for (auto band = 0; band < numBand; band++) {
+  mc_gf_full_print(band, step, checkNum % 2, 0, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+}
+checkNum += 1;
+return checkNum;
 }

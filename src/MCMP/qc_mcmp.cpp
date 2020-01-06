@@ -1,10 +1,6 @@
 //
 // Created by aedoran on 6/1/18.
 //
-
-//
-// Created by aedoran on 6/1/18.
-//
 #include <algorithm>
 #include <chrono>
 #include <fstream>
