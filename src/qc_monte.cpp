@@ -8,8 +8,13 @@
 
 
 QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Electron_Pair_List* ep) :
-    mpi_info(p0), iops(p1), molec(p2), basis(p3), mc_basis(p4),
-    random(iops.iopns[KEYS::DEBUG]), el_pair_list(ep)
+    mpi_info(p0),
+    iops(p1),
+    molec(p2),
+    basis(p3),
+    mc_basis(p4),
+    random(iops.iopns[KEYS::DEBUG]),
+    el_pair_list(ep)
   {
 
   numBand = iops.iopns[KEYS::NUM_BAND];

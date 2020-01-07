@@ -9,8 +9,6 @@
 #include "blas_calls.h"
 #include "qc_ovps.h"
 
-
-
 void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
   mc_pair_num = mc_pair_num_;
   iocc1 = basis.iocc1;
@@ -37,10 +35,10 @@ void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* el_pair_list, Tau* 
     for (auto start = 0; start < o_set[stop].size(); start++) {
       auto t_val = tau->get_exp_tau(stop, start);
       std::transform(t_val.begin(), t_val.end(), t_val.begin(), sqrt);
-      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.psi1, ivir2 - iocc1, &t_val[iocc1], 1, basis.psiTau1, ivir2 - iocc1);
-      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.psi2, ivir2 - iocc1, &t_val[iocc1], 1, basis.psiTau2, ivir2 - iocc1);
-      o_set[stop][start].update(basis.occTau1, basis.occTau2);
-      v_set[stop][start].update(basis.virTau1, basis.virTau2);
+      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.wfn_psi1->psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, basis.wfn_psi1->psiTau.data(), ivir2 - iocc1);
+      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.wfn_psi2->psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, basis.wfn_psi2->psiTau.data(), ivir2 - iocc1);
+      o_set[stop][start].update(basis.wfn_psi1->occTau(), basis.wfn_psi2->occTau());
+      v_set[stop][start].update(basis.wfn_psi1->virTau(), basis.wfn_psi2->virTau());
     }
   }
 }

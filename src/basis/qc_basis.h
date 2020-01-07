@@ -10,6 +10,43 @@
 #include "../qc_mpi.h"
 #include "../el_pair.h"
 
+class Wavefunction {
+ public:
+  Wavefunction(const size_t& electrons_, int io1, int io2, int iv1, int iv2) :
+    iocc1(io1),
+    iocc2(io2),
+    ivir1(iv1),
+    ivir2(iv2),
+    electrons(electrons_),
+    psi((ivir2 - iocc1) * electrons, 0.0),
+    psiTau((ivir2 - iocc1) * electrons, 0.0)
+  {
+  }
+  double *occ() {
+    return psi.data();
+  }
+  double *vir() {
+    return psi.data() + (ivir1-iocc1);
+  }
+  double *occTau() {
+    return psiTau.data();
+  }
+  double *virTau() {
+    return psiTau.data() + (ivir1-iocc1);
+  }
+
+  size_t iocc1, iocc2, ivir1, ivir2, electrons;
+  size_t lda;
+  size_t rows;
+  size_t col;
+  // type for row/col major
+
+  std::vector<double> psi;
+  std::vector<double> psiTau;
+
+ private:
+};
+
 namespace SHELL {
   enum Shell_Type {
     SP=-1, S, P, D, F, G, H
@@ -51,8 +88,10 @@ struct BasisData {
   double *ao_amplitudes;  // stores AO amplidutes
   double *nw_co;          // obital coefs from nwchem
 
-  double *psi1, *psi2, *occ1, *occ2, *vir1, *vir2;
-  double *psiTau1, *psiTau2, *occTau1, *occTau2, *virTau1, *virTau2;
+  Wavefunction* wfn_psi1;
+  Wavefunction* wfn_psi2;
+  // double *psi1, *psi2, *occ1, *occ2, *vir1, *vir2;
+  // double *psiTau1, *psiTau2, *occTau1, *occTau2, *virTau1, *virTau2;
 
   BasisMetaData *meta_data;
 };
@@ -74,7 +113,7 @@ class Basis {
   friend void swap(Basis&, Basis&);
 
   // get psi vals
-  void host_psi_get(Electron_Pair_List* el_pair);
+  void host_psi_get(Wavefunction*, Wavefunction*, Electron_Pair_List* el_pair);
   void host_cgs_get(const std::array<double, 3>&, int);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 
