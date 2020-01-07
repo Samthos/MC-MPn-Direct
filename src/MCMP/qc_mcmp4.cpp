@@ -7,12 +7,31 @@ class MP4_Engine {
  public:
   MP4_Engine(Electron_Pair_List* el_pair) :
       mpn(el_pair->size()),
-      rv(mpn), wgt(mpn), r_r(mpn), r_w(mpn), w_w(mpn), en_r(mpn), en_w(mpn),
-      ij_(mpn * mpn), ik_(mpn * mpn), il_(mpn * mpn), jk_(mpn * mpn), jl_(mpn * mpn), kl_(mpn * mpn),
-      ext_ptr(8), ext_data(8, std::vector<double>(mpn*mpn)),
-      i_kl(mpn * mpn), j_kl(mpn * mpn),
-      ij_rk(mpn * mpn), ij_wk(mpn * mpn), ij_rl(mpn * mpn), ij_wl(mpn * mpn),
-      T_r(mpn * mpn), T_w(mpn * mpn), Av(mpn * mpn) {
+      rv(mpn),
+      wgt(mpn),
+      r_r(mpn),
+      r_w(mpn),
+      w_w(mpn),
+      en_r(mpn),
+      en_w(mpn),
+      ij_(mpn * mpn),
+      ik_(mpn * mpn),
+      il_(mpn * mpn),
+      jk_(mpn * mpn),
+      jl_(mpn * mpn),
+      kl_(mpn * mpn),
+      ext_ptr(8),
+      ext_data(8,
+      std::vector<double>(mpn*mpn)),
+      i_kl(mpn * mpn),
+      j_kl(mpn * mpn),
+      ij_rk(mpn * mpn),
+      ij_wk(mpn * mpn),
+      ij_rl(mpn * mpn),
+      ij_wl(mpn * mpn),
+      T_r(mpn * mpn),
+      T_w(mpn * mpn),
+      Av(mpn * mpn) {
     std::transform(el_pair->begin(), el_pair->end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});
     std::transform(el_pair->begin(), el_pair->end(), wgt.begin(), [](Electron_Pair ept){return 1.0/ept.wgt;});
 

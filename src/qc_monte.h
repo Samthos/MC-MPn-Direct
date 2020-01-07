@@ -64,7 +64,6 @@ class QC_monte {
   int numBand, offBand;
   int iocc1, iocc2, ivir1, ivir2;
 
-
   void update_wavefunction();
   void move_walkers();
   static void print_mc_head(std::chrono::high_resolution_clock::time_point);
