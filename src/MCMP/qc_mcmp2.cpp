@@ -85,18 +85,18 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
       en[0] = en[0] + (o_14 * o_23 * v_14 * v_23);
       en[1] = en[1] + (o_13 * o_24 * v_14 * v_23);
 
-      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->get(jt).rv;});
+      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->rv[jt]; });
 #if MP2CV >= 2
-      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list->get(jt).wgt;});
+      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list-wgt[jt]; });
 #endif
     }
-    en2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->get(it).rv;
+    en2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->rv[it];
 #if MP2CV >= 1
-    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
+    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
 #endif
 #if MP2CV >= 2
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * el_pair_list->get(it).rv; });
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * el_pair_list->rv[it]; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
 #endif
   }
 
@@ -133,18 +133,18 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control2) {
       en[0] = en[0] + (ovps.o_set[0][0].s_12[ijIndex] * ovps.o_set[0][0].s_21[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
       en[1] = en[1] + (ovps.o_set[0][0].s_11[ijIndex] * ovps.o_set[0][0].s_22[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
 
-      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->get(jt).rv;});
+      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->rv[jt];});
 #if MP2CV >= 2
-      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list->get(jt).wgt;});
+      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list->wgt[jt];});
 #endif
     }
-    en2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->get(it).rv;
+    en2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->rv[it];
 #if MP2CV >= 1
-    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
+    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
 #endif
 #if MP2CV >= 2
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * el_pair_list->get(it).rv; });
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / el_pair_list->get(it).wgt; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * el_pair_list->rv[it]; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
 #endif
   }
   auto tau_wgt = tau->get_wgt(1);

@@ -31,15 +31,15 @@ class Electron_Pair_List {
   std::size_t size() {
     return electron_pairs.size();
   }
-  Electron_Pair* data() {
-    return electron_pairs.data();
-  }
-  const Electron_Pair& operator [] (int i) const {
-    return electron_pairs[i];
-  }
-  const Electron_Pair& get(int i) const {
-    return electron_pairs[i];
-  }
+
+  std::vector<std::array<double, 3>> pos1;
+  std::vector<std::array<double, 3>> pos2;
+  std::vector<double> wgt;
+  std::vector<double> rv;
+ protected:
+  static double calculate_r12(const Electron_Pair &el_pair);
+  static void set_weight(Electron_Pair&, const GTO_Weight&);
+  void transpose();
   std::vector<Electron_Pair>::iterator begin() {
     return electron_pairs.begin();
   }
@@ -47,18 +47,9 @@ class Electron_Pair_List {
     return electron_pairs.end();
   }
 
- protected:
-  static double calculate_r12(const Electron_Pair &el_pair);
-  static void set_weight(Electron_Pair&, const GTO_Weight&);
-  void transpose();
 
   std::vector<Electron_Pair> electron_pairs;
-  std::vector<std::array<double, 3>> pos1;
-  std::vector<std::array<double, 3>> pos2;
-  std::vector<double> wgt;
-  std::vector<double> rv;
 };
-
 Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight);
 
 class Direct_Electron_Pair_List : public Electron_Pair_List {

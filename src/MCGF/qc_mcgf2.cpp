@@ -20,8 +20,8 @@ void gf2_core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
         en2m = en2m + 2.00 * ovps.o_set[0][0].s_22[Index] * ovps.o_set[0][0].s_11[Index] * ovps.v_set[0][0].s_11[Index];  // ovps.ps_.s_22c[bandIndex];
         en2m = en2m - 1.00 * ovps.o_set[0][0].s_21[Index] * ovps.o_set[0][0].s_12[Index] * ovps.v_set[0][0].s_11[Index];  // ovps.ps_.s_22c[bandIndex];
 
-        en2p = en2p * electron_pair_list->get(tidx).rv * electron_pair_list->get(tidy).rv;
-        en2m = en2m * electron_pair_list->get(tidx).rv * electron_pair_list->get(tidy).rv;
+        en2p = en2p * electron_pair_list->rv[tidx] * electron_pair_list->rv[tidy];
+        en2m = en2m * electron_pair_list->rv[tidx] * electron_pair_list->rv[tidy];
       }
       ovps.d_ovps.en2pCore[Index] = en2p;
       ovps.d_ovps.en2mCore[Index] = en2m;

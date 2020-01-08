@@ -18,7 +18,7 @@ void Basis::gpu_free() {
 void Basis::host_psi_get(Wavefunction* psi1, Wavefunction* psi2, Electron_Pair_List* el_pair) {
   //for (auto &walker : el_pair) {
   for (auto walker = 0; walker < el_pair->size(); ++walker) {
-    host_cgs_get(el_pair->get(walker).pos1, walker);
+    host_cgs_get(el_pair->pos1[walker], walker);
   }
 
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -30,7 +30,7 @@ void Basis::host_psi_get(Wavefunction* psi1, Wavefunction* psi2, Electron_Pair_L
       psi1->psi.data(), ivir2-iocc1);
 
   for (auto walker = 0; walker < el_pair->size(); ++walker) {
-    host_cgs_get(el_pair->get(walker).pos2, walker);
+    host_cgs_get(el_pair->pos2[walker], walker);
   }
 
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,

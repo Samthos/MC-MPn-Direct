@@ -248,9 +248,8 @@ void GF::mcgf3_local_energy_core() {
   T[1] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
   T[2] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
   T[3] = new double[iops.iopns[KEYS::MC_NPAIR]];
-  for (auto it = el_pair_list->begin(); it != el_pair_list->end(); it++) {
-    T[3][std::distance(el_pair_list->begin(), it)] = it->rv;
-  }
+
+  std::copy(el_pair_list->rv.begin(), el_pair_list->rv.end(), T[3]);
 
   gf3_core_c(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
   gf3_core_1(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
