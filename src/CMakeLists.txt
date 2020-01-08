@@ -13,6 +13,8 @@ set(source
         blas_calls.h
         electron_pair_list.cpp
         electron_pair_list.h
+        electron_list.cpp
+        electron_list.h
         main.cpp
         weight_function.cpp
         weight_function.h

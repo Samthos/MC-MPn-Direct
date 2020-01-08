@@ -38,7 +38,7 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, Electron_Pair_GTO_W
 }
 
 void QC_monte::move_walkers() {
-  electron_pair_list->move(random, molec, mc_basis);
+  electron_pair_list->move(random, mc_basis);
 }
 
 void QC_monte::print_mc_head(std::chrono::high_resolution_clock::time_point mc_start) {
