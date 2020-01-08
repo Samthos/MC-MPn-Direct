@@ -41,7 +41,7 @@ class GFStats {
 
 class QC_monte {
  public:
-  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Electron_Pair_List*);
+  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, Electron_Pair_GTO_Weight p4, Electron_Pair_List*);
   virtual ~QC_monte() {
     basis.gpu_free();
     delete tau;
@@ -53,7 +53,7 @@ class QC_monte {
   IOPs iops;
   Molec molec;
   Basis basis;
-  GTO_Weight mc_basis;
+  Electron_Pair_GTO_Weight mc_basis;
 
   Random random;
   Electron_Pair_List* el_pair_list;
@@ -75,7 +75,7 @@ class MP : public QC_monte {
   void monte_energy();
   virtual void energy() = 0;
  protected:
-  MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep, std::vector<int> cv_sizes) :
+  MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep, std::vector<int> cv_sizes) :
   QC_monte(p1, p2, p3, p4, p5, ep) {
     tau->resize(cv_sizes.size());
     emp.resize(cv_sizes.size());
@@ -123,7 +123,7 @@ class MP : public QC_monte {
 
 class MP2 : public MP {
  public:
-  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6}) {}
+  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6}) {}
   ~MP2() override = default;
 
  protected:
@@ -132,7 +132,7 @@ class MP2 : public MP {
 
 class MP3 : public MP {
  public:
-  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36}) {
+  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36}) {
     ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
   ~MP3() override {
@@ -145,7 +145,7 @@ class MP3 : public MP {
 
 class MP4 : public MP {
  public:
-  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36, 72}) {
+  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36, 72}) {
     ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
   ~MP4() {
@@ -161,7 +161,7 @@ class GF : public  QC_monte {
   void monte_energy() override;
 
  protected:
-  GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : QC_monte(p1, p2, p3, p4, p5, ep) {}
+  GF(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : QC_monte(p1, p2, p3, p4, p5, ep) {}
 
   std::vector<GFStats> qeps;
   virtual void mc_local_energy(const int& step) = 0;
@@ -198,7 +198,7 @@ class GPU_GF2 : public GF {
   void mc_local_energy(std::vector<std::vector<double>>&, int);
 
  public:
-  GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+  GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
@@ -214,7 +214,7 @@ class GPU_GF2 : public GF {
 
 class GF2 : public GF {
  public:
-  GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+  GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init(1, iops.iopns[KEYS::MC_NPAIR], basis);
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
@@ -240,7 +240,7 @@ class GPU_GF3 : public GF {
   void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
 
  public:
-  GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+  GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
                  iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
@@ -255,7 +255,7 @@ class GPU_GF3 : public GF {
 
 class GF3 : public GF {
  public:
-  GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+  GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, Electron_Pair_GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init(2, iops.iopns[KEYS::MC_NPAIR], basis);
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],

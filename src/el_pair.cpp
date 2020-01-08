@@ -35,7 +35,7 @@ double Electron_Pair_List::calculate_r12(const Electron_Pair &el_pair) {
   r12 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
   return sqrt(r12);
 }
-void Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const GTO_Weight& weight) {
+void Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const Electron_Pair_GTO_Weight& weight) {
   electron_pair.wgt = weight.weight(electron_pair.pos1, electron_pair.pos2);
   electron_pair.rv = 1.0 / (calculate_r12(electron_pair)*electron_pair.wgt);
 }
@@ -48,7 +48,7 @@ void Electron_Pair_List::transpose() {
   }
 }
 
-Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight) {
+Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, Electron_Pair_GTO_Weight& weight) {
   Electron_Pair_List* electron_pair_list = nullptr;
   if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
     electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR]);
@@ -62,13 +62,13 @@ Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, GTO_Weight& weight)
 bool Direct_Electron_Pair_List::requires_blocking() {
   return false;
 }
-void Direct_Electron_Pair_List::move(Random& random, const Molec& molec, const GTO_Weight& weight) {
+void Direct_Electron_Pair_List::move(Random& random, const Molec& molec, const Electron_Pair_GTO_Weight& weight) {
   for (Electron_Pair &electron_pair : electron_pairs) {
     mc_move_scheme(electron_pair, random, molec, weight);
   }
   transpose();
 }
-void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Molec& molec, const GTO_Weight& weight) {
+void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Molec& molec, const Electron_Pair_GTO_Weight& weight) {
   constexpr double TWOPI = 6.283185307179586;
   std::array<double, 3> dr{};
 
@@ -224,7 +224,7 @@ double Direct_Electron_Pair_List::calculate_phi(double p, double r, double alpha
   return phi;
 }
 
-Metropolis_Electron_Pair_List::Metropolis_Electron_Pair_List(int size, double ml, Random& random, const Molec& molec, const GTO_Weight& weight) : Electron_Pair_List(size),
+Metropolis_Electron_Pair_List::Metropolis_Electron_Pair_List(int size, double ml, Random& random, const Molec& molec, const Electron_Pair_GTO_Weight& weight) : Electron_Pair_List(size),
     move_length(ml),
     moves_since_rescale(0),
     successful_moves(0),
@@ -242,7 +242,7 @@ Metropolis_Electron_Pair_List::Metropolis_Electron_Pair_List(int size, double ml
 bool Metropolis_Electron_Pair_List::requires_blocking() {
   return true;
 }
-void Metropolis_Electron_Pair_List::move(Random& random, const Molec& molec, const GTO_Weight& weight) {
+void Metropolis_Electron_Pair_List::move(Random& random, const Molec& molec, const Electron_Pair_GTO_Weight& weight) {
   if (moves_since_rescale == 1'000) {
     rescale_move_length();
   }
@@ -252,7 +252,7 @@ void Metropolis_Electron_Pair_List::move(Random& random, const Molec& molec, con
   moves_since_rescale++;
   transpose();
 }
-void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Random &random, const Molec &molec, const GTO_Weight& weight) {
+void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Random &random, const Molec &molec, const Electron_Pair_GTO_Weight& weight) {
   int atom;
   double amp1, amp2, theta1, theta2;
   std::array<double, 3> pos;
@@ -289,7 +289,7 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
 
   set_weight(electron_pair, weight);
 }
-void Metropolis_Electron_Pair_List::mc_move_scheme(Electron_Pair &electron_pair, Random &random, const Molec &molec, const GTO_Weight &weight) {
+void Metropolis_Electron_Pair_List::mc_move_scheme(Electron_Pair &electron_pair, Random &random, const Molec &molec, const Electron_Pair_GTO_Weight &weight) {
   Electron_Pair trial_electron_pair = electron_pair;
 
   for (int i = 0; i < 3; i++) {

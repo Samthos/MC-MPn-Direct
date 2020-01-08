@@ -19,8 +19,10 @@
 #include "atom_znum.h"
 #include "weight_function.h"
 
-void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec,
-                       const std::string &filename) {
+Base_Weight::Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) {
+  read(mpi_info, molec, filename);
+}
+void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::string &filename) {
   int i, znum, mc_nbas;
   std::map<int, mc_basis_typ> WEIGHT_BASIS_;
   std::vector<double> alpha, coef;
@@ -120,26 +122,25 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec,
   normalize();
 }
 
-double GTO_Weight::weight(const std::array<double, 3> &pos1,
-                          const std::array<double, 3> &pos2) const {
+Electron_Pair_Base_Weight::Electron_Pair_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename){}
+
+Electron_Pair_GTO_Weight::Electron_Pair_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Pair_Base_Weight(mpi_info, molec, filename){}
+double Electron_Pair_GTO_Weight::weight(const std::array<double, 3> &pos1, const std::array<double, 3> &pos2) const {
   std::array<double, 3> dr;
   double r1, r2, r12;
   double gf1, gf2;
 
-  std::transform(pos1.begin(), pos1.end(), pos2.begin(), dr.begin(),
-                 std::minus<double>());
+  std::transform(pos1.begin(), pos1.end(), pos2.begin(), dr.begin(), std::minus<double>());
   r12 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
   r12 = sqrt(r12);
 
   gf1 = 0.0;
   gf2 = 0.0;
   for (auto &it : mcBasisList) {
-    std::transform(pos1.begin(), pos1.end(), it.center.begin(), dr.begin(),
-                   std::minus<double>());
+    std::transform(pos1.begin(), pos1.end(), it.center.begin(), dr.begin(), std::minus<double>());
     r1 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
 
-    std::transform(pos2.begin(), pos2.end(), it.center.begin(), dr.begin(),
-                   std::minus<double>());
+    std::transform(pos2.begin(), pos2.end(), it.center.begin(), dr.begin(), std::minus<double>());
     r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
 
     gf1 = std::inner_product(
@@ -151,31 +152,9 @@ double GTO_Weight::weight(const std::array<double, 3> &pos1,
         std::plus<double>(),
         [r2](double a, double n) { return n * exp(-a * r2); });
   }
-  /*
-  for (auto &it : cum_sum_index) {
-    // calculate distance between pos1 and center 1
-    std::transform(pos1.begin(), pos1.end(),
-                   mcBasisList[it[0]].center.begin(), dr.begin(), std::minus<double>());
-    r1 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-
-    // calculate distance between pos2 and center 2
-    std::transform(pos2.begin(), pos2.end(),
-                   mcBasisList[it[1]].center.begin(), dr.begin(), std::minus<double>());
-
-    auto a1 = mcBasisList[it[0]].contraction_exp[it[2]];
-    auto a2 = mcBasisList[it[1]].contraction_exp[it[3]];
-    auto n1 = mcBasisList[it[0]].contraction_coef[it[2]];
-    auto n2 = mcBasisList[it[1]].contraction_coef[it[3]];
-
-    r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-    gf1 += n1 * exp(-a1 * r1) * n2 * exp(-a2 * r2);
-  }
-  */
-
   return gf1 * gf2 / r12;
 }
-
-double GTO_Weight::normalize() {
+void Electron_Pair_GTO_Weight::normalize() {
   int ie, je, m, ts;
   int i, j, k;
   double eri;
@@ -270,8 +249,7 @@ double GTO_Weight::normalize() {
     }
   }
 
-  std::for_each(cum_sum.begin(), cum_sum.end(),
-                [&](double& x) {x = x/g_wgt;});
+  std::for_each(cum_sum.begin(), cum_sum.end(), [&](double& x) {x = x/g_wgt;});
   std::partial_sum(cum_sum.begin(), cum_sum.end(), cum_sum.begin());
 
   // std::cout << "g_wgt: " << g_wgt << std::endl;
@@ -279,6 +257,41 @@ double GTO_Weight::normalize() {
   for (auto &it : mcBasisList) {
     std::for_each(it.norm.begin(), it.norm.end(), [g_wgt](double& n) {n /= g_wgt;});
   }
+}
 
-  return g_wgt;
+Electron_Base_Weight::Electron_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename){}
+
+Electron_GTO_Weight::Electron_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Base_Weight(mpi_info, molec, filename){}
+double Electron_GTO_Weight::weight(const std::array<double, 3> &pos) const {
+  std::array<double, 3> dr;
+  double weight = 0.0;
+
+  for (auto &it : mcBasisList) {
+    std::transform(pos.begin(), pos.end(), it.center.begin(), dr.begin(), std::minus<double>());
+    auto r = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
+    weight = std::inner_product(
+        it.alpha.begin(), it.alpha.end(), it.norm.begin(), weight,
+        std::plus<double>(),
+        [r](double a, double n) { return n * exp(-a * r); });
+  }
+  return weight;
+}
+void Electron_GTO_Weight::normalize() {
+  double norm = 0.0;
+  for (auto &it : mcBasisList) {
+    for (auto i = 0; i < mc_nprim; i++) {
+      auto a = it.alpha[i];
+      auto c = it.norm[i];
+      auto n = c * 5.568327996831709 / pow(a, 1.5);
+      cum_sum.push_back(n);
+      cum_sum_index.push_back({&it - &mcBasisList[0], i});
+      norm += n;
+    }
+  }
+
+  std::for_each(cum_sum.begin(), cum_sum.end(), [&](double& x) {x = x/norm;});
+  std::partial_sum(cum_sum.begin(), cum_sum.end(), cum_sum.begin());
+  for (auto &it : mcBasisList) {
+    std::for_each(it.norm.begin(), it.norm.end(), [norm](double& n) {n /= norm;});
+  }
 }

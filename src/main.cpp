@@ -36,8 +36,7 @@ int main(int argc, char* argv[]) {
 
   Basis basis(iops, mpi_info, molec);
 
-  GTO_Weight mc_basis;
-  mc_basis.read(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);
+  Electron_Pair_GTO_Weight mc_basis(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);
 
   auto el_pair_list = create_sampler(iops, molec, mc_basis);
 

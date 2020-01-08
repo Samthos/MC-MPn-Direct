@@ -7,7 +7,7 @@
 #include "qc_monte.h"
 
 
-QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, GTO_Weight p4, Electron_Pair_List* ep) :
+QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3, Electron_Pair_GTO_Weight p4, Electron_Pair_List* ep) :
     mpi_info(p0),
     iops(p1),
     molec(p2),
