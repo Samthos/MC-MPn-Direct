@@ -29,7 +29,7 @@ void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
 }
 void OVPs::free() {
 }
-void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* el_pair_list, Tau* tau) {
+void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* electron_pair_list, Tau* tau) {
   // update green's function trace objects
   for (auto stop = 0; stop < o_set.size(); stop++) {
     for (auto start = 0; start < o_set[stop].size(); start++) {
@@ -243,13 +243,13 @@ void OVPs::update_ovps_02(const BasisData& basis) {
   }
   */
 }
-void OVPs::update_ovps_03(Electron_Pair* el_pair_list, Tau* tau) {
+void OVPs::update_ovps_03(Electron_Pair* electron_pair_list, Tau* tau) {
   /*
   double alpha = 1.00;
   double beta = 0.00;
 
   std::cerr << "broke as hell\n";
-  // update_ovps_02(el_pair_list, tau);
+  // update_ovps_02(electron_pair_list, tau);
 
   freq_indp_gf(d_ovps, mc_pair_num, iocc2 - iocc1, offBand, numBand);
 

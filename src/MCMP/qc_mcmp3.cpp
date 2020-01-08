@@ -128,10 +128,10 @@ void MP::mcmp3_energy(double& emp3, std::vector<double>& control3) {
   double en3 = 0;
   std::vector<double> ctrl(control3.size(), 0.0);
 
-  std::vector<double>& rv = el_pair_list->rv;
-  std::vector<double>& wgt = el_pair_list->wgt;
-  // std::transform(el_pair_list->begin(), el_pair_list->end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});
-  // std::transform(el_pair_list->begin(), el_pair_list->end(), wgt.begin(), [](Electron_Pair ept){return 1.0/ept.wgt;});
+  std::vector<double>& rv = electron_pair_list->rv;
+  std::vector<double>& wgt = electron_pair_list->wgt;
+  // std::transform(electron_pair_list->begin(), electron_pair_list->end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});
+  // std::transform(electron_pair_list->begin(), electron_pair_list->end(), wgt.begin(), [](Electron_Pair ept){return 1.0/ept.wgt;});
 
   mcmp3_helper(en3, ctrl,  0, iops.iopns[KEYS::MC_NPAIR], 2, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
   mcmp3_helper(en3, ctrl,  6, iops.iopns[KEYS::MC_NPAIR], 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);

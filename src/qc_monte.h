@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "el_pair.h"
+#include "electron_pair_list.h"
 #include "weight_function.h"
 #include "basis/qc_basis.h"
 #include "qc_geom.h"
@@ -56,7 +56,7 @@ class QC_monte {
   Electron_Pair_GTO_Weight mc_basis;
 
   Random random;
-  Electron_Pair_List* el_pair_list;
+  Electron_Pair_List* electron_pair_list;
   OVPs ovps;
   Tau* tau;
 

@@ -5,8 +5,8 @@
 #include "cblas.h"
 class MP4_Engine {
  public:
-  MP4_Engine(Electron_Pair_List* el_pair) :
-      mpn(el_pair->size()),
+  MP4_Engine(Electron_Pair_List* electron_pair_list) :
+      mpn(electron_pair_list->size()),
       rv(mpn),
       wgt(mpn),
       r_r(mpn),
@@ -32,8 +32,8 @@ class MP4_Engine {
       T_r(mpn * mpn),
       T_w(mpn * mpn),
       Av(mpn * mpn) {
-    std::copy(el_pair->rv.begin(), el_pair->rv.end(), rv.begin());
-    std::transform(el_pair->wgt.begin(), el_pair->wgt.end(), wgt.begin(), [](double x){return 1.0/x;});
+    std::copy(electron_pair_list->rv.begin(), electron_pair_list->rv.end(), rv.begin());
+    std::transform(electron_pair_list->wgt.begin(), electron_pair_list->wgt.end(), wgt.begin(), [](double x){return 1.0/x;});
 
     std::transform(rv.begin(), rv.end(), rv.begin(), r_r.begin(), std::multiplies<>());
     std::transform(rv.begin(), rv.end(), wgt.begin(), r_w.begin(), std::multiplies<>());
@@ -1165,7 +1165,7 @@ void MP4_Engine::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& contr
 }
 
 void MP::mcmp4_energy(double& emp4, std::vector<double>& control4) {
-  MP4_Engine mp4(el_pair_list);
+  MP4_Engine mp4(electron_pair_list);
   double en4 = 0.0;
   std::vector<double> ctrl(control4.size(), 0.0);
 

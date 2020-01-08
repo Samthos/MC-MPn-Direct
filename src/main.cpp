@@ -38,30 +38,30 @@ int main(int argc, char* argv[]) {
 
   Electron_Pair_GTO_Weight mc_basis(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]);
 
-  auto el_pair_list = create_sampler(iops, molec, mc_basis);
+  auto electron_pair_list = create_sampler(iops, molec, mc_basis);
 
   if (iops.iopns[KEYS::TASK] == TASKS::MP) {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      MP2 qc_monte(mpi_info, iops, molec, basis, mc_basis, el_pair_list);
+      MP2 qc_monte(mpi_info, iops, molec, basis, mc_basis, electron_pair_list);
       qc_monte.monte_energy();
     } else if (iops.iopns[KEYS::ORDER] == 3) {
-      MP3 qc_monte(mpi_info, iops, molec, basis, mc_basis, el_pair_list);
+      MP3 qc_monte(mpi_info, iops, molec, basis, mc_basis, electron_pair_list);
       qc_monte.monte_energy();
     } else if (iops.iopns[KEYS::ORDER] == 4) {
-      MP4 qc_monte(mpi_info, iops, molec, basis, mc_basis, el_pair_list);
+      MP4 qc_monte(mpi_info, iops, molec, basis, mc_basis, electron_pair_list);
       qc_monte.monte_energy();
     }
   } else {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      GF2 qc_monte(mpi_info, iops, molec, basis, mc_basis, el_pair_list);
+      GF2 qc_monte(mpi_info, iops, molec, basis, mc_basis, electron_pair_list);
       qc_monte.monte_energy();
     } else if (iops.iopns[KEYS::ORDER] == 3) {
-      GF3 qc_monte(mpi_info, iops, molec, basis, mc_basis, el_pair_list);
+      GF3 qc_monte(mpi_info, iops, molec, basis, mc_basis, electron_pair_list);
       qc_monte.monte_energy();
     }
   }
 
-  delete el_pair_list;
+  delete electron_pair_list;
 
 #ifdef HAVE_MPI
   MPI_Finalize();

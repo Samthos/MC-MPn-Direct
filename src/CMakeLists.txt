@@ -11,8 +11,8 @@ set(source
         MCGF/qc_mcgf.cpp
         blas_calls.cpp
         blas_calls.h
-        el_pair.cpp
-        el_pair.h
+        electron_pair_list.cpp
+        electron_pair_list.h
         main.cpp
         weight_function.cpp
         weight_function.h

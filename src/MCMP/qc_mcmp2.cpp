@@ -39,7 +39,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
   std::array<double, 2> en_wj{0, 0};
 #endif
 
-  for (auto it = 0; it < el_pair_list->size(); ++it) {
+  for (auto it = 0; it < electron_pair_list->size(); ++it) {
     en_rj.fill(0.0);
 #if MP2CV >= 2
     en_wj.fill(0.0);
@@ -54,7 +54,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
         tau_values.begin() + iocc1,
         basis.h_basis.wfn_psi2->psiTau.data(),
         std::multiplies<>());
-    for (auto jt = it + 1; jt != el_pair_list->size(); jt++) {
+    for (auto jt = it + 1; jt != electron_pair_list->size(); jt++) {
       o_13 = 0.0;
       o_14 = 0.0;
       o_23 = 0.0;
@@ -85,24 +85,24 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
       en[0] = en[0] + (o_14 * o_23 * v_14 * v_23);
       en[1] = en[1] + (o_13 * o_24 * v_14 * v_23);
 
-      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->rv[jt]; });
+      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * electron_pair_list->rv[jt]; });
 #if MP2CV >= 2
-      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list-wgt[jt]; });
+      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / electron_pair_list-wgt[jt]; });
 #endif
     }
-    en2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->rv[it];
+    en2 += (en_rj[1] - 2.0 * en_rj[0]) * electron_pair_list->rv[it];
 #if MP2CV >= 1
-    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
+    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / electron_pair_list->wgt[it]; });
 #endif
 #if MP2CV >= 2
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * el_pair_list->rv[it]; });
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * electron_pair_list->rv[it]; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / electron_pair_list->wgt[it]; });
 #endif
   }
 
   auto tau_wgt = tau->get_wgt(1);
-  tau_wgt /= static_cast<double>(el_pair_list->size());
-  tau_wgt /= static_cast<double>(el_pair_list->size() - 1);
+  tau_wgt /= static_cast<double>(electron_pair_list->size());
+  tau_wgt /= static_cast<double>(electron_pair_list->size() - 1);
   emp2 += en2 * tau_wgt;
 #if MP2CV >= 1
   std::transform(ctrl.begin(), ctrl.end(), control2.begin(), control2.begin(), [&](double c, double total) { return total + c * tau_wgt; });
@@ -133,23 +133,23 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control2) {
       en[0] = en[0] + (ovps.o_set[0][0].s_12[ijIndex] * ovps.o_set[0][0].s_21[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
       en[1] = en[1] + (ovps.o_set[0][0].s_11[ijIndex] * ovps.o_set[0][0].s_22[ijIndex] * ovps.v_set[0][0].s_12[ijIndex] * ovps.v_set[0][0].s_21[ijIndex]);
 
-      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * el_pair_list->rv[jt];});
+      std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * electron_pair_list->rv[jt];});
 #if MP2CV >= 2
-      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / el_pair_list->wgt[jt];});
+      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / electron_pair_list->wgt[jt];});
 #endif
     }
-    en2 += (en_rj[1] - 2.0 * en_rj[0]) * el_pair_list->rv[it];
+    en2 += (en_rj[1] - 2.0 * en_rj[0]) * electron_pair_list->rv[it];
 #if MP2CV >= 1
-    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
+    std::transform(en_rj.begin(), en_rj.end(), ctrl.begin()+0, ctrl.begin()+0, [&](double x, double y) { return y + x / electron_pair_list->wgt[it]; });
 #endif
 #if MP2CV >= 2
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * el_pair_list->rv[it]; });
-    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / el_pair_list->wgt[it]; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+2, ctrl.begin()+2, [&](double x, double y) { return y + x * electron_pair_list->rv[it]; });
+    std::transform(en_wj.begin(), en_wj.end(), ctrl.begin()+4, ctrl.begin()+4, [&](double x, double y) { return y + x / electron_pair_list->wgt[it]; });
 #endif
   }
   auto tau_wgt = tau->get_wgt(1);
-  tau_wgt /= static_cast<double>(el_pair_list->size());
-  tau_wgt /= static_cast<double>(el_pair_list->size() - 1);
+  tau_wgt /= static_cast<double>(electron_pair_list->size());
+  tau_wgt /= static_cast<double>(electron_pair_list->size() - 1);
   emp2 = emp2 + en2 * tau_wgt;
 #if MP2CV >= 1
   std::transform(ctrl.begin(), ctrl.end(), control2.begin(), control2.begin(), [&](double c, double total) { return total + c * tau_wgt; });

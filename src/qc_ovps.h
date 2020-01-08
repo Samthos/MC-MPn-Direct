@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "el_pair.h"
+#include "electron_pair_list.h"
 #include "basis/qc_basis.h"
 #include "qc_random.h"
 #include "tau_integrals.h"

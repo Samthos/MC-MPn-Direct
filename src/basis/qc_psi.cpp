@@ -7,7 +7,7 @@
 #include "cblas.h"
 #include "../blas_calls.h"
 #include "qc_basis.h"
-#include "../el_pair.h"
+#include "../electron_pair_list.h"
 
 
 void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
@@ -15,26 +15,25 @@ void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 void Basis::gpu_free() {
 }
 
-void Basis::host_psi_get(Wavefunction* psi1, Wavefunction* psi2, Electron_Pair_List* el_pair) {
-  //for (auto &walker : el_pair) {
-  for (auto walker = 0; walker < el_pair->size(); ++walker) {
-    host_cgs_get(el_pair->pos1[walker], walker);
+void Basis::host_psi_get(Wavefunction* psi1, Wavefunction* psi2, Electron_Pair_List* electron_pair_list) {
+  for (auto walker = 0; walker < electron_pair_list->size(); ++walker) {
+    host_cgs_get(electron_pair_list->pos1[walker], walker);
   }
 
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      el_pair->size(), ivir2 - iocc1, nw_nbf,
+      electron_pair_list->size(), ivir2 - iocc1, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,
       0.0,
       psi1->psi.data(), ivir2-iocc1);
 
-  for (auto walker = 0; walker < el_pair->size(); ++walker) {
-    host_cgs_get(el_pair->pos2[walker], walker);
+  for (auto walker = 0; walker < electron_pair_list->size(); ++walker) {
+    host_cgs_get(electron_pair_list->pos2[walker], walker);
   }
 
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      el_pair->size(), ivir2 - iocc1, nw_nbf,
+      electron_pair_list->size(), ivir2 - iocc1, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,

@@ -99,7 +99,7 @@ void GF2::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(basis.h_basis, el_pair_list, tau);
+  ovps.update_ovps(basis.h_basis, electron_pair_list, tau);
   mcgf2_local_energy_core();
   if(iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
     mcgf2_local_energy(qeps[0].qeps);
@@ -139,7 +139,7 @@ void GF3::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(basis.h_basis, el_pair_list, tau);
+  ovps.update_ovps(basis.h_basis, electron_pair_list, tau);
 
   mcgf2_local_energy_core();
   mcgf3_local_energy_core();

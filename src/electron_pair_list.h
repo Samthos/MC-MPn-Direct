@@ -37,7 +37,7 @@ class Electron_Pair_List {
   std::vector<double> wgt;
   std::vector<double> rv;
  protected:
-  static double calculate_r12(const Electron_Pair &el_pair);
+  static double calculate_r12(const Electron_Pair &electron_pair);
   static void set_weight(Electron_Pair&, const Electron_Pair_GTO_Weight&);
   void transpose();
   std::vector<Electron_Pair>::iterator begin() {

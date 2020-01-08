@@ -8,7 +8,7 @@
 #include "../qc_geom.h"
 #include "../qc_input.h"
 #include "../qc_mpi.h"
-#include "../el_pair.h"
+#include "../electron_pair_list.h"
 
 class Wavefunction {
  public:
@@ -113,7 +113,7 @@ class Basis {
   friend void swap(Basis&, Basis&);
 
   // get psi vals
-  void host_psi_get(Wavefunction*, Wavefunction*, Electron_Pair_List* el_pair);
+  void host_psi_get(Wavefunction*, Wavefunction*, Electron_Pair_List* electron_pair_list);
   void host_cgs_get(const std::array<double, 3>&, int);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 

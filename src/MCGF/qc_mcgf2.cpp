@@ -32,7 +32,7 @@ void gf2_core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
 }
 
 void GF::mcgf2_local_energy_core() {
-  gf2_core(ovps, el_pair_list);
+  gf2_core(ovps, electron_pair_list);
 }
 
 void GF::mcgf2_local_energy(std::vector<std::vector<double>>& egf2) {

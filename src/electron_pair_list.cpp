@@ -8,7 +8,7 @@
 #include <cstring>
 #include <iomanip>
 
-#include "el_pair.h"
+#include "electron_pair_list.h"
 
 std::ostream& operator << (std::ostream& os, const Electron_Pair& electron_pair) {
   os << std::setprecision(std::numeric_limits<double>::digits10 + 1) << electron_pair.pos1[0] << ",";
@@ -27,10 +27,10 @@ Electron_Pair_List::Electron_Pair_List(int size) :
     pos2(size),
     wgt(size),
     rv(size) {}
-double Electron_Pair_List::calculate_r12(const Electron_Pair &el_pair) {
+double Electron_Pair_List::calculate_r12(const Electron_Pair &electron_pair_list) {
   double r12;
   std::array<double, 3> dr{};
-  std::transform(el_pair.pos1.begin(), el_pair.pos1.end(), el_pair.pos2.begin(), dr.begin(),
+  std::transform(electron_pair_list.pos1.begin(), electron_pair_list.pos1.end(), electron_pair_list.pos2.begin(), dr.begin(),
                  std::minus<>());
   r12 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
   return sqrt(r12);
