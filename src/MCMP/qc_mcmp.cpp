@@ -109,7 +109,7 @@ void MP2::energy() {
 }
 
 void MP3::energy() {
-  ovps.update_ovps(basis.h_basis, electron_pair_list, tau);
+  ovps.update_ovps(electron_pair_psi1, electron_pair_psi2, tau);
   if (tau->is_new(1)) {
     mcmp2_energy(emp[0], control[0]);
   }
@@ -117,7 +117,7 @@ void MP3::energy() {
 }
 
 void MP4::energy() {
-  ovps.update_ovps(basis.h_basis, electron_pair_list, tau);
+  ovps.update_ovps(electron_pair_psi1, electron_pair_psi2, tau);
   if (tau->is_new(1)) {
     mcmp2_energy(emp[0], control[0]);
   }

@@ -26,7 +26,8 @@ Electron_Pair_List::Electron_Pair_List(int size) :
     pos1(size),
     pos2(size),
     wgt(size),
-    rv(size) {}
+    rv(size),
+    r12(size) {}
 double Electron_Pair_List::calculate_r12(const Electron_Pair &electron_pair_list) {
   double r12;
   std::array<double, 3> dr{};
@@ -37,7 +38,8 @@ double Electron_Pair_List::calculate_r12(const Electron_Pair &electron_pair_list
 }
 void Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const Electron_Pair_GTO_Weight& weight) {
   electron_pair.wgt = weight.weight(electron_pair.pos1, electron_pair.pos2);
-  electron_pair.rv = 1.0 / (calculate_r12(electron_pair)*electron_pair.wgt);
+  electron_pair.r12 = calculate_r12(electron_pair);
+  electron_pair.rv = 1.0 / (electron_pair.r12 * electron_pair.wgt);
 }
 void Electron_Pair_List::transpose() {
   for (size_t i = 0; i < electron_pairs.size(); i++) {
@@ -45,10 +47,11 @@ void Electron_Pair_List::transpose() {
     pos2[i] = electron_pairs[i].pos2;
     wgt[i] = electron_pairs[i].wgt;
     rv[i] = electron_pairs[i].rv;
+    r12[i] = electron_pairs[i].r12;
   }
 }
 
-Electron_Pair_List* create_sampler(IOPs& iops, Molec& molec, Electron_Pair_GTO_Weight& weight) {
+Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molec& molec, Electron_Pair_GTO_Weight& weight) {
   Electron_Pair_List* electron_pair_list = nullptr;
   if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
     electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR]);

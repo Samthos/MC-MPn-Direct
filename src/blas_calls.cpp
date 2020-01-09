@@ -32,7 +32,7 @@ void set_Upper_from_Lower(double *A, int m) {
 void dspr_batched(
     int rows, int cols,
     double alpha,
-    double* x,
+    const double* x,
     double* ap) {
 
   for (auto c1 = 0; c1 < cols; c1++) {
@@ -46,7 +46,7 @@ void dspr_batched(
 
 void dspr(int mode, int uplo, int n,
     double alpha,
-    double* x, int incx,
+    const double* x, int incx,
     double* ap){
   for (auto col = 0; col < n; col++) {
     for (auto row = 0; row <= col; row++) {

@@ -12,7 +12,7 @@
 
 class Wavefunction {
  public:
-  Wavefunction(const size_t& electrons_, int io1, int io2, int iv1, int iv2) :
+  Wavefunction(const size_t electrons_, int io1, int io2, int iv1, int iv2) :
     iocc1(io1),
     iocc2(io2),
     ivir1(iv1),
@@ -20,12 +20,14 @@ class Wavefunction {
     electrons(electrons_),
     psi((ivir2 - iocc1) * electrons, 0.0),
     psiTau((ivir2 - iocc1) * electrons, 0.0)
-  {
-  }
-  double *occ() {
+  {}
+  const double *data() const {
     return psi.data();
   }
-  double *vir() {
+  const double *occ() const {
+    return psi.data();
+  }
+  const double *vir() const {
     return psi.data() + (ivir1-iocc1);
   }
   double *occTau() {
@@ -87,12 +89,6 @@ struct BasisData {
   double *contraction_coef;
   double *ao_amplitudes;  // stores AO amplidutes
   double *nw_co;          // obital coefs from nwchem
-
-  Wavefunction* wfn_psi1;
-  Wavefunction* wfn_psi2;
-  // double *psi1, *psi2, *occ1, *occ2, *vir1, *vir2;
-  // double *psiTau1, *psiTau2, *occTau1, *occTau2, *virTau1, *virTau2;
-
   BasisMetaData *meta_data;
 };
 
@@ -113,7 +109,7 @@ class Basis {
   friend void swap(Basis&, Basis&);
 
   // get psi vals
-  void host_psi_get(Wavefunction*, Wavefunction*, Electron_Pair_List* electron_pair_list);
+  void host_psi_get(Wavefunction&, Wavefunction&, Electron_Pair_List* electron_pair_list);
   void host_cgs_get(const std::array<double, 3>&, int);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 

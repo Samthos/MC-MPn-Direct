@@ -42,6 +42,7 @@ class Electron_Pair_Base_Weight : public Base_Weight {
   std::vector<std::array<long int, 4>> cum_sum_index;
 
   virtual double weight(const std::array<double, 3>&, const std::array<double, 3>&) const = 0;
+  virtual void normalize() = 0;
  protected:
 };
 
@@ -60,6 +61,7 @@ class Electron_Base_Weight : public Base_Weight {
   std::vector<std::array<long int, 2>> cum_sum_index;
 
   virtual double weight(const std::array<double, 3>&) const = 0;
+  virtual void normalize() = 0;
  protected:
 };
 

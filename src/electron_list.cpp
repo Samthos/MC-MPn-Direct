@@ -35,7 +35,7 @@ void Electron_List::transpose() {
   }
 }
 
-Electron_List* create_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight) {
+Electron_List* create_electron_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight) {
   Electron_List* electron_list = nullptr;
   if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
     electron_list = new Direct_Electron_List(iops.iopns[KEYS::MC_NPAIR]);

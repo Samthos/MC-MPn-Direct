@@ -1,8 +1,9 @@
 // copyright 2017
 
+#ifndef QC_OVPS_H_
+#define QC_OVPS_H_
 #include <vector>
 
-#include "electron_pair_list.h"
 #include "basis/qc_basis.h"
 #include "qc_random.h"
 #include "tau_integrals.h"
@@ -10,8 +11,6 @@
 #include "cblas.h"
 #include "blas_calls.h"
 
-#ifndef QC_OVPS_H_
-#define QC_OVPS_H_
 class OVPS_SET {
  public:
   OVPS_SET() = default;
@@ -87,15 +86,10 @@ struct OVPS_ARRAY {
 };
 
 class OVPs {
- private:
-  int numBand, offBand, numDiff, numBlock;
-  int mc_pair_num, iocc1, iocc2, ivir1, ivir2;
-  bool full;
-
  public:
   void init(int dimm, int mc_pair_num_, const Basis &basis);
   void free();
-  void update_ovps(BasisData&, Electron_Pair_List*, Tau*);
+  void update_ovps(Wavefunction&, Wavefunction&, Tau*);
 
   void init_02(int, int, int, int, int, const Basis &, bool);
   void alloc_02();
@@ -113,5 +107,10 @@ class OVPs {
 
   std::vector<std::vector<OVPS_SET>> o_set, v_set;
   OVPS_ARRAY ovps, d_ovps;
+
+ private:
+  int numBand, offBand, numDiff, numBlock;
+  int mc_pair_num, iocc1, iocc2, ivir1, ivir2;
+  bool full;
 };
 #endif  // QC_OVPS_H_

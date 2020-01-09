@@ -44,15 +44,15 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
 #if MP2CV >= 2
     en_wj.fill(0.0);
 #endif
-    std::transform(basis.h_basis.wfn_psi1->psi.data() + it * (ivir2-iocc1),
-        basis.h_basis.wfn_psi1->psi.data() + (it+1) * (ivir2-iocc1), 
+    std::transform(electron_pair_psi1.psi.data() + it * (ivir2-iocc1),
+        electron_pair_psi1.psi.data() + (it+1) * (ivir2-iocc1), 
         tau_values.begin() + iocc1,
-        basis.h_basis.wfn_psi1->psiTau.data(),
+        electron_pair_psi1.psiTau.data(),
         std::multiplies<>());
-    std::transform(basis.h_basis.wfn_psi2->psi.data() + it * (ivir2-iocc1), 
-        basis.h_basis.wfn_psi2->psi.data() + (it+1) * (ivir2-iocc1),
+    std::transform(electron_pair_psi2.psi.data() + it * (ivir2-iocc1), 
+        electron_pair_psi2.psi.data() + (it+1) * (ivir2-iocc1),
         tau_values.begin() + iocc1,
-        basis.h_basis.wfn_psi2->psiTau.data(),
+        electron_pair_psi2.psiTau.data(),
         std::multiplies<>());
     for (auto jt = it + 1; jt != electron_pair_list->size(); jt++) {
       o_13 = 0.0;
@@ -66,16 +66,16 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
 
       // compute the traces of the the HF green's functions
       for (im = 0; im < iocc2-iocc1; im++) {
-        o_13 = o_13 + basis.h_basis.wfn_psi1->psiTau.data()[im] * basis.h_basis.wfn_psi1->psi.data()[jt * (ivir2-iocc1) + (im)];
-        o_14 = o_14 + basis.h_basis.wfn_psi1->psiTau.data()[im] * basis.h_basis.wfn_psi2->psi.data()[jt * (ivir2-iocc1) + (im)];
-        o_23 = o_23 + basis.h_basis.wfn_psi2->psiTau.data()[im] * basis.h_basis.wfn_psi1->psi.data()[jt * (ivir2-iocc1) + (im)];
-        o_24 = o_24 + basis.h_basis.wfn_psi2->psiTau.data()[im] * basis.h_basis.wfn_psi2->psi.data()[jt * (ivir2-iocc1) + (im)];
+        o_13 = o_13 + electron_pair_psi1.psiTau.data()[im] * electron_pair_psi1.psi.data()[jt * (ivir2-iocc1) + (im)];
+        o_14 = o_14 + electron_pair_psi1.psiTau.data()[im] * electron_pair_psi2.psi.data()[jt * (ivir2-iocc1) + (im)];
+        o_23 = o_23 + electron_pair_psi2.psiTau.data()[im] * electron_pair_psi1.psi.data()[jt * (ivir2-iocc1) + (im)];
+        o_24 = o_24 + electron_pair_psi2.psiTau.data()[im] * electron_pair_psi2.psi.data()[jt * (ivir2-iocc1) + (im)];
       }
       for (am = iocc2-iocc1; am < ivir2-iocc1; am++) {
-        v_13 = v_13 + basis.h_basis.wfn_psi1->psiTau.data()[am] * basis.h_basis.wfn_psi1->psi.data()[jt * (ivir2-iocc1) + (am)];
-        v_14 = v_14 + basis.h_basis.wfn_psi1->psiTau.data()[am] * basis.h_basis.wfn_psi2->psi.data()[jt * (ivir2-iocc1) + (am)];
-        v_23 = v_23 + basis.h_basis.wfn_psi2->psiTau.data()[am] * basis.h_basis.wfn_psi1->psi.data()[jt * (ivir2-iocc1) + (am)];
-        v_24 = v_24 + basis.h_basis.wfn_psi2->psiTau.data()[am] * basis.h_basis.wfn_psi2->psi.data()[jt * (ivir2-iocc1) + (am)];
+        v_13 = v_13 + electron_pair_psi1.psiTau.data()[am] * electron_pair_psi1.psi.data()[jt * (ivir2-iocc1) + (am)];
+        v_14 = v_14 + electron_pair_psi1.psiTau.data()[am] * electron_pair_psi2.psi.data()[jt * (ivir2-iocc1) + (am)];
+        v_23 = v_23 + electron_pair_psi2.psiTau.data()[am] * electron_pair_psi1.psi.data()[jt * (ivir2-iocc1) + (am)];
+        v_24 = v_24 + electron_pair_psi2.psiTau.data()[am] * electron_pair_psi2.psi.data()[jt * (ivir2-iocc1) + (am)];
       }
 
       // compute the energy
@@ -87,7 +87,7 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
 
       std::transform(en.begin(), en.end(), en_rj.begin(), en_rj.begin(), [&](double x, double y) {return y + x * electron_pair_list->rv[jt]; });
 #if MP2CV >= 2
-      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / electron_pair_list-wgt[jt]; });
+      std::transform(en.begin(), en.end(), en_wj.begin(), en_wj.begin(), [&](double x, double y) {return y + x / electron_pair_list->wgt[jt]; });
 #endif
     }
     en2 += (en_rj[1] - 2.0 * en_rj[0]) * electron_pair_list->rv[it];

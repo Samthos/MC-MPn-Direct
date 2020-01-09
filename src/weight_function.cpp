@@ -118,13 +118,13 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
   for (auto &it : molec.atom) {
     mcBasisList.push_back({WEIGHT_BASIS_[it.znum], it.pos});
   }
-
-  normalize();
 }
 
-Electron_Pair_Base_Weight::Electron_Pair_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename){}
+Electron_Pair_Base_Weight::Electron_Pair_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename) {}
 
-Electron_Pair_GTO_Weight::Electron_Pair_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Pair_Base_Weight(mpi_info, molec, filename){}
+Electron_Pair_GTO_Weight::Electron_Pair_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Pair_Base_Weight(mpi_info, molec, filename) {
+  normalize();
+}
 double Electron_Pair_GTO_Weight::weight(const std::array<double, 3> &pos1, const std::array<double, 3> &pos2) const {
   std::array<double, 3> dr;
   double r1, r2, r12;
@@ -259,9 +259,11 @@ void Electron_Pair_GTO_Weight::normalize() {
   }
 }
 
-Electron_Base_Weight::Electron_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename){}
+Electron_Base_Weight::Electron_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename) {}
 
-Electron_GTO_Weight::Electron_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Base_Weight(mpi_info, molec, filename){}
+Electron_GTO_Weight::Electron_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Base_Weight(mpi_info, molec, filename) { 
+  normalize();
+}
 double Electron_GTO_Weight::weight(const std::array<double, 3> &pos) const {
   std::array<double, 3> dr;
   double weight = 0.0;

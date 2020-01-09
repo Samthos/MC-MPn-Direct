@@ -29,16 +29,16 @@ void OVPs::init(const int dimm, const int mc_pair_num_, const Basis &basis) {
 }
 void OVPs::free() {
 }
-void OVPs::update_ovps(BasisData& basis, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void OVPs::update_ovps(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
   // update green's function trace objects
   for (auto stop = 0; stop < o_set.size(); stop++) {
     for (auto start = 0; start < o_set[stop].size(); start++) {
       auto t_val = tau->get_exp_tau(stop, start);
       std::transform(t_val.begin(), t_val.end(), t_val.begin(), sqrt);
-      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.wfn_psi1->psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, basis.wfn_psi1->psiTau.data(), ivir2 - iocc1);
-      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, basis.wfn_psi2->psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, basis.wfn_psi2->psiTau.data(), ivir2 - iocc1);
-      o_set[stop][start].update(basis.wfn_psi1->occTau(), basis.wfn_psi2->occTau());
-      v_set[stop][start].update(basis.wfn_psi1->virTau(), basis.wfn_psi2->virTau());
+      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi1.psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, electron_pair_psi1.psiTau.data(), ivir2 - iocc1);
+      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi2.psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, electron_pair_psi2.psiTau.data(), ivir2 - iocc1);
+      o_set[stop][start].update(electron_pair_psi1.occTau(), electron_pair_psi2.occTau());
+      v_set[stop][start].update(electron_pair_psi1.virTau(), electron_pair_psi2.virTau());
     }
   }
 }

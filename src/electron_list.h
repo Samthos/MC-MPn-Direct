@@ -3,6 +3,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#ifndef ELECTRON_LIST_H_
+#define ELECTRON_LIST_H_
 
 #include <array>
 #include <vector>
@@ -12,8 +14,6 @@
 #include "qc_random.h"
 #include "qc_input.h"
 
-#ifndef EL_PAIR_H_
-#define EL_PAIR_H_
 struct Electron {
   std::array<double, 3> pos;
   double weight;
@@ -29,7 +29,7 @@ class Electron_List {
   virtual bool requires_blocking() = 0;
 
   // functions to emulate vector interface
-  std::size_t size() {
+  std::size_t size() const {
     return electrons.size();
   }
 
@@ -48,7 +48,7 @@ class Electron_List {
 
   std::vector<Electron> electrons;
 };
-Electron_List* create_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight);
+Electron_List* create_electron_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight);
 
 class Direct_Electron_List : public Electron_List {
  public:
@@ -78,4 +78,4 @@ class Metropolis_Electron_List : public Electron_List {
   int successful_moves;
   int failed_moves;
 };
-#endif  // EL_PAIR_H_
+#endif  // ELECTRON_LIST_H_

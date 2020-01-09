@@ -40,6 +40,12 @@ set(source
         MCMP/qc_mcmp3.cpp
         MCMP/qc_mcmp4.cpp
         tau_integrals.h
+        MCF12/F12_Traces.cpp
+        MCF12/F12_Traces.h
+        MCF12/correlation_factors.cpp
+        MCF12/correlation_factors.h
+        MCF12/mp2_f12_integrals.cpp
+        MCF12/mp2f12_var.h
 )
 
 set(CPU_EXTRA_SOURCES

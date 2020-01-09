@@ -29,7 +29,10 @@ namespace KEYS {
     ORDER,
     CPU,
     SAMPLER,
-    TAU_INTEGRATION
+    TAU_INTEGRATION,
+    F12_CORR_ID,
+    F12_GAMMA,
+    F12_BETA
   };
 }
 namespace SAMPLERS {

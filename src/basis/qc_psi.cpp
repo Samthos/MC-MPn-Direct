@@ -15,7 +15,7 @@ void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 void Basis::gpu_free() {
 }
 
-void Basis::host_psi_get(Wavefunction* psi1, Wavefunction* psi2, Electron_Pair_List* electron_pair_list) {
+void Basis::host_psi_get(Wavefunction& psi1, Wavefunction& psi2, Electron_Pair_List* electron_pair_list) {
   for (auto walker = 0; walker < electron_pair_list->size(); ++walker) {
     host_cgs_get(electron_pair_list->pos1[walker], walker);
   }
@@ -26,7 +26,7 @@ void Basis::host_psi_get(Wavefunction* psi1, Wavefunction* psi2, Electron_Pair_L
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,
       0.0,
-      psi1->psi.data(), ivir2-iocc1);
+      psi1.psi.data(), ivir2-iocc1);
 
   for (auto walker = 0; walker < electron_pair_list->size(); ++walker) {
     host_cgs_get(electron_pair_list->pos2[walker], walker);
@@ -38,7 +38,7 @@ void Basis::host_psi_get(Wavefunction* psi1, Wavefunction* psi2, Electron_Pair_L
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,
       0.0,
-      psi2->psi.data(), ivir2-iocc1);
+      psi2.psi.data(), ivir2-iocc1);
 }
 
 void Basis::host_cgs_get(const std::array<double, 3> &pos, const int walker) {
