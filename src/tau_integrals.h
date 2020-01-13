@@ -373,4 +373,6 @@ class Quadrature_Tau : public Tau {
  private:
   std::vector<int> indices;
 };
+
+Tau* create_tau_sampler(const IOPs& iops, const Basis& basis);
 #endif //MC_MP3_DIRECT_TAU_INTEGRALS_H

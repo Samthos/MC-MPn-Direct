@@ -8,6 +8,32 @@
 #include "../electron_list.h"
 #include "../electron_pair_list.h"
 
+namespace CORRELATION_FACTORS {
+  enum CORRELATION_FACTORS {
+    Linear,
+    Quadratic,
+    Rational,
+    Slater,
+    Slater_Linear,
+    Gaussian,
+    Cusped_Gaussian,
+    Yukawa_Coulomb,
+    Jastrow,
+    ERFC,
+    ERFC_Linear,
+    Sinh,
+    Tanh,
+    ArcTan,
+    Logarithm,
+    Hybrid,
+    Cubic,
+    Two_Parameter_Rational,
+    Higher_Rational,
+    Cubic_Slater,
+    Higher_Jastrow
+  };
+}
+
 class Correlation_Factor {
  public:
   Correlation_Factor(int electron_pairs, int electrons, double gamma_, double beta_) :
@@ -23,7 +49,7 @@ class Correlation_Factor {
   virtual double calculate_f12_d(double r12) = 0;
   virtual bool f12_d_is_zero() = 0;
 
-  void update(const Electron_Pair_List& electron_pair_list, const Electron_List& electron_list);
+  void update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
   std::vector<std::vector<double>> one_e_r12;
   std::vector<std::vector<double>> f12o;
@@ -33,7 +59,8 @@ class Correlation_Factor {
  protected:
   double gamma, beta;
 };
-Correlation_Factor* make_correlation_factor(int electron_pairs, int electrons, int f12_corr_id, double gamma, double beta);
+Correlation_Factor* create_correlation_factor(int electron_pairs, int electrons, int f12_corr_id, double gamma, double beta);
+CORRELATION_FACTORS::CORRELATION_FACTORS string_to_correlation_factors(const std::string& str);
 
 class Linear_Correlation_Factor : public Correlation_Factor {
  public:

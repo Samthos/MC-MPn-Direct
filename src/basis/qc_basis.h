@@ -21,6 +21,7 @@ class Wavefunction {
     psi((ivir2 - iocc1) * electrons, 0.0),
     psiTau((ivir2 - iocc1) * electrons, 0.0)
   {}
+
   const double *data() const {
     return psi.data();
   }
@@ -37,7 +38,14 @@ class Wavefunction {
     return psiTau.data() + (ivir1-iocc1);
   }
 
-  size_t iocc1, iocc2, ivir1, ivir2, electrons;
+  size_t iocc1;
+  size_t iocc2;
+  size_t ivir1;
+  size_t ivir2;
+  size_t number_of_molecuar_orbitals;
+
+  size_t electrons;
+
   size_t lda;
   size_t rows;
   size_t col;
@@ -109,7 +117,7 @@ class Basis {
   friend void swap(Basis&, Basis&);
 
   // get psi vals
-  void host_psi_get(Wavefunction&, Wavefunction&, Electron_Pair_List* electron_pair_list);
+  void host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_cgs_get(const std::array<double, 3>&, int);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 

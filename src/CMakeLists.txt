@@ -1,14 +1,4 @@
 set(source
-        MCGF/gf3_core_c.h
-        MCGF/gf3_core_m_1.h
-        MCGF/gf3_core_m_12.h
-        MCGF/gf3_core_m_2.h
-        MCGF/gf3_core_p_1.h
-        MCGF/gf3_core_p_12.h
-        MCGF/gf3_core_p_2.h
-        MCGF/gf_stats.cpp
-        MCGF/qc_gfFullStatisticsHost.cpp
-        MCGF/qc_mcgf.cpp
         blas_calls.cpp
         blas_calls.h
         electron_pair_list.cpp
@@ -35,11 +25,22 @@ set(source
         qc_random.h
         control_variate.h
         timer.h
+        tau_integrals.h
+        tau_integrals.cpp
+        MCGF/gf3_core_c.h
+        MCGF/gf3_core_m_1.h
+        MCGF/gf3_core_m_12.h
+        MCGF/gf3_core_m_2.h
+        MCGF/gf3_core_p_1.h
+        MCGF/gf3_core_p_12.h
+        MCGF/gf3_core_p_2.h
+        MCGF/gf_stats.cpp
+        MCGF/qc_gfFullStatisticsHost.cpp
+        MCGF/qc_mcgf.cpp
         MCMP/qc_mcmp.cpp
         MCMP/qc_mcmp2.cpp
         MCMP/qc_mcmp3.cpp
         MCMP/qc_mcmp4.cpp
-        tau_integrals.h
         MCF12/F12_Traces.cpp
         MCF12/F12_Traces.h
         MCF12/correlation_factors.cpp

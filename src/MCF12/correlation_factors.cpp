@@ -2,84 +2,113 @@
 // Created by aedoran on 12/18/19.
 //
 
+#include <iostream>
 #include <algorithm>
 
 #include "correlation_factors.h"
 
-enum CORRELATION_FACTORS {
-  Linear,
-  Quadratic,
-  Rational,
-  Slater,
-  Slater_Linear,
-  Gaussian,
-  Cusped_Gaussian,
-  Yukawa_Coulomb,
-  Jastrow,
-  ERFC,
-  ERFC_Linear,
-  Sinh,
-  Tanh,
-  ArcTan,
-  Logarithm,
-  Hybrid,
-  Cubic,
-  Two_Parameter_Rational,
-  Higher_Rational,
-  Cubic_Slater,
-  Higher_Jastrow
-};
-
-Correlation_Factor* make_correlation_factor(int electron_pairs, int electrons, int f12_corr_id, double gamma, double beta) {
+Correlation_Factor* create_correlation_factor(int electron_pairs, int electrons, int f12_corr_id, double gamma, double beta) {
   Correlation_Factor* correlation_factor = nullptr;
   switch (f12_corr_id) {
-    case Linear: correlation_factor =  new Linear_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Quadratic: correlation_factor =  new Quadratic_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Rational: correlation_factor =  new Rational_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Slater: correlation_factor =  new Slater_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Slater_Linear: correlation_factor =  new Slater_Linear_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Gaussian: correlation_factor =  new Gaussian_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Cusped_Gaussian: correlation_factor =  new Cusped_Gaussian_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Yukawa_Coulomb: correlation_factor =  new Yukawa_Coulomb_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Jastrow: correlation_factor =  new Jastrow_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case ERFC: correlation_factor =  new ERFC_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case ERFC_Linear: correlation_factor =  new ERFC_Linear_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Sinh: correlation_factor =  new Sinh_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Tanh: correlation_factor =  new Tanh_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case ArcTan: correlation_factor =  new ArcTan_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Logarithm: correlation_factor =  new Logarithm_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Hybrid: correlation_factor =  new Hybrid_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Cubic: correlation_factor =  new Cubic_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Two_Parameter_Rational: correlation_factor =  new Two_Parameter_Rational_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Higher_Rational: correlation_factor =  new Higher_Rational_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Cubic_Slater: correlation_factor =  new Cubic_Slater_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
-    case Higher_Jastrow: correlation_factor =  new Higher_Jastrow_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Linear: correlation_factor =  new Linear_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Quadratic: correlation_factor =  new Quadratic_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Rational: correlation_factor =  new Rational_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Slater: correlation_factor =  new Slater_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Slater_Linear: correlation_factor =  new Slater_Linear_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Gaussian: correlation_factor =  new Gaussian_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Cusped_Gaussian: correlation_factor =  new Cusped_Gaussian_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Yukawa_Coulomb: correlation_factor =  new Yukawa_Coulomb_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Jastrow: correlation_factor =  new Jastrow_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::ERFC: correlation_factor =  new ERFC_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::ERFC_Linear: correlation_factor =  new ERFC_Linear_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Sinh: correlation_factor =  new Sinh_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Tanh: correlation_factor =  new Tanh_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::ArcTan: correlation_factor =  new ArcTan_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Logarithm: correlation_factor =  new Logarithm_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Hybrid: correlation_factor =  new Hybrid_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Cubic: correlation_factor =  new Cubic_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Two_Parameter_Rational: correlation_factor =  new Two_Parameter_Rational_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Higher_Rational: correlation_factor =  new Higher_Rational_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Cubic_Slater: correlation_factor =  new Cubic_Slater_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
+    case CORRELATION_FACTORS::Higher_Jastrow: correlation_factor =  new Higher_Jastrow_Correlation_Factor(electron_pairs, electrons, gamma, beta); break;
   }
   return correlation_factor;
 }
+
+CORRELATION_FACTORS::CORRELATION_FACTORS string_to_correlation_factors(const std::string& str) {
+  CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor;
+  if (str == "Linear") {
+    correlation_factor = CORRELATION_FACTORS::Linear;
+  } else if (str == "Quadratic") {
+    correlation_factor = CORRELATION_FACTORS::Quadratic;
+  } else if (str == "Rational") {
+    correlation_factor = CORRELATION_FACTORS::Rational;
+  } else if (str == "Slater") {
+    correlation_factor = CORRELATION_FACTORS::Slater;
+  } else if (str == "Slater_Linear") {
+    correlation_factor = CORRELATION_FACTORS::Slater_Linear;
+  } else if (str == "Gaussian") {
+    correlation_factor = CORRELATION_FACTORS::Gaussian;
+  } else if (str == "Cusped_Gaussian") {
+    correlation_factor = CORRELATION_FACTORS::Cusped_Gaussian;
+  } else if (str == "Yukawa_Coulomb") {
+    correlation_factor = CORRELATION_FACTORS::Yukawa_Coulomb;
+  } else if (str == "Jastrow") {
+    correlation_factor = CORRELATION_FACTORS::Jastrow;
+  } else if (str == "ERFC") {
+    correlation_factor = CORRELATION_FACTORS::ERFC;
+  } else if (str == "ERFC_Linear") {
+    correlation_factor = CORRELATION_FACTORS::ERFC_Linear;
+  } else if (str == "Sinh") {
+    correlation_factor = CORRELATION_FACTORS::Sinh;
+  } else if (str == "Tanh") {
+    correlation_factor = CORRELATION_FACTORS::Tanh;
+  } else if (str == "ArcTan") {
+    correlation_factor = CORRELATION_FACTORS::ArcTan;
+  } else if (str == "Logarithm") {
+    correlation_factor = CORRELATION_FACTORS::Logarithm;
+  } else if (str == "Hybrid") {
+    correlation_factor = CORRELATION_FACTORS::Hybrid;
+  } else if (str == "Cubic") {
+    correlation_factor = CORRELATION_FACTORS::Cubic;
+  } else if (str == "Two_Parameter_Rational") {
+    correlation_factor = CORRELATION_FACTORS::Two_Parameter_Rational;
+  } else if (str == "Higher_Rational") {
+    correlation_factor = CORRELATION_FACTORS::Higher_Rational;
+  } else if (str == "Cubic_Slater") {
+    correlation_factor = CORRELATION_FACTORS::Cubic_Slater;
+  } else if (str == "Higher_Jastrow") {
+    correlation_factor = CORRELATION_FACTORS::Higher_Jastrow;
+  } else {
+    std::cerr << "Correlation factor " << str << " not supported\n";
+    exit(0);
+  }
+  return correlation_factor;
+}
+
 double distance(const std::array<double, 3>& p1, const std::array<double, 3>& p2) {
   std::array<double, 3> dr{};
   std::transform(p1.begin(), p1.end(), p2.begin(), dr.begin(), std::minus<>());
   return sqrt(std::inner_product(dr.begin(), dr.end(), dr.begin(),0.0));
 }
-void Correlation_Factor::update(const Electron_Pair_List& electron_pair_list, const Electron_List& electron_list) {
-  for(int io = 0; io < electron_list.size();io++) {
-    for(int jo = 0; jo < electron_list.size();jo++) {
+
+void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+  for(int io = 0; io < electron_list->size();io++) {
+    for(int jo = 0; jo < electron_list->size();jo++) {
       if (jo != io) {
-        one_e_r12[io][jo] = distance(electron_list.pos[io], electron_list.pos[jo]);
+        one_e_r12[io][jo] = distance(electron_list->pos[io], electron_list->pos[jo]);
         f12o[io][jo] = calculate_f12(one_e_r12[io][jo]);
       }
     }
   }
 
-  for(int ip = 0; ip < electron_pair_list.size(); ++ip) {
-    for(int io = 0; io < electron_list.size(); ++io) {
-      f13p[ip][io] = calculate_f12(distance(electron_pair_list.pos1[ip], electron_list.pos[io]));
-      f23p[ip][io] = calculate_f12(distance(electron_pair_list.pos2[ip], electron_list.pos[io]));
+  for(int ip = 0; ip < electron_pair_list->size(); ++ip) {
+    for(int io = 0; io < electron_list->size(); ++io) {
+      f13p[ip][io] = calculate_f12(distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
+      f23p[ip][io] = calculate_f12(distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
     }
   }
 }
-
 
 double Linear_Correlation_Factor::calculate_f12(double r12) {
   return r12;

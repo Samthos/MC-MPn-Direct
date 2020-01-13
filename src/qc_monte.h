@@ -20,6 +20,8 @@
 #include "qc_random.h"
 #include "tau_integrals.h"
 
+#include "MCF12/mp2f12_var.h"
+
 class GFStats {
  private:
   std::vector<std::vector<double>> qepsEx1, qepsEx2, qepsAvg, qepsVar;
@@ -156,6 +158,22 @@ class MP4 : public MP {
   }
 
  protected:
+  void energy() override;
+};
+
+class MP2F12_V : public MP {
+ public:
+  MP2F12_V(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 1}),
+      mp2f12_v_engine(iops, basis)
+  {
+    electron_list = create_electron_sampler(iops, molec, electron_weight);
+  }
+  ~MP2F12_V() override {
+    delete electron_list;
+  }
+
+ protected:
+  MP2F12_V_Engine mp2f12_v_engine;
   void energy() override;
 };
 

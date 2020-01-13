@@ -13,7 +13,9 @@
 #ifdef HAVE_MPI
 #include "mpi.h"
 #endif
+
 #include "qc_input.h"
+#include "MCF12/correlation_factors.h"
 
 IOPs::IOPs() {
   /*
@@ -24,8 +26,13 @@ IOPs::IOPs() {
    *  -read values directly instead of setting them
    */
   bopns[KEYS::SPHERICAL] = true;
+
   dopns[KEYS::MC_DELX] = 0.1;
+  dopns[KEYS::F12_GAMMA] = 1.2;
+  dopns[KEYS::F12_BETA] = 1.2;
+
   iopns[KEYS::MC_NPAIR] = 16;
+  iopns[KEYS::ELECTRONS] = 16;
   iopns[KEYS::MC_TRIAL] = 1024;
   iopns[KEYS::MC_PAIR_GROUPS] = 1;
   iopns[KEYS::OFF_BAND] = 1;
@@ -37,6 +44,7 @@ IOPs::IOPs() {
   iopns[KEYS::CPU] = true;
   iopns[KEYS::SAMPLER] = SAMPLERS::DIRECT;
   iopns[KEYS::TAU_INTEGRATION] = TAU_INTEGRATION::STOCHASTIC;
+  iopns[KEYS::F12_CORRELATION_FACTOR] = CORRELATION_FACTORS::Slater;
 
   sopns[KEYS::GEOM] = "geom.xyz";
   sopns[KEYS::BASIS] = "basis.dat";
@@ -56,6 +64,9 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
    * TODO
    *  -should probably read input from a json
    *  -needs input validation
+   *  -make key setter by type
+   *  -write functions to convert strings to enums
+   *  -clean up keys
    */
   KEYS::KeyVal keyval;
 
@@ -67,9 +78,11 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
       "JOBNAME", "SPHERICAL", "MC_TRIAL", "MC_NPAIR", "MC_DELX",  //  0-4
       "GEOM", "BASIS", "MC_BASIS", "NBLOCK", "MOVECS",            //  5-9
       "DEBUG", "MC_PAIR_GROUPS", "TASK", "NUM_BAND", "OFF_BAND",  // 10-14
-      "DIFFS", "ORDER", "CPU", "SAMPLER", "TAU_INTEGRATION"};
+      "DIFFS", "ORDER", "CPU", "SAMPLER", "TAU_INTEGRATION",
+      "F12_CORRELATION_FACTOR", "F12_GAMMA", "F12_BETA", "ELECTRONS", "ELECTRON_PAIRS"
+  };
   const std::vector<std::string> taskVals = {
-      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
+      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V"};
 
   if (mpi_info.sys_master) {
     std::ifstream input(file.c_str());
@@ -83,18 +96,6 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
       std::istringstream ss(str);
       while (ss >> key) {
         if (keySet == false) {  // if key not set, determine key value from key_vals arrays
-          /*
-          std::transform(key.begin(), key.end(), key.begin(), ::toupper);
-          for (i=0;i<key_vals.size();i++)
-          {
-            if (key_vals[i] == key)
-            {
-              keyval = static_cast<KEYS::KeyVal>(i);
-              break;
-            }
-          }
-          keySet = true;
-          */
           std::transform(key.begin(), key.end(), key.begin(), ::toupper);
           auto it = std::find(key_vals.begin(), key_vals.end(), key);
           if (it != key_vals.end()) {
@@ -146,7 +147,13 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
               iopns[keyval] = stoi(key, nullptr);
               keySet = false;
               break;
+            case KEYS::ELECTRON_PAIRS:
+              keyval = KEYS::MC_NPAIR;
             case KEYS::MC_NPAIR:
+              iopns[keyval] = stoi(key, nullptr);
+              keySet = false;
+              break;
+            case KEYS::ELECTRONS:
               iopns[keyval] = stoi(key, nullptr);
               keySet = false;
               break;
@@ -223,6 +230,18 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
               iopns[keyval] = stoi(key, nullptr);
               keySet = false;
               break;
+            case KEYS::F12_CORRELATION_FACTOR:
+              iopns[keyval] = string_to_correlation_factors(key);
+              keySet = false;
+              break;
+            case KEYS::F12_GAMMA:
+              dopns[keyval] = stod(key, nullptr);
+              keySet = false;
+              break;
+            case KEYS::F12_BETA:
+              dopns[keyval] = stod(key, nullptr);
+              keySet = false;
+              break;
             default:
               std::cerr << "KEY \"" << key << "\" NOT RECONGNIZED" << std::endl;
               exit(EXIT_FAILURE);
@@ -260,7 +279,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
    *  -should probably read input from a json
    */
   const std::vector<std::string> taskVals = {
-      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF"};
+      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V"};
   const std::vector<std::string> samplers = {
       "DIRECT", "METROPOLIS"};
   const std::vector<std::string> tau_integrations = {

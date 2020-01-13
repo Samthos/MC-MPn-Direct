@@ -9,20 +9,20 @@
 #include "F12_Traces.h"
 #include "correlation_factors.h"
 
-class MP2F12_V {
+class MP2F12_V_Engine {
  public:
-  explicit MP2F12_V(const IOPs& iops, const Basis& basis) :
+  explicit MP2F12_V_Engine(const IOPs& iops, const Basis& basis) :
       traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR])
   {
-    correlation_factor = make_correlation_factor(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::F12_CORR_ID], iops.dopns[KEYS::F12_GAMMA], iops.dopns[KEYS::F12_BETA]);
+    correlation_factor = create_correlation_factor(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::F12_CORRELATION_FACTOR], iops.dopns[KEYS::F12_GAMMA], iops.dopns[KEYS::F12_BETA]);
     nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
     nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
     nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1.0);
   }
-  ~MP2F12_V() {
+  ~MP2F12_V_Engine() {
     delete correlation_factor;
   }
-  double calculate_v(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List& electron_pair_list, const Electron_List& electron_list);
+  double calculate_v(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
  protected:
   //define the amplitudes
   static constexpr double a1 = 3.0/8.0;
@@ -40,9 +40,9 @@ class MP2F12_V {
 };
 
 /*
-class MP2F12_VBX : public MP2F12_V {
+class MP2F12_VBX_Engine : public MP2F12_V_Engine {
  public:
-  explicit MP2F12_VBX(const IOPs& iops, const Basis& basis) : MP2F12_V(iops, basis) {
+  explicit MP2F12_VBX_Engine(const IOPs& iops, const Basis& basis) : MP2F12_V_Engine(iops, basis) {
     nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]-2);
     nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]-3);
   }

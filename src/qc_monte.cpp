@@ -29,29 +29,24 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
   ivir2 = basis.ivir2;
 
   electron_pair_list = create_electron_pair_sampler(iops, molec, electron_pair_weight);
-  electron_list = create_electron_sampler(iops, molec, electron_weight);
+  electron_list = nullptr;
 
   //initialize walkers
   basis.gpu_alloc(iops.iopns[KEYS::MC_NPAIR], molec);
-  if (iops.iopns[KEYS::TAU_INTEGRATION] == TAU_INTEGRATION::STOCHASTIC) {
-    tau = new Stochastic_Tau(basis);
-  } else if (iops.iopns[KEYS::TAU_INTEGRATION] == TAU_INTEGRATION::SUPER_STOCH){
-    tau = new Super_Stochastic_Tau(basis);
-  } else if (iops.iopns[KEYS::TAU_INTEGRATION] == TAU_INTEGRATION::QUADRATURE){
-    tau = new Quadrature_Tau(basis);
-  }
+  tau = create_tau_sampler(iops, basis);
 }
 
 QC_monte::~QC_monte() {
   basis.gpu_free();
   delete tau;
   delete electron_pair_list;
-  delete electron_list;
 }
 
 void QC_monte::move_walkers() {
   electron_pair_list->move(random, electron_pair_weight);
-//  electron_list->move(random, electron_weight);
+  if (electron_list != nullptr) {
+    electron_list->move(random, electron_weight);
+  }
 }
 
 void QC_monte::print_mc_head(std::chrono::high_resolution_clock::time_point mc_start) {

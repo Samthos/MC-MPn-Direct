@@ -30,9 +30,11 @@ namespace KEYS {
     CPU,
     SAMPLER,
     TAU_INTEGRATION,
-    F12_CORR_ID,
+    F12_CORRELATION_FACTOR,
     F12_GAMMA,
-    F12_BETA
+    F12_BETA,
+    ELECTRONS,
+    ELECTRON_PAIRS
   };
 }
 namespace SAMPLERS {
@@ -42,7 +44,7 @@ namespace SAMPLERS {
   };
 }
 namespace TAU_INTEGRATION {
-  enum METHODS{
+  enum METHODS {
     STOCHASTIC,
     QUADRATURE,
     SUPER_STOCH
@@ -54,7 +56,8 @@ namespace TASKS {
     GF,
     GFDIFF,
     GFFULL,
-    GFFULLDIFF
+    GFFULLDIFF,
+    F12V
   };
 }
 

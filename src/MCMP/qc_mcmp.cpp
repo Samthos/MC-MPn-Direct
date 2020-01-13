@@ -126,3 +126,9 @@ void MP4::energy() {
   }
   mcmp4_energy(emp[2], control[2]);
 }
+
+void MP2F12_V::energy() {
+  mcmp2_energy_fast(emp[0], control[0]);
+  emp[1] = mp2f12_v_engine.calculate_v(electron_pair_psi1, electron_pair_psi2, electron_psi, electron_pair_list, electron_list);
+}
+
