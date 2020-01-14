@@ -7,494 +7,761 @@
 #include "../blas_calls.h"
 #include "../qc_monte.h"
 
-void gf3_core_c(OVPS_ARRAY ovps, int mc_pair_num) {
-  int tidx, tidy;
-#define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
-#define TIDY_CONTROL for (tidy = 0; tidy < mc_pair_num; tidy++)
-#include "gf3_core_c.h"
-#undef TIDX_CONTROL
-#undef TIDY_CONTROL
+
+void print_out(bool col_major, double* A, int rows, int cols) {
+  if (col_major) {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        printf("%8.3f", A[i + j * rows]);
+      }
+      printf("\n");
+    }
+  } else {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        printf("%8.3f", A[i * cols + j]);
+      }
+      printf("\n");
+    }
+  }
 }
-void gf3_core_p_1(OVPS_ARRAY ovps, int mc_pair_num) {
-  int tidx, tidy;
-#define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
-#define TIDY_CONTROL for (tidy = 0; tidy < mc_pair_num; tidy++)
-#include "gf3_core_p_1.h"
-#undef TIDX_CONTROL
-#undef TIDY_CONTROL
+
+void vector_multiply(const double* B, double* A, int mc_pair_num) {
+  for (int tidy = 0; tidy < mc_pair_num; tidy++) {
+    for (int tidx = 0; tidx < mc_pair_num; tidx++) {
+      int index = tidy * mc_pair_num + tidx;
+      A[index] = A[index] * B[tidy] * B[tidx];
+    }
+  }
+  for (int tidy = 0; tidy < mc_pair_num; tidy++) {
+    int index = tidy * mc_pair_num + tidy;
+    A[index] = 0;
+  }
 }
-void gf3_core_p_2(OVPS_ARRAY ovps, int mc_pair_num) {
-  int tidx, tidy;
-#define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
-#define TIDY_CONTROL for (tidy = 0; tidy < mc_pair_num; tidy++)
-#include "gf3_core_p_2.h"
-#undef TIDX_CONTROL
-#undef TIDY_CONTROL
+void prep_Tk(const double* Ti, const double* Tj,  const double* rv, double* Tk, int mc_pair_num) {
+  for (int tidy = 0; tidy < mc_pair_num; tidy++) {
+    for (int tidx = 0; tidx < mc_pair_num; tidx++) {
+      int index = tidy * mc_pair_num + tidx;
+      Tk[index] = 0;
+      Tk[index] -= Ti[tidx*mc_pair_num + tidx] * Tj[tidy*mc_pair_num + tidx] * rv[tidx];
+      Tk[index] -= Ti[tidx*mc_pair_num + tidy] * Tj[tidy*mc_pair_num + tidy] * rv[tidy];
+    }
+  }
 }
-void gf3_core_p_12(OVPS_ARRAY ovps, int mc_pair_num) {
-  int tidx, tidy;
-#define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
-#define TIDY_CONTROL for (tidy = 0; tidy < mc_pair_num; tidy++)
-#include "gf3_core_p_12.h"
-#undef TIDX_CONTROL
-#undef TIDY_CONTROL
+void m_v_mul(const double* A, const double *B, double* C, int mc_pair_num) {
+  for (int tidx = 0; tidx < mc_pair_num; tidx++) {
+    for (int tidy = 0; tidy < mc_pair_num; tidy++) {
+      int index = tidx * mc_pair_num + tidy;
+      C[index] = A[index] * B[tidy];
+    }
+  }
 }
-void gf3_core_m_1(OVPS_ARRAY ovps, int mc_pair_num) {
-  int tidx, tidy;
-#define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
-#define TIDY_CONTROL for (tidy = 0; tidy < mc_pair_num; tidy++)
-#include "gf3_core_m_1.h"
-#undef TIDX_CONTROL
-#undef TIDY_CONTROL
+void m_m_add_mul(double alpha, const double* A, const double *B, double* C, int mc_pair_num) {
+  for (int tidx = 0; tidx < mc_pair_num; tidx++) {
+    for (int tidy = 0; tidy < mc_pair_num; tidy++) {
+      int index = tidx * mc_pair_num + tidy;
+      C[index] = alpha * A[index] * B[index] + C[index];
+    }
+  }
 }
-void gf3_core_m_2(OVPS_ARRAY ovps, int mc_pair_num) {
-  int tidx, tidy;
-#define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
-#define TIDY_CONTROL for (tidy = 0; tidy < mc_pair_num; tidy++)
-#include "gf3_core_m_2.h"
-#undef TIDX_CONTROL
-#undef TIDY_CONTROL
+
+void gf3_helper(
+    double* Ti_a, double* Ti_b, double* Ti,
+    double* Tj_a, double* Tj_b, double* Tj,
+    double* rv,
+    double* Tk_a, double* Tk,
+    double* en,
+    double c, int mc_pair_num) {
+  std::transform(Ti_a, Ti_a + mc_pair_num*mc_pair_num, Ti_b, Ti, std::multiplies<>());
+  std::transform(Tj_a, Tj_a + mc_pair_num*mc_pair_num, Tj_b, Tj, std::multiplies<>());
+  prep_Tk(Ti, Tj, rv, Tk, mc_pair_num);
+  m_v_mul(Tj, rv, Tj, mc_pair_num);
+  cblas_dgemm(CblasColMajor,
+      CblasTrans, CblasNoTrans,
+      mc_pair_num, mc_pair_num, mc_pair_num,
+      1.0,
+      Ti, mc_pair_num,
+      Tj, mc_pair_num,
+      1.0,
+      Tk, mc_pair_num);
+  m_m_add_mul(c, Tk, Tk_a, en, mc_pair_num);
 }
-void gf3_core_m_12(OVPS_ARRAY ovps, int mc_pair_num) {
-  int tidx, tidy;
-#define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
-#define TIDY_CONTROL for (tidy = 0; tidy < mc_pair_num; tidy++)
-#include "gf3_core_m_12.h"
-#undef TIDX_CONTROL
-#undef TIDY_CONTROL
+void gf3_core_1(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(ovps.d_ovps.en3_1mCore, ovps.d_ovps.en3_1mCore + mc_pair_num * mc_pair_num, 0.0);
+  std::fill(ovps.d_ovps.en3_1pCore, ovps.d_ovps.en3_1pCore + mc_pair_num * mc_pair_num, 0.0);
+
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore,  2.00, mc_pair_num);
+
+  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0], ovps.v_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.o_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
+
+//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1pCore,  4.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1mCore, -4.00, mc_pair_num);
+  m_m_add_mul(4.0, T[2], ovps.v_set[0][0].s_22.data(), ovps.d_ovps.en3_1pCore, mc_pair_num);
+
+//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
+  m_m_add_mul(-2.0, T[2], ovps.v_set[0][0].s_22.data(), ovps.d_ovps.en3_1pCore, mc_pair_num);
+
+  vector_multiply(rv, ovps.d_ovps.en3_1mCore, mc_pair_num);
+  vector_multiply(rv, ovps.d_ovps.en3_1pCore, mc_pair_num);
+}
+void gf3_core_2(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(ovps.d_ovps.en3_2mCore, ovps.d_ovps.en3_2mCore + mc_pair_num * mc_pair_num, 0.0);
+  std::fill(ovps.d_ovps.en3_2pCore, ovps.d_ovps.en3_2pCore + mc_pair_num * mc_pair_num, 0.0);
+
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1], rv, ovps.v_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.v_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.v_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.v_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore,  2.00, mc_pair_num);
+
+  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.v_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
+
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.v_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2pCore,  4.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2mCore, -4.00, mc_pair_num);
+  m_m_add_mul(4.0, T[2], ovps.v_set[1][1].s_22.data(), ovps.d_ovps.en3_2pCore, mc_pair_num);
+
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.v_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
+  m_m_add_mul(-2.0, T[2], ovps.v_set[1][1].s_22.data(), ovps.d_ovps.en3_2pCore, mc_pair_num);
+
+  vector_multiply(rv, ovps.d_ovps.en3_2mCore, mc_pair_num);
+  vector_multiply(rv, ovps.d_ovps.en3_2pCore, mc_pair_num);
+}
+void gf3_core_12(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(ovps.d_ovps.en3_12mCore, ovps.d_ovps.en3_12mCore + mc_pair_num * mc_pair_num, 0.0);
+  std::fill(ovps.d_ovps.en3_12pCore, ovps.d_ovps.en3_12pCore + mc_pair_num * mc_pair_num, 0.0);
+
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.v_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12pCore,  1.00, mc_pair_num);
+
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore, -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.o_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
+
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12pCore,  4.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12mCore, -4.00, mc_pair_num);
+  m_m_add_mul(4.0, T[2], ovps.v_set[1][0].s_22.data(), ovps.d_ovps.en3_12pCore, mc_pair_num);
+
+//gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
+  m_m_add_mul(-2.0, T[2], ovps.v_set[1][0].s_22.data(), ovps.d_ovps.en3_12pCore, mc_pair_num);
+
+  vector_multiply(rv, ovps.d_ovps.en3_12mCore, mc_pair_num);
+  vector_multiply(rv, ovps.d_ovps.en3_12pCore, mc_pair_num);
+}
+
+void gf3_helper_c(
+    double* Ti,
+    double* Tj_a, double* Tj_b, double* Tj_c, double* Tj,
+    double* rv, double* Tk_a, double* Tk_b, double* Tk,
+    double* en_12, double c12,
+    double* en_22, double c22,
+    int mc_pair_num) {
+  std::transform(Tj_a, Tj_a + mc_pair_num*mc_pair_num, Tj_b, Tj, std::multiplies<>());
+  std::transform(Tj_c, Tj_c + mc_pair_num*mc_pair_num, Tj, Tj, std::multiplies<>());
+  prep_Tk(Ti, Tj, rv, Tk, mc_pair_num);
+  m_v_mul(Tj, rv, Tj, mc_pair_num);
+  cblas_dgemm(CblasColMajor,
+      CblasTrans, CblasNoTrans,
+      mc_pair_num, mc_pair_num, mc_pair_num,
+      1.0,
+      Ti, mc_pair_num,
+      Tj, mc_pair_num,
+      1.0,
+      Tk, mc_pair_num);
+  m_m_add_mul(c12, Tk, Tk_a, en_12, mc_pair_num);
+  m_m_add_mul(c22, Tk, Tk_b, en_22, mc_pair_num);
+}
+void gf3_core_c(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(ovps.d_ovps.en3_12cCore, ovps.d_ovps.en3_12cCore + mc_pair_num * mc_pair_num, 0.0);
+  std::fill(ovps.d_ovps.en3_22cCore, ovps.d_ovps.en3_22cCore + mc_pair_num * mc_pair_num, 0.0);
+
+  gf3_helper_c(ovps.v_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_11.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  2.00,  ovps.d_ovps.en3_22cCore, -4.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][0].s_11.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_12.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -1.00,  ovps.d_ovps.en3_22cCore,  2.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -2.00,  ovps.d_ovps.en3_22cCore,  4.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][1].s_12.data(), ovps.v_set[1][1].s_21.data(), ovps.o_set[1][1].s_11.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  1.00,  ovps.d_ovps.en3_22cCore, -2.00, mc_pair_num);
+
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -1.00,  ovps.d_ovps.en3_22cCore,  2.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  2.00,  ovps.d_ovps.en3_22cCore, -4.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  1.00,  ovps.d_ovps.en3_22cCore, -2.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_22.data(), T[0], rv, ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore, -2.00,  ovps.d_ovps.en3_22cCore,  4.00, mc_pair_num);
+
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_22.data(), T[0], rv, ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore,  2.00,  ovps.d_ovps.en3_22cCore, -4.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], rv, ovps.v_set[1][0].s_22.data(), ovps.v_set[1][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -1.00,  ovps.d_ovps.en3_22cCore,  2.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], rv, ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore, -2.00,  ovps.d_ovps.en3_22cCore,  4.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], rv, ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore,  1.00,  ovps.d_ovps.en3_22cCore, -2.00, mc_pair_num);
+
+  vector_multiply(rv, ovps.d_ovps.en3_12cCore, mc_pair_num);
+  vector_multiply(rv, ovps.d_ovps.en3_22cCore, mc_pair_num);
+}
+
+void strided_transform(
+    const size_t N,
+    double alpha,
+    const double *A, const size_t incA,
+    const double *B, const size_t incB,
+    double beta, double *C, const size_t incC) {
+  for (size_t idx = 0, idxA = 0, idxB = 0, idxC = 0; idx < N; idx++, idxA += incA, idxB += incB, idxC += incC) {
+    C[idxC] = alpha * A[idxA] * B[idxB] + beta * C[idxC];
+  }
 }
 
 void GF::mcgf3_local_energy_core() {
-  double alpha, beta;
-
-  gf3_core_c(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
-  gf3_core_p_1(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
-  gf3_core_p_2(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
-  gf3_core_p_12(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
-  gf3_core_m_1(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
-  gf3_core_m_2(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
-  gf3_core_m_12(ovps.d_ovps, iops.iopns[KEYS::MC_NPAIR]);
-
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemv(CblasColMajor, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.one, 1,
-              beta, ovps.d_ovps.en3c12, 1);
-
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemv(CblasColMajor, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.one, 1,
-              beta, ovps.d_ovps.en3c22, 1);
-}
-void GF::mcgf3_local_energy(std::vector<double>& egf3, int band) {
-  int nsamp;
-  double en3 = 0;
-  double en3t = 0;
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3c12, 1,
-                    ovps.d_ovps.ps_12c + band * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t;
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3c22, 1,
-                    ovps.d_ovps.ps_22c + band * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t;
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_1pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_2pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_12pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_1mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_2mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_12mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3 = en3 + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
-
-  nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
-  en3 = en3 * tau->get_wgt(2) / static_cast<double>(nsamp);
-  egf3.front() += en3;
-}
-void GF::mcgf3_local_energy_diff(std::vector<double>& egf3, int band) {
-  int ip, dp;
-  int nsamp;
-  double en3t;
-  std::array<double, 7> en3;
-
-  std::fill(en3.begin(), en3.end(), 0);
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3c12, 1,
-                    ovps.d_ovps.ps_12c + band * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[0] = en3[0] + en3t;
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3c22, 1,
-                    ovps.d_ovps.ps_22c + band * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[0] = en3[0] + en3t;
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_1pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[1] = en3[1] + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_2pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[2] = en3[2] + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_12pCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[3] = en3[3] + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
-
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_1mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[4] = en3[4] + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_2mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[5] = en3[5] + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
-  en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
-                    ovps.d_ovps.en3_12mCore, 1,
-                    ovps.d_ovps.ps_24 + band * iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR], 1);
-  en3[6] = en3[6] + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
-
-  nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
-  for (auto& it : en3) {
-    it = it * tau->get_wgt(2) / static_cast<double>(nsamp);
+  std::array<double*, 4> T{};
+  T[0] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
+  T[1] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
+  T[2] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
+  T[3] = new double[iops.iopns[KEYS::MC_NPAIR]];
+  for (auto it = el_pair_list->begin(); it != el_pair_list->end(); it++) {
+    T[3][std::distance(el_pair_list->begin(), it)] = it->rv;
   }
 
-  for (ip = 0; ip < iops.iopns[KEYS::DIFFS]; ip++) {
-    if (ip == 0) {
-      for (dp = 0; dp < 3; dp++) {
-        egf3[ip] += en3[dp + 1] + en3[dp + 4];
-      }
-      egf3[ip] += en3[0];
-    } else if (ip % 2 == 1) {
-      for (dp = 0; dp < 3; dp++) {
-        egf3[ip] += en3[dp + 1] - en3[dp + 4];
-      }
-    } else if (ip % 2 == 0) {
-      for (dp = 0; dp < 3; dp++) {
-        egf3[ip] += en3[dp + 1] + en3[dp + 4];
-      }
+  gf3_core_c(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
+  gf3_core_1(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
+  gf3_core_2(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
+  gf3_core_12(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
+
+  cblas_dgemv(CblasColMajor, CblasNoTrans,
+      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+      1.0,
+      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.one, 1,
+      0.0,
+      ovps.d_ovps.en3c12, 1);
+
+  cblas_dgemv(CblasColMajor, CblasNoTrans,
+      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+      1.0,
+      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.one, 1,
+      0.0,
+      ovps.d_ovps.en3c22, 1);
+
+  for (auto &it : T) {
+    delete [] it;
+  }
+}
+void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
+  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
+  for (int band = 0; band < numBand; band++) {
+    double en3 = 0;
+    double alpha, beta;
+    double *psi1, *psi2;
+    if (band-offBand < 0) {
+      psi1 = basis.h_basis.occ1 + (band+iocc2-iocc1-offBand);
+      psi2 = basis.h_basis.occ2 + (band+iocc2-iocc1-offBand);
+    } else {
+      psi1 = basis.h_basis.vir1 + (band-offBand);
+      psi2 = basis.h_basis.vir2 + (band-offBand);
     }
-    auto xx1 = tau->get_tau(0);
-    auto xx2 = tau->get_tau(1);
-    en3[1] = en3[1] * xx1;
-    en3[2] = en3[2] * xx2;
-    en3[3] = en3[3] * xx1 * xx2;
-    en3[4] = en3[4] * xx1;
-    en3[5] = en3[5] * xx2;
-    en3[6] = en3[6] * xx1 * xx2;
+
+    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c12, 1, psi1, ivir2 - iocc1, 0.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c22, 1, psi2, ivir2 - iocc1, 1.0, ovps.d_ovps.ent, 1);
+
+    // ent = ovps.ovps.tg_val1[band] * en3_1pCore . psi
+    alpha = tau->get_gfn_tau(0, 0, band-offBand, false);
+    beta = 1.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta, ovps.d_ovps.ent, 1);
+
+    // ent = ovps.ovps.tg_val2[band] * en3_2pCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 1, band-offBand, false);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+
+    // ent = ovps.ovps.tg_val12[band] * en3_12pCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 0, band-offBand, false);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+
+    // ent = ovps.ovps.tgc_val1[band] * en3_1mCore . psi + ent
+    alpha = tau->get_gfn_tau(0, 0, band-offBand, true);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+
+    // ent = ovps.ovps.tgc_val2[band] * en3_2mCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 1, band-offBand, true);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+
+    // ent = ovps.ovps.tgc_val12[band] * en3_12mCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 0, band-offBand, true);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+
+    // en2 = psi2 . ent
+    en3 += cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+
+    en3 = en3 * tau->get_wgt(2) / nsamp;
+    egf3[band].front() += en3;
   }
 }
-void GF::mcgf3_local_energy_full(int band) {
-  int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
-  double alpha, beta;
+void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
+  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
+  for (int band = 0; band < numBand; band++) {
+    int ip, dp;
+    std::array<double, 7> en3{0, 0, 0, 0, 0, 0, 0};
+    double en3t;
+    double alpha, beta;
+    double *psi1, *psi2;
 
-  // ent = contraction_exp en3_1p . psi2
-  alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+    if (band - offBand < 0) {
+      psi1 = basis.h_basis.occ1 + (band + iocc2 - iocc1 - offBand);
+      psi2 = basis.h_basis.occ2 + (band + iocc2 - iocc1 - offBand);
+    } else {
+      psi1 = basis.h_basis.vir1 + (band - offBand);
+      psi2 = basis.h_basis.vir2 + (band - offBand);
+    }
 
-  // ent = contraction_exp en3_2p . psi2 + ent
-  alpha = tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c12, 1, psi1, ivir2 - iocc1, 0.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c22, 1, psi2, ivir2 - iocc1, 1.0, ovps.d_ovps.ent, 1);
+    en3[0] = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
 
-  // ent = contraction_exp en3_12p . psi2 + ent
-  alpha = tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+    // ent = en3_1pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[1] = en3[1] + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
 
-  // ent = contraction_exp en3_1m . psi2 + ent
-  alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+    // ent = en3_2pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[2] = en3[2] + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
 
-  // ent = contraction_exp en3_2m . psi2 + ent
-  alpha = tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+    // ent = en3_12pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[3] = en3[3] + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
 
-  // ent = contraction_exp en3_12m . psi2 + ent
-  alpha = tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
-  // en3 = Transpose[psi2] . ent + en3
-  alpha = 1.00;
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3[band][0], ivir2 - iocc1);
-  // en3c = contraction_exp en3_12c . IdentityVector
-  //  contraction_exp = tau->get_wgt(2) / static_cast<double>(nsamp);
-  //  beta  = 0.00;
-  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
-  //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
-  //      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::MC_NPAIR],
-  //      ovps.d_ovps.one, 1,
-  //      beta, ovps.d_ovps.en3c, 1);
+    // ent = en3_1mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[4] = en3[4] + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
 
-  // ent = diag[enc12] . psi1
-  Ddgmm(DDGMM_SIDE_LEFT,
-        iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1,
-        ovps.d_ovps.psi1, iops.iopns[KEYS::MC_NPAIR],
-        ovps.d_ovps.en3c12, 1,
-        ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+    // ent = en3_2mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[5] = en3[5] + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
 
-  // en3 = Transpose[psi2] . ent + en3
-  //  contraction_exp = 1.00;
-  alpha = tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3[band][0], ivir2 - iocc1);
+    // ent = en3_12mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        alpha,
+        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        beta,
+        ovps.d_ovps.ent, 1);
+    // en2 = psi2 . ent
+    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
+        psi2, ivir2 - iocc1,
+        ovps.d_ovps.ent, 1);
+    en3[6] = en3[6] + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
 
-  // en3c = contraction_exp en3_22c . IdentityVector
-  //  contraction_exp = tau->get_wgt(2) / static_cast<double>(nsamp);
-  //  beta  = 0.00;
-  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
-  //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
-  //      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::MC_NPAIR],
-  //      ovps.d_ovps.one, 1,
-  //      beta, ovps.d_ovps.en3c, 1);
+    for (auto &it : en3) {
+      it = it * tau->get_wgt(2) / nsamp;
+    }
 
-  // ent = diag[en3c22] . psi2
-  Ddgmm(DDGMM_SIDE_LEFT,
-        iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1,
-        ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-        ovps.d_ovps.en3c22, 1,
-        ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
-
-  // en3 = Transpose[psi2] . ent + en3
-  alpha = tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3[band][0], ivir2 - iocc1);
-
-  /*
-  cudaMemcpy(&en3, ovps.d_ovps.en3 + offset, sizeof(double), cudaMemcpyDeviceToHost);
-  cudaThreadSynchronize();
-  egf3.front() += en3;
-*/
+    for (ip = 0; ip < iops.iopns[KEYS::DIFFS]; ip++) {
+      if (ip == 0) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] + en3[dp + 4];
+        }
+        egf3[band][ip] += en3[0];
+      } else if (ip % 2 == 1) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] - en3[dp + 4];
+        }
+      } else if (ip % 2 == 0) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] + en3[dp + 4];
+        }
+      }
+      en3[1] = en3[1] * tau->get_tau(0);
+      en3[2] = en3[2] * tau->get_tau(1);
+      en3[3] = en3[3] * (tau->get_tau(0) + tau->get_tau(1));
+      en3[4] = en3[4] * tau->get_tau(0);
+      en3[5] = en3[5] * tau->get_tau(1);
+      en3[6] = en3[6] * (tau->get_tau(0) + tau->get_tau(1));
+    }
+  }
 }
-void GF::mcgf3_local_energy_full_diff(int band) {
-  int nsamp = iops.iopns[KEYS::MC_NPAIR] * (iops.iopns[KEYS::MC_NPAIR] - 1) * (iops.iopns[KEYS::MC_NPAIR] - 2);
-  double alpha, beta;
 
-  // ent = contraction_exp en3_1pCore . psi2
-  alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
-
-  // en3_1p = Tranpsose[psi2] . ent
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_1p, ivir2 - iocc1);
-
-  // ent = contraction_exp en3_2pCore . psi2
-  alpha = tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+void mcgf_full_helper(
+    int m, int n,
+    double a1, double b1, double a2, double b2,
+    double* enCore, double* psi, double* ent, double* en) {
+  // ent = alpha en3_2pCore . psi2
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
+      m, n, m,
+      a1,
+      enCore, m,
+      psi, n,
+      b1,
+      ent, m);
 
   // en3_2p = Tranpsose[psi2] . ent
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_2p, ivir2 - iocc1);
-
-  // ent = contraction_exp en3_12pCore . psi2
-  alpha = tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+      n, n, m,
+      a2,
+      psi, n,
+      ent, m,
+      b2,
+      en, n);
+}
+void GF::mcgf3_local_energy_full(int band) {
+  double nsamp;
+  double alpha, beta;
 
-  // en3_12p = Tranpsose[psi2] . ent
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_12p, ivir2 - iocc1);
+  nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = nsamp * (nsamp - 1.0);
 
-  // ent = contraction_exp en3_1mCore . psi2
-  alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+  // enCore = alpha en2pCore + beta en2mCore
+  alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / nsamp;
+  beta = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / nsamp;
+  std::transform(ovps.d_ovps.en2pCore,
+      ovps.d_ovps.en2pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en2mCore,
+      ovps.d_ovps.enCore,
+      [&](double a, double b) {return alpha*a + beta*b;});
 
-  // en3_1m = Tranpsose[psi2] . ent
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_1m, ivir2 - iocc1);
+  nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
 
-  // ent = contraction_exp en3_2mCore . psi2
-  alpha = tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+  // enCore = alpha en3_1p + enCore
+  alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en3_1pCore,
+      ovps.d_ovps.en3_1pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.enCore,
+      ovps.d_ovps.enCore,
+      [&](double a, double b) {return alpha*a + b;});
 
-  // en3_2m = Tranpsose[psi2] . ent
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_2m, ivir2 - iocc1);
+  // enCore = alpha en3_2p + enCore
+  alpha = tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en3_2pCore,
+      ovps.d_ovps.en3_2pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.enCore,
+      ovps.d_ovps.enCore,
+      [&](double a, double b) {return alpha*a + b;});
 
-  // ent = contraction_exp en3_12mCore . psi2
-  alpha = tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-              iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+  // enCore = alpha en3_12p + enCore
+  alpha = tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en3_12pCore,
+      ovps.d_ovps.en3_12pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.enCore,
+      ovps.d_ovps.enCore,
+      [&](double a, double b) {return alpha*a + b;});
 
-  // en3_12m = Tranpsose[psi2] . ent
-  alpha = 1.00;
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_12m, ivir2 - iocc1);
+  // enCore = alpha en3_1m + enCore
+  alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en3_1mCore,
+      ovps.d_ovps.en3_1mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.enCore,
+      ovps.d_ovps.enCore,
+      [&](double a, double b) {return alpha*a + b;});
 
-  // en3c = contraction_exp en3_12cCore . IdentityVector
-  //  contraction_exp = tau->get_wgt(2) / static_cast<double>(nsamp);
-  //  beta  = 0.00;
-  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
-  //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
-  //      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::MC_NPAIR],
-  //      ovps.d_ovps.one, 1,
-  //      beta, ovps.d_ovps.en3c, 1);
+  // enCore = alpha en3_2m + enCore
+  alpha = tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en3_2mCore,
+      ovps.d_ovps.en3_2mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.enCore,
+      ovps.d_ovps.enCore,
+      [&](double a, double b) {return alpha*a + b;});
+
+  // enCore = alpha en3_12m + enCore
+  alpha = tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en3_12mCore,
+      ovps.d_ovps.en3_12mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.enCore,
+      ovps.d_ovps.enCore,
+      [&](double a, double b) {return alpha*a + b;});
+
+  mcgf_full_helper(
+      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      1.00, 0.00,
+      1.00, 1.00,
+      ovps.d_ovps.enCore,
+      basis.h_basis.psi2,
+      ovps.d_ovps.ent,
+      ovps.d_ovps.enBlock[band][0]);
 
   // ent = diag[enc12] . psi1
-  Ddgmm(DDGMM_SIDE_LEFT,
-        iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1,
-        ovps.d_ovps.psi1, iops.iopns[KEYS::MC_NPAIR],
-        ovps.d_ovps.en3c12, 1,
-        ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+  Ddgmm(DDGMM_SIDE_RIGHT,
+      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
+      basis.h_basis.psi1, ivir2 - iocc1,
+      ovps.d_ovps.en3c12, 1,
+      ovps.d_ovps.ent, ivir2 - iocc1);
 
-  // en3_c = Transpose[psi2] . ent
-  //contraction_exp = 1.00;
-  alpha = tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 0.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_c, ivir2 - iocc1);
-
-  // en3c = contraction_exp en3_22cCore . IdentityVector
-  //  contraction_exp = tau->get_wgt(2) / static_cast<double>(nsamp);
-  //  beta  = 0.00;
-  //  my_cblas_dgemv(CblasColMajor, CblasNoTrans,
-  //      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], contraction_exp,
-  //      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::MC_NPAIR],
-  //      ovps.d_ovps.one, 1,
-  //      beta, ovps.d_ovps.en3c, 1);
+  // en3 = Transpose[psi2] . ent + en3
+  // alpha = 1.00;
+  alpha = tau->get_wgt(2) / nsamp;
+  beta  = 1.00;
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
+      basis.h_basis.psi2, ivir2 - iocc1,
+      ovps.d_ovps.ent, ivir2 - iocc1,
+      beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
 
   // ent = diag[en3c22] . psi2
-  Ddgmm(DDGMM_SIDE_LEFT,
-        iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1,
-        ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-        ovps.d_ovps.en3c22, 1,
-        ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
+  Ddgmm(DDGMM_SIDE_RIGHT,
+      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
+      basis.h_basis.psi2, ivir2 - iocc1,
+      ovps.d_ovps.en3c22, 1,
+      ovps.d_ovps.ent, ivir2 - iocc1);
 
-  // en3_c = Transpose[psi2] . ent + en3_c
-  //contraction_exp = 1.00;
-  alpha = tau->get_wgt(2) / static_cast<double>(nsamp);
-  beta = 1.00;
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-              ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-              ovps.d_ovps.psi2, iops.iopns[KEYS::MC_NPAIR],
-              ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
-              beta, ovps.d_ovps.en3_c, ivir2 - iocc1);
+  // en3 = Transpose[psi2] . ent + en3
+  alpha = tau->get_wgt(2) / nsamp;
+  beta  = 1.00;
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
+      basis.h_basis.psi2, ivir2 - iocc1,
+      ovps.d_ovps.ent, ivir2 - iocc1,
+      beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
 }
+void GF::mcgf3_local_energy_full_diff(int band) {
+  double nsamp, nsamp2;
+  double alpha, beta;
+
+  nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp2 = nsamp * (nsamp - 1.0);
+  nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
+
+  alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / nsamp2;
+  beta = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en2pCore,
+                 ovps.d_ovps.en2pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+                 ovps.d_ovps.en3_1pCore,
+                 ovps.d_ovps.enCore,
+                 [&](double a, double b) {return alpha*a + beta*b;});
+  mcgf_full_helper(
+      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      1.00, 0.00,
+      1.00, 0.00,
+      ovps.d_ovps.enCore,
+      basis.h_basis.psi2,
+      ovps.d_ovps.ent,
+      ovps.d_ovps.en3_1p);
+
+  // ent = alpha en3_2pCore . psi2
+  mcgf_full_helper(
+      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
+      1.00, 0.00,
+      ovps.d_ovps.en3_2pCore,
+      basis.h_basis.psi2,
+      ovps.d_ovps.ent,
+      ovps.d_ovps.en3_2p);
+
+  // ent = alpha en3_12pCore . psi2
+  mcgf_full_helper(
+      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
+      1.00, 0.00,
+      ovps.d_ovps.en3_12pCore,
+      basis.h_basis.psi2,
+      ovps.d_ovps.ent,
+      ovps.d_ovps.en3_12p);
+
+  alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / nsamp2;
+  beta = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
+  std::transform(ovps.d_ovps.en2mCore,
+                 ovps.d_ovps.en2mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+                 ovps.d_ovps.en3_1mCore,
+                 ovps.d_ovps.enCore,
+                 [&](double a, double b) {return alpha*a + beta*b;});
+  mcgf_full_helper(
+      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      1.00, 0.00,
+      1.00, 0.00,
+      ovps.d_ovps.enCore,
+      basis.h_basis.psi2,
+      ovps.d_ovps.ent,
+      ovps.d_ovps.en3_1m);
+
+  mcgf_full_helper(
+      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
+      1.00, 0.00,
+      ovps.d_ovps.en3_2mCore,
+      basis.h_basis.psi2,
+      ovps.d_ovps.ent,
+      ovps.d_ovps.en3_2m);
+
+  mcgf_full_helper(
+      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
+      1.00, 0.00,
+      ovps.d_ovps.en3_12mCore,
+      basis.h_basis.psi2,
+      ovps.d_ovps.ent,
+      ovps.d_ovps.en3_12m);
+
+  // ent = diag[enc12] . psi1
+  Ddgmm(DDGMM_SIDE_RIGHT,
+      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
+      basis.h_basis.psi1, ivir2 - iocc1,
+      ovps.d_ovps.en3c12, 1,
+      ovps.d_ovps.ent, ivir2 - iocc1);
+
+  // en3 = Transpose[psi2] . ent + en3
+  // alpha = 1.00;
+  alpha = tau->get_wgt(2) / nsamp;
+  beta  = 0.00;
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
+      basis.h_basis.psi2, ivir2 - iocc1,
+      ovps.d_ovps.ent, ivir2 - iocc1,
+      beta, ovps.d_ovps.en3_c, ivir2-iocc1);
+
+  // ent = diag[en3c22] . psi2
+  Ddgmm(DDGMM_SIDE_RIGHT,
+      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
+      basis.h_basis.psi2, ivir2 - iocc1,
+      ovps.d_ovps.en3c22, 1,
+      ovps.d_ovps.ent, ivir2 - iocc1);
+
+  // en3 = Transpose[psi2] . ent + en3
+  alpha = tau->get_wgt(2) / nsamp;
+  beta  = 1.00;
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
+      basis.h_basis.psi2, ivir2 - iocc1,
+      ovps.d_ovps.ent, ivir2 - iocc1,
+      beta, ovps.d_ovps.en3_c, ivir2-iocc1);
+}
+
 
 /*
 void GF::mc_gf3_func(double* en3, int ip, int jp, int kp, int band) {

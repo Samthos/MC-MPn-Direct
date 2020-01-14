@@ -33,5 +33,13 @@ void Ddgmm(const enum DDGMM_SIDE Side,
     double *C, int ldc);
 void Transpose(const double*A, int m, double *B);
 void set_Upper_from_Lower(double *A, int m);
+void dspr(int mode, int uplo, int n,
+          double alpha,
+          double* x, int incx,
+          double* ap);
 
+void dspr_batched(int rows, int cols,
+          double alpha,
+          double* x,
+          double* ap);
 #endif  // BLAS_CALLS_H_

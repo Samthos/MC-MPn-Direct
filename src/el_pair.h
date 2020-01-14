@@ -91,13 +91,13 @@ class Metropolis_Electron_Pair_List : public Electron_Pair_List {
   }
   ~Metropolis_Electron_Pair_List() override = default;
   void move(Random& random, const Molec& molec, const GTO_Weight& weight) override {
-    if (moves_since_rescale == 1'000) {
-      rescale_move_length();
-    }
     for (Electron_Pair &electron_pair : electron_pairs) {
       mc_move_scheme(electron_pair, random, molec, weight);
     }
     moves_since_rescale++;
+    if (moves_since_rescale == 1'000) {
+      rescale_move_length();
+    }
   }
   bool requires_blocking() override {
     return true;

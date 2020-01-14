@@ -69,7 +69,6 @@ class QC_monte {
   void move_walkers();
   static void print_mc_head(std::chrono::high_resolution_clock::time_point);
   static void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
-  std::string genFileName(int, int, int, int, int);
 };
 
 class MP : public QC_monte {
@@ -126,7 +125,7 @@ class MP : public QC_monte {
 class MP2 : public MP {
  public:
   MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6}) {}
-  ~MP2() = default;
+  ~MP2() override = default;
 
  protected:
   void energy() override;
@@ -137,7 +136,7 @@ class MP3 : public MP {
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : MP(p1, p2, p3, p4, p5, ep, {6, 36}) {
     ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
   }
-  ~MP3() {
+  ~MP3() override {
     ovps.free();
   }
 
@@ -168,32 +167,31 @@ class GF : public  QC_monte {
   std::vector<GFStats> qeps;
   virtual void mc_local_energy(const int& step) = 0;
   virtual int full_print(int& step, int checkNum) = 0;
+  std::string genFileName(int, int, int, int, int, int);
 
   void mcgf2_local_energy_core();
-  void mcgf2_local_energy(std::vector<double>&, int);
-  void mcgf2_local_energy_diff(std::vector<double>&, int);
+  void mcgf2_local_energy(std::vector<std::vector<double>>&);
+  void mcgf2_local_energy_diff(std::vector<std::vector<double>>&);
   void mcgf2_local_energy_full(int);
   void mcgf2_local_energy_full_diff(int);
 
   void mcgf3_local_energy_core();
-  void mcgf3_local_energy(std::vector<double>&, int);
-  void mcgf3_local_energy_diff(std::vector<double>&, int);
+  void mcgf3_local_energy(std::vector<std::vector<double>>&);
+  void mcgf3_local_energy_diff(std::vector<std::vector<double>>&);
   void mcgf3_local_energy_full(int);
   void mcgf3_local_energy_full_diff(int);
 
   void mc_gf_statistics(int,
-                        std::vector<std::vector<double>>&,
                         std::vector<std::vector<double*>>&,
-                        std::vector<std::vector<double*>>&,
+                        std::vector<double*>&,
                         std::vector<std::vector<double*>>&);
+  void mc_gf_full_diffs(int band, std::vector<double> m);
 
-  void mc_gf_copy(std::vector<double>&, std::vector<double>&, double*, double*);
+  void mc_gf_copy(std::vector<double>&, double*);
 
-  void mc_gf2_statistics(int, int);
-  void mc_gf2_full_print(int, int, int);
-
-  void mc_gf3_statistics(int, int);
-  void mc_gf3_full_print(int, int, int);
+  void mc_gf_full_print(int band, int steps, int checkNum, int order,
+      std::vector<double*>& d_ex1,
+      std::vector<std::vector<double*>>& d_cov);
 };
 
 class GPU_GF2 : public GF {
@@ -204,7 +202,7 @@ class GPU_GF2 : public GF {
   GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 basis);
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
 
     ovps.alloc_02();
   }
@@ -218,9 +216,10 @@ class GPU_GF2 : public GF {
 class GF2 : public GF {
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+    ovps.init(1, iops.iopns[KEYS::MC_NPAIR], basis);
     ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 basis);
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
 
     ovps.alloc_02();
     tau->resize(2);
@@ -245,7 +244,7 @@ class GPU_GF3 : public GF {
   GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 basis);
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
     ovps.alloc_03();
   }
   ~GPU_GF3() {
@@ -258,9 +257,10 @@ class GPU_GF3 : public GF {
 class GF3 : public GF {
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4, GTO_Weight p5, Electron_Pair_List* ep) : GF(p1, p2, p3, p4, p5, ep) {
+    ovps.init(2, iops.iopns[KEYS::MC_NPAIR], basis);
     ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 basis);
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
     ovps.alloc_03();
     tau->resize(2);
 

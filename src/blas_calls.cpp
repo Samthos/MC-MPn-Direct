@@ -28,3 +28,31 @@ void set_Upper_from_Lower(double *A, int m) {
     }
   }
 }
+
+void dspr_batched(
+    int rows, int cols,
+    double alpha,
+    double* x,
+    double* ap) {
+
+  for (auto c1 = 0; c1 < cols; c1++) {
+    for (auto c2 = 0; c2 <= c1; c2++) {
+      for (auto row = 0; row < rows; row++) {
+        ap[(c1 * (c1 + 1) / 2 + c2) * rows + row] += alpha * x[c1 * rows + row] * x[c2 * rows + row];
+      }
+    }
+  }
+}
+
+void dspr(int mode, int uplo, int n,
+    double alpha,
+    double* x, int incx,
+    double* ap){
+  for (auto col = 0; col < n; col++) {
+    for (auto row = 0; row <= col; row++) {
+      ap[row + col * (col+1) / 2] += alpha * x[row * incx] * x[col * incx];
+    }
+  }
+}
+
+

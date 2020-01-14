@@ -272,27 +272,12 @@ double GTO_Weight::normalize() {
 
   std::for_each(cum_sum.begin(), cum_sum.end(),
                 [&](double& x) {x = x/g_wgt;});
-#ifndef NDEBUG
-  for (auto &it : cum_sum) {
-    std::cout << it;
-    for (auto &jt : cum_sum_index[&it - &cum_sum[0]]) {
-      std::cout << " " << jt;
-    }
-    std::cout << std::endl;
-  }
-#endif
   std::partial_sum(cum_sum.begin(), cum_sum.end(), cum_sum.begin());
 
   // std::cout << "g_wgt: " << g_wgt << std::endl;
   g_wgt = sqrt(g_wgt);
   for (auto &it : mcBasisList) {
-    std::for_each(it.norm.begin(), it.norm.end(),
-                   [g_wgt](double& n) {n /= g_wgt;});
-#ifndef NDEBUG
-    for (auto i = 0; i < it.norm.size(); i++) {
-      printf("%.16f %.16f\n", it.norm[i], it.alpha[i]);
-    }
-#endif
+    std::for_each(it.norm.begin(), it.norm.end(), [g_wgt](double& n) {n /= g_wgt;});
   }
 
   return g_wgt;
