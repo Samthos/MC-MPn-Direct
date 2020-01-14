@@ -14,20 +14,17 @@
 class OVPS_SET {
  public:
   OVPS_SET() = default;
-  OVPS_SET(int mc_pair_num_, int n1_, int n2_) {
-    resize(mc_pair_num_, n1_, n2_);
+  OVPS_SET(int mc_pair_num_) {
+    resize(mc_pair_num_);
   }
-  void resize(int mc_pair_num_, int inner_, int lda_) {
+  void resize(int mc_pair_num_) {
     mc_pair_num = mc_pair_num_;
-    inner =  inner_;
-    lda = lda_;
-
-    s_11.resize(mc_pair_num*mc_pair_num);
-    s_12.resize(mc_pair_num*mc_pair_num);
-    s_21.resize(mc_pair_num*mc_pair_num);
-    s_22.resize(mc_pair_num*mc_pair_num);
+    s_11.resize(mc_pair_num * mc_pair_num);
+    s_12.resize(mc_pair_num * mc_pair_num);
+    s_21.resize(mc_pair_num * mc_pair_num);
+    s_22.resize(mc_pair_num * mc_pair_num);
   }
-  void update(double *psi1Tau, double *psi2Tau) {
+  void update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
     double alpha = 1.0;
     double beta = 0.0;
 
@@ -60,7 +57,7 @@ class OVPS_SET {
     Transpose(s_21.data(), mc_pair_num, s_12.data());
   }
 
-  int mc_pair_num, inner, lda;
+  int mc_pair_num;
   std::vector<double> s_11, s_12, s_21, s_22;
 };
 

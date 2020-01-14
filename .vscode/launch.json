@@ -11,7 +11,7 @@
             "program": "/home/aedoran/Documents/lab_projects/MC-MPn-Direct/cmake-build-debug/src/MC_MPn_Direct",
             "args": ["molecule_water.task_MP.order_2.sampler_DIRECT.tau_STOCHASTIC.cv_FALSE.mcin"],
             "stopAtEntry": false,
-            "cwd": "/home/aedoran/Documents/lab_projects/MC-MPn-Direct-test/molecule_water.task_MP.order_2.sampler_DIRECT.tau_STOCHASTIC.cv_FALSE",
+            "cwd": "/home/aedoran/Documents/lab_projects/MC-MPn-Direct-test/molecule_water.task_MPV.order_2.sampler_DIRECT.tau_STOCHASTIC.cv_FALSE",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

@@ -21,12 +21,12 @@ void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& 
   }
 
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), ivir2 - iocc1, nw_nbf,
+      pos.size(), psi.lda, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,
       0.0,
-      psi.psi.data(), ivir2-iocc1);
+      psi.psi.data(), psi.lda);
 }
 
 void Basis::host_cgs_get(const std::array<double, 3> &pos, const int walker) {

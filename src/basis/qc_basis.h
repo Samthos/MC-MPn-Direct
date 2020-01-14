@@ -18,8 +18,9 @@ class Wavefunction {
     ivir1(iv1),
     ivir2(iv2),
     electrons(electrons_),
-    psi((ivir2 - iocc1) * electrons, 0.0),
-    psiTau((ivir2 - iocc1) * electrons, 0.0)
+    lda(ivir2 - iocc1),
+    psi(lda * electrons, 0.0),
+    psiTau(lda * electrons, 0.0)
   {}
 
   const double *data() const {
