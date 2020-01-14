@@ -523,7 +523,7 @@ void mcgf_full_helper(
     int m, int n,
     double a1, double b1, double a2, double b2,
     double* enCore,
-    double* psi, int psi_lda,
+    const double* psi, int psi_lda,
     double* ent,
     double* en) {
   // ent = alpha en3_2pCore . psi2
@@ -616,14 +616,14 @@ void GF::mcgf3_local_energy_full(int band) {
       1.00, 0.00,
       1.00, 1.00,
       ovps.d_ovps.enCore,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.enBlock[band][0]);
 
   // ent = diag[enc12] . psi1
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi1.psi.data(), electron_pair_psi1.lda,
+      electron_pair_psi1.occ(), electron_pair_psi1.lda,
       ovps.d_ovps.en3c12, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -633,14 +633,14 @@ void GF::mcgf3_local_energy_full(int band) {
   beta  = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
 
   // ent = diag[en3c22] . psi2
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.en3c22, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -649,7 +649,7 @@ void GF::mcgf3_local_energy_full(int band) {
   beta  = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
 }
@@ -673,7 +673,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
       1.00, 0.00,
       1.00, 0.00,
       ovps.d_ovps.enCore,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_1p);
 
@@ -683,7 +683,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
       tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_2pCore,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_2p);
 
@@ -693,7 +693,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
       tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_12pCore,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_12p);
 
@@ -709,7 +709,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
       1.00, 0.00,
       1.00, 0.00,
       ovps.d_ovps.enCore,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_1m);
 
@@ -718,7 +718,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
       tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_2mCore,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_2m);
 
@@ -727,14 +727,14 @@ void GF::mcgf3_local_energy_full_diff(int band) {
       tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_12mCore,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_12m);
 
   // ent = diag[enc12] . psi1
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi1.psi.data(), electron_pair_psi1.lda,
+      electron_pair_psi1.occ(), electron_pair_psi1.lda,
       ovps.d_ovps.en3c12, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -744,14 +744,14 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   beta  = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.en3_c, ivir2-iocc1);
 
   // ent = diag[en3c22] . psi2
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.en3c22, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -760,7 +760,7 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   beta  = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.en3_c, ivir2-iocc1);
 }

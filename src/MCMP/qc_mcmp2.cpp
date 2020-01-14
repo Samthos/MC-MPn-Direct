@@ -23,8 +23,6 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
    *   emp2: reference to double. stores the energy calcaulted by this function
    *   control2: reference to vector<double>. stores the control2 varaites to the mp2 energy for calcaulted by this function.
    */
-  int im, am;
-
   double o_13, o_14, o_23, o_24;
   double v_13, v_14, v_23, v_24;
 
@@ -44,15 +42,15 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
 #if MP2CV >= 2
     en_wj.fill(0.0);
 #endif
-    std::transform(electron_pair_psi1.psi.data() + it * electron_pair_psi1.lda,
-        electron_pair_psi1.psi.data() + (it+1) * electron_pair_psi1.lda, 
-        tau_values.begin() + iocc1,
-        electron_pair_psi1.psiTau.data(),
+    std::transform(electron_pair_psi1.data() + it * electron_pair_psi1.lda,
+        electron_pair_psi1.data() + (it+1) * electron_pair_psi1.lda, 
+        tau_values.begin(),
+        electron_pair_psi1.dataTau(),
         std::multiplies<>());
-    std::transform(electron_pair_psi2.psi.data() + it * electron_pair_psi2.lda, 
-        electron_pair_psi2.psi.data() + (it+1) * electron_pair_psi2.lda,
-        tau_values.begin() + iocc1,
-        electron_pair_psi2.psiTau.data(),
+    std::transform(electron_pair_psi2.data() + it * electron_pair_psi2.lda, 
+        electron_pair_psi2.data() + (it+1) * electron_pair_psi2.lda,
+        tau_values.begin(),
+        electron_pair_psi2.dataTau(),
         std::multiplies<>());
     for (auto jt = it + 1; jt != electron_pair_list->size(); jt++) {
       o_13 = 0.0;
@@ -65,13 +63,13 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
       v_24 = 0.0;
 
       // compute the traces of the the HF green's functions
-      for (im = 0; im < iocc2-iocc1; im++) {
+      for (auto im = iocc1; im < iocc2; im++) {
         o_13 = o_13 + electron_pair_psi1.psiTau.data()[im] * electron_pair_psi1.psi.data()[jt * electron_pair_psi1.lda + (im)];
         o_14 = o_14 + electron_pair_psi1.psiTau.data()[im] * electron_pair_psi2.psi.data()[jt * electron_pair_psi2.lda + (im)];
         o_23 = o_23 + electron_pair_psi2.psiTau.data()[im] * electron_pair_psi1.psi.data()[jt * electron_pair_psi1.lda + (im)];
         o_24 = o_24 + electron_pair_psi2.psiTau.data()[im] * electron_pair_psi2.psi.data()[jt * electron_pair_psi2.lda + (im)];
       }
-      for (am = iocc2-iocc1; am < ivir2-iocc1; am++) {
+      for (auto am = ivir1; am < ivir2; am++) {
         v_13 = v_13 + electron_pair_psi1.psiTau.data()[am] * electron_pair_psi1.psi.data()[jt * electron_pair_psi1.lda + (am)];
         v_14 = v_14 + electron_pair_psi1.psiTau.data()[am] * electron_pair_psi2.psi.data()[jt * electron_pair_psi2.lda + (am)];
         v_23 = v_23 + electron_pair_psi2.psiTau.data()[am] * electron_pair_psi1.psi.data()[jt * electron_pair_psi1.lda + (am)];

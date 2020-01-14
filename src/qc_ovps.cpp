@@ -35,8 +35,10 @@ void OVPs::update_ovps(Wavefunction& electron_pair_psi1, Wavefunction& electron_
     for (auto start = 0; start < o_set[stop].size(); start++) {
       auto t_val = tau->get_exp_tau(stop, start);
       std::transform(t_val.begin(), t_val.end(), t_val.begin(), sqrt);
-      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi1.psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, electron_pair_psi1.psiTau.data(), ivir2 - iocc1);
-      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi2.psi.data(), ivir2 - iocc1, &t_val[iocc1], 1, electron_pair_psi2.psiTau.data(), ivir2 - iocc1);
+
+      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi1.occ(), electron_pair_psi1.lda, &t_val[iocc1], 1, electron_pair_psi1.occTau(), electron_pair_psi1.lda);
+      Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi2.occ(), electron_pair_psi2.lda, &t_val[iocc1], 1, electron_pair_psi2.occTau(), electron_pair_psi2.lda);
+
       o_set[stop][start].update(electron_pair_psi1.occTau(), electron_pair_psi2.occTau(), electron_pair_psi2.iocc2 - electron_pair_psi2.iocc1, electron_pair_psi2.lda);
       v_set[stop][start].update(electron_pair_psi1.virTau(), electron_pair_psi2.virTau(), electron_pair_psi2.ivir2 - electron_pair_psi2.ivir1, electron_pair_psi2.lda);
     }

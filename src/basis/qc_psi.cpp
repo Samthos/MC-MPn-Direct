@@ -24,7 +24,7 @@ void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& 
       pos.size(), psi.lda, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co + iocc1 * nw_nbf, nw_nbf,
+      h_basis.nw_co, nw_nbf,
       0.0,
       psi.psi.data(), psi.lda);
 }

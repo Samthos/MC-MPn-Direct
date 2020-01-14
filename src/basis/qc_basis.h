@@ -18,7 +18,7 @@ class Wavefunction {
     ivir1(iv1),
     ivir2(iv2),
     electrons(electrons_),
-    lda(ivir2 - iocc1),
+    lda(ivir2),
     psi(lda * electrons, 0.0),
     psiTau(lda * electrons, 0.0)
   {}
@@ -27,16 +27,19 @@ class Wavefunction {
     return psi.data();
   }
   const double *occ() const {
-    return psi.data();
+    return psi.data() + iocc1;
   }
   const double *vir() const {
-    return psi.data() + (ivir1-iocc1);
+    return psi.data() + ivir1;
   }
-  double *occTau() {
+  double *dataTau() {
     return psiTau.data();
   }
+  double *occTau() {
+    return psiTau.data() + iocc1;
+  }
   double *virTau() {
-    return psiTau.data() + (ivir1-iocc1);
+    return psiTau.data() + ivir1;
   }
 
   size_t iocc1;

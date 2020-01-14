@@ -160,7 +160,7 @@ void GF::mcgf2_local_energy_full(int band) {
       iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR],
       alpha,
       ovps.d_ovps.enCore, iops.iopns[KEYS::MC_NPAIR],
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       beta,
       ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
@@ -170,7 +170,7 @@ void GF::mcgf2_local_energy_full(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR],
       alpha,
-      electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+      electron_pair_psi2.occ(), electron_pair_psi2.lda,
       ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
       beta,
       ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
@@ -188,7 +188,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
               ovps.d_ovps.en2pCore, iops.iopns[KEYS::MC_NPAIR],
-              electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+              electron_pair_psi2.occ(), electron_pair_psi2.lda,
               beta,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
@@ -198,7 +198,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
-              electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+              electron_pair_psi2.occ(), electron_pair_psi2.lda,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta,
               ovps.d_ovps.en2p, ivir2 - iocc1);
@@ -210,7 +210,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
               ovps.d_ovps.en2mCore, iops.iopns[KEYS::MC_NPAIR],
-              electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+              electron_pair_psi2.occ(), electron_pair_psi2.lda,
               beta,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
@@ -220,7 +220,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
-              electron_pair_psi2.psi.data(), electron_pair_psi2.lda,
+              electron_pair_psi2.occ(), electron_pair_psi2.lda,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta,
               ovps.d_ovps.en2m, ivir2 - iocc1);
