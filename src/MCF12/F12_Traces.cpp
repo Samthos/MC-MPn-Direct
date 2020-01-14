@@ -51,7 +51,10 @@ void F12_Traces::update_bx_fd_traces(const std::vector<el_one_typ> &const Wavefu
 
 void F12_Traces::build_one_e_traces(const Wavefunction& electron_psi) {
   for(int io = 0; io < electrons;io++) {
-    op11[io] = std::inner_product(electron_psi.data() + iocc1, electron_psi.data() + iocc2, electron_psi.data() + iocc1, 0.0);
+    op11[io] = std::inner_product(electron_psi.data() + io * electron_psi.lda + iocc1, 
+        electron_psi.data() + io * electron_psi.lda + iocc2, 
+        electron_psi.data() + io * electron_psi.lda + iocc1, 
+        0.0);
   }
 }
 
@@ -59,9 +62,20 @@ void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
   for(int io = 0; io < electrons;io++) {
     for(int jo = 0; jo < electrons;jo++) {
       if (jo != io) {
-        op12[io][jo] = std::inner_product(electron_psi.data() + iocc1, electron_psi.data() + iocc2, electron_psi.data() + iocc1, 0.0);
-        ok12[io][jo] = std::inner_product(electron_psi.data(), electron_psi.data() + iocc1, electron_psi.data(), op12[io][jo]);
-        ov12[io][jo] = std::inner_product(electron_psi.data() + ivir1, electron_psi.data() + ivir2, electron_psi.data() + ivir1, 0.0);
+        op12[io][jo] = std::inner_product(electron_psi.data() + io * electron_psi.lda + iocc1,
+            electron_psi.data() + io * electron_psi.lda + iocc2,
+            electron_psi.data() + jo * electron_psi.lda + iocc1,
+            0.0);
+
+        ok12[io][jo] = std::inner_product(electron_psi.data() + io * electron_psi.lda        ,
+            electron_psi.data() + io * electron_psi.lda + iocc1,
+            electron_psi.data() + jo * electron_psi.lda,
+            op12[io][jo]);
+
+        ov12[io][jo] = std::inner_product(electron_psi.data() + io * electron_psi.lda + ivir1,
+            electron_psi.data() + io * electron_psi.lda + ivir2,
+            electron_psi.data() + jo * electron_psi.lda + ivir1,
+            0.0);
       }
     }
   }
@@ -69,24 +83,54 @@ void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
 
 void F12_Traces::build_two_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2) {
   for(int ip = 0; ip < electron_pairs;ip++) {
-    p11[ip] = std::inner_product(electron_pair_psi1.data() + iocc1, electron_pair_psi1.data() + iocc2, electron_pair_psi1.data() + iocc1, 0.0);
-    p12[ip] = std::inner_product(electron_pair_psi1.data() + iocc1, electron_pair_psi1.data() + iocc2, electron_pair_psi2.data() + iocc1, 0.0);
-    p22[ip] = std::inner_product(electron_pair_psi2.data() + iocc1, electron_pair_psi2.data() + iocc2, electron_pair_psi2.data() + iocc1, 0.0);
-    k12[ip] = std::inner_product(electron_pair_psi1.data(), electron_pair_psi1.data() + iocc1, electron_pair_psi2.data(), p12[ip]);
+    p11[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
+        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+        0.0);
+    p12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
+        electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+        0.0);
+    p22[ip] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+        electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc2,
+        electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+        0.0);
+    k12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda,
+        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+        electron_pair_psi2.data() + ip * electron_pair_psi2.lda,
+        p12[ip]);
   }
 }
 
 void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi) {
   for(int ip = 0; ip < electron_pairs; ++ip) {
     for(int io = 0; io < electrons; ++io) {
-      p13[ip][io] = std::inner_product(electron_pair_psi1.data() + iocc1, electron_pair_psi1.data() + iocc2, electron_psi.data() + iocc1, 0.0);
-      p23[ip][io] = std::inner_product(electron_pair_psi2.data() + iocc1, electron_pair_psi2.data() + iocc2, electron_psi.data() + iocc1, 0.0);
+      p13[ip][io] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+          electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
+          electron_psi.data() + io * electron_psi.lda + iocc1,
+          0.0);
+      p23[ip][io] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+          electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc2,
+          electron_psi.data() + io * electron_psi.lda + iocc1,
+          0.0);
 
-      k13[ip][io] = std::inner_product(electron_pair_psi1.data(), electron_pair_psi1.data() + iocc1, electron_psi.data(), p13[ip][io]);
-      k23[ip][io] = std::inner_product(electron_pair_psi2.data(), electron_pair_psi2.data() + iocc1, electron_psi.data(), p23[ip][io]);
+      k13[ip][io] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda,
+          electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+          electron_psi.data() + io * electron_psi.lda,
+          p13[ip][io]);
+      k23[ip][io] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda,
+          electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+          electron_psi.data() + io * electron_psi.lda,
+          p23[ip][io]);
 
-      v13[ip][io] = std::inner_product(electron_pair_psi1.data() + ivir1, electron_pair_psi1.data() + ivir2, electron_psi.data() + ivir1, 0.0);
-      v23[ip][io] = std::inner_product(electron_pair_psi2.data() + ivir1, electron_pair_psi2.data() + ivir2, electron_psi.data() + ivir1, 0.0);
+      v13[ip][io] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda  + ivir1,
+          electron_pair_psi1.data() + ip * electron_pair_psi1.lda + ivir2,
+          electron_psi.data() + io * electron_psi.lda + ivir1,
+          0.0);
+      v23[ip][io] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda  + ivir1,
+          electron_pair_psi2.data() + ip * electron_pair_psi2.lda + ivir2,
+          electron_psi.data() + io * electron_psi.lda + ivir1,
+          0.0);
     }
   }
 }

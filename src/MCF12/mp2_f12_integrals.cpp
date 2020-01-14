@@ -19,7 +19,6 @@ double MP2F12_V_Engine::calculate_v(const Wavefunction& electron_pair_psi1, cons
   }
 
   std::array<double, 2> v_1_pair_1_one_ints{0.0, 0.0};
-  /*
   for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
     std::array<double, 2> t{0.0, 0.0};
     for (int io = 0; io < electron_list->size(); ++io) {
@@ -32,10 +31,8 @@ double MP2F12_V_Engine::calculate_v(const Wavefunction& electron_pair_psi1, cons
   for (double & v_1_pair_1_one_int : v_1_pair_1_one_ints) {
     v_1_pair_1_one_int *= nsamp_pair * nsamp_one_1;
   }
-  */
 
   std::array<double, 2> v_1_pair_2_one_ints{0.0, 0.0};
-  /*
   for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
     std::array<double, 4> t{0.0, 0.0, 0.0, 0.0};
     for (int io = 0; io < electron_list->size(); ++io) {
@@ -57,10 +54,9 @@ double MP2F12_V_Engine::calculate_v(const Wavefunction& electron_pair_psi1, cons
   for (double & v_1_pair_2_one_int : v_1_pair_2_one_ints) {
     v_1_pair_2_one_int *= nsamp_pair * nsamp_one_2;
   }
-  */
 
-  auto eV =   2 * c1 * (v_1_pair_0_one_ints[0] + v_1_pair_2_one_ints[0] - 2 * v_1_pair_1_one_ints[0])
-            + 2 * c2 * (v_1_pair_0_one_ints[1] + v_1_pair_2_one_ints[1] - 2 * v_1_pair_1_one_ints[1]);
+  auto eV =   c1 * (v_1_pair_0_one_ints[0] + v_1_pair_2_one_ints[0] - 2 * v_1_pair_1_one_ints[0])
+            + c2 * (v_1_pair_0_one_ints[1] + v_1_pair_2_one_ints[1] - 2 * v_1_pair_1_one_ints[1]);
   return eV;
 }
 
@@ -469,6 +465,6 @@ double MP2F12_VBX_Engine::calculate_bx(const std::vector<electron_pair_typ>& ele
 std::pair<double, double> MP2F12_VBX_Engine::calculate_v_vbx(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& electron_list) {
   auto e_v = calculate_v(electron_pair_list, electron_list);
   auto e_bx = calculate_bx(electron_pair_list, electron_list);
-  return std::make_pair(e_v, e_v + e_bx);
+  return std::make_pair(e_v, 2 * e_v + e_bx);
 }
 */
