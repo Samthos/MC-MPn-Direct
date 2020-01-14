@@ -32,6 +32,12 @@ void MP::monte_energy() {
     }
   }
 
+#ifdef DIMER_PRINT
+  /*
+   * Open an ofstream for each process. Use jobname to name them
+   */
+#endif // DIMER_PRINT
+
   // --- initialize
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
     // generate new positions
@@ -49,6 +55,13 @@ void MP::monte_energy() {
       energy();
     } while (tau->next());
 
+#ifdef DIMER_PRINT
+    /*
+     * dump all values to dimer ofstream
+     * values are stored in emp and control
+     */
+#endif // DIMER_PRINT
+
     // accumulate
     auto cv_back = control.back().begin();
     for (auto it = 0; it < cv.size()-1; it++) {
@@ -58,9 +71,7 @@ void MP::monte_energy() {
       // std::cout << std::distance(control.back().begin(), cv_back) << std::endl;
     }
     cv.back()->add(std::accumulate(emp.begin(), emp.end(), 0.0), control.back());
-
     // print if i is a multiple of 128
-#ifndef FULL_PRINTING
     if (0 == step % 128) {
       for (auto i = 0; i < emp.size(); i++) {
         output[i] << *cv[i] << "\t";
@@ -71,13 +82,6 @@ void MP::monte_energy() {
       output.back().flush();
       stepTimer.Start();
     }
-#else
-    output.back() << step << ",";
-    for (double i : emp) {
-      output.back() << std::setprecision(std::numeric_limits<double>::digits10 + 1)<< i << ",";
-    }
-    output.back() << "\n";
-#endif
   }
 
   for (auto i = 0; i < emp.size(); i++) {

@@ -66,6 +66,7 @@ target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
 
 target_include_directories(MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+target_include_directories(MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
 
 target_compile_definitions(MC_MPn_Direct PUBLIC -DMP2CV=${MP2CV})
 target_compile_definitions(MC_MPn_Direct PUBLIC -DMP3CV=${MP3CV})

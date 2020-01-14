@@ -18,20 +18,21 @@ add_definitions("-DVERSION=\"${GIT_COMMIT_HASH}\"")
 
 find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
+find_path(BLAS_INCLUDE_DIRS cblas.h)
 
 option(Enable_MPI "Enables MPI Sampling" Off)
 if (Enable_MPI)
     find_package(MPI REQUIRED)
 endif()
 
-option(NDEBUG "enables NDEBUG macro" OFF)
+option(NDEBUG "enables NDEBUG macro" Off)
 if(${NDEBUG})
     add_definitions(-DNDEBUG)
 endif()
 
-option(Enable_Full_Print "Enables Printing of the full energy sequence" Off)
-if (Enable_Full_Print)
-    add_definitions(-DFULL_PRINTING)
+option(DIMER_PRINT "enables printing of all integrands for dimer calculation macro" Off)
+if(${DIMER_PRINT})
+    add_definitions(-DDIMER_PRINT)
 endif()
 
 set(MP2CV 0 CACHE STRING "Sets MP2CV level")
