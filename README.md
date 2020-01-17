@@ -93,6 +93,7 @@ The following are options technically options, but will be set for nearly every 
   * GFDIFF: Green's function calculation for diagonal element only with derivatives.
   * GFFULL: Green's function calculation for full self-energy matrix.
   * GFFULLDIFF: Green's function calculation for full self-energy matrix with derivatives.
+  * F12V: MP2 calculation with F12-V cbs correction.
 
 * **ORDER**: (INT) Level of theory to perform. Default=2
   
@@ -124,13 +125,40 @@ If the sampler is set to Metropolis the following keywords may be set:
  * **MC_DELX**: (DOUBLE) Sets initial maximum offset for the Metropolis algorithm. Default=0.1
  * **NBLOCK**: (INT) May be depreciates. Set maximum number of blocking transformations. Default=1
 
-The options control the sequence the behavior of MC-GF calculations. 
+These options control the sequence the behavior of MC-GF calculations. 
  * **OFF_BAND**: (INT) Specifies offset of the first orbital relative to LUMO to target. Default=1 (HOMO)
  * **NUM_BAND**: (INT) Specifies number of orbitals to target. Default=1.
  * **DIFFS**: (INT) Maximum number of derivatives to calculate plus one. DIFFS=1 is a calculation with no derivatives. Diffs=2 is the self-energy  plus its first derivatives. Default=1
 
 The OFF_BAND and NUM_BAND keywords are used in conjunction to specify the range of orbitals that the MC-GF calculation will provide a correction to. 
 The range of orbitals is (LUMO - OFF_BAND, ..., LUMO - OFF_BAND + NUM_BAND - 1).
+
+These options control the behavior of F12V calculations
+ * **ELECTRONS**: (INT) Number of one electron walkers to use for the calculation. Default=16
+ * **F12_CORRELATION_FACTOR**: (STRING) Which functional form to use for the correlation factor. A list of the available correlation factors is given below. Default=Slater.
+ * **F12_GAMMA**: (DOUBLE) Value of the adjustable parameter used by the correlation factor. The default value is dependant of the correlation factor chosen. 
+ * **F12_BETA**: (DOUBLE) Value of the second adjustable parameter used by the correlation factor. Functionals that require a second parameter are noted. The default value is dependant of the correlation factor chosen. 
+
+MC-F12 methods have the unique ability to use nearly any function as the correlation factor, since the use of a function is not dependant of the availability of analytic integrals.  The choice of correlation factor can dramatically affect the accuracy of the resulting F12 calculation.  Because of this, it is recommend to use the Slater correlation factor as it generally performs well.  See (Cole's correlation function paper) for a detailed study comparing the usage of different correlation factors for F12 calculations.  The default values of the adjustable parameters are taken from this study.  The following correlation factors are implemented for MC-F12 calculations. 
+ * **Linear**: Zero-parameter functional.
+ * **Rational**: One-parameter functional. Default Gamma=1.2.
+ * **Slater**: One-parameter functional. Default Gamma=1.2.
+ * **Slater_Linear**: One-parameter functional. Default Gamma=0.5.
+ * **Gaussian**: One-parameter functional. Default Gamma=0.5.
+ * **Cusped_Gaussian**: One-parameter functional. Default Gamma=1.2.
+ * **Yukawa_Coulomb**: One-parameter functional. Default Gamma=2.0.
+ * **Jastrow**: One-parameter functional. Default Gamma=1.2.
+ * **ERFC**: One-parameter functional. Default Gamma=1.2.
+ * **ERFC_Linear**: One-parameter functional. Default Gamma=0.4.
+ * **Tanh**: One-parameter functional. Default Gamma=1.2.
+ * **ArcTan**: One-parameter functional. Default Gamma=1.6.
+ * **Logarithm**: One-parameter functional. Default Gamma=2.0.
+ * **Hybrid**: One-parameter functional. Default Gamma=1.2.
+ * **Two_Parameter_Rational**: Two-parameter functional. Default Gamma=NAN. Default Beta=NAN.
+ * **Higher_Rational**: Two-parameter functional. Default Gamma=1.6. Default Beta=3.0.
+ * **Cubic_Slater**: Two-parameter functional. Default Gamma=1.2. Default Beta=0.003.
+ * **Higher_Jastrow**: Two-parameter functional. Default Gamma=0.8. Default Beta=0.75.
+
 
 
 ### Running a Calculation
