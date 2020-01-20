@@ -12,12 +12,12 @@
 class MP2F12_V_Engine {
  public:
   explicit MP2F12_V_Engine(const IOPs& iops, const Basis& basis) :
-      traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR])
+      traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::ELECTRONS])
   {
-    correlation_factor = create_correlation_factor(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::F12_CORRELATION_FACTOR], iops.dopns[KEYS::F12_GAMMA], iops.dopns[KEYS::F12_BETA]);
+    correlation_factor = create_correlation_factor(iops);
     nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
-    nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
-    nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1.0);
+    nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);
+    nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::ELECTRONS] - 1.0);
   }
   ~MP2F12_V_Engine() {
     delete correlation_factor;
@@ -43,8 +43,8 @@ class MP2F12_V_Engine {
 class MP2F12_VBX_Engine : public MP2F12_V_Engine {
  public:
   explicit MP2F12_VBX_Engine(const IOPs& iops, const Basis& basis) : MP2F12_V_Engine(iops, basis) {
-    nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]-2);
-    nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]-3);
+    nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-2);
+    nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-3);
   }
   std::pair<double, double> calculate_v_vbx(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
 

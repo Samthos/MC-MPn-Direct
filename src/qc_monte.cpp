@@ -16,7 +16,7 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
     electron_weight(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]),
     electron_pair_psi1(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2),
     electron_pair_psi2(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2),
-    electron_psi(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2),
+    electron_psi(iops.iopns[KEYS::ELECTRONS], basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2),
     random(iops.iopns[KEYS::DEBUG])
 {
   numBand = iops.iopns[KEYS::NUM_BAND];

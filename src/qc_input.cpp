@@ -26,12 +26,13 @@ IOPs::IOPs() {
    *  -read values directly instead of setting them
    */
   bopns[KEYS::SPHERICAL] = true;
+  bopns[KEYS::F12_GAMMA] = false;
+  bopns[KEYS::F12_BETA] = false;
 
   dopns[KEYS::MC_DELX] = 0.1;
-  dopns[KEYS::F12_GAMMA] = 1.2;
-  dopns[KEYS::F12_BETA] = 1.2;
 
   iopns[KEYS::MC_NPAIR] = 16;
+  iopns[KEYS::ELECTRON_PAIRS] = 16;
   iopns[KEYS::ELECTRONS] = 16;
   iopns[KEYS::MC_TRIAL] = 1024;
   iopns[KEYS::MC_PAIR_GROUPS] = 1;
@@ -235,10 +236,12 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
               keySet = false;
               break;
             case KEYS::F12_GAMMA:
+              bopns[keyval] = true;
               dopns[keyval] = stod(key, nullptr);
               keySet = false;
               break;
             case KEYS::F12_BETA:
+              bopns[keyval] = true;
               dopns[keyval] = stod(key, nullptr);
               keySet = false;
               break;
@@ -301,26 +304,47 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
       std::cout << " RNG in debug mode" << std::endl;
     }
 
-    std::cout << "\tDIFFS = ";
-    if (iopns[KEYS::DIFFS] > 1) {
-      std::cout << iopns[KEYS::DIFFS] - 1 << std::endl;
-    } else {
-      std::cout << "FALSE" << std::endl;
-    }
-    std::cout << "\tBands: ";
-
-    for (int i = 0; i < iopns[KEYS::NUM_BAND]; i++) {
-      if ((i + 1 - iopns[KEYS::OFF_BAND]) < 0) {
-        std::cout << "HOMO" << i - iopns[KEYS::OFF_BAND] + 1;
-      } else if ((i + 1 - iopns[KEYS::OFF_BAND]) == 0) {
-        std::cout << "HOMO-" << i - iopns[KEYS::OFF_BAND] + 1;
+    if (iopns[KEYS::TASK] == TASKS::GF || iopns[KEYS::TASK] == TASKS::GFDIFF || iopns[KEYS::TASK] == TASKS::GFFULL || iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+      std::cout << "\tDIFFS = ";
+      if (iopns[KEYS::DIFFS] > 1) {
+        std::cout << iopns[KEYS::DIFFS] - 1 << std::endl;
       } else {
-        std::cout << "LUMO+" << i - iopns[KEYS::OFF_BAND];
+        std::cout << "FALSE" << std::endl;
       }
+      std::cout << "\tBands: ";
 
-      if (i < iopns[KEYS::NUM_BAND] - 1) {
-        std::cout << ", ";
+      for (int i = 0; i < iopns[KEYS::NUM_BAND]; i++) {
+        if ((i + 1 - iopns[KEYS::OFF_BAND]) < 0) {
+          std::cout << "HOMO" << i - iopns[KEYS::OFF_BAND] + 1;
+        } else if ((i + 1 - iopns[KEYS::OFF_BAND]) == 0) {
+          std::cout << "HOMO-" << i - iopns[KEYS::OFF_BAND] + 1;
+        } else {
+          std::cout << "LUMO+" << i - iopns[KEYS::OFF_BAND];
+        }
+
+        if (i < iopns[KEYS::NUM_BAND] - 1) {
+          std::cout << ", ";
+        }
       }
+    } else if (iopns[KEYS::TASK] == TASKS::F12V) {
+      std::cout << "Number of Electrons Walkers = " << iopns[KEYS::ELECTRONS] << "\n";
+      std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
+
+      std::cout << "F12_GAMMA = ";
+      if (bopns[KEYS::F12_GAMMA]) {
+        std::cout << "default";
+      } else {
+        std::cout << dopns[KEYS::F12_GAMMA];
+      }
+      std::cout << "\n";
+
+      std::cout << "F12_BETA = ";
+      if (bopns[KEYS::F12_BETA]) {
+        std::cout << "default";
+      } else {
+        std::cout << dopns[KEYS::F12_BETA];
+      }
+      std::cout << "\n";
     }
     std::cout << std::endl;
   }
