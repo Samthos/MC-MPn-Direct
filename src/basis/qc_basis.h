@@ -61,6 +61,74 @@ class Wavefunction {
  private:
 };
 
+namespace Cartesian_Poly {
+  enum Cartesian_P {
+    X = 0, 
+    Y,
+    Z
+  };
+  enum Cartesian_D {
+    XX = 0,
+    XY,
+    XZ,
+    YY,
+    YZ,
+    ZZ
+  };
+  enum Cartesian_F {
+    XXX = 0,
+    XXY,
+    XXZ,
+    XYY,
+    XYZ,
+    XZZ,
+    YYY,
+    YYZ,
+    YZZ,
+    ZZZ
+  };
+  enum Cartesian_G {
+    XXXX = 0,
+    XXXY,
+    XXXZ,
+    XXYY,
+    XXYZ,
+    XXZZ,
+    XYYY,
+    XYYZ,
+    XYZZ,
+    XZZZ,
+    YYYY,
+    YYYZ,
+    YYZZ,
+    YZZZ,
+    ZZZZ
+  };
+  enum Cartesian_H {
+    XXXXX = 0,
+    XXXXY,
+    XXXXZ,
+    XXXYY,
+    XXXYZ,
+    XXXZZ,
+    XXYYY,
+    XXYYZ,
+    XXYZZ,
+    XXZZZ,
+    XYYYY,
+    XYYYZ,
+    XYYZZ,
+    XYZZZ,
+    XZZZZ,
+    YYYYY,
+    YYYYZ,
+    YYYZZ,
+    YYZZZ,
+    YZZZZ,
+    ZZZZZ,
+  };
+}
+
 namespace SHELL {
   enum Shell_Type {
     SP=-1, S, P, D, F, G, H
@@ -100,6 +168,8 @@ struct BasisData {
   double *contraction_exp;
   double *contraction_coef;
   double *ao_amplitudes;  // stores AO amplidutes
+  double *contraction_amplitudes;  // stores contraction amplidutes
+  double *contraction_amplitudes_derivative;  // stores contraction amplidutes
   double *nw_co;          // obital coefs from nwchem
   BasisMetaData *meta_data;
 };
@@ -122,7 +192,7 @@ class Basis {
 
   // get psi vals
   void host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
-  void host_cgs_get(const std::array<double, 3>&, int);
+  void host_psi_get_with_derivatives(Wavefunction&, Wavefunction&, Wavefunction&, Wavefunction&, std::vector<std::array<double, 3>>&);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 
   // read write
@@ -148,27 +218,17 @@ class Basis {
   BasisData h_basis, d_basis;
 
  private:
-  static constexpr double cf[] = {0.7905694150420949,  // sqrt(2.5) * 0.5,
-                                  2.3717082451262845,  // sqrt(2.5) * 1.5,
-                                  3.8729833462074170,  // sqrt(15.0),
-                                  0.6123724356957945,  // sqrt(1.5) * 0.5,
-                                  2.4494897427831780,  // sqrt(6.0),
-                                  1.5000000000000000,  // 1.5,
-                                  1.9364916731037085}; // sqrt(15.0) * 0.5
-  static constexpr double cg[] = {2.9580398915498085,
-                                  6.2749501990055672,
-                                  2.0916500663351894,
-                                  1.1180339887498949,
-                                  6.7082039324993694,
-                                  2.3717082451262845,
-                                  3.1622776601683795,
-                                  0.55901699437494745,
-                                  3.3541019662496847,
-                                  0.73950997288745213,
-                                  4.4370598373247132};
-
   void read(IOPs &, MPI_info &, Molec &);
   void nw_vectors_read(IOPs &, MPI_info &, Molec &);
+
+  void build_contractions(const std::vector<std::array<double, 3>>&);
+  void build_contractions_with_derivatives(const std::vector<std::array<double, 3>>&);
+
+  void build_ao_amplitudes(const std::vector<std::array<double, 3>>&);
+  void build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>&);
+  void build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>&);
+  void build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>&);
+
   static void normalize_atom_basis(std::vector<AtomBasis>&);
   static void normalize_sp(SHELL::Shell& shell);
   static void normalize_s(SHELL::Shell& shell);
@@ -177,14 +237,50 @@ class Basis {
   static void normalize_f(SHELL::Shell& shell);
   static void normalize_g(SHELL::Shell& shell);
 
-  static void evaulate_s(double*, const double&, const double&, const double&, const double&);
-  static void evaulate_p(double*, const double&, const double&, const double&, const double&);
-  static void evaulate_spherical_d(double*, const double&, const double&, const double&, const double&);
-  static void evaulate_spherical_f(double*, const double&, const double&, const double&, const double&);
-  static void evaulate_spherical_g(double*, const double&, const double&, const double&, const double&);
-  static void evaulate_cartesian_d(double*, const double&, const double&, const double&, const double&);
-  static void evaulate_cartesian_f(double*, const double&, const double&, const double&, const double&);
-  static void evaulate_cartesian_g(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_d_shell(double*, double*);
+  static void evaluate_spherical_f_shell(double*, double*);
+  static void evaluate_spherical_g_shell(double*, double*);
+
+  static void evaluate_s(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_p(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_d(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_f(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_g(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_h(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_d(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_f(double*, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_g(double*, const double&, const double&, const double&, const double&);
+
+  static void evaluate_s_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_p_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_d_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_f_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_g_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_h_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_d_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_f_dx(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_g_dx(double*, const double&, const double&, const double&, const double&, const double&);
+
+  static void evaluate_s_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_p_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_d_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_f_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_g_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_h_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_d_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_f_dy(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_g_dy(double*, const double&, const double&, const double&, const double&, const double&);
+
+  static void evaluate_s_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_p_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_d_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_f_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_g_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_cartesian_h_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_d_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_f_dz(double*, const double&, const double&, const double&, const double&, const double&);
+  static void evaluate_spherical_g_dz(double*, const double&, const double&, const double&, const double&, const double&);
+
   void dump(const std::string&);
 };
 #endif  // QC_BASIS_H_

@@ -84,6 +84,8 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   // declare memory
   mc_pair_num = iops.iopns[KEYS::MC_NPAIR];
   h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
+  h_basis.contraction_amplitudes = new double[nShells * mc_pair_num];
+  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_pair_num];
 }
 Basis::~Basis() {
   /*
@@ -93,6 +95,8 @@ Basis::~Basis() {
 
   delete[] h_basis.nw_co;
   delete[] h_basis.ao_amplitudes;
+  delete[] h_basis.contraction_amplitudes;
+  delete[] h_basis.contraction_amplitudes_derivative;
   delete[] h_basis.contraction_exp;
   delete[] h_basis.contraction_coef;
 }
@@ -126,6 +130,8 @@ Basis::Basis(const Basis& param) {
   h_basis.nw_co = new double[nw_nbf * nw_nmo];
   std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo * nw_nbf, h_basis.nw_co);
 
+  h_basis.contraction_amplitudes = new double[nShells * mc_pair_num];
+  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_pair_num];
   h_basis.contraction_exp = new double[nPrimatives];
   h_basis.contraction_coef = new double[nPrimatives];
   std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + nPrimatives, h_basis.contraction_exp);
@@ -158,6 +164,8 @@ void swap(Basis& a, Basis& b) {
   std::swap(a.h_basis.ao_amplitudes, b.h_basis.ao_amplitudes);
   std::swap(a.nw_en, b.nw_en);
   std::swap(a.h_basis.nw_co, b.h_basis.nw_co);
+  std::swap(a.h_basis.contraction_amplitudes, b.h_basis.contraction_amplitudes);
+  std::swap(a.h_basis.contraction_amplitudes_derivative, b.h_basis.contraction_amplitudes_derivative);
   std::swap(a.h_basis.contraction_exp, b.h_basis.contraction_exp);
   std::swap(a.h_basis.contraction_coef, b.h_basis.contraction_coef);
 }
