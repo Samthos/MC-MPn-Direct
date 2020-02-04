@@ -7,10 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-#ifdef HAVE_MPII
-#include "mpi.h"
-#endif
-
+#include "../qc_mpi.h"
 #include "../qc_monte.h"
 
 void GF::monte_energy() {
@@ -48,9 +45,7 @@ void GF::monte_energy() {
     // print every 128 steps
     if (0 == step % 128) {
       // Reduce variables across all threads
-#ifdef HAVE_MPI
-      MPI_Barrier(MPI_COMM_WORLD);
-#endif
+      MPI_info::barrier();
       for (auto & qep : qeps) {
         qep.reduce();
       }
@@ -69,15 +64,11 @@ void GF::monte_energy() {
       mc_end = std::chrono::high_resolution_clock::now();
       time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
       print_mat = (time_span.count() > checkNum * 900);
-#ifdef HAVE_MPI
-      MPI_Barrier(MPI_COMM_WORLD);
-      MPI_Bcast(&print_mat, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
+      MPI_info::barrier();
+      MPI_info::broadcast_int(&print_mat, 1);
       if (print_mat) {
         checkNum = full_print(step, checkNum);
-#ifdef HAVE_MPI
-        MPI_Barrier(MPI_COMM_WORLD);
-#endif
+        MPI_info::barrier();
       }
     }
   }

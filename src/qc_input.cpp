@@ -6,14 +6,8 @@
 #include <sstream>
 #include <string>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif  // HAVE_CONFIG_H
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
-
+#include "qc_mpi.h"
 #include "qc_input.h"
 #include "MCF12/correlation_factors.h"
 
@@ -259,15 +253,10 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
     iopns[KEYS::DIFFS] = 1;
   }
 
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  MPI_Bcast(iopns.data(), iopns.size(), MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(dopns.data(), dopns.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(bopns.data(), bopns.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
-
-  MPI_Barrier(MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_int(iopns.data(), iopns.size());
+  MPI_info::broadcast_double(dopns.data(), dopns.size());
+  MPI_info::broadcast_char((char*) bopns.data(), bopns.size());
 }
 
 void IOPs::print(const MPI_info& mpi_info, const std::string& file) {

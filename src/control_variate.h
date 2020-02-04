@@ -12,9 +12,7 @@
 #include <armadillo>
 #include <iomanip>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
+#include "qc_mpi.h"
 
 class Accumulator {
  public:
@@ -33,13 +31,9 @@ class Accumulator {
 class ControlVariate : public Accumulator {
  public:
   ControlVariate(size_t nControlVariates, const std::vector<double>& ExactCV) {
-#ifdef HAVE_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &master);
-#else
-    master = 0;
-#endif
+    MPI_info::comm_rank(&master);
 
-    nSamples = 0;
+    n_samples = 0;
     exact_cv = ExactCV;
 
     s_x.zeros();
@@ -60,7 +54,7 @@ class ControlVariate : public Accumulator {
 
   // getters
   unsigned long long int getNumberOfSteps() {
-    return nSamples;
+    return n_samples;
   }
   size_t size() {
     return s_c1.size();
@@ -139,34 +133,26 @@ class ControlVariate : public Accumulator {
     s_xc += x * c_;
 
     s_c2 += c_ * c_.t();
-    nSamples++;
+    n_samples++;
   }
   void update() override {
     // calculate averages
-#ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Reduce(&nSamples, &TotalSamples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(s_x.memptr(), e_x.memptr(), s_x.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(s_c1.memptr(), e_c1.memptr(), s_c1.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(s_c2.memptr(), e_c2.memptr(), s_c2.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(s_xc.memptr(), e_xc.memptr(), s_xc.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    e_x  = e_x  / static_cast<double>(TotalSamples);
-    e_c1 = e_c1 / static_cast<double>(TotalSamples);
-    e_c2 = e_c2 / static_cast<double>(TotalSamples);
-    e_xc = e_xc / static_cast<double>(TotalSamples);
-#else
-    TotalSamples = nSamples;
-    e_x  = s_x  / static_cast<double>(nSamples);
-    e_c1 = s_c1 / static_cast<double>(nSamples);
-    e_c2 = s_c2 / static_cast<double>(nSamples);
-    e_xc = s_xc / static_cast<double>(nSamples);
-#endif
+    MPI_info::barrier();
+    MPI_info::reduce_long_long_uint(&n_samples, &total_samples, 1);
+    MPI_info::reduce_double(s_x.memptr(), e_x.memptr(), s_x.n_elem);
+    MPI_info::reduce_double(s_c1.memptr(), e_c1.memptr(), s_c1.n_elem);
+    MPI_info::reduce_double(s_c2.memptr(), e_c2.memptr(), s_c2.n_elem);
+    MPI_info::reduce_double(s_xc.memptr(), e_xc.memptr(), s_xc.n_elem);
+    e_x  = e_x  / static_cast<double>(total_samples);
+    e_c1 = e_c1 / static_cast<double>(total_samples);
+    e_c2 = e_c2 / static_cast<double>(total_samples);
+    e_xc = e_xc / static_cast<double>(total_samples);
 
     if (0 == master) {
       // calculate variance and derived
       var = e_x[1] - e_x[0] * e_x[0];
       std = sqrt(var);
-      error = sqrt(var / static_cast<double>(TotalSamples));
+      error = sqrt(var / static_cast<double>(total_samples));
 
       // calculate covariance of control variates
       cov_xc = e_xc - e_c1 * e_x[0];
@@ -181,7 +167,7 @@ class ControlVariate : public Accumulator {
       // calcaulte statistics for control variate guess
       var_cv = var - arma::dot(cov_xc, alpha);
       std_cv = sqrt(var_cv);
-      error_cv = sqrt(var_cv / static_cast<double>(TotalSamples));
+      error_cv = sqrt(var_cv / static_cast<double>(total_samples));
     }
   }
   void to_json(std::string fname) override {
@@ -196,7 +182,7 @@ class ControlVariate : public Accumulator {
       os << "{\n";
 
       // print number of steps
-      os << "\t\"Steps\" : " << TotalSamples << ",\n";
+      os << "\t\"Steps\" : " << total_samples << ",\n";
 
       // print E[x]
       os << "\t\"EX\" : " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << e_x[0] << ",\n";
@@ -267,7 +253,7 @@ class ControlVariate : public Accumulator {
     update();
     if (0 == master) {
 #ifndef FULL_PRINTING
-      os << nSamples << "\t";
+      os << n_samples << "\t";
       os << std::setprecision(7);
       os << e_x[0] << "\t";
       os << error << "\t";
@@ -283,8 +269,8 @@ class ControlVariate : public Accumulator {
 
  private:
   int master;
-  unsigned long long int nSamples;
-  unsigned long long int TotalSamples;
+  unsigned long long int n_samples;
+  unsigned long long int total_samples;
   // accumulators
   arma::vec2 s_x;
   arma::vec s_c1;
@@ -313,12 +299,9 @@ class ControlVariate : public Accumulator {
 class BlockingAccumulator : public Accumulator {
  public:
   BlockingAccumulator(size_t nControlVariates, const std::vector<double>& ExactCV) {
-    master = 0;
-    comm_size = 1;
-#ifdef HAVE_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &master);
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-#endif
+    MPI_info::comm_rank(&master);
+    MPI_info::comm_size(&comm_size);
+
     n_samples = 0;
     total_samples = 0;
 
@@ -382,16 +365,10 @@ class BlockingAccumulator : public Accumulator {
   }
   void update() override {
     // calculate averages
-#ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Reduce(&n_samples, &total_samples, 1, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(s_x1.memptr(), e_x1.memptr(), s_x1.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(s_x2.memptr(), e_x2.memptr(), s_x2.n_elem, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-#else
-    total_samples = n_samples;
-    std::copy(s_x1.begin(), s_x1.end(), e_x1.begin());
-    std::copy(s_x2.begin(), s_x2.end(), e_x2.begin());
-#endif
+    MPI_info::barrier();
+    MPI_info::reduce_long_long_uint(&n_samples, &total_samples, 1);
+    MPI_info::reduce_double(s_x1.memptr(), e_x1.memptr(), s_x1.n_elem);
+    MPI_info::reduce_double(s_x2.memptr(), e_x2.memptr(), s_x2.n_elem);
 
     arma::vec block_sample(s_x1.n_elem);
     for (unsigned long long int block = 0, pow_two_block = 1; block < block_sample.n_elem; block++, pow_two_block <<= 1ull) {

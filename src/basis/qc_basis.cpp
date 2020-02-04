@@ -8,9 +8,7 @@
 #include <sstream>
 #include <string>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
+#include "../qc_mpi.h"
 #include "qc_basis.h"
 #include "../atom_znum.h"
 
@@ -253,12 +251,10 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(&qc_nshl, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&qc_nprm, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&qc_nbf, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_int(&nShells, 1);
+  MPI_info::broadcast_int(&nPrimatives, 1);
+  MPI_info::broadcast_int(&qc_nbf, 1);
 
   h_basis.contraction_exp = new double[nPrimatives];
   h_basis.contraction_coef = new double[nPrimatives];
@@ -311,13 +307,10 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(alpha.data(), alpha.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(norm.data(), norm.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(basisMetaData.data(), basisMetaData.size() * sizeof(BasisMetaData),
-            MPI_CHAR, 0, MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_double(h_basis.contraction_exp, nPrimatives);
+  MPI_info::broadcast_double(h_basis.contraction_coef, nPrimatives);
+  MPI_info::broadcast_char((char*) h_basis.meta_data, nShells * sizeof(BasisMetaData));
 }
 
 void Basis::normalize_atom_basis(std::vector<AtomBasis>& atomBasis) {

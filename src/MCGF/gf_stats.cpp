@@ -2,10 +2,8 @@
 #include <fstream>
 #include <iomanip>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
 
+#include "../qc_mpi.h"
 #include "../qc_monte.h"
 
 GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeriv, const std::string& jobname, int order) : isMaster(isMaster_), tasks(static_cast<double>(tasks_)) {
@@ -63,13 +61,8 @@ void GFStats::blockIt(const int& step) {
 
 void GFStats::reduce() {
   for (uint it = 0; it < qepsEx1.size(); it++) {
-#ifdef HAVE_MPI
-      MPI_Reduce(qepsEx1[it].data(), qepsAvg[it].data(), qepsEx1[it].size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Reduce(qepsEx2[it].data(), qepsVar[it].data(), qepsEx2[it].size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-#else
-      std::copy(qepsEx1[it].begin(), qepsEx1[it].end(), qepsAvg[it].begin());
-      std::copy(qepsEx2[it].begin(), qepsEx2[it].end(), qepsVar[it].begin());
-#endif
+    MPI_info::reduce_double(qepsEx1[it].data(), qepsAvg[it].data(), qepsEx1[it].size());
+    MPI_info::reduce_double(qepsEx2[it].data(), qepsVar[it].data(), qepsEx2[it].size());
   }
 }
 

@@ -6,9 +6,7 @@
 #include <string>
 #include <algorithm>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
+#include "qc_mpi.h"
 
 #include "atom_znum.h"
 #include "qc_geom.h"
@@ -38,11 +36,8 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
     input >> natom;
   }
 
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(&natom, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Barrier(MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_int(&natom, 1);
 
   atom.resize(natom);
   if (mpi_info.sys_master) {
@@ -65,12 +60,9 @@ void Molec::read(MPI_info& mpi_info, std::string& filename) {
       std::transform(pos, pos+3, pos, [ang_to_bohr](double x) {return x * ang_to_bohr; });
     }
 
-#ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Bcast(&pos, 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&znum, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
+    MPI_info::barrier();
+    MPI_info::broadcast_double(&pos[0], 3);
+    MPI_info::broadcast_int(&znum, 1);
 
     atom[i].znum = znum;
     atom[i].pos[0] = pos[0];

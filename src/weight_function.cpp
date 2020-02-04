@@ -1,12 +1,4 @@
 // Copyright 2017 Hirata Lab
-#ifdef HAVE_CONFIG_H_
-#include "config.h"
-#endif
-
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
-
 #include <cmath>
 #include <algorithm>
 #include <numeric>
@@ -16,6 +8,7 @@
 #include <iostream>
 #include <map>
 
+#include "qc_mpi.h"
 #include "atom_znum.h"
 #include "weight_function.h"
 
@@ -40,11 +33,9 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
     input >> mc_nbas >> mc_nprim;
   }
 
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(&mc_nbas, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&mc_nprim, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_int(&mc_nbas, 1);
+  MPI_info::broadcast_int(&mc_nprim, 1);
 
   alpha.resize(mc_nprim);
   coef.resize(mc_nprim);
@@ -86,12 +77,10 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
       }
     }
 
-#ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Bcast(&znum, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(alpha.data(), mc_nprim, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(coef.data(), mc_nprim, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-#endif
+    MPI_info::barrier();
+    MPI_info::broadcast_int(&znum, 1);
+    MPI_info::broadcast_double(alpha.data(), mc_nprim);
+    MPI_info::broadcast_double(coef.data(), mc_nprim);
 
     WEIGHT_BASIS_[znum] = {alpha, coef, {0, 0, 0}};
   }
