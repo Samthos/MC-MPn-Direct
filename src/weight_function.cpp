@@ -9,7 +9,7 @@
 #include <map>
 
 #include "qc_mpi.h"
-#include "atom_znum.h"
+#include "atom_tag_parser.h"
 #include "weight_function.h"
 
 Base_Weight::Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) {
@@ -21,6 +21,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
   std::vector<double> alpha, coef;
   std::string atname;
   std::ifstream input;
+  Atom_Tag_Parser atom_tag_parser;
 
   if (mpi_info.sys_master) {
     std::cout << std::endl << std::endl;
@@ -57,7 +58,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
       for (int j = 0; j < mc_nprim; j++) {  // read in primatives coefs
         input >> alpha[j] >> coef[j];
       }
-      znum = atomic_znum(atname);
+      znum = atom_tag_parser.parse(atname);
       // print mc basis functions if <atom> in molecule
       if (std::any_of(molec.atoms.begin(), molec.atoms.end(),
                       [znum](Atom a) { return a.znum == znum; })) {

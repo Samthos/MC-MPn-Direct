@@ -11,8 +11,6 @@ set(source
         basis/nw_vectors.cpp
         basis/qc_basis.cpp
         basis/qc_basis.h
-        atom_znum.cpp
-        atom_znum.h
 	atom_tag_parser.h
 	atom_tag_parser.cpp
         qc_geom.cpp

@@ -10,7 +10,7 @@
 
 #include "../qc_mpi.h"
 #include "qc_basis.h"
-#include "../atom_znum.h"
+#include "../atom_tag_parser.h"
 
 
 SHELL::Shell_Type SHELL::string_to_shell_type(const std::string& str) {
@@ -173,6 +173,8 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   std::string str;
   std::string atomName, basisName, basisType, shell_type;
 
+  Atom_Tag_Parser atom_tag_parser;
+
   int currentBasis = -1;
   std::vector<AtomBasis> atomBasis(100);
 
@@ -199,7 +201,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
           atomName = basisName.substr(0, pos);
 
           // find charge of atom
-          currentBasis = atomic_znum(atomName);
+          currentBasis = atom_tag_parser.parse(atomName);
 
           // store information in atomBasis;
           atomBasis[currentBasis].atomName = atomName;
