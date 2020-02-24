@@ -1,6 +1,8 @@
 // Copyright 2019
 #ifndef QC_MPI_H_
 #define QC_MPI_H_
+
+#include <string>
 #include <vector>
 
 class MPI_info {
@@ -13,6 +15,7 @@ class MPI_info {
   static void broadcast_char(char*, size_t);
   static void broadcast_double(double*, size_t);
   static void broadcast_vector_double(std::vector<double>&);
+  static void broadcast_string(std::string&);
 
   static void reduce_long_long_uint(long long unsigned int* source, long long unsigned int* dest, size_t size);
   static void reduce_double(double* source, double* dest, size_t size);

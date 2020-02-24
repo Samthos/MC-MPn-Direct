@@ -245,8 +245,8 @@ void Basis::nw_vectors_read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
   //orbital_check();
   nw_icore = 0;
-  for (i = 0; i < molec.natom; i++) {
-    if (molec.atom[i].znum > 3 && molec.atom[i].znum < 10) {
+  for (i = 0; i < molec.atoms.size(); i++) {
+    if (molec.atoms[i].znum > 3 && molec.atoms[i].znum < 10) {
       nw_icore = nw_icore + 1;
     }
   }

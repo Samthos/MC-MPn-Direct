@@ -261,10 +261,10 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
   std::array<double, 3> pos;
   constexpr double twopi = 6.283185307179586;
 
-  atom = molec.natom * random.uniform();
-  pos[0] = molec.atom[atom].pos[0];
-  pos[1] = molec.atom[atom].pos[1];
-  pos[2] = molec.atom[atom].pos[2];
+  atom = molec.atoms.size() * random.uniform();
+  pos[0] = molec.atoms[atom].pos[0];
+  pos[1] = molec.atoms[atom].pos[1];
+  pos[2] = molec.atoms[atom].pos[2];
 
   amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
   amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));
@@ -276,10 +276,10 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
   electron_pair.pos1[2] = pos[2] + amp2*cos(theta2);
 
   //elec position 2;
-  atom = molec.natom * random.uniform();
-  pos[0] = molec.atom[atom].pos[0];
-  pos[1] = molec.atom[atom].pos[1];
-  pos[2] = molec.atom[atom].pos[2];
+  atom = molec.atoms.size() * random.uniform();
+  pos[0] = molec.atoms[atom].pos[0];
+  pos[1] = molec.atoms[atom].pos[1];
+  pos[2] = molec.atoms[atom].pos[2];
 
   amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
   amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));

@@ -238,7 +238,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     qc_nbf = 0;
     nShells = 0;
     nPrimatives = 0;
-    for (auto& it : molec.atom) {
+    for (auto& it : molec.atoms) {
       for (auto& jt : atomBasis[it.znum].shell) {
         nShells += jt.contracted_gaussian.front().second.size();
         nPrimatives += jt.contracted_gaussian.size() * jt.contracted_gaussian.front().second.size();
@@ -262,7 +262,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
   if (mpi_info.sys_master) {
     uint contraction= 0;
-    for (auto& atom : molec.atom) {
+    for (auto& atom : molec.atoms) {
       for (auto& shell : atomBasis[atom.znum].shell) {
         for (uint shell_contraction = 0; shell_contraction < shell.n_contractions(); shell_contraction++) {
           // set start and stop

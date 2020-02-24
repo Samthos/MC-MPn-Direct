@@ -13,6 +13,8 @@ set(source
         basis/qc_basis.h
         atom_znum.cpp
         atom_znum.h
+	atom_tag_parser.h
+	atom_tag_parser.cpp
         qc_geom.cpp
         qc_geom.h
         qc_input.cpp

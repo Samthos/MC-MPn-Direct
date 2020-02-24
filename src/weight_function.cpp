@@ -59,7 +59,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
       }
       znum = atomic_znum(atname);
       // print mc basis functions if <atom> in molecule
-      if (std::any_of(molec.atom.begin(), molec.atom.end(),
+      if (std::any_of(molec.atoms.begin(), molec.atoms.end(),
                       [znum](Atom a) { return a.znum == znum; })) {
         std::cout << "\t " << atname << "\t";
         std::cout << std::setw(30) << std::setprecision(16) << std::fixed
@@ -94,7 +94,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
     std::cout << std::endl << std::endl;
   }
 
-  for (auto &it : molec.atom) {
+  for (auto &it : molec.atoms) {
     if (WEIGHT_BASIS_.count(it.znum) == 0) {
       if (mpi_info.sys_master) {
         std::cerr << "No MC basis function defined for atom with charge "
@@ -104,7 +104,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
     }
   }
 
-  for (auto &it : molec.atom) {
+  for (auto &it : molec.atoms) {
     mcBasisList.push_back({WEIGHT_BASIS_[it.znum], it.pos});
   }
 }

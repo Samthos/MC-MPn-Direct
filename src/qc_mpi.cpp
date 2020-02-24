@@ -56,6 +56,20 @@ void MPI_info::broadcast_vector_double(std::vector<double>& v) {
 #endif
 }
 
+void MPI_info::broadcast_string(std::string& v) {
+#ifdef HAVE_MPI
+  int size = v.size();
+  MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  v.resize(size);
+  char *w = new char[size];
+  std::copy(v.begin(), v.end(), w);
+
+  MPI_Bcast(w, size, MPI_CHAR, 0, MPI_COMM_WORLD);
+  std::copy(w, w + size, v.begin());
+  delete w;
+#endif
+}
+
 void MPI_info::reduce_long_long_uint(long long unsigned int* source, long long unsigned int* dest, size_t size) {
 #ifdef HAVE_MPI
   MPI_Reduce(source, dest, size, MPI_LONG_LONG_INT, MPI_SUM, 0, MPI_COMM_WORLD);
