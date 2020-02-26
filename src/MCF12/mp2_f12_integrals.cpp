@@ -60,6 +60,40 @@ double MP2F12_V_Engine::calculate_v(const Wavefunction& electron_pair_psi1, cons
   return eV;
 }
 
+double MP2F12_VBX_Engine::calculate_bx(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+  /*
+  traces.update_bx(electron_pair_list, electron_list);
+  zero();
+  calculate_bx_t_fa(electron_pair_list, electron_list);
+  calculate_bx_t_fb(electron_pair_list, electron_list);
+  calculate_bx_t_fc(electron_pair_list, electron_list);
+  calculate_bx_t_fd(electron_pair_list, electron_list);
+  calculate_bx_k(electron_pair_list, electron_list);
+  normalize();
+  */
+
+  auto direct_contribution = direct_1_pair_0_one_ints[0] + direct_1_pair_0_one_ints[1]
+      + direct_0_pair_2_one_ints[0] + direct_0_pair_2_one_ints[1]
+      - 2.0*direct_1_pair_1_one_ints[0] - 2.0*direct_1_pair_1_one_ints[1] + 2.0*direct_1_pair_1_one_ints[2]
+      - 2.0*direct_0_pair_3_one_ints[0] -2.0*direct_0_pair_3_one_ints[1]
+      + direct_1_pair_2_one_ints[0] + direct_1_pair_2_one_ints[1] - direct_1_pair_2_one_ints[2] - direct_1_pair_2_one_ints[3] - 2.0*direct_1_pair_2_one_ints[4] - 2.0*direct_1_pair_2_one_ints[5]
+      + direct_0_pair_4_one_ints[0] - direct_0_pair_4_one_ints[1] + direct_0_pair_4_one_ints[2] - direct_0_pair_4_one_ints[3]
+      + 2.0*direct_1_pair_3_one_ints[0];
+  auto xchang_contrubtion = xchang_1_pair_0_one_ints[0] + xchang_1_pair_0_one_ints[1] + xchang_0_pair_2_one_ints[0] + xchang_0_pair_2_one_ints[1]
+      - 2.0*xchang_1_pair_1_one_ints[0] - 2.0*xchang_1_pair_1_one_ints[1] + 2.0*xchang_1_pair_1_one_ints[2]
+      - 2.0*xchang_0_pair_3_one_ints[0] - 2.0*xchang_0_pair_3_one_ints[1]
+      + xchang_1_pair_2_one_ints[0] + xchang_1_pair_2_one_ints[1] - xchang_1_pair_2_one_ints[2] - xchang_1_pair_2_one_ints[3] - 2.0*xchang_1_pair_2_one_ints[4] - 2.0*xchang_1_pair_2_one_ints[5]
+      + xchang_0_pair_4_one_ints[0] - xchang_0_pair_4_one_ints[1] + xchang_0_pair_4_one_ints[2] - xchang_0_pair_4_one_ints[3]
+      + 2.0*xchang_1_pair_3_one_ints[0];
+  return c3 * direct_contribution + c4 * xchang_contrubtion;
+}
+
+std::pair<double, double> MP2F12_VBX_Engine::calculate_v_vbx(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+  auto e_v = calculate_v(electron_pair_psi1, electron_pair_psi2, electron_psi, electron_pair_list, electron_list);
+  auto e_bx = calculate_bx(electron_pair_psi1, electron_pair_psi2, electron_psi, electron_pair_list, electron_list);
+  return std::make_pair(e_v, 2 * e_v + e_bx);
+}
+
 /*
 void MP2F12_VBX_Engine::zero() {
   direct_1_pair_0_one_ints.fill(0.0);
@@ -436,35 +470,5 @@ void MP2F12_VBX_Engine::normalize() {
   }
 }
 
-double MP2F12_VBX_Engine::calculate_bx(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& electron_list) {
-  traces.update_bx(electron_pair_list, electron_list);
-  zero();
-  calculate_bx_t_fa(electron_pair_list, electron_list);
-  calculate_bx_t_fb(electron_pair_list, electron_list);
-  calculate_bx_t_fc(electron_pair_list, electron_list);
-  calculate_bx_t_fd(electron_pair_list, electron_list);
-  calculate_bx_k(electron_pair_list, electron_list);
-  normalize();
 
-  auto direct_contribution = direct_1_pair_0_one_ints[0] + direct_1_pair_0_one_ints[1]
-      + direct_0_pair_2_one_ints[0] + direct_0_pair_2_one_ints[1]
-      - 2.0*direct_1_pair_1_one_ints[0] - 2.0*direct_1_pair_1_one_ints[1] + 2.0*direct_1_pair_1_one_ints[2]
-      - 2.0*direct_0_pair_3_one_ints[0] -2.0*direct_0_pair_3_one_ints[1]
-      + direct_1_pair_2_one_ints[0] + direct_1_pair_2_one_ints[1] - direct_1_pair_2_one_ints[2] - direct_1_pair_2_one_ints[3] - 2.0*direct_1_pair_2_one_ints[4] - 2.0*direct_1_pair_2_one_ints[5]
-      + direct_0_pair_4_one_ints[0] - direct_0_pair_4_one_ints[1] + direct_0_pair_4_one_ints[2] - direct_0_pair_4_one_ints[3]
-      + 2.0*direct_1_pair_3_one_ints[0];
-  auto xchang_contrubtion = xchang_1_pair_0_one_ints[0] + xchang_1_pair_0_one_ints[1] + xchang_0_pair_2_one_ints[0] + xchang_0_pair_2_one_ints[1]
-      - 2.0*xchang_1_pair_1_one_ints[0] - 2.0*xchang_1_pair_1_one_ints[1] + 2.0*xchang_1_pair_1_one_ints[2]
-      - 2.0*xchang_0_pair_3_one_ints[0] - 2.0*xchang_0_pair_3_one_ints[1]
-      + xchang_1_pair_2_one_ints[0] + xchang_1_pair_2_one_ints[1] - xchang_1_pair_2_one_ints[2] - xchang_1_pair_2_one_ints[3] - 2.0*xchang_1_pair_2_one_ints[4] - 2.0*xchang_1_pair_2_one_ints[5]
-      + xchang_0_pair_4_one_ints[0] - xchang_0_pair_4_one_ints[1] + xchang_0_pair_4_one_ints[2] - xchang_0_pair_4_one_ints[3]
-      + 2.0*xchang_1_pair_3_one_ints[0];
-  return c3 * direct_contribution + c4 * xchang_contrubtion;
-}
-
-std::pair<double, double> MP2F12_VBX_Engine::calculate_v_vbx(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& electron_list) {
-  auto e_v = calculate_v(electron_pair_list, electron_list);
-  auto e_bx = calculate_bx(electron_pair_list, electron_list);
-  return std::make_pair(e_v, 2 * e_v + e_bx);
-}
 */

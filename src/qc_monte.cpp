@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <unordered_map>
+
 #include "qc_monte.h"
 
 
@@ -14,9 +16,6 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
     basis(p3),
     electron_pair_weight(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]),
     electron_weight(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]),
-    electron_pair_psi1(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2),
-    electron_pair_psi2(iops.iopns[KEYS::MC_NPAIR], basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2),
-    electron_psi(iops.iopns[KEYS::ELECTRONS], basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2),
     random(iops.iopns[KEYS::DEBUG])
 {
   numBand = iops.iopns[KEYS::NUM_BAND];
@@ -30,6 +29,9 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
 
   electron_pair_list = create_electron_pair_sampler(iops, molec, electron_pair_weight);
   electron_list = nullptr;
+
+  wavefunctions.emplace(electron_pairs_1, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+  wavefunctions.emplace(electron_pairs_2, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
 
   //initialize walkers
   basis.gpu_alloc(iops.iopns[KEYS::MC_NPAIR], molec);

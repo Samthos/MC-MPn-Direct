@@ -113,7 +113,7 @@ void MP2::energy() {
 }
 
 void MP3::energy() {
-  ovps.update_ovps(electron_pair_psi1, electron_pair_psi2, tau);
+  ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
   if (tau->is_new(1)) {
     mcmp2_energy(emp[0], control[0]);
   }
@@ -121,7 +121,7 @@ void MP3::energy() {
 }
 
 void MP4::energy() {
-  ovps.update_ovps(electron_pair_psi1, electron_pair_psi2, tau);
+  ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
   if (tau->is_new(1)) {
     mcmp2_energy(emp[0], control[0]);
   }
@@ -133,6 +133,6 @@ void MP4::energy() {
 
 void MP2F12_V::energy() {
   mcmp2_energy_fast(emp[0], control[0]);
-  emp[1] = mp2f12_v_engine.calculate_v(electron_pair_psi1, electron_pair_psi2, electron_psi, electron_pair_list, electron_list);
+  emp[1] = mp2f12_v_engine.calculate_v(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], wavefunctions[electrons], electron_pair_list, electron_list);
 }
 

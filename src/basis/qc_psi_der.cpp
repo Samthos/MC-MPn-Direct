@@ -7,55 +7,50 @@
 #include "../blas_calls.h"
 #include "../electron_pair_list.h"
 
-void Basis::host_psi_get_with_derivatives(
-    Wavefunction& psi,
+void Basis::host_psi_get_dx(
     Wavefunction& psi_dx,
-    Wavefunction& psi_dy,
-    Wavefunction& psi_dz,
-    std::vector<std::array<double, 3>>& pos
-    ) {
-
+    std::vector<std::array<double, 3>>& pos) {
   build_contractions_with_derivatives(pos);
-
-  // wavefunction
-  build_ao_amplitudes(pos);
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi.lda, nw_nbf,
-      1.0,
-      h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co, nw_nbf,
-      0.0,
-      psi.psi.data(), psi.lda);
-
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
+
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi.lda, nw_nbf,
+      pos.size(), psi_dx.lda, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co, nw_nbf,
       0.0,
-      psi_dx.psi.data(), psi.lda);
-
+      psi_dx.psi.data(), psi_dx.lda);
+}
+void Basis::host_psi_get_dy(
+    Wavefunction& psi_dy,
+    std::vector<std::array<double, 3>>& pos) {
+  build_contractions_with_derivatives(pos);
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
+
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi.lda, nw_nbf,
+      pos.size(), psi_dy.lda, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co, nw_nbf,
       0.0,
-      psi_dy.psi.data(), psi.lda);
+      psi_dy.psi.data(), psi_dy.lda);
+}
+void Basis::host_psi_get_dz(
+    Wavefunction& psi_dz,
+    std::vector<std::array<double, 3>>& pos) {
+  build_contractions_with_derivatives(pos);
 
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi.lda, nw_nbf,
+      pos.size(), psi_dz.lda, nw_nbf,
       1.0,
       h_basis.ao_amplitudes, nw_nbf,
       h_basis.nw_co, nw_nbf,
       0.0,
-      psi_dz.psi.data(), psi.lda);
+      psi_dz.psi.data(), psi_dz.lda);
 }
 
 void Basis::evaluate_s_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
@@ -341,11 +336,11 @@ void Basis::build_contractions_with_derivatives(const std::vector<std::array<dou
     }
   }
 }
+
 void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos){
   std::array<double, 3> dr;
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
-
       auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
       auto ao_offset = walker * nw_nbf + h_basis.meta_data[shell].ao_begin;
       auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];

@@ -39,24 +39,23 @@ class MP2F12_V_Engine {
   double nsamp_one_2;
 };
 
-/*
 class MP2F12_VBX_Engine : public MP2F12_V_Engine {
  public:
   explicit MP2F12_VBX_Engine(const IOPs& iops, const Basis& basis) : MP2F12_V_Engine(iops, basis) {
     nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-2);
     nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-3);
   }
-  std::pair<double, double> calculate_v_vbx(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
+  std::pair<double, double> calculate_v_vbx(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
  protected:
-  double calculate_bx(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  void zero();
-  void calculate_bx_t_fa(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  void calculate_bx_t_fb(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  void calculate_bx_t_fc(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  void calculate_bx_t_fd(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  void calculate_bx_k(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  void normalize();
+  double calculate_bx(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  // void zero();
+  // void calculate_bx_t_fa(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
+  // void calculate_bx_t_fb(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
+  // void calculate_bx_t_fc(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
+  // void calculate_bx_t_fd(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
+  // void calculate_bx_k(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
+  // void normalize();
 
   static constexpr double c3 = 2.0*(a1*a1+a2*a2-a1*a2);
   static constexpr double c4 = 4*a1*a2-a1*a1-a2*a2;
@@ -80,6 +79,5 @@ class MP2F12_VBX_Engine : public MP2F12_V_Engine {
   std::array<double, 4> xchang_0_pair_4_one_ints;
   std::array<double, 1> xchang_1_pair_3_one_ints;
 };
-*/
 
 #endif  // MP2F12_H_

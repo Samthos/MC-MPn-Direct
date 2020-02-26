@@ -43,9 +43,9 @@ void GF::mcgf2_local_energy(std::vector<std::vector<double>>& egf2) {
   const double *psi2;
   for (int band = 0; band < numBand; band++) {
     if (band-offBand < 0) {
-      psi2 = electron_pair_psi2.occ() + (band+iocc2-iocc1-offBand);
+      psi2 = wavefunctions[electron_pairs_2].occ() + (band+iocc2-iocc1-offBand);
     } else {
-      psi2 = electron_pair_psi2.vir() + (band-offBand);
+      psi2 = wavefunctions[electron_pairs_2].vir() + (band-offBand);
     }
 
     // ent = ovps.ovps.tg_val1[band] * en2pCore . psi
@@ -55,7 +55,7 @@ void GF::mcgf2_local_energy(std::vector<std::vector<double>>& egf2) {
         iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
         alpha,
         ovps.d_ovps.en2pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        psi2, wavefunctions[electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
@@ -66,13 +66,13 @@ void GF::mcgf2_local_energy(std::vector<std::vector<double>>& egf2) {
         iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
         alpha,
         ovps.d_ovps.en2mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        psi2, wavefunctions[electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
     // en2 = psi2 . ent
     en2 = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        psi2, wavefunctions[electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
 
     en2 = en2 * tau->get_wgt(1) / nsamp;
@@ -89,9 +89,9 @@ void GF::mcgf2_local_energy_diff(std::vector<std::vector<double>>& egf2) {
   const double *psi2;
   for (int band = 0; band < numBand; band++) {
     if (band-offBand < 0) {
-      psi2 = electron_pair_psi2.occ() + (band+iocc2-iocc1-offBand);
+      psi2 = wavefunctions[electron_pairs_2].occ() + (band+iocc2-iocc1-offBand);
     } else {
-      psi2 = electron_pair_psi2.vir() + (band-offBand);
+      psi2 = wavefunctions[electron_pairs_2].vir() + (band-offBand);
     }
 
     // ent = en2pCore . psi
@@ -101,13 +101,13 @@ void GF::mcgf2_local_energy_diff(std::vector<std::vector<double>>& egf2) {
         iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
         alpha,
         ovps.d_ovps.en2pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        psi2, wavefunctions[electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
     // en2p = psi2 . ent
     en2p = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        psi2, wavefunctions[electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
 
     // ent = en2mCore . psi
@@ -117,13 +117,13 @@ void GF::mcgf2_local_energy_diff(std::vector<std::vector<double>>& egf2) {
         iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
         alpha,
         ovps.d_ovps.en2mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        psi2, wavefunctions[electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
     // en2m = psi2 . ent
     en2m = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        psi2, wavefunctions[electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
 
     en2p = en2p * tau->get_wgt(1) / nsamp;
@@ -160,7 +160,7 @@ void GF::mcgf2_local_energy_full(int band) {
       iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR],
       alpha,
       ovps.d_ovps.enCore, iops.iopns[KEYS::MC_NPAIR],
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[electron_pairs_2].occ(), wavefunctions[electron_pairs_2].lda,
       beta,
       ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
@@ -170,7 +170,7 @@ void GF::mcgf2_local_energy_full(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR],
       alpha,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[electron_pairs_2].occ(), wavefunctions[electron_pairs_2].lda,
       ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
       beta,
       ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
@@ -188,7 +188,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
               ovps.d_ovps.en2pCore, iops.iopns[KEYS::MC_NPAIR],
-              electron_pair_psi2.occ(), electron_pair_psi2.lda,
+              wavefunctions[electron_pairs_2].occ(), wavefunctions[electron_pairs_2].lda,
               beta,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
@@ -198,7 +198,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
-              electron_pair_psi2.occ(), electron_pair_psi2.lda,
+              wavefunctions[electron_pairs_2].occ(), wavefunctions[electron_pairs_2].lda,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta,
               ovps.d_ovps.en2p, ivir2 - iocc1);
@@ -210,7 +210,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
               iops.iopns[KEYS::MC_NPAIR], ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
               ovps.d_ovps.en2mCore, iops.iopns[KEYS::MC_NPAIR],
-              electron_pair_psi2.occ(), electron_pair_psi2.lda,
+              wavefunctions[electron_pairs_2].occ(), wavefunctions[electron_pairs_2].lda,
               beta,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR]);
 
@@ -220,7 +220,7 @@ void GF::mcgf2_local_energy_full_diff(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
               ivir2 - iocc1, ivir2 - iocc1, iops.iopns[KEYS::MC_NPAIR],
               alpha,
-              electron_pair_psi2.occ(), electron_pair_psi2.lda,
+              wavefunctions[electron_pairs_2].occ(), wavefunctions[electron_pairs_2].lda,
               ovps.d_ovps.ent, iops.iopns[KEYS::MC_NPAIR],
               beta,
               ovps.d_ovps.en2m, ivir2 - iocc1);

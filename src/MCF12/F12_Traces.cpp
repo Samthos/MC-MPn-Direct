@@ -7,6 +7,45 @@
 #include <array>
 
 #include "F12_Traces.h"
+
+F12_Traces::F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, int electrons_) :
+    iocc1(io1),
+    iocc2(io2),
+    ivir1(iv1),
+    ivir2(iv2),
+    electron_pairs(electron_pairs_),
+    electrons(electrons_),
+    op11(electrons, 0.0),
+    op12(electrons, std::vector<double>(electrons, 0.0)),
+    ok12(electrons, std::vector<double>(electrons, 0.0)),
+    ov12(electrons, std::vector<double>(electrons, 0.0)),
+    dop11(electrons, std::vector<double>(electrons, 0.0)),
+    dop12(electrons, std::vector<double>(electrons, 0.0)),
+    p11(electron_pairs, 0.0),
+    p12(electron_pairs, 0.0),
+    p22(electron_pairs, 0.0),
+    k12(electron_pairs, 0.0),
+    dp11(electron_pairs, 0.0),
+    dp12(electron_pairs, 0.0),
+    dp21(electron_pairs, 0.0),
+    dp22(electron_pairs, 0.0),
+    p13(electron_pairs, std::vector<double>(electrons, 0.0)),
+    k13(electron_pairs, std::vector<double>(electrons, 0.0)),
+    v13(electron_pairs, std::vector<double>(electrons, 0.0)),
+    dp31(electron_pairs, std::vector<double>(electrons, 0.0)),
+    p23(electron_pairs, std::vector<double>(electrons, 0.0)),
+    k23(electron_pairs, std::vector<double>(electrons, 0.0)),
+    v23(electron_pairs, std::vector<double>(electrons, 0.0)),
+    dp32(electron_pairs, std::vector<double>(electrons, 0.0)),
+    ds_p11(electrons, std::vector<double>(electrons, 0.0)),
+    ds_p12(electrons, std::vector<double>(electrons, 0.0)),
+    ds_p21(electrons, std::vector<double>(electrons, 0.0)),
+    ds_p22(electrons, std::vector<double>(electrons, 0.0)),
+    ds_p31(electrons, std::vector<std::vector<double>>(electrons, std::vector<double>(electrons, 0.0))),
+    ds_p32(electrons, std::vector<std::vector<double>>(electrons, std::vector<double>(electrons, 0.0)))
+{
+}
+
 void F12_Traces::update_v(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi) {
   build_one_e_traces(electron_psi);
   build_one_e_one_e_traces(electron_psi);
@@ -19,7 +58,9 @@ void F12_Traces::update_bx(const Wavefunction& electron_pair_psi1, const Wavefun
   build_two_e_derivative_traces(electron_pair_list);
   build_two_e_one_e_derivative_traces(electron_pair_list, el_one_list);
 }
+*/
 
+/*
 void F12_Traces::update_bx_fd_traces(const std::vector<el_one_typ> &const Wavefunction& electron_psi) {
   std::array<double, 3> dr{};
   for (int io = 0; io < electrons; ++io) {
@@ -152,7 +193,9 @@ void F12_Traces::build_two_e_derivative_traces(const std::vector<electron_pair_t
     }
   }
 }
+*/
 
+/*
 void F12_Traces::build_two_e_one_e_derivative_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi) {
   std::array<double, 3> dr{};
   for(int ip = 0; ip < electron_pairs; ++ip) {

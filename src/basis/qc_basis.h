@@ -10,17 +10,52 @@
 #include "../qc_mpi.h"
 #include "../electron_pair_list.h"
 
+namespace WS {
+  enum Wavefunction_Sources {
+    electron_pairs_1 = 0x0000,
+    electron_pairs_2 = 0x0001,
+    electrons = 0x0010,
+  };
+}
+
+namespace WT {
+  enum Wavefunction_Types {
+    normal = 0x0000,
+    dx     = 0x0100,
+    dy     = 0x1000,
+    dz     = 0x1100,
+    mask = 0x1100,
+  };
+}
+
+enum Wavefunction_Code {
+  electron_pairs_1 = WS::electron_pairs_1,
+  electron_pairs_2 = WS::electron_pairs_2,
+  electrons        = WS::electrons,
+  electron_pairs_1_dx = WT::dx | WS::electron_pairs_1,
+  electron_pairs_2_dx = WT::dx | WS::electron_pairs_1,
+  electrons_dx        = WT::dx | WS::electrons,
+  electron_pairs_1_dy = WT::dy | WS::electron_pairs_1,
+  electron_pairs_2_dy = WT::dy | WS::electron_pairs_1,
+  electrons_dy        = WT::dy | WS::electrons,
+  electron_pairs_1_dz = WT::dz | WS::electron_pairs_1,
+  electron_pairs_2_dz = WT::dz | WS::electron_pairs_1,
+  electrons_dz        = WT::dz | WS::electrons,
+};
+
 class Wavefunction {
  public:
-  Wavefunction(const size_t electrons_, int io1, int io2, int iv1, int iv2) :
+  Wavefunction() {}
+  Wavefunction(std::vector<std::array<double, 3>>* p, int io1, int io2, int iv1, int iv2) :
     iocc1(io1),
     iocc2(io2),
     ivir1(iv1),
     ivir2(iv2),
-    electrons(electrons_),
+    electrons(p->size()),
     lda(ivir2),
     psi(lda * electrons, 0.0),
-    psiTau(lda * electrons, 0.0)
+    psiTau(lda * electrons, 0.0),
+    pos(p)
   {}
 
   const double *data() const {
@@ -57,6 +92,7 @@ class Wavefunction {
 
   std::vector<double> psi;
   std::vector<double> psiTau;
+  std::vector<std::array<double, 3>>* pos;
 
  private:
 };
@@ -192,7 +228,9 @@ class Basis {
 
   // get psi vals
   void host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
-  void host_psi_get_with_derivatives(Wavefunction&, Wavefunction&, Wavefunction&, Wavefunction&, std::vector<std::array<double, 3>>&);
+  void host_psi_get_dx(Wavefunction&, std::vector<std::array<double, 3>>&);
+  void host_psi_get_dy(Wavefunction&, std::vector<std::array<double, 3>>&);
+  void host_psi_get_dz(Wavefunction&, std::vector<std::array<double, 3>>&);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 
   // read write

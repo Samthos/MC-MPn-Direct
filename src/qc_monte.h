@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <unordered_map>
+
 #include "qc_mpi.h"
 #include "qc_input.h"
 #include "qc_geom.h"
@@ -56,9 +58,9 @@ class QC_monte {
   Basis basis;
   Electron_Pair_GTO_Weight electron_pair_weight;
   Electron_GTO_Weight electron_weight;
-  Wavefunction electron_pair_psi1;
-  Wavefunction electron_pair_psi2;
-  Wavefunction electron_psi;
+
+  std::unordered_map<int, Wavefunction> wavefunctions;
+
   Random random;
   OVPs ovps;
   
@@ -167,6 +169,7 @@ class MP2F12_V : public MP {
       mp2f12_v_engine(iops, basis)
   {
     electron_list = create_electron_sampler(iops, molec, electron_weight);
+    wavefunctions.emplace(electrons, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
   }
   ~MP2F12_V() override {
     delete electron_list;
@@ -174,6 +177,35 @@ class MP2F12_V : public MP {
 
  protected:
   MP2F12_V_Engine mp2f12_v_engine;
+  void energy() override;
+};
+
+class MP2F12_VBX : public MP {
+ public:
+  MP2F12_VBX(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 1}),
+      mp2f12_vbx_engine(iops, basis)
+  {
+    electron_list = create_electron_sampler(iops, molec, electron_weight);
+    wavefunctions.emplace(electrons, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+
+    wavefunctions.emplace(electrons_dx, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    wavefunctions.emplace(electrons_dy, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    wavefunctions.emplace(electrons_dz, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+
+    wavefunctions.emplace(electron_pairs_1_dx, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    wavefunctions.emplace(electron_pairs_1_dy, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    wavefunctions.emplace(electron_pairs_1_dz, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+
+    wavefunctions.emplace(electron_pairs_2_dx, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    wavefunctions.emplace(electron_pairs_2_dy, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    wavefunctions.emplace(electron_pairs_2_dz, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+  }
+  ~MP2F12_VBX() override {
+    delete electron_list;
+  }
+
+ protected:
+  MP2F12_VBX_Engine mp2f12_vbx_engine;
   void energy() override;
 };
 
