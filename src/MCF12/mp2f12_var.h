@@ -2,6 +2,8 @@
 #define MP2F12_H_
 
 #include <array>
+#include <unordered_map>
+
 #include "../qc_input.h"
 #include "../basis/qc_basis.h"
 #include "../electron_pair_list.h"
@@ -22,7 +24,7 @@ class MP2F12_V_Engine {
   ~MP2F12_V_Engine() {
     delete correlation_factor;
   }
-  double calculate_v(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  double calculate_v(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
  protected:
   //define the amplitudes
   static constexpr double a1 = 3.0/8.0;
@@ -45,17 +47,17 @@ class MP2F12_VBX_Engine : public MP2F12_V_Engine {
     nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-2);
     nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-3);
   }
-  std::pair<double, double> calculate_v_vbx(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  std::pair<double, double> calculate_v_vbx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
  protected:
-  double calculate_bx(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
-  // void zero();
-  // void calculate_bx_t_fa(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  // void calculate_bx_t_fb(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  // void calculate_bx_t_fc(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  // void calculate_bx_t_fd(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  // void calculate_bx_k(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  // void normalize();
+  double calculate_bx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void zero();
+  void calculate_bx_t_fa(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_t_fb(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_t_fd(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_k   (const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void normalize();
 
   static constexpr double c3 = 2.0*(a1*a1+a2*a2-a1*a2);
   static constexpr double c4 = 4*a1*a2-a1*a1-a2*a2;

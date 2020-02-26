@@ -5,8 +5,11 @@
 #ifndef F12_METHODS_SRC_F12_TRACES_H_
 #define F12_METHODS_SRC_F12_TRACES_H_
 
+#include <unordered_map>
 #include <vector>
 #include "../basis/qc_basis.h"
+#include "../electron_pair_list.h"
+#include "../electron_list.h"
 
 class F12_Traces {
  public:
@@ -53,17 +56,18 @@ class F12_Traces {
   std::vector<std::vector<std::vector<double>>> ds_p31;
   std::vector<std::vector<std::vector<double>>> ds_p32;
 
-  void update_v(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi);
-  // void update_bx(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
-  // void update_bx_fd_traces(const std::vector<el_one_typ>& el_one_list);
+  void update_v(std::unordered_map<int, Wavefunction>& wavefunctions);
+  void update_bx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_List* electron_list);
 
  private:
   void build_one_e_traces(const Wavefunction& electron_psi);
   void build_one_e_one_e_traces(const Wavefunction& electron_psi);
   void build_two_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2);
   void build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi);
-  // void build_two_e_derivative_traces(const std::vector<electron_pair_typ>& electron_pair_list);
-  // void build_two_e_one_e_derivative_traces(const std::vector<electron_pair_typ>& electron_pair_list, const std::vector<el_one_typ>& el_one_list);
+
+  void build_two_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list);
+  void build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 };
 
 #endif //F12_METHODS_SRC_F12_TRACES_H_

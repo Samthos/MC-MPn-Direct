@@ -133,6 +133,6 @@ void MP4::energy() {
 
 void MP2F12_V::energy() {
   mcmp2_energy_fast(emp[0], control[0]);
-  emp[1] = mp2f12_v_engine.calculate_v(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], wavefunctions[electrons], electron_pair_list, electron_list);
+  emp[1] = mp2f12_v_engine.calculate_v(wavefunctions, electron_pair_list, electron_list);
 }
 
