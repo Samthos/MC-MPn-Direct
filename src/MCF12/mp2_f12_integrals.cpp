@@ -89,10 +89,10 @@ double MP2F12_VBX_Engine::calculate_bx(std::unordered_map<int, Wavefunction>& wa
   return c3 * direct_contribution + c4 * xchang_contrubtion;
 }
 
-std::pair<double, double> MP2F12_VBX_Engine::calculate_v_vbx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double MP2F12_VBX_Engine::calculate_vbx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   auto e_v = calculate_v(wavefunctions, electron_pair_list, electron_list);
   auto e_bx = calculate_bx(wavefunctions, electron_pair_list, electron_list);
-  return std::make_pair(e_v, 2 * e_v + e_bx);
+  return 2 * e_v + e_bx;
 }
 
 void MP2F12_VBX_Engine::zero() {

@@ -57,7 +57,8 @@ namespace TASKS {
     GFDIFF,
     GFFULL,
     GFFULLDIFF,
-    F12V
+    F12V,
+    F12VBX,
   };
 }
 

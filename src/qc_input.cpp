@@ -77,7 +77,7 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
       "F12_CORRELATION_FACTOR", "F12_GAMMA", "F12_BETA", "ELECTRONS", "ELECTRON_PAIRS"
   };
   const std::vector<std::string> taskVals = {
-      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V"};
+      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V", "F12VBX"};
 
   if (mpi_info.sys_master) {
     std::ifstream input(file.c_str());
@@ -271,7 +271,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
    *  -should probably read input from a json
    */
   const std::vector<std::string> taskVals = {
-      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V"};
+      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V", "F12VBX"};
   const std::vector<std::string> samplers = {
       "DIRECT", "METROPOLIS"};
   const std::vector<std::string> tau_integrations = {

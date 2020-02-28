@@ -268,8 +268,8 @@ class Two_Parameter_Rational_Correlation_Factor : public Correlation_Factor {
   double calculate_f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
-  static constexpr double default_gamma = 0.0;
-  static constexpr double default_beta  = 0.0;
+  static constexpr double default_gamma = 1.0;
+  static constexpr double default_beta  = 1.0;
 };
 class Higher_Rational_Correlation_Factor : public Correlation_Factor {
  public:

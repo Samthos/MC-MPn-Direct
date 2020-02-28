@@ -123,6 +123,7 @@ void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, co
   }
 }
 
+
 double Linear_Correlation_Factor::calculate_f12(double r12) {
   return r12;
 }
@@ -207,8 +208,8 @@ bool Slater_Linear_Correlation_Factor::f12_d_is_zero() {
 
 
 double Gaussian_Correlation_Factor::calculate_f12(double r12) {
-  // return 1.0-exp(-gamma*r12*r12);
-  return -exp(-gamma * r12 * r12);
+  return 1.0-exp(-gamma*r12*r12);
+  // return -exp(-gamma * r12 * r12);
 }
 double Gaussian_Correlation_Factor::calculate_f12_a(double r12) { 
   return 0.0;
@@ -231,7 +232,6 @@ bool Gaussian_Correlation_Factor::f12_d_is_zero() {
 
 double Cusped_Gaussian_Correlation_Factor::calculate_f12(double r12) {
   return (1.0 - exp(-gamma * r12 * r12)) / (gamma * r12);
-  // return -exp(-gamma*r12*r12)/(gamma*r12);
 }
 double Cusped_Gaussian_Correlation_Factor::calculate_f12_a(double r12) {
   return -2.0 * exp(-gamma * r12 * r12);

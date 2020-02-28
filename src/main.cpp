@@ -50,6 +50,9 @@ int main(int argc, char* argv[]) {
   } else if (iops.iopns[KEYS::TASK] == TASKS::F12V) {
     MP2F12_V qc_monte(mpi_info, iops, molec, basis);
     qc_monte.monte_energy();
+  } else if (iops.iopns[KEYS::TASK] == TASKS::F12VBX) {
+    MP2F12_VBX qc_monte(mpi_info, iops, molec, basis);
+    qc_monte.monte_energy();
   } else {
     if (iops.iopns[KEYS::ORDER] == 2) {
       GF2 qc_monte(mpi_info, iops, molec, basis);

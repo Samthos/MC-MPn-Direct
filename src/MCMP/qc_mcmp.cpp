@@ -136,3 +136,7 @@ void MP2F12_V::energy() {
   emp[1] = mp2f12_v_engine.calculate_v(wavefunctions, electron_pair_list, electron_list);
 }
 
+void MP2F12_VBX::energy() {
+  mcmp2_energy_fast(emp[0], control[0]);
+  emp[1] = mp2f12_vbx_engine.calculate_vbx(wavefunctions, electron_pair_list, electron_list);
+}
