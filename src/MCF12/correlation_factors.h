@@ -39,8 +39,8 @@ class Correlation_Factor {
   Correlation_Factor(const IOPs& iops, double gamma_, double beta_) :
       one_e_r12(iops.iopns[KEYS::ELECTRONS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
       f12o(iops.iopns[KEYS::ELECTRONS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
-      f13p(iops.iopns[KEYS::MC_NPAIR], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
-      f23p(iops.iopns[KEYS::MC_NPAIR], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
+      f13p(iops.iopns[KEYS::ELECTRON_PAIRS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
+      f23p(iops.iopns[KEYS::ELECTRON_PAIRS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
       gamma(gamma_), 
       beta(beta_) 
   {

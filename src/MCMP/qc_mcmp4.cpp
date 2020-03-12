@@ -305,7 +305,7 @@ void MP4_Engine::mcmp4_ij_helper_t3(double constant,
 void MP4_Engine::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
   constexpr int offset = 0;
   /*
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, 0, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::ELECTRON_PAIRS], 1, emp4, control, 0, rv, wgt,
       ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_22, ovps.v_set[1][1].s_11,
       ovps.v_set[2][0].s_21, ovps.v_set[2][0].s_12, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22);
   */
@@ -422,7 +422,7 @@ void MP4_Engine::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control
 }
 void MP4_Engine::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
   /*
-  mcmp4_ij_helper_t2(iops.iopns[KEYS::MC_NPAIR], 1, emp4, control, 3, rv, wgt,
+  mcmp4_ij_helper_t2(iops.iopns[KEYS::ELECTRON_PAIRS], 1, emp4, control, 3, rv, wgt,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22,
       ovps.v_set[2][0].s_12, ovps.v_set[2][0].s_21, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22);
       */
@@ -1172,10 +1172,10 @@ void MP::mcmp4_energy(double& emp4, std::vector<double>& control4) {
   mp4.energy(en4, ctrl, ovps);
 
   auto nsamp_tauwgt = tau->get_wgt(3);
-  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
-  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
-  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
-  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 3);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS] - 1);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS] - 2);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS] - 3);
   emp4 = emp4 + en4 * nsamp_tauwgt;
 #if MP4CV >= 1
   std::transform(ctrl.begin(), ctrl.end(), control4.begin(), control4.begin(), [&](double c, double total) { return total + c * nsamp_tauwgt; });

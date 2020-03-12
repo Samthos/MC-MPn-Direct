@@ -36,10 +36,10 @@ int main(int argc, char* argv[]) {
 
   Basis basis(iops, mpi_info, molec);
 
-  if (iops.iopns[KEYS::TASK] == TASKS::ENERGY) {
+  if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
     Energy qc_monte(mpi_info, iops, molec, basis);
     qc_monte.monte_energy();
-  } else if (iops.iopns[KEYS::TASK] == TASKS::MP) {
+  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::MP) {
     if (iops.iopns[KEYS::ORDER] == 2) {
       MP2 qc_monte(mpi_info, iops, molec, basis);
       qc_monte.monte_energy();
@@ -50,10 +50,10 @@ int main(int argc, char* argv[]) {
       MP4 qc_monte(mpi_info, iops, molec, basis);
       qc_monte.monte_energy();
     }
-  } else if (iops.iopns[KEYS::TASK] == TASKS::F12V) {
+  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::F12V) {
     MP2F12_V qc_monte(mpi_info, iops, molec, basis);
     qc_monte.monte_energy();
-  } else if (iops.iopns[KEYS::TASK] == TASKS::F12VBX) {
+  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX) {
     MP2F12_VBX qc_monte(mpi_info, iops, molec, basis);
     qc_monte.monte_energy();
   } else {

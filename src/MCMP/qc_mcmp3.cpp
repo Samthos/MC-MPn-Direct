@@ -133,25 +133,25 @@ void MP::mcmp3_energy(double& emp3, std::vector<double>& control3) {
   // std::transform(electron_pair_list->begin(), electron_pair_list->end(), rv.begin(), [](Electron_Pair ept){return ept.rv;});
   // std::transform(electron_pair_list->begin(), electron_pair_list->end(), wgt.begin(), [](Electron_Pair ept){return 1.0/ept.wgt;});
 
-  mcmp3_helper(en3, ctrl,  0, iops.iopns[KEYS::MC_NPAIR], 2, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
-  mcmp3_helper(en3, ctrl,  6, iops.iopns[KEYS::MC_NPAIR], 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 12, iops.iopns[KEYS::MC_NPAIR], 8, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 18, iops.iopns[KEYS::MC_NPAIR], 2, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 24, iops.iopns[KEYS::MC_NPAIR], 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 30, iops.iopns[KEYS::MC_NPAIR], 2, ovps.o_set[0][0].s_21, ovps.o_set[0][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl,  0, iops.iopns[KEYS::ELECTRON_PAIRS], 2, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl,  6, iops.iopns[KEYS::ELECTRON_PAIRS], 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 12, iops.iopns[KEYS::ELECTRON_PAIRS], 8, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 18, iops.iopns[KEYS::ELECTRON_PAIRS], 2, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 24, iops.iopns[KEYS::ELECTRON_PAIRS], 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 30, iops.iopns[KEYS::ELECTRON_PAIRS], 2, ovps.o_set[0][0].s_21, ovps.o_set[0][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
 
-  mcmp3_helper(en3, ctrl,  0,iops.iopns[KEYS::MC_NPAIR], -1, ovps.v_set[0][0].s_12, ovps.v_set[0][0].s_21, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
-  mcmp3_helper(en3, ctrl,  6,iops.iopns[KEYS::MC_NPAIR], -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 12,iops.iopns[KEYS::MC_NPAIR], -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 18,iops.iopns[KEYS::MC_NPAIR], -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 24,iops.iopns[KEYS::MC_NPAIR], -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 30,iops.iopns[KEYS::MC_NPAIR], -1, ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl,  0,iops.iopns[KEYS::ELECTRON_PAIRS], -1, ovps.v_set[0][0].s_12, ovps.v_set[0][0].s_21, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl,  6,iops.iopns[KEYS::ELECTRON_PAIRS], -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 12,iops.iopns[KEYS::ELECTRON_PAIRS], -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 18,iops.iopns[KEYS::ELECTRON_PAIRS], -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 24,iops.iopns[KEYS::ELECTRON_PAIRS], -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 30,iops.iopns[KEYS::ELECTRON_PAIRS], -1, ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
 
   // divide by number of RW samples
   auto nsamp_tauwgt = tau->get_wgt(2);
-  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
-  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 1);
-  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::MC_NPAIR] - 2);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS] - 1);
+  nsamp_tauwgt /= static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS] - 2);
   emp3 = emp3 + en3 * nsamp_tauwgt;
 #if MP3CV >= 1
   std::transform(ctrl.begin(), ctrl.end(), control3.begin(), control3.begin(), [&](double c, double total) { return total + c * nsamp_tauwgt; });

@@ -14,10 +14,10 @@
 class MP2F12_V_Engine {
  public:
   explicit MP2F12_V_Engine(const IOPs& iops, const Basis& basis) :
-      traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::ELECTRONS])
+      traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS])
   {
     correlation_factor = create_correlation_factor(iops);
-    nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+    nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
     nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);
     nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::ELECTRONS] - 1.0);
   }

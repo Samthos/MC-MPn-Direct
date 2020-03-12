@@ -60,7 +60,7 @@ void GF::monte_energy() {
       }
     }
 
-    if ((iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF)) {
+    if ((iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF)) {
       mc_end = std::chrono::high_resolution_clock::now();
       time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
       print_mat = (time_span.count() > checkNum * 900);
@@ -73,7 +73,7 @@ void GF::monte_energy() {
     }
   }
 
-  if (iops.iopns[KEYS::TASK] == TASKS::GFFULL || iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+  if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
     full_print(iops.iopns[KEYS::MC_TRIAL], 2);
   }
 
@@ -92,24 +92,24 @@ void GF2::mc_local_energy(const int& step) {
 
   ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
   mcgf2_local_energy_core();
-  if(iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
+  if(iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) {
     mcgf2_local_energy(qeps[0].qeps);
-  } else if (iops.iopns[KEYS::TASK] == TASKS::GFDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
     mcgf2_local_energy_diff(qeps[0].qeps);
   }
 
 
   for(int band=0;band<numBand;band++) {
-    if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
+    if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) {
       mcgf2_local_energy_full(band);
-    } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+    } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
       mcgf2_local_energy_full_diff(band);
       if (step > 0) {
         mc_gf_full_diffs(band, {tau->get_tau(0), -tau->get_tau(0)});
       }
     }
   }
-  if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
+  if (step > 0 && (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL)) {
     mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
   }
 }
@@ -135,18 +135,18 @@ void GF3::mc_local_energy(const int& step) {
   mcgf2_local_energy_core();
   mcgf3_local_energy_core();
 
-  if(iops.iopns[KEYS::TASK] == TASKS::GF || iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
+  if(iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) {
     mcgf2_local_energy(qeps[0].qeps);
     mcgf3_local_energy(qeps[1].qeps);
-  } else if (iops.iopns[KEYS::TASK] == TASKS::GFDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
     mcgf2_local_energy_diff(qeps[0].qeps);
     mcgf3_local_energy_diff(qeps[1].qeps);
   }
 
   for (int band = 0; band < numBand; band++) {
-    if (iops.iopns[KEYS::TASK] == TASKS::GFFULL) {
+    if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) {
       mcgf3_local_energy_full(band);
-    } else if (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF) {
+    } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
       mcgf3_local_energy_full_diff(band);
         if (step > 0) {
           mc_gf_full_diffs(band, {tau->get_tau(0), tau->get_tau(1), tau->get_tau(0) + tau->get_tau(1),
@@ -155,7 +155,7 @@ void GF3::mc_local_energy(const int& step) {
     }
   }
 
-  if (step > 0 && (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF || iops.iopns[KEYS::TASK] == TASKS::GFFULL)) {
+  if (step > 0 && (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL)) {
     mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
   }
 }

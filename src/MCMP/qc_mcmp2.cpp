@@ -121,14 +121,14 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control2) {
   std::array<double, 2> en_wj{0, 0};
 #endif
 
-  for (auto it = 0; it != iops.iopns[KEYS::MC_NPAIR]; it++) {
+  for (auto it = 0; it != iops.iopns[KEYS::ELECTRON_PAIRS]; it++) {
     en_rj.fill(0.0);
 #if MP2CV >= 2
     en_wj.fill(0.0);
 #endif
 
-    for (auto jt = it + 1; jt !=  iops.iopns[KEYS::MC_NPAIR]; jt++) {
-      auto ijIndex = it * iops.iopns[KEYS::MC_NPAIR] + jt;
+    for (auto jt = it + 1; jt !=  iops.iopns[KEYS::ELECTRON_PAIRS]; jt++) {
+      auto ijIndex = it * iops.iopns[KEYS::ELECTRON_PAIRS] + jt;
       en[0] = (ovps.o_set[0][0].s_11[ijIndex] * ovps.o_set[0][0].s_22[ijIndex] * ovps.v_set[0][0].s_11[ijIndex] * ovps.v_set[0][0].s_22[ijIndex]);
       en[1] = (ovps.o_set[0][0].s_12[ijIndex] * ovps.o_set[0][0].s_21[ijIndex] * ovps.v_set[0][0].s_11[ijIndex] * ovps.v_set[0][0].s_22[ijIndex]);
 

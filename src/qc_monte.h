@@ -96,7 +96,7 @@ class Energy : public QC_monte {
     control.emplace_back(6);
     cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(6, 0.0)));
 
-    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
+    ovps.init(cv.size() - 1, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
   }
   ~Energy() {
     for (auto &item : cv) {
@@ -169,7 +169,7 @@ class MP2 : public MP {
 class MP3 : public MP {
  public:
   MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 36}) {
-    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
+    ovps.init(cv.size() - 1, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
   }
   ~MP3() override {
     ovps.free();
@@ -182,7 +182,7 @@ class MP3 : public MP {
 class MP4 : public MP {
  public:
   MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 36, 72}) {
-    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
+    ovps.init(cv.size() - 1, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
   }
   ~MP4() {
     ovps.free();
@@ -281,9 +281,9 @@ class GPU_GF2 : public GF {
 
  public:
   GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init_02(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
 
     ovps.alloc_02();
   }
@@ -297,10 +297,10 @@ class GPU_GF2 : public GF {
 class GF2 : public GF {
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init(1, iops.iopns[KEYS::MC_NPAIR], basis);
-    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init(1, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+    ovps.init_02(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
 
     ovps.alloc_02();
     tau->resize(2);
@@ -323,9 +323,9 @@ class GPU_GF3 : public GF {
 
  public:
   GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init_03(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
     ovps.alloc_03();
   }
   ~GPU_GF3() {
@@ -338,10 +338,10 @@ class GPU_GF3 : public GF {
 class GF3 : public GF {
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init(2, iops.iopns[KEYS::MC_NPAIR], basis);
-    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init(2, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+    ovps.init_03(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
     ovps.alloc_03();
     tau->resize(2);
 

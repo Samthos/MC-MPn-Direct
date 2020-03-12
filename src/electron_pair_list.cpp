@@ -53,11 +53,11 @@ void Electron_Pair_List::transpose() {
 
 Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molec& molec, Electron_Pair_GTO_Weight& weight) {
   Electron_Pair_List* electron_pair_list = nullptr;
-  if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
-    electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR]);
-  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::METROPOLIS) {
+  if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
+    electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::ELECTRON_PAIRS]);
+  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
     Random rnd(iops.iopns[KEYS::DEBUG]);
-    electron_pair_list = new Metropolis_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
+    electron_pair_list = new Metropolis_Electron_Pair_List(iops.iopns[KEYS::ELECTRON_PAIRS], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
   }
   return electron_pair_list;
 }

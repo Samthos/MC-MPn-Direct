@@ -37,9 +37,9 @@ void Electron_List::transpose() {
 
 Electron_List* create_electron_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight) {
   Electron_List* electron_list = nullptr;
-  if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
+  if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
     electron_list = new Direct_Electron_List(iops.iopns[KEYS::ELECTRONS]);
-  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::METROPOLIS) {
+  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
     Random rnd(iops.iopns[KEYS::DEBUG]);
     electron_list = new Metropolis_Electron_List(iops.iopns[KEYS::ELECTRONS], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
   }

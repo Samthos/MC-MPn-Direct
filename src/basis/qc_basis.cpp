@@ -80,7 +80,7 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   nw_vectors_read(iops, mpi_info, molec);
 
   // declare memory
-  mc_pair_num = iops.iopns[KEYS::MC_NPAIR];
+  mc_pair_num = iops.iopns[KEYS::ELECTRON_PAIRS];
   h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
   h_basis.contraction_amplitudes = new double[nShells * mc_pair_num];
   h_basis.contraction_amplitudes_derivative = new double[nShells * mc_pair_num];
