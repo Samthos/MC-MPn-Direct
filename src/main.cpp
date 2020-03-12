@@ -36,7 +36,10 @@ int main(int argc, char* argv[]) {
 
   Basis basis(iops, mpi_info, molec);
 
-  if (iops.iopns[KEYS::TASK] == TASKS::MP) {
+  if (iops.iopns[KEYS::TASK] == TASKS::ENERGY) {
+    Energy qc_monte(mpi_info, iops, molec, basis);
+    qc_monte.monte_energy();
+  } else if (iops.iopns[KEYS::TASK] == TASKS::MP) {
     if (iops.iopns[KEYS::ORDER] == 2) {
       MP2 qc_monte(mpi_info, iops, molec, basis);
       qc_monte.monte_energy();

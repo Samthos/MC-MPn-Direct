@@ -76,8 +76,8 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
       "DIFFS", "ORDER", "CPU", "SAMPLER", "TAU_INTEGRATION",
       "F12_CORRELATION_FACTOR", "F12_GAMMA", "F12_BETA", "ELECTRONS", "ELECTRON_PAIRS"
   };
-  const std::vector<std::string> taskVals = {
-      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V", "F12VBX"};
+  // const std::vector<std::string> taskVals = {
+  //     "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V", "F12VBX", "ENERGY"};
 
   if (mpi_info.sys_master) {
     std::ifstream input(file.c_str());
@@ -105,9 +105,9 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
             case KEYS::TASK:
               std::transform(key.begin(), key.end(), key.begin(), ::toupper);
               {
-                auto it = std::find(taskVals.begin(), taskVals.end(), key);
-                if (it != taskVals.end()) {
-                  iopns[keyval] = std::distance(taskVals.begin(), it);
+                auto it = std::find(TASKS::taskVals.begin(), TASKS::taskVals.end(), key);
+                if (it != TASKS::taskVals.end()) {
+                  iopns[keyval] = std::distance(TASKS::taskVals.begin(), it);
                 } else {
                   std::cerr << "Task " << key << " not reconginzed" << std::endl;
                   exit(0);
@@ -270,8 +270,8 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
    * TODO
    *  -should probably read input from a json
    */
-  const std::vector<std::string> taskVals = {
-      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V", "F12VBX"};
+  // const std::vector<std::string> taskVals = {
+  //     "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V", "F12VBX", "ENERGY"};
   const std::vector<std::string> samplers = {
       "DIRECT", "METROPOLIS"};
   const std::vector<std::string> tau_integrations = {
@@ -281,7 +281,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
     std::cout << std::endl;
     std::cout << "Input read from " << file << std::endl;
     std::cout << "JOBNAME: " << sopns[KEYS::JOBNAME] << std::endl;
-    std::cout << " TASK: " << taskVals[iopns[KEYS::TASK]] << std::endl;
+    std::cout << " TASK: " << TASKS::taskVals[iopns[KEYS::TASK]] << std::endl;
     std::cout << " ORDER: " << iopns[KEYS::ORDER] << std::endl;
     std::cout << " MC_TRIAL: " << iopns[KEYS::MC_TRIAL] << std::endl;
     std::cout << " MC_NPAIR: " << iopns[KEYS::MC_NPAIR] << std::endl;

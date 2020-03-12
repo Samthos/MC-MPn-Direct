@@ -24,6 +24,7 @@ set(source
         qc_random.cpp
         qc_random.h
         control_variate.h
+        control_variate.cpp
         timer.h
         tau_integrals.h
         tau_integrals.cpp
@@ -38,6 +39,8 @@ set(source
         MCGF/qc_gfFullStatisticsHost.cpp
         MCGF/qc_mcgf.cpp
         MCMP/qc_mcmp.cpp
+        MCMP/mcmp.h
+        MCMP/qc_mcmp2.h
         MCMP/qc_mcmp2.cpp
         MCMP/qc_mcmp3.cpp
         MCMP/qc_mcmp4.cpp

@@ -30,7 +30,7 @@ namespace CORRELATION_FACTORS {
     Two_Parameter_Rational,
     Higher_Rational,
     Cubic_Slater,
-    Higher_Jastrow
+    Higher_Jastrow,
   };
 }
 

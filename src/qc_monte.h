@@ -24,6 +24,9 @@
 
 #include "MCF12/mp2f12_var.h"
 
+#include "MCMP/mcmp.h"
+#include "MCMP/qc_mcmp2.h"
+
 class GFStats {
  private:
   std::vector<std::vector<double>> qepsEx1, qepsEx2, qepsAvg, qepsVar;
@@ -78,6 +81,42 @@ class QC_monte {
   static void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
 };
 
+class Energy : public QC_monte {
+ public:
+  Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
+    energy_functions.push_back(new MCMP2<2>);
+    control.emplace_back(energy_functions.back()->n_control_variates);
+    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(energy_functions.back()->n_control_variates, 0.0)));
+
+    tau->resize(cv.size());
+    emp.resize(cv.size());
+    
+    // control.emplace_back(cv_sizes.back());
+    //cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(cv_sizes.back(), 0.0)));
+    control.emplace_back(6);
+    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(6, 0.0)));
+
+    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
+  }
+  ~Energy() {
+    for (auto &item : cv) {
+      delete item;
+    }
+  }
+
+  void monte_energy() override;
+
+ protected:
+  std::vector<MCMP*> energy_functions;
+  std::vector<Accumulator*> cv;
+
+  std::vector<double> emp;
+  std::vector<std::vector<double>> control;
+
+  void zero_energies();
+  void energy();
+};
+
 class MP : public QC_monte {
  public:
   void monte_energy();
@@ -87,23 +126,13 @@ class MP : public QC_monte {
     tau->resize(cv_sizes.size());
     emp.resize(cv_sizes.size());
 
-    if (electron_pair_list->requires_blocking()) {
-      for (int n : cv_sizes) {
-        control.emplace_back(std::vector<double>(n));
-        cv.push_back(new BlockingAccumulator(n, std::vector<double>(n, 0.0)));
-      }
-      cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
-      control.emplace_back(std::vector<double>(cv_sizes.back()));
-      cv.push_back(new BlockingAccumulator(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
-    } else {
-      for (int n : cv_sizes) {
-        control.emplace_back(std::vector<double>(n));
-        cv.push_back(new ControlVariate(n, std::vector<double>(n, 0.0)));
-      }
-      cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
-      control.emplace_back(std::vector<double>(cv_sizes.back()));
-      cv.push_back(new ControlVariate(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
+    for (int n : cv_sizes) {
+      control.emplace_back(n);
+      cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(n, 0.0)));
     }
+    cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
+    control.emplace_back(cv_sizes.back());
+    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(cv_sizes.back(), 0.0)));
   }
   ~MP() {
     for (auto &item : cv) {

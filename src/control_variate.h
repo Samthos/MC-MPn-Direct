@@ -28,6 +28,8 @@ class Accumulator {
  private:
 };
 
+Accumulator* create_accumulator(const bool& requires_blocking, const std::vector<double>& Exact_CV);
+
 class ControlVariate : public Accumulator {
  public:
   ControlVariate(size_t nControlVariates, const std::vector<double>& ExactCV) {

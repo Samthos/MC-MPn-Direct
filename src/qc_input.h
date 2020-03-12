@@ -59,7 +59,10 @@ namespace TASKS {
     GFFULLDIFF,
     F12V,
     F12VBX,
+    ENERGY
   };
+  const std::vector<std::string> taskVals = {
+      "MP", "GF", "GFDIFF", "GFFULL", "GFFULLDIFF", "F12V", "F12VBX", "ENERGY"};
 }
 
 class IOPs {
