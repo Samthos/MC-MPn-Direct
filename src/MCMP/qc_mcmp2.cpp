@@ -258,6 +258,24 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control2) {
 //#endif
 //}
 
+
+MCMP* create_MCMP2(int cv_level) {
+  MCMP* mcmp = nullptr;
+  if (cv_level == 0) {
+    mcmp = new MCMP2<0>;
+  } else if (cv_level == 1) {
+    mcmp = new MCMP2<1>;
+  } else if (cv_level == 2) {
+    mcmp = new MCMP2<2>;
+  }
+  
+  if (mcmp == nullptr) {
+    std::cerr << "MCMP2 not supported with cv level " << cv_level << "\n";
+    exit(0);
+  }
+  return mcmp;
+}
+
 template <int CVMP2>
 void MCMP2<CVMP2>::energy(double& emp, std::vector<double>& control, OVPs& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
   double en2 = 0.0;

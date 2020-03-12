@@ -38,6 +38,10 @@ IOPs::IOPs() {
   iopns[KEYS::TAU_INTEGRATION] = TAU_INTEGRATION::STOCHASTIC;
   iopns[KEYS::F12_CORRELATION_FACTOR] = CORRELATION_FACTORS::Slater;
 
+  iopns[KEYS::MP2CV_LEVEL] = 0;
+  iopns[KEYS::MP3CV_LEVEL] = 0;
+  iopns[KEYS::MP4CV_LEVEL] = 0;
+
   sopns[KEYS::GEOM] = "geom.xyz";
   sopns[KEYS::BASIS] = "basis.dat";
   sopns[KEYS::MC_BASIS] = "mc_basis.dat";

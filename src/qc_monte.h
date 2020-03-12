@@ -84,7 +84,7 @@ class QC_monte {
 class Energy : public QC_monte {
  public:
   Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
-    energy_functions.push_back(new MCMP2<2>);
+    energy_functions.push_back(create_MCMP2(iops.iopns[KEYS::MP2CV_LEVEL]));
     control.emplace_back(energy_functions.back()->n_control_variates);
     cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(energy_functions.back()->n_control_variates, 0.0)));
 
