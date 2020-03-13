@@ -8,11 +8,12 @@
 
 class MCMP {
  public:
-   MCMP(int n, int m) : n_control_variates(n), n_tau_coordinates(m) {}
+   MCMP(int ncv, int ntc, const std::string& e) : n_control_variates(ncv), n_tau_coordinates(ntc), extension(e) {}
    virtual void energy(double& emp, std::vector<double>& control, OVPs&, Electron_Pair_List*, Tau*) = 0;
 
    int n_control_variates;
    int n_tau_coordinates;
+   std::string extension;
 
  protected:
 };

@@ -29,8 +29,8 @@ void Energy::monte_energy() {
     stepTimer.Start();
     print_mc_head(mcTimer.StartTime());
 
-    for (auto i = 0; i < emp.size(); i++) {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
+    for (auto i = 0; i < energy_functions.size(); i++) {
+      std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
       output[i].open(filename.c_str());
     }
     {
@@ -38,12 +38,6 @@ void Energy::monte_energy() {
       output.back().open(filename.c_str());
     }
   }
-
-#ifdef DIMER_PRINT
-  /*
-   * Open an ofstream for each process. Use jobname to name them
-   */
-#endif // DIMER_PRINT
 
   // --- initialize
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
@@ -61,13 +55,6 @@ void Energy::monte_energy() {
       tau->new_tau(random);
       energy();
     } while (tau->next());
-
-#ifdef DIMER_PRINT
-    /*
-     * dump all values to dimer ofstream
-     * values are stored in emp and control
-     */
-#endif // DIMER_PRINT
 
     // accumulate
     auto cv_back = control.back().begin();

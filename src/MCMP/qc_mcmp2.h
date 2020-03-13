@@ -6,7 +6,7 @@
 template <int CVMP2>
 class MCMP2 : public MCMP {
  public:
-   MCMP2() : MCMP(std::max(CVMP2 * (CVMP2+1), 1), 1) {}
+   MCMP2() : MCMP(std::max(CVMP2 * (CVMP2+1), 1), 1, "22") {}
    void energy(double& emp, std::vector<double>& control, OVPs&, Electron_Pair_List*, Tau*) override;
  private:
 };

@@ -155,7 +155,7 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
               keySet = false;
               break;
             case KEYS::TASK:
-              iopns[keyval] = string_to_enum<TASK::TASK>(key, TASK::task_strings);
+              iopns[keyval] |= (1 << string_to_enum<TASK::TASK>(key, TASK::task_strings));
               keySet = false;
               break;
             case KEYS::NUM_BAND:

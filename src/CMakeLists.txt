@@ -11,8 +11,8 @@ set(source
         basis/nw_vectors.cpp
         basis/qc_basis.cpp
         basis/qc_basis.h
-	atom_tag_parser.h
-	atom_tag_parser.cpp
+        atom_tag_parser.h
+        atom_tag_parser.cpp
         qc_geom.cpp
         qc_geom.h
         qc_input.cpp
@@ -42,6 +42,7 @@ set(source
         MCMP/mcmp.h
         MCMP/qc_mcmp2.h
         MCMP/qc_mcmp2.cpp
+        MCMP/qc_mcmp3.h
         MCMP/qc_mcmp3.cpp
         MCMP/qc_mcmp4.cpp
         MCF12/F12_Traces.cpp

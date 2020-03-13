@@ -26,6 +26,7 @@
 
 #include "MCMP/mcmp.h"
 #include "MCMP/qc_mcmp2.h"
+#include "MCMP/qc_mcmp3.h"
 
 class GFStats {
  private:
@@ -84,19 +85,35 @@ class QC_monte {
 class Energy : public QC_monte {
  public:
   Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
-    energy_functions.push_back(create_MCMP2(iops.iopns[KEYS::MP2CV_LEVEL]));
-    control.emplace_back(energy_functions.back()->n_control_variates);
-    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(energy_functions.back()->n_control_variates, 0.0)));
+    int max_tau_coordinates = 0;
+    int total_control_variates = 0;
 
-    tau->resize(cv.size());
-    emp.resize(cv.size());
+    std::cout << iops.iopns[KEYS::TASK] << "\n";
+    if (iops.iopns[KEYS::TASK] & TASK::MP2) {
+      energy_functions.push_back(create_MCMP2(iops.iopns[KEYS::MP2CV_LEVEL]));
+    }
+    if (iops.iopns[KEYS::TASK] & TASK::MP3) {
+      energy_functions.push_back(create_MCMP3(iops.iopns[KEYS::MP3CV_LEVEL]));
+    }
+
+    emp.resize(energy_functions.size());
+    for (auto &it : energy_functions) {
+      control.emplace_back(it->n_control_variates);
+      cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(it->n_control_variates, 0.0)));
+
+      max_tau_coordinates = std::max(max_tau_coordinates, it->n_tau_coordinates);
+      total_control_variates += it->n_control_variates;
+    }
+
+
+    tau->resize(max_tau_coordinates);
+    ovps.init(max_tau_coordinates, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
     
     // control.emplace_back(cv_sizes.back());
-    //cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(cv_sizes.back(), 0.0)));
-    control.emplace_back(6);
-    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(6, 0.0)));
+    // cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(cv_sizes.back(), 0.0)));
 
-    ovps.init(cv.size() - 1, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+    control.emplace_back(total_control_variates);
+    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
   }
   ~Energy() {
     for (auto &item : cv) {
