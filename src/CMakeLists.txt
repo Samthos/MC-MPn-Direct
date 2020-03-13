@@ -45,6 +45,7 @@ set(source
         MCMP/qc_mcmp3.h
         MCMP/qc_mcmp3.cpp
         MCMP/qc_mcmp4.cpp
+        MCMP/qc_mcmp4_temp.cpp
         MCF12/F12_Traces.cpp
         MCF12/F12_Traces.h
         MCF12/correlation_factors.cpp

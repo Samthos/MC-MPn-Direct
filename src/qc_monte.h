@@ -27,6 +27,7 @@
 #include "MCMP/mcmp.h"
 #include "MCMP/qc_mcmp2.h"
 #include "MCMP/qc_mcmp3.h"
+#include "MCMP/qc_mcmp4.h"
 
 class GFStats {
  private:
@@ -94,6 +95,9 @@ class Energy : public QC_monte {
     }
     if (iops.iopns[KEYS::TASK] & TASK::MP3) {
       energy_functions.push_back(create_MCMP3(iops.iopns[KEYS::MP3CV_LEVEL]));
+    }
+    if (iops.iopns[KEYS::TASK] & TASK::MP4) {
+      energy_functions.push_back(create_MCMP4(iops.iopns[KEYS::MP4CV_LEVEL], electron_pair_list));
     }
 
     emp.resize(energy_functions.size());

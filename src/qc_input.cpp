@@ -255,19 +255,30 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
     std::cout << std::endl;
     std::cout << "Input read from " << file << std::endl;
     std::cout << "JOBNAME: " << sopns[KEYS::JOBNAME] << std::endl;
-    std::cout << " TASK: " << TASK::task_strings[iopns[KEYS::TASK]] << std::endl;
-    std::cout << " ORDER: " << iopns[KEYS::ORDER] << std::endl;
+    std::cout << " JOBTYPE: " << TASK::task_strings[iopns[KEYS::JOBTYPE]] << std::endl;
     std::cout << " MC_TRIAL: " << iopns[KEYS::MC_TRIAL] << std::endl;
-    std::cout << " MC_NPAIR: " << iopns[KEYS::ELECTRON_PAIRS] << std::endl;
-    std::cout << " MC_DELX: " << dopns[KEYS::MC_DELX] << std::endl;
-    std::cout << " SPHERICAL: " << bopns[KEYS::SPHERICAL] << std::endl;
+    std::cout << " Electron Pairs: " << iopns[KEYS::ELECTRON_PAIRS] << std::endl;
     std::cout << " SAMPLER: " << SAMPLER::sampler_strings[iopns[KEYS::SAMPLER]] << std::endl;
+    if (iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
+      std::cout << " MC_DELX: " << dopns[KEYS::MC_DELX] << std::endl;
+    }
     std::cout << " TAU_INTEGRATION: " << TAU_INTEGRATION::tau_integration_strings[iopns[KEYS::TAU_INTEGRATION]]  << std::endl;
+    std::cout << " SPHERICAL: " << bopns[KEYS::SPHERICAL] << std::endl;
+
     if (iopns[KEYS::DEBUG] == 1) {
       std::cout << " RNG in debug mode" << std::endl;
     }
-
-    if (iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF || iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL || iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
+    if (iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
+      if (iopns[KEYS::TASK] & TASK::MP2) {
+        std::cout << " TASK: MP2   CV_LEVEL " << iopns[KEYS::MP2CV_LEVEL] << "\n";
+      }
+      if (iopns[KEYS::TASK] & TASK::MP3) {
+        std::cout << " TASK: MP3   CV_LEVEL " << iopns[KEYS::MP3CV_LEVEL] << "\n";
+      }
+      if (iopns[KEYS::TASK] & TASK::MP4) {
+        std::cout << " TASK: MP4   CV_LEVEL " << iopns[KEYS::MP4CV_LEVEL] << "\n";
+      }
+    } else if (iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF || iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL || iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
       std::cout << "\tDIFFS = ";
       if (iopns[KEYS::DIFFS] > 1) {
         std::cout << iopns[KEYS::DIFFS] - 1 << std::endl;
