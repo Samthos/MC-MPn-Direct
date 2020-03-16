@@ -96,10 +96,16 @@ void Energy::monte_energy() {
 }
 
 void Energy::energy() {
-  ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
+  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   for (int i = 0; i < energy_functions.size(); i++) {
-    if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
-      energy_functions[i]->energy(emp[i], control[i], ovps, electron_pair_list, tau);
+    if (!energy_functions[i]->is_f12) {
+      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy(emp[i], control[i], ovps, electron_pair_list, tau);
+      }
+    } else {
+      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy_f12(emp[i], control[i], wavefunctions, electron_pair_list, electron_list);
+      }
     }
   }
 }
@@ -137,6 +143,24 @@ void MP::monte_energy() {
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
     // generate new positions
     move_walkers();
+    for (auto &it : electron_pair_list->pos1) {
+      printf("%7.3f ", it[0]);
+      printf("%7.3f ", it[1]);
+      printf("%7.3f ", it[2]);
+      printf("\n");
+    }
+    for (auto &it : electron_pair_list->pos2) {
+      printf("%7.3f ", it[0]);
+      printf("%7.3f ", it[1]);
+      printf("%7.3f ", it[2]);
+      printf("\n");
+    }
+    for (auto &it : electron_list->pos) {
+      printf("%7.3f ", it[0]);
+      printf("%7.3f ", it[1]);
+      printf("%7.3f ", it[2]);
+      printf("\n");
+    }
 
     // update wavefunction
     update_wavefunction();
@@ -208,7 +232,7 @@ void MP2::energy() {
 }
 
 void MP3::energy() {
-  ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
+  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   if (tau->is_new(1)) {
     mcmp2_energy(emp[0], control[0]);
   }
@@ -216,7 +240,7 @@ void MP3::energy() {
 }
 
 void MP4::energy() {
-  ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
+  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   if (tau->is_new(1)) {
     mcmp2_energy(emp[0], control[0]);
   }
@@ -226,12 +250,9 @@ void MP4::energy() {
   mcmp4_energy(emp[2], control[2]);
 }
 
-void MP2F12_V::energy() {
-  mcmp2_energy_fast(emp[0], control[0]);
-  emp[1] = mp2f12_v_engine.calculate_v(wavefunctions, electron_pair_list, electron_list);
-}
-
+/*
 void MP2F12_VBX::energy() {
   mcmp2_energy_fast(emp[0], control[0]);
   emp[1] = mp2f12_vbx_engine.calculate_vbx(wavefunctions, electron_pair_list, electron_list);
 }
+*/

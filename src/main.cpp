@@ -50,12 +50,9 @@ int main(int argc, char* argv[]) {
       MP4 qc_monte(mpi_info, iops, molec, basis);
       qc_monte.monte_energy();
     }
-  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::F12V) {
-    MP2F12_V qc_monte(mpi_info, iops, molec, basis);
-    qc_monte.monte_energy();
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX) {
-    MP2F12_VBX qc_monte(mpi_info, iops, molec, basis);
-    qc_monte.monte_energy();
+    // MP2F12_VBX qc_monte(mpi_info, iops, molec, basis);
+    // qc_monte.monte_energy();
   } else {
     if (iops.iopns[KEYS::ORDER] == 2) {
       GF2 qc_monte(mpi_info, iops, molec, basis);

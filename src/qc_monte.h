@@ -22,12 +22,11 @@
 #include "qc_random.h"
 #include "tau_integrals.h"
 
-#include "MCF12/mp2f12_var.h"
-
 #include "MCMP/mcmp.h"
 #include "MCMP/qc_mcmp2.h"
 #include "MCMP/qc_mcmp3.h"
 #include "MCMP/qc_mcmp4.h"
+#include "MCF12/mp2_f12.h"
 
 class GFStats {
  private:
@@ -85,45 +84,8 @@ class QC_monte {
 
 class Energy : public QC_monte {
  public:
-  Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
-    int max_tau_coordinates = 0;
-    int total_control_variates = 0;
-
-    std::cout << iops.iopns[KEYS::TASK] << "\n";
-    if (iops.iopns[KEYS::TASK] & TASK::MP2) {
-      energy_functions.push_back(create_MCMP2(iops.iopns[KEYS::MP2CV_LEVEL]));
-    }
-    if (iops.iopns[KEYS::TASK] & TASK::MP3) {
-      energy_functions.push_back(create_MCMP3(iops.iopns[KEYS::MP3CV_LEVEL]));
-    }
-    if (iops.iopns[KEYS::TASK] & TASK::MP4) {
-      energy_functions.push_back(create_MCMP4(iops.iopns[KEYS::MP4CV_LEVEL], electron_pair_list));
-    }
-
-    emp.resize(energy_functions.size());
-    for (auto &it : energy_functions) {
-      control.emplace_back(it->n_control_variates);
-      cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(it->n_control_variates, 0.0)));
-
-      max_tau_coordinates = std::max(max_tau_coordinates, it->n_tau_coordinates);
-      total_control_variates += it->n_control_variates;
-    }
-
-
-    tau->resize(max_tau_coordinates);
-    ovps.init(max_tau_coordinates, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
-    
-    // control.emplace_back(cv_sizes.back());
-    // cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(cv_sizes.back(), 0.0)));
-
-    control.emplace_back(total_control_variates);
-    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
-  }
-  ~Energy() {
-    for (auto &item : cv) {
-      delete item;
-    }
-  }
+  Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  ~Energy();
 
   void monte_energy() override;
 
@@ -213,23 +175,7 @@ class MP4 : public MP {
   void energy() override;
 };
 
-class MP2F12_V : public MP {
- public:
-  MP2F12_V(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 1}),
-      mp2f12_v_engine(iops, basis)
-  {
-    electron_list = create_electron_sampler(iops, molec, electron_weight);
-    wavefunctions.emplace(electrons, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
-  }
-  ~MP2F12_V() override {
-    delete electron_list;
-  }
-
- protected:
-  MP2F12_V_Engine mp2f12_v_engine;
-  void energy() override;
-};
-
+/*
 class MP2F12_VBX : public MP {
  public:
   MP2F12_VBX(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 1}),
@@ -258,6 +204,7 @@ class MP2F12_VBX : public MP {
   MP2F12_VBX_Engine mp2f12_vbx_engine;
   void energy() override;
 };
+*/
 
 class GF : public  QC_monte {
  public:

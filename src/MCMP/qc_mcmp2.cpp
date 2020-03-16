@@ -38,8 +38,8 @@ void MP::mcmp2_energy_fast(double& emp2, std::vector<double>& control2) {
   std::array<double, 2> en_wj{0, 0};
 #endif
 
-  Wavefunction& electron_pair_psi1 = wavefunctions[electron_pairs_1];
-  Wavefunction& electron_pair_psi2 = wavefunctions[electron_pairs_2];
+  Wavefunction& electron_pair_psi1 = wavefunctions[WC::electron_pairs_1];
+  Wavefunction& electron_pair_psi2 = wavefunctions[WC::electron_pairs_2];
 
   for (auto it = 0; it < electron_pair_list->size(); ++it) {
     en_rj.fill(0.0);
@@ -185,8 +185,8 @@ void MP::mcmp2_energy(double& emp2, std::vector<double>& control2) {
 //  std::array<double, 2> en_wj{0, 0};
 //#endif
 //
-//  Wavefunction& electron_pair_psi1 = wavefunctions[electron_pairs_1];
-//  Wavefunction& electron_pair_psi2 = wavefunctions[electron_pairs_2];
+//  Wavefunction& electron_pair_psi1 = wavefunctions[WC::electron_pairs_1];
+//  Wavefunction& electron_pair_psi2 = wavefunctions[WC::electron_pairs_2];
 //
 //  for (auto it = 0; it < electron_pair_list->size(); ++it) {
 //    en_rj.fill(0.0);

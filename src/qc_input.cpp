@@ -255,7 +255,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
     std::cout << std::endl;
     std::cout << "Input read from " << file << std::endl;
     std::cout << "JOBNAME: " << sopns[KEYS::JOBNAME] << std::endl;
-    std::cout << " JOBTYPE: " << TASK::task_strings[iopns[KEYS::JOBTYPE]] << std::endl;
+    std::cout << " JOBTYPE: " << JOBTYPE::jobtype_strings[iopns[KEYS::JOBTYPE]] << std::endl;
     std::cout << " MC_TRIAL: " << iopns[KEYS::MC_TRIAL] << std::endl;
     std::cout << " Electron Pairs: " << iopns[KEYS::ELECTRON_PAIRS] << std::endl;
     std::cout << " SAMPLER: " << SAMPLER::sampler_strings[iopns[KEYS::SAMPLER]] << std::endl;
@@ -300,7 +300,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
           std::cout << ", ";
         }
       }
-    } else if (iopns[KEYS::JOBTYPE] == JOBTYPE::F12V) {
+    } else if (iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX) {
       std::cout << "Number of Electrons Walkers = " << iopns[KEYS::ELECTRONS] << "\n";
       std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
 

@@ -90,7 +90,7 @@ void GF2::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
+  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   mcgf2_local_energy_core();
   if(iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) {
     mcgf2_local_energy(qeps[0].qeps);
@@ -130,7 +130,7 @@ void GF3::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], tau);
+  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
 
   mcgf2_local_energy_core();
   mcgf3_local_energy_core();

@@ -50,8 +50,8 @@ set(source
         MCF12/F12_Traces.h
         MCF12/correlation_factors.cpp
         MCF12/correlation_factors.h
-        MCF12/mp2_f12_integrals.cpp
-        MCF12/mp2f12_var.h
+        MCF12/mp2_f12.cpp
+        MCF12/mp2_f12.h
 )
 
 set(CPU_EXTRA_SOURCES

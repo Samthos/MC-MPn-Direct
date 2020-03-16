@@ -47,10 +47,10 @@ F12_Traces::F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, 
 }
 
 void F12_Traces::update_v(std::unordered_map<int, Wavefunction>& wavefunctions) {
-  build_one_e_traces(wavefunctions[electrons]);
-  build_one_e_one_e_traces(wavefunctions[electrons]);
-  build_two_e_traces(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2]);
-  build_two_e_one_e_traces(wavefunctions[electron_pairs_1], wavefunctions[electron_pairs_2], wavefunctions[electrons]);
+  build_one_e_traces(wavefunctions[WC::electrons]);
+  build_one_e_one_e_traces(wavefunctions[WC::electrons]);
+  build_two_e_traces(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2]);
+  build_two_e_one_e_traces(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], wavefunctions[WC::electrons]);
 }
 
 void F12_Traces::update_bx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
@@ -61,11 +61,11 @@ void F12_Traces::update_bx(std::unordered_map<int, Wavefunction>& wavefunctions,
 void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_List* electron_list) {
   std::array<double, 3> dr{};
 
-  auto lda = wavefunctions[electrons].lda;
-  const double* psi = wavefunctions[electrons].data();
-  const double* psi_dx = wavefunctions[electrons_dx].data();
-  const double* psi_dy = wavefunctions[electrons_dy].data();
-  const double* psi_dz = wavefunctions[electrons_dz].data();
+  auto lda = wavefunctions[WC::electrons].lda;
+  const double* psi = wavefunctions[WC::electrons].data();
+  const double* psi_dx = wavefunctions[WC::electrons_dx].data();
+  const double* psi_dy = wavefunctions[WC::electrons_dy].data();
+  const double* psi_dz = wavefunctions[WC::electrons_dz].data();
 
   for (int io = 0; io < electrons; ++io) {
     for (int jo = 0; jo < electrons; ++jo) {
@@ -181,18 +181,18 @@ void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1
 
 void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list) {
   std::array<double, 3> dr{};
-  auto lda = wavefunctions[electron_pairs_1].lda;
+  auto lda = wavefunctions[WC::electron_pairs_1].lda;
 
-  const double* psi1 = wavefunctions[electron_pairs_1].data();
-  const double* psi2 = wavefunctions[electron_pairs_2].data();
+  const double* psi1 = wavefunctions[WC::electron_pairs_1].data();
+  const double* psi2 = wavefunctions[WC::electron_pairs_2].data();
 
-  const double* psi1_dx = wavefunctions[electron_pairs_1_dx].data();
-  const double* psi1_dy = wavefunctions[electron_pairs_1_dy].data();
-  const double* psi1_dz = wavefunctions[electron_pairs_1_dz].data();
+  const double* psi1_dx = wavefunctions[WC::electron_pairs_1_dx].data();
+  const double* psi1_dy = wavefunctions[WC::electron_pairs_1_dy].data();
+  const double* psi1_dz = wavefunctions[WC::electron_pairs_1_dz].data();
 
-  const double* psi2_dx = wavefunctions[electron_pairs_2_dx].data();
-  const double* psi2_dy = wavefunctions[electron_pairs_2_dy].data();
-  const double* psi2_dz = wavefunctions[electron_pairs_2_dz].data();
+  const double* psi2_dx = wavefunctions[WC::electron_pairs_2_dx].data();
+  const double* psi2_dy = wavefunctions[WC::electron_pairs_2_dy].data();
+  const double* psi2_dz = wavefunctions[WC::electron_pairs_2_dz].data();
 
   for (int ip = 0; ip < electron_pairs; ip++) {
     std::transform(electron_pair_list->pos1[ip].begin(), electron_pair_list->pos1[ip].end(), electron_pair_list->pos2[ip].begin(), dr.begin(), std::minus<>());
@@ -212,18 +212,18 @@ void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunct
 void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   std::array<double, 3> dr{};
 
-  auto o_lda = wavefunctions[electrons].lda;
-  auto p_lda = wavefunctions[electron_pairs_1].lda;
+  auto o_lda = wavefunctions[WC::electrons].lda;
+  auto p_lda = wavefunctions[WC::electron_pairs_1].lda;
 
-  const double* psi = wavefunctions[electrons].data();
+  const double* psi = wavefunctions[WC::electrons].data();
 
-  const double* psi1_dx = wavefunctions[electron_pairs_1_dx].data();
-  const double* psi1_dy = wavefunctions[electron_pairs_1_dy].data();
-  const double* psi1_dz = wavefunctions[electron_pairs_1_dz].data();
+  const double* psi1_dx = wavefunctions[WC::electron_pairs_1_dx].data();
+  const double* psi1_dy = wavefunctions[WC::electron_pairs_1_dy].data();
+  const double* psi1_dz = wavefunctions[WC::electron_pairs_1_dz].data();
 
-  const double* psi2_dx = wavefunctions[electron_pairs_2_dx].data();
-  const double* psi2_dy = wavefunctions[electron_pairs_2_dy].data();
-  const double* psi2_dz = wavefunctions[electron_pairs_2_dz].data();
+  const double* psi2_dx = wavefunctions[WC::electron_pairs_2_dx].data();
+  const double* psi2_dy = wavefunctions[WC::electron_pairs_2_dy].data();
+  const double* psi2_dz = wavefunctions[WC::electron_pairs_2_dz].data();
 
   for(int ip = 0; ip < electron_pairs; ++ip) {
     std::transform(electron_pair_list->pos1[ip].begin(), electron_pair_list->pos1[ip].begin() + 3, electron_pair_list->pos2[ip].begin(), dr.begin(), std::minus<>());

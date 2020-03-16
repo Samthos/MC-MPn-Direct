@@ -8,23 +8,16 @@
 #include "../basis/qc_basis.h"
 #include "../electron_pair_list.h"
 #include "../electron_list.h"
+#include "../MCMP/mcmp.h"
 #include "F12_Traces.h"
 #include "correlation_factors.h"
 
-class MP2F12_V_Engine {
+class MP2_F12_V : public MCMP {
  public:
-  explicit MP2F12_V_Engine(const IOPs& iops, const Basis& basis) :
-      traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS])
-  {
-    correlation_factor = create_correlation_factor(iops);
-    nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
-    nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);
-    nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::ELECTRONS] - 1.0);
-  }
-  ~MP2F12_V_Engine() {
-    delete correlation_factor;
-  }
-  double calculate_v(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  explicit MP2_F12_V(const IOPs& iops, const Basis& basis);
+  ~MP2_F12_V();
+  void energy(double& emp, std::vector<double>& control, OVPs& ovps, Electron_Pair_List* epl, Tau* tau) override {}
+  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
  protected:
   //define the amplitudes
   static constexpr double a1 = 3.0/8.0;
@@ -41,6 +34,7 @@ class MP2F12_V_Engine {
   double nsamp_one_2;
 };
 
+/*
 class MP2F12_VBX_Engine : public MP2F12_V_Engine {
  public:
   explicit MP2F12_VBX_Engine(const IOPs& iops, const Basis& basis) : MP2F12_V_Engine(iops, basis) {
@@ -81,5 +75,5 @@ class MP2F12_VBX_Engine : public MP2F12_V_Engine {
   std::array<double, 4> xchang_0_pair_4_one_ints;
   std::array<double, 1> xchang_1_pair_3_one_ints;
 };
-
+*/
 #endif  // MP2F12_H_

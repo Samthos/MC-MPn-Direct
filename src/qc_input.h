@@ -77,7 +77,6 @@ namespace JOBTYPE {
     GFFULL,
     GFFULLDIFF,
     MP,
-    F12V,
     F12VBX,
   };
   const std::vector<std::string> jobtype_strings = {
@@ -88,7 +87,6 @@ namespace JOBTYPE {
     "GFFULL",
     "GFFULLDIFF",
     "MP",
-    "F12V",
     "F12VBX"
   };
 }

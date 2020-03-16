@@ -6,7 +6,7 @@
 template <int CVMP4>
 class MCMP4 : public MCMP {
  public:
-  MCMP4(Electron_Pair_List* electron_pair_list) : MCMP(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24"),
+  MCMP4(Electron_Pair_List* electron_pair_list) : MCMP(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24", false),
       mpn(electron_pair_list->size()),
       rv(mpn),
       wgt(mpn),
@@ -34,6 +34,7 @@ class MCMP4 : public MCMP {
       T_w(mpn * mpn),
       Av(mpn * mpn) {}
   void energy(double& emp, std::vector<double>& control, OVPs&, Electron_Pair_List*, Tau*) override;
+  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list){}
 
  private:
   void contract(std::vector<double>& result, const std::vector<double>& A, CBLAS_TRANSPOSE A_trans, const std::vector<double>& B, const std::vector<double>& v);

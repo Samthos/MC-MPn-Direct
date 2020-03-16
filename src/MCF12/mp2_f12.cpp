@@ -2,9 +2,21 @@
 #include <iostream>
 #include <numeric>
 
-#include "mp2f12_var.h"
+#include "mp2_f12.h"
 
-double MP2F12_V_Engine::calculate_v(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+MP2_F12_V::MP2_F12_V(const IOPs& iops, const Basis& basis) :
+    MCMP(0, 0, "f12_V", true),
+    traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS])
+{
+  correlation_factor = create_correlation_factor(iops);
+  nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
+  nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);
+  nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::ELECTRONS] - 1.0);
+}
+MP2_F12_V::~MP2_F12_V() {
+  delete correlation_factor;
+}
+void MP2_F12_V::energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   traces.update_v(wavefunctions);
   correlation_factor->update(electron_pair_list, electron_list);
 
@@ -55,11 +67,11 @@ double MP2F12_V_Engine::calculate_v(std::unordered_map<int, Wavefunction>& wavef
     v_1_pair_2_one_int *= nsamp_pair * nsamp_one_2;
   }
 
-  auto eV =   c1 * (v_1_pair_0_one_ints[0] + v_1_pair_2_one_ints[0] - 2 * v_1_pair_1_one_ints[0])
-            + c2 * (v_1_pair_0_one_ints[1] + v_1_pair_2_one_ints[1] - 2 * v_1_pair_1_one_ints[1]);
-  return eV;
+  emp =   c1 * (v_1_pair_0_one_ints[0] + v_1_pair_2_one_ints[0] - 2 * v_1_pair_1_one_ints[0])
+        + c2 * (v_1_pair_0_one_ints[1] + v_1_pair_2_one_ints[1] - 2 * v_1_pair_1_one_ints[1]);
 }
 
+/*
 double MP2F12_VBX_Engine::calculate_bx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   traces.update_bx(wavefunctions, electron_pair_list, electron_list);
   zero();
@@ -90,7 +102,9 @@ double MP2F12_VBX_Engine::calculate_bx(std::unordered_map<int, Wavefunction>& wa
 }
 
 double MP2F12_VBX_Engine::calculate_vbx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
-  auto e_v = calculate_v(wavefunctions, electron_pair_list, electron_list);
+  double e_V;
+  std::vector<double> c;
+  calculate_v(e_v, c, wavefunctions, electron_pair_list, electron_list);
   auto e_bx = calculate_bx(wavefunctions, electron_pair_list, electron_list);
   return 2 * e_v + e_bx;
 }
@@ -465,3 +479,4 @@ void MP2F12_VBX_Engine::normalize() {
     it *= nsamp_pair * nsamp_one_3;
   }
 }
+*/
