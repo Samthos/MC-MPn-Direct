@@ -58,7 +58,7 @@ void MCMP4<CVMP4>::mcmp4_ij_helper(double constant,
 
   if (CVMP4 >= 2) {
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[1 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r r
+    control[3 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r r
   }
 
   if (CVMP4 >= 3) {
@@ -71,12 +71,12 @@ void MCMP4<CVMP4>::mcmp4_ij_helper(double constant,
     cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[2 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;    // r r r w
-    control[3 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r w
+    control[6 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;    // r r r w
+    control[9 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r w
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[4 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;    // r w r w
-    control[5 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r w
+    control[12 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;    // r w r w
+    control[15 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r w
 
     // T_w = ij_rk * ij_wl - T_r
     std::transform(std::begin(ij_wk), std::end(ij_wk), std::begin(ij_rl), std::begin(T_w), std::multiplies<>());
@@ -84,10 +84,10 @@ void MCMP4<CVMP4>::mcmp4_ij_helper(double constant,
     cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[6 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w r
+    control[18 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w r
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[7 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w r
+    control[21 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w r
 
     // T_r = i_kl . diagonal(wgt * wgt) . kl_j
     contract(T_r, j_kl, CblasTrans, i_kl, w_w);
@@ -98,12 +98,12 @@ void MCMP4<CVMP4>::mcmp4_ij_helper(double constant,
     cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[8 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;    // r r w w
-    control[9 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w w
+    control[24 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;    // r r w w
+    control[27 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w w
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[10 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w w
-    control[11 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w w
+    control[30 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w w
+    control[33 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w w
   }
 }
 template <int CVMP4>
@@ -152,7 +152,7 @@ void MCMP4<CVMP4>::mcmp4_ij_helper_t3(double constant,
 }
 template <int CVMP4>
 void MCMP4<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
-  constexpr int offset = 0;
+  constexpr int offset = 0 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_ij_helper_t1(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21,
       ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11, ovps.o_set[2][1].s_22, ovps.v_set[2][1].s_11);
@@ -266,7 +266,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& contr
 }
 template <int CVMP4>
 void MCMP4<CVMP4>::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
-  constexpr int offset = 12;
+  constexpr int offset = 1 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_ij_helper_t1(  4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
       ovps.v_set[2][0].s_22, ovps.o_set[2][2].s_11, ovps.o_set[2][2].s_22, ovps.v_set[2][2].s_11);
@@ -411,10 +411,9 @@ void MCMP4<CVMP4>::mcmp4_il_helper(double constant,
 
   if (CVMP4 >= 2) {
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[1 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r w
-    control[2 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r r r w
+    control[3 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r w
+    control[6 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r r r w
   }
-
 
   if (CVMP4 >= 3) {
     contract(T_r, j_kl, CblasNoTrans, i_kl, r_w);
@@ -424,11 +423,11 @@ void MCMP4<CVMP4>::mcmp4_il_helper(double constant,
     cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[3 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r r
+    control[9 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r r
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[4 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r w
-    control[5 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w r w
+    control[12 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r w
+    control[15 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w r w
 
     // build jr kw
     std::transform(std::begin(ij_rl), std::end(ij_rl), std::begin(ij_wk), std::begin(T_w), std::multiplies<>());
@@ -436,11 +435,11 @@ void MCMP4<CVMP4>::mcmp4_il_helper(double constant,
     cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[6 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w r
+    control[18 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w r
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[7 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w w
-    control[8 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r r w w
+    control[21 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w w
+    control[24 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r r w w
 
     // build jw kw
     contract(T_r, j_kl, CblasNoTrans, i_kl, w_w);
@@ -449,11 +448,11 @@ void MCMP4<CVMP4>::mcmp4_il_helper(double constant,
     cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[9 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w r
+    control[27 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w r
 
     cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[10 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w w
-    control[11 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w w
+    control[30 + offset] +=  std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w w
+    control[33 + offset] +=  std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w w
   }
 }
 template <int CVMP4>
@@ -499,7 +498,7 @@ void MCMP4<CVMP4>::mcmp4_il_helper_t3(double constant,
 }
 template <int CVMP4>
 void MCMP4<CVMP4>::mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {
-  constexpr int offset = 24;
+  constexpr int offset = 2 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_il_helper_t1( 2, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12,
       ovps.v_set[1][0].s_22, ovps.o_set[2][2].s_11, ovps.v_set[2][2].s_12, ovps.v_set[2][2].s_21);
@@ -682,24 +681,24 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& c
     }
     emp4        += jr_kr_lr * rv[i];
     if (CVMP4 >= 1) {
-      control[offset + 4] += jr_kr_lr * wgt[i];
+      control[offset + 0] += jr_kr_lr * wgt[i];
     }
     if (CVMP4 >= 2) {
-      control[offset + 6] += jr_kw_lr * wgt[i];
+      control[offset + 3] += jr_kw_lr * wgt[i];
     }
     if (CVMP4 >= 3) {
-      control[offset + 8] += jw_kr_lr * wgt[i];
-      control[offset + 10] += jw_kw_lr * wgt[i];
+      control[offset + 6] += jw_kr_lr * wgt[i];
+      control[offset + 9] += jw_kw_lr * wgt[i];
     }
     if (CVMP4 >= 4) {
-      control[offset + 0] += jr_kr_lw * rv[i];
-      control[offset + 1] += jw_kr_lw * rv[i];
-      control[offset + 2] += jr_kw_lw * rv[i];
-      control[offset + 3] += jw_kw_lw * rv[i];
-      control[offset + 5] += jr_kr_lw * wgt[i];
-      control[offset + 7] += jw_kr_lw * wgt[i];
-      control[offset + 9] += jr_kw_lw * wgt[i];
-      control[offset + 11] += jw_kw_lw * wgt[i];
+      control[offset + 12] += jr_kr_lw * rv[i];
+      control[offset + 15] += jw_kr_lw * rv[i];
+      control[offset + 18] += jr_kw_lw * rv[i];
+      control[offset + 21] += jw_kw_lw * rv[i];
+      control[offset + 24] += jr_kr_lw * wgt[i];
+      control[offset + 27] += jw_kr_lw * wgt[i];
+      control[offset + 30] += jr_kw_lw * wgt[i];
+      control[offset + 33] += jw_kw_lw * wgt[i];
     }
   }
 }
@@ -719,7 +718,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& contr
     ext_ptr[i] = &ext_data[i];
   }
 
-  mcmp4_energy_ijkl_helper(emp4, control, 36, constants, ij, ik, il_, ext_ptr, jl, kl);
+  mcmp4_energy_ijkl_helper(emp4, control, 0, constants, ij, ik, il_, ext_ptr, jl, kl);
 }
 template <int CVMP4>
 void MCMP4<CVMP4>::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& control,
@@ -738,7 +737,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& contr
 
   std::transform(jl_1.begin(), jl_1.end(), jl_2.begin(), jl_.begin(), std::multiplies<>());
 
-  mcmp4_energy_ijkl_helper(emp4, control, 48, constants, ij, ext_ptr, il, jk, jl_, kl);
+  mcmp4_energy_ijkl_helper(emp4, control, 1, constants, ij, ext_ptr, il, jk, jl_, kl);
 }
 template <int CVMP4>
 void MCMP4<CVMP4>::mcmp4_energy_ijkl_t3(double& emp4, std::vector<double>& control,
@@ -756,7 +755,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_t3(double& emp4, std::vector<double>& contr
 
   std::transform(kl_1.begin(), kl_1.end(), kl_2.begin(), jl_.begin(), std::multiplies<>());
 
-  mcmp4_energy_ijkl_helper(emp4, control, 60, constants, ext_ptr, ik, il, jk, jl, jl_);
+  mcmp4_energy_ijkl_helper(emp4, control, 2, constants, ext_ptr, ik, il, jk, jl, jl_);
 }
 template <int CVMP4>
 void MCMP4<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPs& ovps) {

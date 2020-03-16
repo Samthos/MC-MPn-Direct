@@ -238,8 +238,8 @@ void MCMP3<CVMP3>::mcmp3_helper(
         wgt.data(), 1,
         0.0,
         A_jk.data(), 1);
-    control[offset + 1] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * w
-    control[offset + 2] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * w
+    control[offset + 6] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * w
+    control[offset + 12] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * w
   }
 
   if (CVMP3 >= 3) {
@@ -276,7 +276,7 @@ void MCMP3<CVMP3>::mcmp3_helper(
         rv.data(), 1,
         0.0,
         A_jk.data(), 1);
-    control[offset + 3] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * w * r
+    control[offset + 18] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * w * r
 
     // A_ik . wgt
     cblas_dgemv(CblasColMajor,
@@ -287,8 +287,8 @@ void MCMP3<CVMP3>::mcmp3_helper(
         wgt.data(), 1,
         0.0,
         A_jk.data(), 1);
-    control[offset + 4] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // r * w * w
-    control[offset + 5] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // w * w * w
+    control[offset + 24] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // r * w * w
+    control[offset + 30] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // w * w * w
   }
 }
 
@@ -301,19 +301,19 @@ void MCMP3<CVMP3>::energy(double& emp, std::vector<double>& control, OVPs& ovps,
   std::vector<double> wgt(electron_pair_list->size());
   std::transform(electron_pair_list->wgt.begin(), electron_pair_list->wgt.end(), wgt.begin(), [](double w){return 1.0/w;});
 
-  mcmp3_helper(en3, ctrl,  0, electron_pair_list->size(), 2, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
-  mcmp3_helper(en3, ctrl,  6, electron_pair_list->size(), 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 12, electron_pair_list->size(), 8, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 18, electron_pair_list->size(), 2, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 24, electron_pair_list->size(), 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 30, electron_pair_list->size(), 2, ovps.o_set[0][0].s_21, ovps.o_set[0][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl, 0, electron_pair_list->size(), 2, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl, 1, electron_pair_list->size(), 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 2, electron_pair_list->size(), 8, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 3, electron_pair_list->size(), 2, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 4, electron_pair_list->size(), 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 5, electron_pair_list->size(), 2, ovps.o_set[0][0].s_21, ovps.o_set[0][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
 
-  mcmp3_helper(en3, ctrl,  0, electron_pair_list->size(), -1, ovps.v_set[0][0].s_12, ovps.v_set[0][0].s_21, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
-  mcmp3_helper(en3, ctrl,  6, electron_pair_list->size(), -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 12, electron_pair_list->size(), -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 18, electron_pair_list->size(), -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 24, electron_pair_list->size(), -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
-  mcmp3_helper(en3, ctrl, 30, electron_pair_list->size(), -1, ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl, 0, electron_pair_list->size(), -1, ovps.v_set[0][0].s_12, ovps.v_set[0][0].s_21, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
+  mcmp3_helper(en3, ctrl, 1, electron_pair_list->size(), -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_12, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 2, electron_pair_list->size(), -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 3, electron_pair_list->size(), -4, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 4, electron_pair_list->size(), -4, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.o_set[1][1].s_11, rv, wgt);
+  mcmp3_helper(en3, ctrl, 5, electron_pair_list->size(), -1, ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[1][0].s_12, ovps.v_set[1][0].s_21, ovps.o_set[1][1].s_11, ovps.o_set[1][1].s_22, rv, wgt);
 
   // divide by number of RW samples
   auto nsamp_tauwgt = tau->get_wgt(2);

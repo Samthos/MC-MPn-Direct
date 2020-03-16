@@ -6,7 +6,7 @@
 template <int CVMP4>
 class MCMP4 : public MCMP {
  public:
-  MCMP4(Electron_Pair_List* electron_pair_list) : MCMP(72, 3, "24"),
+  MCMP4(Electron_Pair_List* electron_pair_list) : MCMP(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24"),
       mpn(electron_pair_list->size()),
       rv(mpn),
       wgt(mpn),

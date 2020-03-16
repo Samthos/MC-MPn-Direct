@@ -79,7 +79,7 @@ void Energy::monte_energy() {
   }
 
   for (auto i = 0; i < emp.size(); i++) {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
+      std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
       cv[i]->to_json(filename);
   }
   {

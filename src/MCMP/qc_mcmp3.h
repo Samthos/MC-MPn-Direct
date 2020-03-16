@@ -6,7 +6,7 @@
 template <int CVMP3>
 class MCMP3 : public MCMP {
  public:
-  MCMP3() : MCMP(36, 2, "23") {}
+  MCMP3() : MCMP(3 * CVMP3 * (1 + CVMP3), 2, "23") {}
   void energy(double& emp, std::vector<double>& control, OVPs&, Electron_Pair_List*, Tau*) override;
  private:
   void mcmp3_helper(
