@@ -36,38 +36,30 @@ int main(int argc, char* argv[]) {
 
   Basis basis(iops, mpi_info, molec);
 
+  QC_monte* qc_monte;
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
-    Energy qc_monte(mpi_info, iops, molec, basis);
-    qc_monte.monte_energy();
+    qc_monte = new Energy(mpi_info, iops, molec, basis);
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::MP) {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      MP2 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
+      qc_monte = new MP2(mpi_info, iops, molec, basis);
     } else if (iops.iopns[KEYS::ORDER] == 3) {
-      MP3 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
+      qc_monte = new MP3(mpi_info, iops, molec, basis);
     } else if (iops.iopns[KEYS::ORDER] == 4) {
-      MP4 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
+      qc_monte = new MP4(mpi_info, iops, molec, basis);
     }
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX) {
-    // MP2F12_VBX qc_monte(mpi_info, iops, molec, basis);
-    // qc_monte.monte_energy();
+    // qc_monte = new MP2F12_VBX(mpi_info, iops, molec, basis);
+  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {
+    qc_monte = new Diagonal_GF(mpi_info, iops, molec, basis);
   } else {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      GF* qc_monte;
-      if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {
-        qc_monte = new Diagonal_GF(mpi_info, iops, molec, basis);
-      } else { 
-        qc_monte = new GF2(mpi_info, iops, molec, basis);
-      }
-      qc_monte->monte_energy();
-      delete qc_monte;
+      qc_monte = new GF2(mpi_info, iops, molec, basis);
     } else if (iops.iopns[KEYS::ORDER] == 3) {
-      GF3 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
+      qc_monte = new GF3(mpi_info, iops, molec, basis);
     }
   }
+  qc_monte->monte_energy();
+  delete qc_monte;
 
 #ifdef HAVE_MPI
   MPI_Finalize();

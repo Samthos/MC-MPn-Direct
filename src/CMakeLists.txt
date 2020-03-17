@@ -56,7 +56,9 @@ set(source
 
 set(CPU_EXTRA_SOURCES
         MCGF/qc_gfFullStatistics.cpp
+        MCGF/qc_mcgf.h
         MCGF/qc_mcgf2.h
+        MCGF/qc_mcgf3.h
         MCGF/qc_mcgf2.cpp
         MCGF/qc_mcgf3.cpp 
         qc_ovps.cpp 

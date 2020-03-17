@@ -6,7 +6,7 @@
 #include "../qc_mpi.h"
 #include "../qc_monte.h"
 
-GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeriv, const std::string& jobname, int order) : isMaster(isMaster_), tasks(static_cast<double>(tasks_)) {
+GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeriv, const std::string& jobname, const std::string& extension) : isMaster(isMaster_), tasks(static_cast<double>(tasks_)) {
   qeps = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv));  //stores energy correction for current step
 
   qepsEx1 = std::vector<std::vector<double>>(numBand, std::vector<double>(nDeriv, 0));    // stores first moment of blocked energy correction
@@ -21,17 +21,19 @@ GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeri
       for (int deriv = 0; deriv < nDeriv; deriv++) {
         char file2[256];
         if ((band + 1 - offBand) < 0) {
-          sprintf(file2, "%s.2%i.DIFF%i.HOMO%i", jobname.c_str(), order, deriv, band - offBand + 1);
+          sprintf(file2, "%s.%s.DIFF%i.HOMO%i", jobname.c_str(), extension.c_str(), deriv, band - offBand + 1);
         } else if ((band + 1 - offBand) == 0) {
-          sprintf(file2, "%s.2%i.DIFF%i.HOMO-%i", jobname.c_str(), order, deriv, band - offBand + 1);
+          sprintf(file2, "%s.%s.DIFF%i.HOMO-%i", jobname.c_str(), extension.c_str(), deriv, band - offBand + 1);
         } else {
-          sprintf(file2, "%s.2%i.DIFF%i.LUMO+%i", jobname.c_str(), order, deriv, band - offBand);
+          sprintf(file2, "%s.%s.DIFF%i.LUMO+%i", jobname.c_str(), extension.c_str(), deriv, band - offBand);
         }
         output_streams[band][deriv].open(file2);
       }
     }
   }
 }
+
+GFStats::GFStats(bool isMaster_, int tasks_, int numBand, int offBand, int nDeriv, const std::string& jobname, int order) : GFStats(isMaster_, tasks_, numBand, offBand, nDeriv, jobname, "2" + std::to_string(order)) {}
 
 GFStats::~GFStats() {
   if (isMaster) {

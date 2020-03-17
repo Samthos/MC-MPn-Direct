@@ -28,12 +28,15 @@
 #include "MCMP/qc_mcmp4.h"
 #include "MCF12/mp2_f12.h"
 
+#include "MCGF/qc_mcgf.h"
 #include "MCGF/qc_mcgf2.h"
+#include "MCGF/qc_mcgf3.h"
 
 class GFStats {
  public:
   std::vector<std::vector<double>> qeps;
 
+  GFStats(bool, int, int, int, int, const std::string&, const std::string&);
   GFStats(bool, int, int, int, int, const std::string&, int);
   GFStats(const GFStats& gf) { throw std::runtime_error("Tried to copy GFStats"); }
   GFStats operator=(const GFStats& gf) { exit(0); }
@@ -251,8 +254,7 @@ class Diagonal_GF : public GF {
   void monte_energy() override;
 
  protected:
-  // std::vector<MCGF*> energy_functions;
-  GF2_Functional gf2_functional;
+  std::vector<MCGF*> energy_functions;
   std::vector<GFStats> qeps;
   void mc_local_energy(const int& step);
   int full_print(int& step, int checkNum);

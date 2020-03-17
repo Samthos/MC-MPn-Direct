@@ -123,18 +123,19 @@ void GF::mcgf2_local_energy_full_diff(int band) {
 }
 
 GF2_Functional::GF2_Functional(IOPs& iops, Basis& basis) :
-  n_electron_pairs(iops.iopns[KEYS::ELECTRON_PAIRS]),
-  numBand(iops.iopns[KEYS::NUM_BAND]),
-  offBand(iops.iopns[KEYS::OFF_BAND]),
-  numDiff(iops.iopns[KEYS::DIFFS]),
+  MCGF(iops, basis, 1, "22", false),
   en2mCore(n_electron_pairs * n_electron_pairs),
-  en2pCore(n_electron_pairs * n_electron_pairs),
-  ent(n_electron_pairs)
+  en2pCore(n_electron_pairs * n_electron_pairs)
 {
+  ent.resize(n_electron_pairs);
   nsamp = static_cast<double>(n_electron_pairs);
   nsamp = nsamp * (nsamp - 1.0);
+
+
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL || 
         iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
+    std::cerr << "Full rountine not integrated into MCGF class\n";
+    exit(0);
     ent.resize((basis.ivir2 - basis.iocc1) * n_electron_pairs);
   }
 }
@@ -270,13 +271,3 @@ void GF2_Functional::energy_diff(std::vector<std::vector<double>>& egf2,
   }
 }
 
-void GF2_Functional::energy(std::vector<std::vector<double>>& egf2,
-       std::unordered_map<int, Wavefunction>& wavefunctions,
-       OVPs& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
-  core(ovps, electron_pair_list);
-  if (numDiff == 0) {
-    energy_no_diff(egf2, wavefunctions, electron_pair_list, tau);
-  } else {
-    energy_diff(egf2, wavefunctions, electron_pair_list, tau);
-  }
-}

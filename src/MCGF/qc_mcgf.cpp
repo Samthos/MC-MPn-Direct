@@ -9,6 +9,7 @@
 
 #include "../qc_mpi.h"
 #include "../qc_monte.h"
+#include "qc_mcgf.h"
 
 void GF::monte_energy() {
   int checkNum = 1;
@@ -161,16 +162,47 @@ int GF3::full_print(int& step, int checkNum) {
   return checkNum;
 }
 
+MCGF::MCGF(IOPs& iops, Basis& basis, int ntc, std::string ext, bool f) :
+  n_tau_coordinates(ntc),
+  extension(ext),
+  is_f12(f),
+  n_electron_pairs(iops.iopns[KEYS::ELECTRON_PAIRS]),
+  numBand(iops.iopns[KEYS::NUM_BAND]),
+  offBand(iops.iopns[KEYS::OFF_BAND]),
+  numDiff(iops.iopns[KEYS::DIFFS]) {} 
+
+void MCGF::energy(std::vector<std::vector<double>>& egf,
+       std::unordered_map<int, Wavefunction>& wavefunctions,
+       OVPs& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+  core(ovps, electron_pair_list);
+  if (numDiff == 0) {
+    energy_no_diff(egf, wavefunctions, electron_pair_list, tau);
+  } else {
+    energy_diff(egf, wavefunctions, electron_pair_list, tau);
+  }
+}
+
+
 Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4)
-  : GF(p1, p2, p3, p4),
-  gf2_functional(p2, p4)
+  : GF(p1, p2, p3, p4)
 {
-  int max_tau_coordinates = 1;
+  int max_tau_coordinates = 0;
 
-  qeps.emplace_back(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], 2);
+  if (iops.iopns[KEYS::TASK] & TASK::GF2) {
+    energy_functions.push_back(new GF2_Functional(p2, p4));
+  }
+  if (iops.iopns[KEYS::TASK] & TASK::GF3) {
+    energy_functions.push_back(new GF3_Functional(p2, p4));
+  }
 
-  tau->resize(2);
-  // tau->resize(max_tau_coordinates);
+
+  qeps.reserve(energy_functions.size());
+  for (auto &it : energy_functions) {
+    qeps.emplace_back(mpi_info.sys_master, mpi_info.numtasks, numBand, offBand, nDeriv, iops.sopns[KEYS::JOBNAME], it->extension);
+    max_tau_coordinates = std::max(max_tau_coordinates, it->n_tau_coordinates);
+  }
+
+  tau->resize(max_tau_coordinates);
   ovps.init(max_tau_coordinates, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
 }
 
@@ -237,7 +269,9 @@ void Diagonal_GF::monte_energy() {
 
 void Diagonal_GF::mc_local_energy(const int& step) {
   ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
-  gf2_functional.energy(qeps[0].qeps, wavefunctions, ovps, electron_pair_list, tau);
+  for (int i = 0; i < energy_functions.size(); i++) {
+    energy_functions[i]->energy(qeps[i].qeps, wavefunctions, ovps, electron_pair_list, tau);
+  }
 }
 
 int Diagonal_GF::full_print(int& step, int checkNum) {
