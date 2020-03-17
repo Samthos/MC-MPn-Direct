@@ -55,9 +55,13 @@ set(source
 )
 
 set(CPU_EXTRA_SOURCES
-        MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp 
+        MCGF/qc_gfFullStatistics.cpp
+        MCGF/qc_mcgf2.h
+        MCGF/qc_mcgf2.cpp
+        MCGF/qc_mcgf3.cpp 
+        qc_ovps.cpp 
         basis/qc_psi.cpp basis/qc_psi_der.cpp
-	cpu_qc_monte.cpp
+        cpu_qc_monte.cpp
         MCMP/qc_mcmp4_ijk.h MCMP/qc_mcmp4_ijkl.h
         MCMP/qc_mcmp4_ij.h MCMP/qc_mcmp4_ij_k.h MCMP/qc_mcmp4_ij_l.h
         MCMP/qc_mcmp4_ik.h MCMP/qc_mcmp4_ik_j.h MCMP/qc_mcmp4_ik_l.h

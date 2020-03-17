@@ -55,8 +55,14 @@ int main(int argc, char* argv[]) {
     // qc_monte.monte_energy();
   } else {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      GF2 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
+      GF* qc_monte;
+      if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {
+        qc_monte = new Diagonal_GF(mpi_info, iops, molec, basis);
+      } else { 
+        qc_monte = new GF2(mpi_info, iops, molec, basis);
+      }
+      qc_monte->monte_energy();
+      delete qc_monte;
     } else if (iops.iopns[KEYS::ORDER] == 3) {
       GF3 qc_monte(mpi_info, iops, molec, basis);
       qc_monte.monte_energy();

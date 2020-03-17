@@ -28,13 +28,9 @@
 #include "MCMP/qc_mcmp4.h"
 #include "MCF12/mp2_f12.h"
 
-class GFStats {
- private:
-  std::vector<std::vector<double>> qepsEx1, qepsEx2, qepsAvg, qepsVar;
-  std::vector<std::ofstream*> output_streams;
-  bool isMaster;
-  double tasks;
+#include "MCGF/qc_mcgf2.h"
 
+class GFStats {
  public:
   std::vector<std::vector<double>> qeps;
 
@@ -47,6 +43,12 @@ class GFStats {
   void blockIt(const int&);
   void reduce();
   void print(const int& step, const double& time_span);
+
+ private:
+  std::vector<std::vector<double>> qepsEx1, qepsEx2, qepsAvg, qepsVar;
+  std::vector<std::ofstream*> output_streams;
+  bool isMaster;
+  double tasks;
 };
 
 class QC_monte {
@@ -241,6 +243,20 @@ class GF : public  QC_monte {
   void mc_gf_full_print(int band, int steps, int checkNum, int order,
       std::vector<double*>& d_ex1,
       std::vector<std::vector<double*>>& d_cov);
+};
+
+class Diagonal_GF : public GF {
+ public:
+  Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  void monte_energy() override;
+
+ protected:
+  // std::vector<MCGF*> energy_functions;
+  GF2_Functional gf2_functional;
+  std::vector<GFStats> qeps;
+  void mc_local_energy(const int& step);
+  int full_print(int& step, int checkNum);
+  std::string genFileName(int, int, int, int, int, int);
 };
 
 class GPU_GF2 : public GF {
