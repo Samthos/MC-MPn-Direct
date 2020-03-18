@@ -39,16 +39,6 @@ int main(int argc, char* argv[]) {
   QC_monte* qc_monte;
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
     qc_monte = new Energy(mpi_info, iops, molec, basis);
-  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::MP) {
-    if (iops.iopns[KEYS::ORDER] == 2) {
-      qc_monte = new MP2(mpi_info, iops, molec, basis);
-    } else if (iops.iopns[KEYS::ORDER] == 3) {
-      qc_monte = new MP3(mpi_info, iops, molec, basis);
-    } else if (iops.iopns[KEYS::ORDER] == 4) {
-      qc_monte = new MP4(mpi_info, iops, molec, basis);
-    }
-  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX) {
-    // qc_monte = new MP2F12_VBX(mpi_info, iops, molec, basis);
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {
     qc_monte = new Diagonal_GF(mpi_info, iops, molec, basis);
   } else {

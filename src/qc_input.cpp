@@ -302,7 +302,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
       }
     }
    
-    if (iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX || (iopns[KEYS::TASK] | TASK::ANY_F12)) {
+    if (iopns[KEYS::TASK] | TASK::ANY_F12) {
       std::cout << "Number of Electrons Walkers = " << iopns[KEYS::ELECTRONS] << "\n";
       std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
 
