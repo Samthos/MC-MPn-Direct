@@ -10,10 +10,12 @@
 #include "../tau_integrals.h"
 #include "../electron_pair_list.h"
 
-
 class GF2_Functional : public MCGF {
   public:
    GF2_Functional(IOPs&, Basis&);
+   void energy_f12(std::vector<std::vector<double>>&, 
+       std::unordered_map<int, Wavefunction>&,
+       Electron_Pair_List*, Electron_List*);
 
   private:
    void core(OVPs& ovps, Electron_Pair_List* electron_pair_list);

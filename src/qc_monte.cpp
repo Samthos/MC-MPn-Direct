@@ -28,10 +28,27 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
   ivir2 = basis.ivir2;
 
   electron_pair_list = create_electron_pair_sampler(iops, molec, electron_pair_weight);
-  electron_list = nullptr;
-
   wavefunctions.emplace(WC::electron_pairs_1, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
   wavefunctions.emplace(WC::electron_pairs_2, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+
+  electron_list = nullptr;
+  if (iops.iopns[KEYS::TASK] & TASK::ANY_F12) {
+    electron_list = create_electron_sampler(iops, molec, electron_weight);
+    wavefunctions.emplace(WC::electrons, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    if (iops.iopns[KEYS::TASK] & TASK::ANY_F12_VBX) {
+      wavefunctions.emplace(WC::electrons_dx, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+      wavefunctions.emplace(WC::electrons_dy, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+      wavefunctions.emplace(WC::electrons_dz, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+
+      wavefunctions.emplace(WC::electron_pairs_1_dx, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+      wavefunctions.emplace(WC::electron_pairs_1_dy, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+      wavefunctions.emplace(WC::electron_pairs_1_dz, Wavefunction(&electron_pair_list->pos1, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+
+      wavefunctions.emplace(WC::electron_pairs_2_dx, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+      wavefunctions.emplace(WC::electron_pairs_2_dy, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+      wavefunctions.emplace(WC::electron_pairs_2_dz, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
+    }
+  }
 
   //initialize walkers
   basis.gpu_alloc(iops.iopns[KEYS::ELECTRON_PAIRS], molec);
@@ -79,9 +96,6 @@ Energy::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, 
   }
   if (iops.iopns[KEYS::TASK] & TASK::MP2_F12_V) {
     energy_functions.push_back(new MP2_F12_V(iops, basis));
-    
-    electron_list = create_electron_sampler(iops, molec, electron_weight);
-    wavefunctions.emplace(WC::electrons, Wavefunction(&electron_list->pos, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
   }
 
   emp.resize(energy_functions.size());

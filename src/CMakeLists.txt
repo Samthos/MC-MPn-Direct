@@ -52,6 +52,8 @@ set(source
         MCF12/correlation_factors.h
         MCF12/mp2_f12.cpp
         MCF12/mp2_f12.h
+        MCF12/gf2_f12.cpp
+        MCF12/gf2_f12.h
 )
 
 set(CPU_EXTRA_SOURCES

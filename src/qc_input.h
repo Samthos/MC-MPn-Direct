@@ -92,13 +92,17 @@ namespace JOBTYPE {
 }
 namespace TASK {
   enum TASK {
-    MP2 =         0b0000001,
-    MP3 =         0b0000010,
-    MP4 =         0b0000100,
-    MP2_F12_V =   0b0001000,
-    MP2_F12_VBX = 0b0010000,
-    GF2 =         0b0100000,
-    GF3 =         0b1000000,
+    MP2 =         0b000000001,
+    MP3 =         0b000000010,
+    MP4 =         0b000000100,
+    MP2_F12_V =   0b000001000,
+    MP2_F12_VBX = 0b000010000,
+    GF2 =         0b000100000,
+    GF3 =         0b001000000,
+    GF2_F12_V =   0b010000000,
+    GF2_F12_VBX = 0b100000000,
+    ANY_F12     = 0b110011000,
+    ANY_F12_VBX = 0b100010000,
   };
   const std::vector<std::string> task_strings = {
     "MP2", 
@@ -107,7 +111,9 @@ namespace TASK {
     "MP2_F12_V",
     "MP2_F12_VBX", 
     "GF2", 
-    "GF3"
+    "GF3",
+    "GF2_F12_V",
+    "GF2_F12_VBX", 
   };
 }
 

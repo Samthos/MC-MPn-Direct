@@ -8,6 +8,8 @@
 #include "../basis/qc_basis.h"
 #include "../tau_integrals.h"
 #include "../electron_pair_list.h"
+#include "../qc_ovps.h"
+#include "../electron_list.h"
 
 class MCGF {
   public:
@@ -15,6 +17,9 @@ class MCGF {
    void energy(std::vector<std::vector<double>>&, 
        std::unordered_map<int, Wavefunction>&,
        OVPs&, Electron_Pair_List*, Tau*);
+   virtual void energy_f12(std::vector<std::vector<double>>&, 
+       std::unordered_map<int, Wavefunction>&,
+       Electron_Pair_List*, Electron_List*) = 0;
 
    int n_tau_coordinates;
    std::string extension;
@@ -28,6 +33,7 @@ class MCGF {
    virtual void energy_diff(std::vector<std::vector<double>>&,
        std::unordered_map<int, Wavefunction>&,
        Electron_Pair_List*, Tau*) = 0;
+
 
    int n_electron_pairs, numBand, offBand, numDiff;
    double nsamp;

@@ -1193,6 +1193,9 @@ void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3,
   }
 }
 
+void GF3_Functional::energy_f12(std::vector<std::vector<double>>&, 
+   std::unordered_map<int, Wavefunction>&,
+   Electron_Pair_List*, Electron_List*) {}
 
 
 /*

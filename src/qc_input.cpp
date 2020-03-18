@@ -300,12 +300,14 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
           std::cout << ", ";
         }
       }
-    } else if (iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX) {
+    }
+   
+    if (iopns[KEYS::JOBTYPE] == JOBTYPE::F12VBX || (iopns[KEYS::TASK] | TASK::ANY_F12)) {
       std::cout << "Number of Electrons Walkers = " << iopns[KEYS::ELECTRONS] << "\n";
       std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
 
       std::cout << "F12_GAMMA = ";
-      if (bopns[KEYS::F12_GAMMA]) {
+      if (!bopns[KEYS::F12_GAMMA]) {
         std::cout << "default";
       } else {
         std::cout << dopns[KEYS::F12_GAMMA];
@@ -313,7 +315,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
       std::cout << "\n";
 
       std::cout << "F12_BETA = ";
-      if (bopns[KEYS::F12_BETA]) {
+      if (!bopns[KEYS::F12_BETA]) {
         std::cout << "default";
       } else {
         std::cout << dopns[KEYS::F12_BETA];

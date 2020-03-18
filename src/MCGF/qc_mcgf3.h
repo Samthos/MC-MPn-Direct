@@ -14,6 +14,9 @@ class GF3_Functional : public MCGF {
   public:
    GF3_Functional(IOPs&, Basis&);
    ~GF3_Functional();
+   void energy_f12(std::vector<std::vector<double>>&, 
+       std::unordered_map<int, Wavefunction>&,
+       Electron_Pair_List*, Electron_List*);
 
   private:
    void core(OVPs& ovps, Electron_Pair_List* electron_pair_list);
