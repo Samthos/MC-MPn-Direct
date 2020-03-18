@@ -14,11 +14,13 @@
 
 class MP2_F12_V : public MCMP {
  public:
-  explicit MP2_F12_V(const IOPs& iops, const Basis& basis);
+  explicit MP2_F12_V(const IOPs& iops, const Basis& basis, std::string extension="f12_V");
   ~MP2_F12_V();
   void energy(double& emp, std::vector<double>& control, OVPs& ovps, Electron_Pair_List* epl, Tau* tau) override {}
   void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
  protected:
+  void calculate_v(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+
   //define the amplitudes
   static constexpr double a1 = 3.0/8.0;
   static constexpr double a2 = 1.0/8.0;
@@ -34,18 +36,14 @@ class MP2_F12_V : public MCMP {
   double nsamp_one_2;
 };
 
-/*
-class MP2F12_VBX_Engine : public MP2F12_V_Engine {
+class MP2_F12_VBX : public MP2_F12_V {
  public:
-  explicit MP2F12_VBX_Engine(const IOPs& iops, const Basis& basis) : MP2F12_V_Engine(iops, basis) {
-    nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-2);
-    nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-3);
-  }
-  double calculate_vbx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  explicit MP2_F12_VBX(const IOPs& iops, const Basis& basis);
+  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
  protected:
-  double calculate_bx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   void zero();
+  void calculate_bx(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   void calculate_bx_t_fa(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   void calculate_bx_t_fb(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   void calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
@@ -75,5 +73,4 @@ class MP2F12_VBX_Engine : public MP2F12_V_Engine {
   std::array<double, 4> xchang_0_pair_4_one_ints;
   std::array<double, 1> xchang_1_pair_3_one_ints;
 };
-*/
 #endif  // MP2F12_H_

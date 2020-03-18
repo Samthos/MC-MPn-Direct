@@ -953,13 +953,6 @@ void GF3_Functional::energy_no_diff(std::vector<std::vector<double>>& egf3,
     double alpha, beta;
     const double *psi1;
     const double *psi2;
-    // if (band-offBand < 0) {
-    //   psi1 = wavefunctions[WC::electron_pairs_1].occ() + (band+iocc2-iocc1-offBand);
-    //   psi2 = wavefunctions[WC::electron_pairs_2].occ() + (band+iocc2-iocc1-offBand);
-    // } else {
-    //   psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band-offBand);
-    //   psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
-    // }
     psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band-offBand);
     psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
 
@@ -1041,6 +1034,7 @@ void GF3_Functional::energy_no_diff(std::vector<std::vector<double>>& egf3,
     egf3[band].front() += en3;
   }
 }
+
 void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3, 
        std::unordered_map<int, Wavefunction>& wavefunctions,
        Electron_Pair_List* electron_pair_list, Tau* tau) {
@@ -1051,13 +1045,6 @@ void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3,
     double alpha, beta;
     const double *psi1;
     const double *psi2;
-    // if (band-offBand < 0) {
-    //   psi1 = wavefunctions[WC::electron_pairs_1].occ() + (band+iocc2-iocc1-offBand);
-    //   psi2 = wavefunctions[WC::electron_pairs_2].occ() + (band+iocc2-iocc1-offBand);
-    // } else {
-    //   psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band-offBand);
-    //   psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
-    // }
     psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band-offBand);
     psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
 

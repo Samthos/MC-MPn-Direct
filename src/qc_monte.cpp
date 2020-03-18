@@ -97,6 +97,9 @@ Energy::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, 
   if (iops.iopns[KEYS::TASK] & TASK::MP2_F12_V) {
     energy_functions.push_back(new MP2_F12_V(iops, basis));
   }
+  if (iops.iopns[KEYS::TASK] & TASK::MP2_F12_VBX) {
+    energy_functions.push_back(new MP2_F12_VBX(iops, basis));
+  }
 
   emp.resize(energy_functions.size());
   for (auto &it : energy_functions) {
