@@ -84,7 +84,6 @@ MP2_F12_VBX::MP2_F12_VBX(const IOPs& iops, const Basis& basis) : MP2_F12_V(iops,
 
 void MP2_F12_VBX::energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   double e_v = 0;
-  double e_bx = 0;
   std::vector<double> c_v, c_bx;
   calculate_v(e_v, c_v, wavefunctions, electron_pair_list, electron_list);
   calculate_bx(emp, c_bx, wavefunctions, electron_pair_list, electron_list);
@@ -97,10 +96,13 @@ void MP2_F12_VBX::calculate_bx(double& emp, std::vector<double>& control, std::u
   calculate_bx_t_fa(electron_pair_list, electron_list);
   calculate_bx_t_fb(electron_pair_list, electron_list);
   calculate_bx_t_fc(electron_pair_list, electron_list);
-  if (!correlation_factor->f12_d_is_zero()) {
-    traces.update_bx_fd_traces(wavefunctions, electron_list);
-    calculate_bx_t_fd(electron_pair_list, electron_list);
-  }
+  /* Due to the symetry of the integrals in calculate_bx_t_fd, calculate_bx_t_fd always evalates to zero analatically.
+   * if (!correlation_factor->f12_d_is_zero()) {
+   *   traces.update_bx_fd_traces(wavefunctions, electron_list);
+   *   calculate_bx_t_fd(electron_pair_list, electron_list);
+   * }
+   */
+
   calculate_bx_k(electron_pair_list, electron_list);
   normalize();
 
@@ -137,6 +139,51 @@ void MP2_F12_VBX::zero() {
   xchang_1_pair_2_one_ints.fill(0.0);
   xchang_0_pair_4_one_ints.fill(0.0);
   xchang_1_pair_3_one_ints.fill(0.0);
+}
+
+void MP2_F12_VBX::normalize() {
+  for (auto &it : direct_1_pair_0_one_ints) {
+    it *= nsamp_pair;
+  }
+  for (auto &it : xchang_1_pair_0_one_ints) {
+    it *= nsamp_pair;
+  }
+  for (auto &it : direct_0_pair_2_one_ints) {
+    it *= nsamp_one_2;
+  }
+  for (auto &it : xchang_0_pair_2_one_ints) {
+    it *= nsamp_one_2;
+  }
+  for (auto &it : direct_1_pair_1_one_ints) {
+    it *= nsamp_pair * nsamp_one_1;
+  }
+  for (auto &it : xchang_1_pair_1_one_ints) {
+    it *= nsamp_pair * nsamp_one_1;
+  }
+  for (auto &it : direct_0_pair_3_one_ints) {
+    it *= nsamp_one_3;
+  }
+  for (auto &it : xchang_0_pair_3_one_ints) {
+    it *= nsamp_one_3;
+  }
+  for (auto &it : direct_1_pair_2_one_ints) {
+    it *= nsamp_pair * nsamp_one_2;
+  }
+  for (auto &it : xchang_1_pair_2_one_ints) {
+    it *= nsamp_pair * nsamp_one_2;
+  }
+  for (auto &it : direct_0_pair_4_one_ints) {
+    it *= nsamp_one_4;
+  }
+  for (auto &it : xchang_0_pair_4_one_ints) {
+    it *= nsamp_one_4;
+  }
+  for (auto &it : direct_1_pair_3_one_ints) {
+    it *= nsamp_pair * nsamp_one_3;
+  }
+  for (auto &it : xchang_1_pair_3_one_ints) {
+    it *= nsamp_pair * nsamp_one_3;
+  }
 }
 
 void MP2_F12_VBX::calculate_bx_t_fa(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
@@ -296,8 +343,8 @@ void MP2_F12_VBX::calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list
       }
       t[0] += (s[0] *  traces.p13[ip][io] - s[1] * traces.dp31[ip][io]) * traces.k13[ip][io] / (electron_list->weight[io]);
       t[1] += (s[2] *  traces.p13[ip][io] - s[3] * traces.dp31[ip][io]) * traces.v13[ip][io] / (electron_list->weight[io]);
-      t[2] += (s[3] * traces.dp32[ip][io] - s[5] *  traces.p23[ip][io]) * traces.k13[ip][io] / (electron_list->weight[io]);
-      t[3] += (s[4] * traces.dp32[ip][io] - s[7] *  traces.p23[ip][io]) * traces.v13[ip][io] / (electron_list->weight[io]);
+      t[2] += (s[4] * traces.dp32[ip][io] - s[5] *  traces.p23[ip][io]) * traces.k13[ip][io] / (electron_list->weight[io]);
+      t[3] += (s[6] * traces.dp32[ip][io] - s[7] *  traces.p23[ip][io]) * traces.v13[ip][io] / (electron_list->weight[io]);
     }
     auto f_c = correlation_factor->calculate_f12_c(electron_pair_list->r12[ip]);
     direct_1_pair_2_one_ints[1] += t[0] * f_c * electron_pair_list->rv[ip];
@@ -464,50 +511,5 @@ void MP2_F12_VBX::calculate_bx_k(const Electron_Pair_List* electron_pair_list, c
     direct_1_pair_3_one_ints[0] -= t_i[1] * traces.k12[ip] * electron_pair_list->rv[ip];
     xchang_1_pair_3_one_ints[0] += t_i[2] * traces.k12[ip] * electron_pair_list->rv[ip];
     xchang_1_pair_3_one_ints[0] -= t_i[3] * traces.k12[ip] * electron_pair_list->rv[ip];
-  }
-}
-
-void MP2_F12_VBX::normalize() {
-  for (auto &it : direct_1_pair_0_one_ints) {
-    it *= nsamp_pair;
-  }
-  for (auto &it : xchang_1_pair_0_one_ints) {
-    it *= nsamp_pair;
-  }
-  for (auto &it : direct_0_pair_2_one_ints) {
-    it *= nsamp_one_2;
-  }
-  for (auto &it : xchang_0_pair_2_one_ints) {
-    it *= nsamp_one_2;
-  }
-  for (auto &it : direct_1_pair_1_one_ints) {
-    it *= nsamp_pair * nsamp_one_1;
-  }
-  for (auto &it : xchang_1_pair_1_one_ints) {
-    it *= nsamp_pair * nsamp_one_1;
-  }
-  for (auto &it : direct_0_pair_3_one_ints) {
-    it *= nsamp_one_3;
-  }
-  for (auto &it : xchang_0_pair_3_one_ints) {
-    it *= nsamp_one_3;
-  }
-  for (auto &it : direct_1_pair_2_one_ints) {
-    it *= nsamp_pair * nsamp_one_2;
-  }
-  for (auto &it : xchang_1_pair_2_one_ints) {
-    it *= nsamp_pair * nsamp_one_2;
-  }
-  for (auto &it : direct_0_pair_4_one_ints) {
-    it *= nsamp_one_4;
-  }
-  for (auto &it : xchang_0_pair_4_one_ints) {
-    it *= nsamp_one_4;
-  }
-  for (auto &it : direct_1_pair_3_one_ints) {
-    it *= nsamp_pair * nsamp_one_3;
-  }
-  for (auto &it : xchang_1_pair_3_one_ints) {
-    it *= nsamp_pair * nsamp_one_3;
   }
 }
