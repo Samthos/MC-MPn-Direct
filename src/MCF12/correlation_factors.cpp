@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <algorithm>
+#include <cmath>
+#include <numeric>
 
 #include "correlation_factors.h"
 
@@ -234,6 +236,9 @@ bool Gaussian_Correlation_Factor::f12_d_is_zero() {
 
 
 double Cusped_Gaussian_Correlation_Factor::calculate_f12(double r12) {
+  if (r12 == 0.0) {
+    return 0.0;
+  }
   return (1.0 - exp(-gamma * r12 * r12)) / (gamma * r12);
 }
 double Cusped_Gaussian_Correlation_Factor::calculate_f12_a(double r12) {
@@ -243,6 +248,9 @@ double Cusped_Gaussian_Correlation_Factor::calculate_f12_b(double r12) {
   return 4.0 * gamma * r12 * exp(-gamma * r12 * r12);
 }
 double Cusped_Gaussian_Correlation_Factor::calculate_f12_c(double r12) {
+  if (r12 == 0.0) {
+    return 1.0;
+  }
   double er12_2 = exp(-gamma * r12 * r12);
   return (er12_2 - 1.0) / (gamma * r12 * r12) + 2.0 * er12_2;
 }
@@ -255,6 +263,9 @@ bool Cusped_Gaussian_Correlation_Factor::f12_d_is_zero() {
 
 
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12(double r12) {
+  if (r12 == 0.0) {
+    return -2.0 / gamma;
+  }
   return 2.0 * (exp(-gamma * r12) - 1.0) / (gamma * gamma * r12);
 }
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12_a(double r12) {
@@ -264,6 +275,9 @@ double Yukawa_Coulomb_Correlation_Factor::calculate_f12_b(double r12) {
   return 0.0;
 }
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12_c(double r12) {
+  if (r12 == 0.0) {
+    return 1.0;
+  }
   return 2.0 * (1.0 - (1.0 + gamma * r12) * exp(-gamma * r12)) / (gamma * gamma * r12 * r12);
 }
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12_d(double r12) {
