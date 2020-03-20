@@ -110,7 +110,10 @@ void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, co
     for(int jo = 0; jo < electron_list->size();jo++) {
       if (jo != io) {
         one_e_r12[io][jo] = distance(electron_list->pos[io], electron_list->pos[jo]);
-        f12o[io][jo] = calculate_f12(one_e_r12[io][jo]);
+        f12o[io][jo]      = calculate_f12(one_e_r12[io][jo]);
+      } else {
+        one_e_r12[io][jo] = 0.0;
+        f12o[io][jo]      = 0.0;
       }
     }
   }
@@ -253,7 +256,6 @@ bool Cusped_Gaussian_Correlation_Factor::f12_d_is_zero() {
 
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12(double r12) {
   return 2.0 * (exp(-gamma * r12) - 1.0) / (gamma * gamma * r12);
-  // return 2.0*(exp(-gamma*r12))/(gamma*gamma*r12);
 }
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12_a(double r12) {
   return -2.0 * exp(-gamma * r12);
@@ -262,8 +264,7 @@ double Yukawa_Coulomb_Correlation_Factor::calculate_f12_b(double r12) {
   return 0.0;
 }
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12_c(double r12) {
-  return 2.0 * (1.0 - (1.0 + gamma * r12) * exp(-gamma * r12)) /
-         (gamma * gamma * r12 * r12);
+  return 2.0 * (1.0 - (1.0 + gamma * r12) * exp(-gamma * r12)) / (gamma * gamma * r12 * r12);
 }
 double Yukawa_Coulomb_Correlation_Factor::calculate_f12_d(double r12) {
   return 0.0;
@@ -287,8 +288,7 @@ double Jastrow_Correlation_Factor::calculate_f12_c(double r12) {
   return exp(r12 / (1 + gamma * r12)) / (1 + gamma * r12);
 }
 double Jastrow_Correlation_Factor::calculate_f12_d(double r12) {
-  return -exp(r12 / (1 + gamma * r12)) * gamma /
-         ((1 + gamma * r12) * (1 + gamma * r12));
+  return -exp(r12 / (1 + gamma * r12)) * gamma / ((1 + gamma * r12) * (1 + gamma * r12));
 }
 bool Jastrow_Correlation_Factor::f12_d_is_zero() {
   return false;

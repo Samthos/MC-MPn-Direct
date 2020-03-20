@@ -120,6 +120,10 @@ void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
             electron_psi.data() + io * electron_psi.lda + ivir2,
             electron_psi.data() + jo * electron_psi.lda + ivir1,
             0.0);
+      } else {
+        op12[io][jo] = 0;
+        ok12[io][jo] = 0;
+        ov12[io][jo] = 0;
       }
     }
   }
