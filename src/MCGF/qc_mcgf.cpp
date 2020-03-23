@@ -196,6 +196,9 @@ Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4)
   if (iops.iopns[KEYS::TASK] & TASK::GF2_F12_V) {
     energy_functions.push_back(new GF2_F12_V(p2, p4));
   }
+  if (iops.iopns[KEYS::TASK] & TASK::GF2_F12_VBX) {
+    energy_functions.push_back(new GF2_F12_VBX(p2, p4));
+  }
 
 
   qeps.reserve(energy_functions.size());
