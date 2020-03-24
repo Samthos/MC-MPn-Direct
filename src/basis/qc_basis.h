@@ -34,13 +34,13 @@ namespace WC {
     electron_pairs_2 = WS::electron_pairs_2,
     electrons        = WS::electrons,
     electron_pairs_1_dx = WT::dx | WS::electron_pairs_1,
-    electron_pairs_2_dx = WT::dx | WS::electron_pairs_1,
+    electron_pairs_2_dx = WT::dx | WS::electron_pairs_2,
     electrons_dx        = WT::dx | WS::electrons,
     electron_pairs_1_dy = WT::dy | WS::electron_pairs_1,
-    electron_pairs_2_dy = WT::dy | WS::electron_pairs_1,
+    electron_pairs_2_dy = WT::dy | WS::electron_pairs_2,
     electrons_dy        = WT::dy | WS::electrons,
     electron_pairs_1_dz = WT::dz | WS::electron_pairs_1,
-    electron_pairs_2_dz = WT::dz | WS::electron_pairs_1,
+    electron_pairs_2_dz = WT::dz | WS::electron_pairs_2,
     electrons_dz        = WT::dz | WS::electrons,
   };
 }
