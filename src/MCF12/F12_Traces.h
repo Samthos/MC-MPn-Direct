@@ -22,11 +22,9 @@ class F12_Traces {
   std::vector<double> op11;
 
   // traces of single electrons with single electrons
-  std::vector<std::vector<double>> op12;
-  std::vector<std::vector<double>> ok12;
-  std::vector<std::vector<double>> ov12;
-  std::vector<std::vector<double>> dop11;
-  std::vector<std::vector<double>> dop12;
+  std::vector<double> op12;
+  std::vector<double> ok12;
+  std::vector<double> ov12;
 
   // traces of electrons pairs with themselves
   std::vector<double> p11;
@@ -39,13 +37,13 @@ class F12_Traces {
   std::vector<double> dp22;
 
   // traces of electron pairs with single electrons
-  std::vector<std::vector<double>> p13;
-  std::vector<std::vector<double>> k13;
-  std::vector<std::vector<double>> v13;
+  std::vector<double> p13;
+  std::vector<double> k13;
+  std::vector<double> v13;
   std::vector<std::vector<double>> dp31;
-  std::vector<std::vector<double>> p23;
-  std::vector<std::vector<double>> k23;
-  std::vector<std::vector<double>> v23;
+  std::vector<double> p23;
+  std::vector<double> k23;
+  std::vector<double> v23;
   std::vector<std::vector<double>> dp32;
 
   // extra one electron traces

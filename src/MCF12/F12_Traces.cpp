@@ -6,6 +6,9 @@
 #include <numeric>
 #include <array>
 
+#include "cblas.h"
+#include "../blas_calls.h"
+
 #include "F12_Traces.h"
 
 F12_Traces::F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, int electrons_) :
@@ -16,11 +19,9 @@ F12_Traces::F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, 
     electron_pairs(electron_pairs_),
     electrons(electrons_),
     op11(electrons, 0.0),
-    op12(electrons, std::vector<double>(electrons, 0.0)),
-    ok12(electrons, std::vector<double>(electrons, 0.0)),
-    ov12(electrons, std::vector<double>(electrons, 0.0)),
-    dop11(electrons, std::vector<double>(electrons, 0.0)),
-    dop12(electrons, std::vector<double>(electrons, 0.0)),
+    op12(electrons * electrons, 0.0),
+    ok12(electrons * electrons, 0.0),
+    ov12(electrons * electrons, 0.0),
     p11(electron_pairs, 0.0),
     p12(electron_pairs, 0.0),
     p22(electron_pairs, 0.0),
@@ -29,13 +30,13 @@ F12_Traces::F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, 
     dp12(electron_pairs, 0.0),
     dp21(electron_pairs, 0.0),
     dp22(electron_pairs, 0.0),
-    p13(electron_pairs, std::vector<double>(electrons, 0.0)),
-    k13(electron_pairs, std::vector<double>(electrons, 0.0)),
-    v13(electron_pairs, std::vector<double>(electrons, 0.0)),
+    p13(electron_pairs * electrons, 0.0),
+    k13(electron_pairs * electrons, 0.0),
+    v13(electron_pairs * electrons, 0.0),
     dp31(electron_pairs, std::vector<double>(electrons, 0.0)),
-    p23(electron_pairs, std::vector<double>(electrons, 0.0)),
-    k23(electron_pairs, std::vector<double>(electrons, 0.0)),
-    v23(electron_pairs, std::vector<double>(electrons, 0.0)),
+    p23(electron_pairs * electrons, 0.0),
+    k23(electron_pairs * electrons, 0.0),
+    v23(electron_pairs * electrons, 0.0),
     dp32(electron_pairs, std::vector<double>(electrons, 0.0)),
     ds_p11(electrons, std::vector<double>(electrons, 0.0)),
     ds_p12(electrons, std::vector<double>(electrons, 0.0)),
@@ -93,28 +94,41 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wave
 }
 
 void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
-  for(int io = 0; io < electrons;io++) {
-    for(int jo = 0; jo < electrons;jo++) {
-      op12[io][jo] = std::inner_product(electron_psi.data() + io * electron_psi.lda + iocc1,
-          electron_psi.data() + io * electron_psi.lda + iocc2,
-          electron_psi.data() + jo * electron_psi.lda + iocc1,
-          0.0);
+  double alpha = 1.0;
+  double beta = 0.0;
+  cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+      electrons, iocc2 - iocc1,
+      alpha,
+      electron_psi.data() + iocc1, electron_psi.lda,
+      beta,
+      op12.data(), electrons);
+  set_Upper_from_Lower(op12.data(), electrons);
 
-      ok12[io][jo] = std::inner_product(electron_psi.data() + io * electron_psi.lda        ,
-          electron_psi.data() + io * electron_psi.lda + iocc1,
-          electron_psi.data() + jo * electron_psi.lda,
-          op12[io][jo]);
-
-      ov12[io][jo] = std::inner_product(electron_psi.data() + io * electron_psi.lda + ivir1,
-          electron_psi.data() + io * electron_psi.lda + ivir2,
-          electron_psi.data() + jo * electron_psi.lda + ivir1,
-          0.0);
-    }
-    op11[io] = op12[io][io];
-    op12[io][io] = 0;
-    ok12[io][io] = 0;
-    ov12[io][io] = 0;
+  for (int io = 0; io < electrons; io++) {
+    op11[io] = op12[io * electrons + io];
   }
+
+  cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+      electrons, ivir2 - ivir1,
+      alpha,
+      electron_psi.data() + ivir1, electron_psi.lda,
+      beta,
+      ov12.data(), electrons);
+  set_Upper_from_Lower(ov12.data(), electrons);
+
+  beta = 1.0;
+  std::copy(op12.begin(), op12.end(), ok12.begin());
+  cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+      electrons, iocc1,
+      alpha,
+      electron_psi.data(), electron_psi.lda,
+      beta,
+      ok12.data(), electrons);
+  set_Upper_from_Lower(ok12.data(), electrons);
+
+  cblas_dscal(electrons, 0.0, op12.data(), electrons+1);
+  cblas_dscal(electrons, 0.0, ov12.data(), electrons+1);
+  cblas_dscal(electrons, 0.0, ok12.data(), electrons+1);
 }
 
 void F12_Traces::build_two_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2) {
@@ -139,36 +153,59 @@ void F12_Traces::build_two_e_traces(const Wavefunction& electron_pair_psi1, cons
 }
 
 void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi) {
-  for(int ip = 0; ip < electron_pairs; ++ip) {
-    for(int io = 0; io < electrons; ++io) {
-      p13[ip][io] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-          electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
-          electron_psi.data() + io * electron_psi.lda + iocc1,
-          0.0);
-      p23[ip][io] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-          electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc2,
-          electron_psi.data() + io * electron_psi.lda + iocc1,
-          0.0);
+  double alpha = 1.0;
+  double beta = 0.0;
 
-      k13[ip][io] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda,
-          electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-          electron_psi.data() + io * electron_psi.lda,
-          p13[ip][io]);
-      k23[ip][io] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda,
-          electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-          electron_psi.data() + io * electron_psi.lda,
-          p23[ip][io]);
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+      electrons, electron_pairs, iocc2 - iocc1,
+      alpha,
+      electron_psi.data() + iocc1, electron_psi.lda,
+      electron_pair_psi1.data() + iocc1, electron_pair_psi2.lda,
+      beta,
+      p13.data(), electrons);
 
-      v13[ip][io] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda  + ivir1,
-          electron_pair_psi1.data() + ip * electron_pair_psi1.lda + ivir2,
-          electron_psi.data() + io * electron_psi.lda + ivir1,
-          0.0);
-      v23[ip][io] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda  + ivir1,
-          electron_pair_psi2.data() + ip * electron_pair_psi2.lda + ivir2,
-          electron_psi.data() + io * electron_psi.lda + ivir1,
-          0.0);
-    }
-  }
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+      electrons, electron_pairs, iocc2 - iocc1,
+      alpha,
+      electron_psi.data() + iocc1, electron_psi.lda,
+      electron_pair_psi2.data() + iocc1, electron_pair_psi2.lda,
+      beta,
+      p23.data(), electrons);
+
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+      electrons, electron_pairs, ivir2 - ivir1,
+      alpha,
+      electron_psi.data() + ivir1, electron_psi.lda,
+      electron_pair_psi1.data() + ivir1, electron_pair_psi2.lda,
+      beta,
+      v13.data(), electrons);
+
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+      electrons, electron_pairs, ivir2 - ivir1,
+      alpha,
+      electron_psi.data() + ivir1, electron_psi.lda,
+      electron_pair_psi2.data() + ivir1, electron_pair_psi2.lda,
+      beta,
+      v23.data(), electrons);
+
+  beta = 1.0;
+  std::copy(p13.begin(), p13.end(), k13.begin());
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+      electrons, electron_pairs, iocc1,
+      alpha,
+      electron_psi.data(), electron_psi.lda,
+      electron_pair_psi1.data(), electron_pair_psi2.lda,
+      beta,
+      k13.data(), electrons);
+
+  std::copy(p23.begin(), p23.end(), k23.begin());
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+      electrons, electron_pairs, iocc1,
+      alpha,
+      electron_psi.data(), electron_psi.lda,
+      electron_pair_psi2.data(), electron_pair_psi2.lda,
+      beta,
+      k23.data(), electrons);
 }
 
 void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list) {
