@@ -36,21 +36,7 @@ namespace CORRELATION_FACTORS {
 
 class Correlation_Factor {
  public:
-  Correlation_Factor(const IOPs& iops, double gamma_, double beta_) :
-      one_e_r12(iops.iopns[KEYS::ELECTRONS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
-      f12o(iops.iopns[KEYS::ELECTRONS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
-      f13p(iops.iopns[KEYS::ELECTRON_PAIRS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
-      f23p(iops.iopns[KEYS::ELECTRON_PAIRS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
-      gamma(gamma_), 
-      beta(beta_) 
-  {
-    if (iops.bopns[KEYS::F12_GAMMA]) {
-      gamma = iops.dopns[KEYS::F12_GAMMA];
-    }
-    if (iops.bopns[KEYS::F12_BETA]) {
-      beta = iops.dopns[KEYS::F12_BETA];
-    }
-  }
+  Correlation_Factor(const IOPs& iops, double gamma_, double beta_);
   virtual double calculate_f12(double r12) = 0;
   virtual double calculate_f12_a(double r12) = 0;
   virtual double calculate_f12_b(double r12) = 0;
@@ -60,10 +46,20 @@ class Correlation_Factor {
 
   void update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
-  std::vector<std::vector<double>> one_e_r12;
+
+  // electron_pair arrays
+  std::vector<double> f12p;
+  std::vector<double> f12p_a;
+  std::vector<double> f12p_c;
+  
+  // electron electron arrays
   std::vector<std::vector<double>> f12o;
-  std::vector<std::vector<double>> f13p;
-  std::vector<std::vector<double>> f23p;
+  std::vector<std::vector<double>> f12o_b;
+  std::vector<std::vector<double>> f12o_d;
+
+  // electron_pair electron arrays
+  std::vector<std::vector<double>> f13;
+  std::vector<std::vector<double>> f23;
 
  protected:
   double gamma, beta;

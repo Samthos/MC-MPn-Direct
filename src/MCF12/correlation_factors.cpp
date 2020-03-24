@@ -102,28 +102,57 @@ std::string correlation_factors_to_string(const CORRELATION_FACTORS::CORRELATION
   return str;
 }
 
+Correlation_Factor::Correlation_Factor(const IOPs& iops, double gamma_, double beta_) :
+    f12p(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    f12p_a(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    f12p_c(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    f12o(iops.iopns[KEYS::ELECTRONS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
+    f12o_b(iops.iopns[KEYS::ELECTRONS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
+    f12o_d(iops.iopns[KEYS::ELECTRONS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
+    f13(iops.iopns[KEYS::ELECTRON_PAIRS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
+    f23(iops.iopns[KEYS::ELECTRON_PAIRS], std::vector<double>(iops.iopns[KEYS::ELECTRONS], 0.0)),
+    gamma(gamma_), 
+    beta(beta_) 
+{
+  if (iops.bopns[KEYS::F12_GAMMA]) {
+    gamma = iops.dopns[KEYS::F12_GAMMA];
+  }
+  if (iops.bopns[KEYS::F12_BETA]) {
+    beta = iops.dopns[KEYS::F12_BETA];
+  }
+}
+
 double Correlation_Factor::distance(const std::array<double, 3>& p1, const std::array<double, 3>& p2) {
   std::array<double, 3> dr{};
   std::transform(p1.begin(), p1.end(), p2.begin(), dr.begin(), std::minus<>());
   return sqrt(std::inner_product(dr.begin(), dr.end(), dr.begin(),0.0));
 }
+
 void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+
+  for (int ip = 0; ip < electron_pair_list->size(); ip++) {
+    f12p[ip] = calculate_f12(electron_pair_list->r12[ip]);
+    f12p_a[ip] = calculate_f12_a(electron_pair_list->r12[ip]);
+    f12p_c[ip] = calculate_f12_c(electron_pair_list->r12[ip]);
+  }
+  
   for(int io = 0; io < electron_list->size();io++) {
     for(int jo = 0; jo < electron_list->size();jo++) {
       if (jo != io) {
-        one_e_r12[io][jo] = distance(electron_list->pos[io], electron_list->pos[jo]);
-        f12o[io][jo]      = calculate_f12(one_e_r12[io][jo]);
+        auto dr = distance(electron_list->pos[io], electron_list->pos[jo]);
+        f12o[io][jo]  = calculate_f12(dr);
+        f12o_b[io][jo] =  calculate_f12_b(dr);
       } else {
-        one_e_r12[io][jo] = 0.0;
         f12o[io][jo]      = 0.0;
+        f12o_b[io][jo]     = 0.0;
       }
     }
   }
 
   for(int ip = 0; ip < electron_pair_list->size(); ++ip) {
     for(int io = 0; io < electron_list->size(); ++io) {
-      f13p[ip][io] = calculate_f12(distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
-      f23p[ip][io] = calculate_f12(distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
+      f13[ip][io] = calculate_f12(distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
+      f23[ip][io] = calculate_f12(distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
     }
   }
 }

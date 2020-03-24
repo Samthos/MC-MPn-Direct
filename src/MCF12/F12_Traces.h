@@ -61,7 +61,6 @@ class F12_Traces {
   void update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_List* electron_list);
 
  private:
-  void build_one_e_traces(const Wavefunction& electron_psi);
   void build_one_e_one_e_traces(const Wavefunction& electron_psi);
   void build_two_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2);
   void build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi);
