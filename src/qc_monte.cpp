@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <bitset>
 
 #include <unordered_map>
 
@@ -48,6 +49,9 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
       wavefunctions.emplace(WC::electron_pairs_2_dy, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
       wavefunctions.emplace(WC::electron_pairs_2_dz, Wavefunction(&electron_pair_list->pos2, basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2));
     }
+  }
+  for (auto &it : wavefunctions) {
+    wavefunction_groups[it.first & (~WT::mask)].push_back(it.first);
   }
 
   //initialize walkers

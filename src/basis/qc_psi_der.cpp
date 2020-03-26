@@ -7,13 +7,30 @@
 #include "../blas_calls.h"
 #include "../electron_pair_list.h"
 
-void Basis::host_psi_get_dx(
+void Basis::full_host_psi_get_dx(
     Wavefunction& psi_dx,
     std::vector<std::array<double, 3>>& pos) {
   build_contractions_with_derivatives(pos);
+  host_psi_get_dx(psi_dx, pos);
+}
+void Basis::full_host_psi_get_dy(
+    Wavefunction& psi_dy,
+    std::vector<std::array<double, 3>>& pos) {
+  build_contractions_with_derivatives(pos);
+  host_psi_get_dy(psi_dy, pos);
+}
+void Basis::full_host_psi_get_dz(
+    Wavefunction& psi_dz,
+    std::vector<std::array<double, 3>>& pos) {
+  build_contractions_with_derivatives(pos);
+  host_psi_get_dz(psi_dz, pos);
+}
+
+void Basis::host_psi_get_dx(
+    Wavefunction& psi_dx,
+    std::vector<std::array<double, 3>>& pos) {
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
-
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi_dx.lda, nw_nbf,
       1.0,
@@ -25,10 +42,8 @@ void Basis::host_psi_get_dx(
 void Basis::host_psi_get_dy(
     Wavefunction& psi_dy,
     std::vector<std::array<double, 3>>& pos) {
-  build_contractions_with_derivatives(pos);
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
-
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi_dy.lda, nw_nbf,
       1.0,
@@ -40,8 +55,6 @@ void Basis::host_psi_get_dy(
 void Basis::host_psi_get_dz(
     Wavefunction& psi_dz,
     std::vector<std::array<double, 3>>& pos) {
-  build_contractions_with_derivatives(pos);
-
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,

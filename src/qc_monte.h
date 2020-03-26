@@ -70,6 +70,7 @@ class QC_monte {
   Electron_GTO_Weight electron_weight;
 
   std::unordered_map<int, Wavefunction> wavefunctions;
+  std::unordered_map<int, std::vector<int>> wavefunction_groups;
 
   Random random;
   OVPs ovps;

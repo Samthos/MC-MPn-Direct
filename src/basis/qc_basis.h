@@ -229,10 +229,17 @@ class Basis {
   friend void swap(Basis&, Basis&);
 
   // get psi vals
+  void full_host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
+  void full_host_psi_get_dx(Wavefunction&, std::vector<std::array<double, 3>>&);
+  void full_host_psi_get_dy(Wavefunction&, std::vector<std::array<double, 3>>&);
+  void full_host_psi_get_dz(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dx(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dy(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dz(Wavefunction&, std::vector<std::array<double, 3>>&);
+
+  void build_contractions(const std::vector<std::array<double, 3>>&);
+  void build_contractions_with_derivatives(const std::vector<std::array<double, 3>>&);
   void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
 
   // read write
@@ -260,9 +267,6 @@ class Basis {
  private:
   void read(IOPs &, MPI_info &, Molec &);
   void nw_vectors_read(IOPs &, MPI_info &, Molec &);
-
-  void build_contractions(const std::vector<std::array<double, 3>>&);
-  void build_contractions_with_derivatives(const std::vector<std::array<double, 3>>&);
 
   void build_ao_amplitudes(const std::vector<std::array<double, 3>>&);
   void build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>&);

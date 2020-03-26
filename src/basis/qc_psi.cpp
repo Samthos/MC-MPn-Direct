@@ -15,12 +15,15 @@ void Basis::gpu_alloc(int mc_pair_num, Molec& molec) {
 void Basis::gpu_free() {
 }
 
+void Basis::full_host_psi_get(
+    Wavefunction& psi,
+    std::vector<std::array<double, 3>>& pos) {
+  build_contractions(pos);
+  host_psi_get(psi, pos);
+}
 void Basis::host_psi_get(
     Wavefunction& psi,
-    std::vector<std::array<double, 3>>& pos
-    ) {
-
-  build_contractions(pos);
+    std::vector<std::array<double, 3>>& pos) {
   build_ao_amplitudes(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi.lda, nw_nbf,
