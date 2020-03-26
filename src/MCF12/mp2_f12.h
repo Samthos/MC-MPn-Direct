@@ -45,9 +45,17 @@ class MP2_F12_VBX : public MP2_F12_V {
   void zero();
   void calculate_bx(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   void calculate_bx_t_fa(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_t_fb_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_t_fb_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_t_fb_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   void calculate_bx_t_fb(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   void calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   void calculate_bx_t_fd(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_k_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  double calculate_bx_t_fb_4e_help(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, size_t size);
+ double calculate_bx_k_5e_help( const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, size_t, size_t);
+   void calculate_bx_k_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_k_5e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   void calculate_bx_k   (const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   void normalize();
 
@@ -72,5 +80,13 @@ class MP2_F12_VBX : public MP2_F12_V {
   std::array<double, 6> xchang_1_pair_2_one_ints;
   std::array<double, 4> xchang_0_pair_4_one_ints;
   std::array<double, 1> xchang_1_pair_3_one_ints;
+
+  std::vector<double> T_ip;
+  std::vector<double> T_ip_io;
+  std::vector<double> T_ip_jo;
+
+  std::vector<double> T_io_jo;
+  std::vector<double> T_io_ko;
+  std::vector<double> T_jo_ko;
 };
 #endif  // MP2F12_H_

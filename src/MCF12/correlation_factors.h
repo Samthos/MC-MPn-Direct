@@ -53,13 +53,13 @@ class Correlation_Factor {
   std::vector<double> f12p_c;
   
   // electron electron arrays
-  std::vector<std::vector<double>> f12o;
-  std::vector<std::vector<double>> f12o_b;
-  std::vector<std::vector<double>> f12o_d;
+  std::vector<double> f12o;
+  std::vector<double> f12o_b;
+  std::vector<double> f12o_d;
 
   // electron_pair electron arrays
-  std::vector<std::vector<double>> f13;
-  std::vector<std::vector<double>> f23;
+  std::vector<double> f13;
+  std::vector<double> f23;
 
  protected:
   double gamma, beta;
