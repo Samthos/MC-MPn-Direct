@@ -142,9 +142,11 @@ void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, co
         auto dr = distance(electron_list->pos[io], electron_list->pos[jo]);
         f12o[io * electron_list->size() + jo]  = calculate_f12(dr);
         f12o_b[io * electron_list->size() + jo] =  calculate_f12_b(dr);
+        f12o_d[io * electron_list->size() + jo] =  calculate_f12_d(dr);
       } else {
         f12o[io * electron_list->size() + jo]   = 0.0;
         f12o_b[io * electron_list->size() + jo] = 0.0;
+        f12o_d[io * electron_list->size() + jo] = 0.0;
       }
     }
   }

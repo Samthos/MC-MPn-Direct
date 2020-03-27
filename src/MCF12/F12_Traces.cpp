@@ -81,6 +81,7 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wave
         ds_p22[io][jo] = ds_p22[io][jo] + psi[jo * lda + im] * (dr[0] * psi_dx[jo * lda + im] + dr[1] * psi_dy[jo * lda + im] + dr[2] * psi_dz[jo * lda + im]);
       }
 
+
       for (int ko = 0; ko < electrons; ++ko) {
         ds_p31[io][jo][ko] = 0.0;
         ds_p32[io][jo][ko] = 0.0;
@@ -90,6 +91,23 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wave
         }
       }
     }
+    ds_p11[io][io] = 0.0;
+    ds_p12[io][io] = 0.0;
+    ds_p21[io][io] = 0.0;
+    ds_p22[io][io] = 0.0;
+  }
+  for (int io = 0; io < electrons; ++io) {
+    for (int jo = 0; jo < electrons; ++jo) {
+      ds_p31[io][io][jo] = 0.0;
+      ds_p31[io][jo][io] = 0.0;
+      ds_p31[jo][io][io] = 0.0;
+
+      ds_p32[io][io][jo] = 0.0;
+      ds_p32[io][jo][io] = 0.0;
+      ds_p32[jo][io][io] = 0.0;
+    }
+    ds_p31[io][io][io] = 0.0;
+    ds_p32[io][io][io] = 0.0;
   }
 }
 
