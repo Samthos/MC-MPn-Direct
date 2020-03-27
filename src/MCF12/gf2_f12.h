@@ -24,9 +24,13 @@ class GF2_F12_V : public MCGF {
 
 
  protected:
+  double calculate_v_2e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list);
+  double calculate_v_3e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list);
+  double calculate_v_4e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list);
   void calculate_v(std::vector<std::vector<double>>&, 
      std::unordered_map<int, Wavefunction>&,
      Electron_Pair_List*, Electron_List*);
+
 
 
   void core(OVPs& ovps, Electron_Pair_List* electron_pair_list);
@@ -62,11 +66,30 @@ class GF2_F12_VBX : public GF2_F12_V {
  protected:
   void zero();
   void calculate_bx(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
-  void calculate_bx_t_fa(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
-  void calculate_bx_t_fb(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
-  void calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
-  void calculate_bx_t_fd(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
-  void calculate_bx_k   (const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
+  void calculate_bx_t_fa_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fa_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fa_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fa(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+
+  void calculate_bx_t_fb_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fb_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fb_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fb(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+
+  void calculate_bx_t_fc_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fc_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fc_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+
+  void calculate_bx_t_fd_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fd_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fd_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_t_fd(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+
+  void calculate_bx_k_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_k_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_k_5e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx_k(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   void normalize();
 
   static constexpr double c3 = (a1*a1+a2*a2-a1*a2);
