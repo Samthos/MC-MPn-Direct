@@ -99,6 +99,9 @@ void MP::monte_energy() {
     }
   }
 
+// suppress JSON output if DIMER_PRINT is defined
+#ifndef DIMER_PRINT
+
   for (auto i = 0; i < emp.size(); i++) {
       std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
       cv[i]->to_json(filename);
@@ -107,6 +110,9 @@ void MP::monte_energy() {
     std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
     cv.back()->to_json(filename);
   }
+
+#endif // DIMER_PRINT
+
   if (mpi_info.sys_master) {
     mcTimer.Stop();
     print_mc_tail(mcTimer.Span(), mcTimer.EndTime());
