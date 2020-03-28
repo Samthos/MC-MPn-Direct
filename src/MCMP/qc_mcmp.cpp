@@ -13,7 +13,15 @@
 #include "../timer.h"
 
 void MP::monte_energy() {
-  std::vector<std::ofstream> output(emp.size()+1);
+
+  std::vector<std::ofstream> output(emp.size() + 1);
+
+#ifdef DIMER_PRINT
+
+  std::vector<std::ofstream> dimer_output(emp.size() + 1);
+
+#endif // DIMER_PRINT
+
   Timer mcTimer, stepTimer;
 
   // open output stream and start clock for calculation
@@ -22,21 +30,28 @@ void MP::monte_energy() {
     stepTimer.Start();
     print_mc_head(mcTimer.StartTime());
 
+    std::string filename;
     for (auto i = 0; i < emp.size(); i++) {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
+      filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
       output[i].open(filename.c_str());
     }
-    {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
-      output.back().open(filename.c_str());
+    filename = iops.sopns[KEYS::JOBNAME] + ".20";
+    output.back().open(filename.c_str());
+
+  // if DIMER_PRINT is defined: open binary ofstream for each process
+#ifdef DIMER_PRINT
+
+    std::string dimer_filename;
+    for (auto i = 0; i < emp.size(); i++) {
+      dimer_filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2) + ".bin";
+      dimer_output[i].open(dimer_filename.c_str(), std::ios::binary);
     }
+    dimer_filename = iops.sopns[KEYS::JOBNAME] + ".20.bin";
+    dimer_output.back().open(dimer_filename.c_str(), std::ios::binary);
+
+#endif // DIMER_PRINT
   }
 
-#ifdef DIMER_PRINT
-  /*
-   * Open an ofstream for each process. Use jobname to name them
-   */
-#endif // DIMER_PRINT
 
   // --- initialize
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
