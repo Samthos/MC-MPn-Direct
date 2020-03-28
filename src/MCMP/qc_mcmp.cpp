@@ -38,20 +38,24 @@ void MP::monte_energy() {
     filename = iops.sopns[KEYS::JOBNAME] + ".20";
     output.back().open(filename.c_str());
 
-  // if DIMER_PRINT is defined: open binary ofstream for each process
+  // if DIMER_PRINT is defined: open binary ofstream for eneries and control
+  // variates of each step.
+  //
+  // currently only works for MP2
 #ifdef DIMER_PRINT
 
     std::string dimer_filename;
     for (auto i = 0; i < emp.size(); i++) {
-      dimer_filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2) + ".bin";
+      dimer_filename = iops.sopns[KEYS::JOBNAME] + ".22.emp.bin";
       dimer_output[i].open(dimer_filename.c_str(), std::ios::binary);
     }
-    dimer_filename = iops.sopns[KEYS::JOBNAME] + ".20.bin";
+    dimer_filename = iops.sopns[KEYS::JOBNAME] + ".22.cv.bin";
     dimer_output.back().open(dimer_filename.c_str(), std::ios::binary);
 
 #endif // DIMER_PRINT
   }
 
+  size_t double_size = sizeof(double);
 
   // --- initialize
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
@@ -70,11 +74,12 @@ void MP::monte_energy() {
       energy();
     } while (tau->next());
 
+// dump energies and control vars to dimer binary ofstream
 #ifdef DIMER_PRINT
-    /*
-     * dump all values to dimer ofstream
-     * values are stored in emp and control
-     */
+
+    dimer_output[0].write((char*) &emp[0], double_size);
+    dimer_output[1].write((char*) control[0].data(), double_size * control[0].size());
+
 #endif // DIMER_PRINT
 
     // accumulate
