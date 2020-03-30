@@ -123,7 +123,14 @@ void GF2_F12_V::energy_no_diff(std::vector<std::vector<double>>&, std::unordered
 
 void GF2_F12_V::energy_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction>&, Electron_Pair_List*, Tau*) {}
 
-GF2_F12_VBX::GF2_F12_VBX(IOPs& iops, Basis& basis) : GF2_F12_V(iops, basis, "f12_VBX") {
+GF2_F12_VBX::GF2_F12_VBX(IOPs& iops, Basis& basis) : GF2_F12_V(iops, basis, "f12_VBX"),
+    core_d11p(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    core_d12p(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    core_d21p(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    core_d22p(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    core_d13(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
+    core_d23(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS])
+{
   nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-2);
   nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-3);
 }
@@ -149,33 +156,50 @@ void GF2_F12_VBX::calculate_bx(std::vector<std::vector<double>>& egf, std::unord
   std::fill(core_13.begin(), core_13.end(), 0.0);
   std::fill(core_23.begin(), core_23.end(), 0.0);
 
+  std::fill(core_d11p.begin(), core_d11p.end(), 0.0);
+  std::fill(core_d12p.begin(), core_d12p.end(), 0.0);
+  std::fill(core_d21p.begin(), core_d21p.end(), 0.0);
+  std::fill(core_d22p.begin(), core_d22p.end(), 0.0);
+  std::fill(core_d13.begin(), core_d13.end(), 0.0);
+  std::fill(core_d23.begin(), core_d23.end(), 0.0);
+
   calculate_bx_t_fa(electron_pair_list, electron_list);
   calculate_bx_t_fb(electron_pair_list, electron_list);
+  calculate_bx_t_fc(electron_pair_list, electron_list);
   calculate_bx_k(electron_pair_list, electron_list);
   for (int band = 0; band < numBand; band++) {
     x_traces.set(band, offBand, wavefunctions);
     x_traces.set_derivative_traces(band, offBand, wavefunctions, electron_pair_list, electron_list);
-
-    egf[band][0] += calculate_bx_t_fc(electron_pair_list, electron_list);
-    if (!correlation_factor->f12_d_is_zero()) {
-      traces.update_bx_fd_traces(wavefunctions, electron_list);
-      egf[band][0] += calculate_bx_t_fd(electron_pair_list, electron_list);
-    }
-
     egf[band][0] += std::inner_product(core_11o.begin(), core_11o.end(), x_traces.ox11.begin(), 0.0);
     egf[band][0] += std::inner_product(core_11p.begin(), core_11p.end(), x_traces.x11.begin(), 0.0);
     egf[band][0] += std::inner_product(core_12p.begin(), core_12p.end(), x_traces.x12.begin(), 0.0);
     egf[band][0] += std::inner_product(core_22p.begin(), core_22p.end(), x_traces.x22.begin(), 0.0);
+    egf[band][0] += std::inner_product(core_d11p.begin(), core_d11p.end(), x_traces.dx11.begin(), 0.0);
+    egf[band][0] += std::inner_product(core_d12p.begin(), core_d12p.end(), x_traces.dx12.begin(), 0.0);
+    egf[band][0] += std::inner_product(core_d21p.begin(), core_d21p.end(), x_traces.dx21.begin(), 0.0);
+    egf[band][0] += std::inner_product(core_d22p.begin(), core_d22p.end(), x_traces.dx22.begin(), 0.0);
     for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
       for (int io = 0; io < electron_list->size(); ++io) {
-        egf[band][0] += core_13[ip*traces.electrons+io] * x_traces.x13[ip][io] ;
-        egf[band][0] += core_23[ip*traces.electrons+io] * x_traces.x23[ip][io] ;
+        egf[band][0] += core_13[ip*traces.electrons+io] * x_traces.x13[ip][io];
+        egf[band][0] += core_23[ip*traces.electrons+io] * x_traces.x23[ip][io];
+        egf[band][0] += core_d13[ip*traces.electrons+io] * x_traces.dx31[ip][io];
+        egf[band][0] += core_d23[ip*traces.electrons+io] * x_traces.dx32[ip][io];
       }
     }
     for (int io = 0; io < electron_list->size(); ++io) {
       for (int jo = 0; jo < electron_list->size(); ++jo) {
         egf[band][0] += core_12o[io*traces.electrons+jo] * x_traces.ox12[io][jo];
       }
+    }
+  }
+
+  if (!correlation_factor->f12_d_is_zero()) {
+    for (int band = 0; band < numBand; band++) {
+      x_traces.set(band, offBand, wavefunctions);
+      x_traces.set_derivative_traces(band, offBand, wavefunctions, electron_pair_list, electron_list);
+
+      traces.update_bx_fd_traces(wavefunctions, electron_list);
+      egf[band][0] += calculate_bx_t_fd(electron_pair_list, electron_list);
     }
   }
 }
@@ -316,28 +340,37 @@ double GF2_F12_VBX::calculate_bx_t_fb(const Electron_Pair_List* electron_pair_li
 double GF2_F12_VBX::calculate_bx_t_fc_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for(int ip = 0; ip < electron_pair_list->size();ip++) {
-    auto f_12 = correlation_factor->f12p[ip];
-    auto f_c = correlation_factor->f12p_c[ip];
-    t[0] += f_12 * f_c * (x_traces.x11[ip] * traces.dp22[ip] - x_traces.dx11[ip] * traces.p22[ip]) * electron_pair_list->rv[ip];
-    t[0] += f_12 * f_c * (traces.p11[ip] * x_traces.dx22[ip] - traces.dp11[ip] * x_traces.x22[ip]) * electron_pair_list->rv[ip];
-    t[1] += f_12 * f_c * (x_traces.dx12[ip] * traces.p12[ip] - x_traces.x12[ip] * traces.dp21[ip]) * electron_pair_list->rv[ip];
-    t[1] += f_12 * f_c * (traces.dp12[ip] * x_traces.x12[ip] - traces.p12[ip] * x_traces.dx21[ip]) * electron_pair_list->rv[ip];
+    auto cf = correlation_factor->f12p_c[ip] * correlation_factor->f12p[ip] * nsamp_pair;
+    core_11p[ip]  += c3 * cf * traces.dp22[ip] * electron_pair_list->rv[ip];
+    core_d22p[ip] += c3 * cf * traces.p11[ip] * electron_pair_list->rv[ip];
+    core_d12p[ip] += c4 * cf * traces.p12[ip] * electron_pair_list->rv[ip];
+    core_12p[ip]  += c4 * cf * traces.dp12[ip] * electron_pair_list->rv[ip];
+                      
+    core_d11p[ip] -= c3 * cf * traces.p22[ip] * electron_pair_list->rv[ip];
+    core_22p[ip]  -= c3 * cf * traces.dp11[ip] * electron_pair_list->rv[ip];
+    core_12p[ip]  -= c4 * cf * traces.dp21[ip] * electron_pair_list->rv[ip];
+    core_d21p[ip] -= c4 * cf * traces.p12[ip] * electron_pair_list->rv[ip];
   }
-  return (c3 * t[0] + c4 * t[1]) * nsamp_pair;
+  return (t[0] + t[1]);
 }
 double GF2_F12_VBX::calculate_bx_t_fc_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for(int ip = 0; ip < electron_pair_list->size();ip++) {
     for (int io = 0; io < electron_list->size(); ++io) {
-      auto cf = correlation_factor->f23[ip * traces.electrons + io] * correlation_factor->f12p_c[ip];
+      auto cf = -2.0 * correlation_factor->f23[ip * traces.electrons + io] * correlation_factor->f12p_c[ip] * nsamp_pair * nsamp_one_1;
       auto wgt = electron_pair_list->rv[ip] * electron_list->inverse_weight[io];
-      t[0] += cf * (x_traces.x13[ip][io]  * traces.dp22[ip] - x_traces.dx31[ip][io] * traces.p22[ip] ) * traces.k13[ip * traces.electrons + io] * wgt;
-      t[0] += cf * (traces.p13[ip * traces.electrons + io]  * x_traces.dx22[ip] - traces.dp31[ip][io] * x_traces.x22[ip] ) * traces.k13[ip * traces.electrons + io] * wgt;
-      t[1] += cf * (x_traces.dx32[ip][io] * traces.p12[ip]  - x_traces.x23[ip][io]  * traces.dp21[ip]) * traces.k13[ip * traces.electrons + io] * wgt;
-      t[1] += cf * (traces.dp32[ip][io] * x_traces.x12[ip]  - traces.p23[ip * traces.electrons + io]  * x_traces.dx21[ip]) * traces.k13[ip * traces.electrons + io] * wgt;
+      core_13[ip*traces.electrons+io]  += c3 * cf * traces.dp22[ip] * traces.k13[ip * traces.electrons + io] * wgt;
+      core_d23[ip*traces.electrons+io] += c4 * cf * traces.p12[ip] * traces.k13[ip * traces.electrons + io] * wgt;
+      core_d13[ip*traces.electrons+io] -= c3 * cf * traces.p22[ip]  * traces.k13[ip * traces.electrons + io] * wgt;
+      core_23[ip*traces.electrons+io]  -= c4 * cf * traces.dp21[ip] * traces.k13[ip * traces.electrons + io] * wgt;
+
+      core_d22p[ip]    += c3 * cf * traces.p13[ip * traces.electrons + io]  * traces.k13[ip * traces.electrons + io] * wgt;
+      core_12p[ip]     += c4 * cf * traces.dp32[ip][io] * traces.k13[ip * traces.electrons + io] * wgt;
+      core_22p[ip]     -= c3 * cf * traces.dp31[ip][io]  * traces.k13[ip * traces.electrons + io] * wgt;
+      core_d21p[ip]    -= c4 * cf * traces.p23[ip * traces.electrons + io]  * traces.k13[ip * traces.electrons + io] * wgt;
     }
   }
-  return -2.0 * (c3 * t[0] + c4 * t[1]) * nsamp_pair * nsamp_one_1;
+  return (t[0] + t[1]);
 }
 double GF2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
@@ -346,23 +379,29 @@ double GF2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List* electron_pair
       for (int jo = 0; jo < electron_list->size(); ++jo) {
         if (jo != io) {
           auto cf = correlation_factor->f12p_c[ip] * correlation_factor->f12o[io * traces.electrons + jo];
-          auto wgt = electron_pair_list->rv[ip] * electron_list->inverse_weight[io] * electron_list->inverse_weight[jo];
-t[0] += cf * (x_traces.dx32[ip][jo] *  traces.p13[ip * traces.electrons + io] -  x_traces.x23[ip][jo] * traces.dp31[ip][io]) * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
-t[0] += cf * (traces.dp32[ip][jo] *  x_traces.x13[ip][io] -  traces.p23[ip * traces.electrons + jo] * x_traces.dx31[ip][io]) * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+          auto wgt = electron_pair_list->rv[ip] * electron_list->inverse_weight[io] * electron_list->inverse_weight[jo] * nsamp_pair * nsamp_one_2;
+core_d23[ip*traces.electrons+jo] += c3 * cf * traces.p13[ip * traces.electrons + io] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_d23[ip*traces.electrons+jo] -= c3 * cf * traces.p13[ip * traces.electrons + io] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
+core_d23[ip*traces.electrons+io] += c4 * cf * traces.p13[ip * traces.electrons + jo] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_d23[ip*traces.electrons+io] -= c4 * cf * traces.p13[ip * traces.electrons + jo] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
+core_d13[ip*traces.electrons+io] -= c3 * cf * traces.p23[ip * traces.electrons + jo] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_d13[ip*traces.electrons+io] += c3 * cf * traces.p23[ip * traces.electrons + jo] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
+core_d13[ip*traces.electrons+jo] -= c4 * cf * traces.p23[ip * traces.electrons + io] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_d13[ip*traces.electrons+jo] += c4 * cf * traces.p23[ip * traces.electrons + io] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
 
-t[0] -= cf * (x_traces.dx32[ip][jo] *  traces.p13[ip * traces.electrons + io] -  x_traces.x23[ip][jo] * traces.dp31[ip][io]) * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
-t[0] -= cf * (traces.dp32[ip][jo] *  x_traces.x13[ip][io] -  traces.p23[ip * traces.electrons + jo] * x_traces.dx31[ip][io]) * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
-
-t[1] += cf * ( x_traces.x13[ip][jo] * traces.dp32[ip][io] - x_traces.dx31[ip][jo] *  traces.p23[ip * traces.electrons + io]) * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
-t[1] += cf * ( traces.p13[ip * traces.electrons + jo] * x_traces.dx32[ip][io] - traces.dp31[ip][jo] *  x_traces.x23[ip][io]) * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
-
-t[1] -= cf * ( x_traces.x13[ip][jo] * traces.dp32[ip][io] - x_traces.dx31[ip][jo] *  traces.p23[ip * traces.electrons + io]) * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
-t[1] -= cf * ( traces.p13[ip * traces.electrons + jo] * x_traces.dx32[ip][io] - traces.dp31[ip][jo] *  x_traces.x23[ip][io]) * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
+core_23[ip*traces.electrons+jo] -= c3 * cf * traces.dp31[ip][io] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_23[ip*traces.electrons+jo] += c3 * cf * traces.dp31[ip][io] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
+core_23[ip*traces.electrons+io] -= c4 * cf * traces.dp31[ip][jo] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_23[ip*traces.electrons+io] += c4 * cf * traces.dp31[ip][jo] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
+core_13[ip*traces.electrons+io] += c3 * cf * traces.dp32[ip][jo] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_13[ip*traces.electrons+io] -= c3 * cf * traces.dp32[ip][jo] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
+core_13[ip*traces.electrons+jo] += c4 * cf * traces.dp32[ip][io] * traces.k13[ip * traces.electrons + io] * traces.k23[ip * traces.electrons + jo] * wgt;
+core_13[ip*traces.electrons+jo] -= c4 * cf * traces.dp32[ip][io] * traces.v13[ip * traces.electrons + io] * traces.v23[ip * traces.electrons + jo] * wgt;
         }
       }
     }
   }
-  return (c3 * t[0] + c4 * t[1]) * nsamp_pair * nsamp_one_2;
+  return (t[0] + t[1]);
 }
 double GF2_F12_VBX::calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   double en = 0.0;

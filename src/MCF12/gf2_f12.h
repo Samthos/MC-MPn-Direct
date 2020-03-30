@@ -103,5 +103,12 @@ class GF2_F12_VBX : public GF2_F12_V {
 
   double nsamp_one_3;
   double nsamp_one_4;
+
+  std::vector<double> core_d11p;
+  std::vector<double> core_d12p;
+  std::vector<double> core_d21p;
+  std::vector<double> core_d22p;
+  std::vector<double> core_d13;
+  std::vector<double> core_d23;
 };
 #endif  // GF2F12_H_
