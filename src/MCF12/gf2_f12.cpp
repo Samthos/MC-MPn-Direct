@@ -129,7 +129,13 @@ GF2_F12_VBX::GF2_F12_VBX(IOPs& iops, Basis& basis) : GF2_F12_V(iops, basis, "f12
     core_d21p(iops.iopns[KEYS::ELECTRON_PAIRS]),
     core_d22p(iops.iopns[KEYS::ELECTRON_PAIRS]),
     core_d13(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
-    core_d23(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS])
+    core_d23(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
+    T_ip(iops.iopns[KEYS::ELECTRON_PAIRS]),
+    T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
+    T_ip_jo(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
+    T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
+    T_io_ko(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
+    T_jo_ko(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]) 
 {
   nsamp_one_3 = nsamp_one_2 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-2);
   nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-3);
@@ -564,7 +570,6 @@ void calculate_bx_k_5e_help_1(
     }
   }
 }
-
 void calculate_bx_k_5e_help_2(
     std::vector<double>& T_io_jo, const std::vector<double>& S_ip_jo, const std::vector<double>& S_ip_io,
     std::vector<double>& T_jo_ko, const std::vector<double>& S_io_ko,
@@ -595,18 +600,13 @@ void calculate_bx_k_5e_help_2(
     }
   }
 }
-
 double GF2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c_c3 = 2.0 * nsamp_pair * nsamp_one_3 * c3;
   double c_c4 = 2.0 * nsamp_pair * nsamp_one_3 * c4;
 
-  // constant array
-  std::vector<double> T_ip(electron_pair_list->size());
   std::transform(traces.k12.begin(), traces.k12.end(), electron_pair_list->rv.begin(), T_ip.begin(), std::multiplies<>());
 
-  // constant array
-  std::vector<double> T_ip_jo(electron_pair_list->size() * electron_list->size());
   std::transform(correlation_factor->f13.begin(), correlation_factor->f13.end(), correlation_factor->f23.begin(), T_ip_jo.begin(), std::minus<>());
   for (int ip = 0; ip < electron_pair_list->size();ip++) {
     for (int jo = 0; jo < electron_list->size(); ++jo) {
@@ -614,8 +614,6 @@ double GF2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List* electron_pair_li
     }
   }
 
-  // constant ????
-  std::vector<double> T_io_ko(electron_list->size() * electron_list->size());
   for (int io = 0; io < electron_list->size(); ++io) {
     for (int ko = 0; ko < electron_list->size(); ++ko) {
       T_io_ko[io * traces.electrons + ko] = correlation_factor->f12o[io * traces.electrons + ko] * electron_list->inverse_weight[io] * electron_list->inverse_weight[ko];
@@ -623,9 +621,6 @@ double GF2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List* electron_pair_li
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  std::vector<double> T_jo_ko(electron_list->size() * electron_list->size());
-  std::vector<double> T_io_jo(electron_list->size() * electron_list->size());
-  std::vector<double> T_ip_io(electron_pair_list->size() * electron_list->size());
   size_t size = electron_list->size();
   size_t size_ep = electron_pair_list->size();
 
