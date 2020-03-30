@@ -129,7 +129,6 @@ double Correlation_Factor::distance(const std::array<double, 3>& p1, const std::
 }
 
 void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
-
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     f12p[ip] = calculate_f12(electron_pair_list->r12[ip]);
     f12p_a[ip] = calculate_f12_a(electron_pair_list->r12[ip]);
@@ -202,6 +201,33 @@ bool Rational_Correlation_Factor::f12_d_is_zero() {
 }
 
 
+void Slater_Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+  std::cout << "BURN IN HELL\n";
+  for (int ip = 0; ip < electron_pair_list->size(); ip++) {
+    f12p[ip] = calculate_f12(electron_pair_list->r12[ip]);
+    f12p_a[ip] = 2.0 * gamma * f12p[ip];
+    f12p_c[ip] = -gamma * f12p[ip];
+  }
+  
+  for(int io = 0, idx = 0; io < electron_list->size(); io++) {
+    for(int jo = 0; jo < electron_list->size(); jo++, idx++) {
+      if (jo != io) {
+        f12o[idx] = calculate_f12(distance(electron_list->pos[io], electron_list->pos[jo]));
+        f12o_b[idx] =  -gamma * gamma * f12o[idx];
+      } else {
+        f12o[idx]   = 0.0;
+        f12o_b[idx] = 0.0;
+      }
+    }
+  }
+
+  for(int ip = 0; ip < electron_pair_list->size(); ++ip) {
+    for(int io = 0; io < electron_list->size(); ++io) {
+      f13[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
+      f23[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
+    }
+  }
+}
 double Slater_Correlation_Factor::calculate_f12(double r12) {
   // return (1.0-exp(-gamma*r12))/gamma;
   return -exp(-gamma * r12) / gamma;

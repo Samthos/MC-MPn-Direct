@@ -44,7 +44,7 @@ class Correlation_Factor {
   virtual double calculate_f12_d(double r12) = 0;
   virtual bool f12_d_is_zero() = 0;
 
-  void update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  virtual void update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
 
   // electron_pair arrays
@@ -98,13 +98,14 @@ class Rational_Correlation_Factor : public Correlation_Factor {
 class Slater_Correlation_Factor : public Correlation_Factor {
  public:
   Slater_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
+  void update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  bool f12_d_is_zero() override;
+ private:
   double calculate_f12(double r12) override;
   double calculate_f12_a(double r12) override;
   double calculate_f12_b(double r12) override;
   double calculate_f12_c(double r12) override;
   double calculate_f12_d(double r12) override;
-  bool f12_d_is_zero() override;
- private:
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
