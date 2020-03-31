@@ -56,6 +56,10 @@ class GF2_F12_V : public MCGF {
   std::vector<double> core_13;
   std::vector<double> core_23;
 
+  std::vector<double> T_ip_io;
+  std::vector<double> T_ip_jo;
+  std::vector<double> T_io_jo;
+
   double nsamp_pair;
   double nsamp_one_1;
   double nsamp_one_2;
@@ -113,10 +117,7 @@ class GF2_F12_VBX : public GF2_F12_V {
 
   // scratch arrays
   std::vector<double> T_ip;
-  std::vector<double> T_ip_jo;
-  std::vector<double> T_ip_io;
   std::vector<double> T_ip_ko;
-  std::vector<double> T_io_jo;
   std::vector<double> T_io_ko;
   std::vector<double> T_io_lo;
   std::vector<double> T_jo_ko;
