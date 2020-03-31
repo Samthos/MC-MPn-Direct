@@ -311,9 +311,9 @@ double MP2_F12_VBX::calculate_bx_t_fc_3e(const Electron_Pair_List* electron_pair
     std::array<double, 4> t_ip{0.0, 0.0, 0.0, 0.0};
     for (int io = 0; io < electron_list->size(); ++io) {
       t_ip[0] += correlation_factor->f23[ip * traces.electrons + io] *  traces.p13[ip * traces.electrons + io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
-      t_ip[1] += correlation_factor->f23[ip * traces.electrons + io] * traces.dp31[ip][io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
+      t_ip[1] += correlation_factor->f23[ip * traces.electrons + io] * traces.dp31[ip*traces.electrons+io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
 
-      t_ip[2] += correlation_factor->f23[ip * traces.electrons + io] * traces.dp32[ip][io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
+      t_ip[2] += correlation_factor->f23[ip * traces.electrons + io] * traces.dp32[ip*traces.electrons+io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
       t_ip[3] += correlation_factor->f23[ip * traces.electrons + io] *  traces.p23[ip * traces.electrons + io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
     }
     auto f_c = correlation_factor->f12p_c[ip];
@@ -329,22 +329,22 @@ double MP2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List* electron_pair
     for (int io = 0; io < electron_list->size(); ++io) {
       std::array<double, 8> t_io{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
       for (int jo = 0; jo < electron_list->size(); ++jo) {
-          t_io[0] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp32[ip][jo]                     * traces.k23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
+          t_io[0] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp32[ip*traces.electrons+jo]                     * traces.k23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
           t_io[1] += correlation_factor->f12o[io * traces.electrons + jo] *  traces.p23[ip * traces.electrons + jo] * traces.k23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
 
-          t_io[2] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp32[ip][jo]                     * traces.v23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
+          t_io[2] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp32[ip*traces.electrons+jo]                     * traces.v23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
           t_io[3] += correlation_factor->f12o[io * traces.electrons + jo] *  traces.p23[ip * traces.electrons + jo] * traces.v23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
 
           t_io[4] += correlation_factor->f12o[io * traces.electrons + jo] *  traces.p13[ip * traces.electrons + jo] * traces.k23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
-          t_io[5] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp31[ip][jo]                     * traces.k23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
+          t_io[5] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp31[ip*traces.electrons+jo]                     * traces.k23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
 
           t_io[6] += correlation_factor->f12o[io * traces.electrons + jo] *  traces.p13[ip * traces.electrons + jo] * traces.v23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
-          t_io[7] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp31[ip][jo]                     * traces.v23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
+          t_io[7] += correlation_factor->f12o[io * traces.electrons + jo] * traces.dp31[ip*traces.electrons+jo]                     * traces.v23[ip * traces.electrons + jo] * electron_list->inverse_weight[jo];
       }
-      t_ip[0] += (t_io[0] *  traces.p13[ip * traces.electrons + io] - t_io[1] * traces.dp31[ip][io]) * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
-      t_ip[1] += (t_io[2] *  traces.p13[ip * traces.electrons + io] - t_io[3] * traces.dp31[ip][io]) * traces.v13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
-      t_ip[2] += (t_io[4] * traces.dp32[ip][io] - t_io[5] *  traces.p23[ip * traces.electrons + io]) * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
-      t_ip[3] += (t_io[6] * traces.dp32[ip][io] - t_io[7] *  traces.p23[ip * traces.electrons + io]) * traces.v13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
+      t_ip[0] += (t_io[0] *  traces.p13[ip * traces.electrons + io] - t_io[1] * traces.dp31[ip*traces.electrons+io]) * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
+      t_ip[1] += (t_io[2] *  traces.p13[ip * traces.electrons + io] - t_io[3] * traces.dp31[ip*traces.electrons+io]) * traces.v13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
+      t_ip[2] += (t_io[4] * traces.dp32[ip*traces.electrons+io] - t_io[5] *  traces.p23[ip * traces.electrons + io]) * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
+      t_ip[3] += (t_io[6] * traces.dp32[ip*traces.electrons+io] - t_io[7] *  traces.p23[ip * traces.electrons + io]) * traces.v13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
     }
     auto f_c = correlation_factor->f12p_c[ip];
     t[0] += t_ip[0] * f_c * electron_pair_list->rv[ip];

@@ -33,11 +33,11 @@ F12_Traces::F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, 
     p13(electron_pairs * electrons, 0.0),
     k13(electron_pairs * electrons, 0.0),
     v13(electron_pairs * electrons, 0.0),
-    dp31(electron_pairs, std::vector<double>(electrons, 0.0)),
+    dp31(electron_pairs * electrons, 0.0),
     p23(electron_pairs * electrons, 0.0),
     k23(electron_pairs * electrons, 0.0),
     v23(electron_pairs * electrons, 0.0),
-    dp32(electron_pairs, std::vector<double>(electrons, 0.0)),
+    dp32(electron_pairs * electrons, 0.0),
     ds_p11(electrons, std::vector<double>(electrons, 0.0)),
     ds_p12(electrons, std::vector<double>(electrons, 0.0)),
     ds_p21(electrons, std::vector<double>(electrons, 0.0)),
@@ -272,14 +272,14 @@ void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wav
   const double* psi2_dy = wavefunctions[WC::electron_pairs_2_dy].data();
   const double* psi2_dz = wavefunctions[WC::electron_pairs_2_dz].data();
 
-  for(int ip = 0; ip < electron_pairs; ++ip) {
+  for(int ip = 0, idx=0; ip < electron_pairs; ++ip) {
     std::transform(electron_pair_list->pos1[ip].begin(), electron_pair_list->pos1[ip].begin() + 3, electron_pair_list->pos2[ip].begin(), dr.begin(), std::minus<>());
-    for(int io = 0; io < electrons; ++io) {
-      dp31[ip][io] = 0.0;
-      dp32[ip][io] = 0.0;
+    for(int io = 0; io < electrons; ++io, ++idx) {
+      dp31[idx] = 0.0;
+      dp32[idx] = 0.0;
       for(int im = iocc1, p_idx = ip * p_lda + iocc1, o_idx = io * o_lda + iocc1; im < iocc2; ++im, p_idx++, o_idx++) {
-        dp31[ip][io] = dp31[ip][io] + psi[o_idx] * (dr[0] * psi1_dx[p_idx] + dr[1] * psi1_dy[p_idx] + dr[2] * psi1_dz[p_idx]);
-        dp32[ip][io] = dp32[ip][io] + psi[o_idx] * (dr[0] * psi2_dx[p_idx] + dr[1] * psi2_dy[p_idx] + dr[2] * psi2_dz[p_idx]);
+        dp31[idx] += psi[o_idx] * (dr[0] * psi1_dx[p_idx] + dr[1] * psi1_dy[p_idx] + dr[2] * psi1_dz[p_idx]);
+        dp32[idx] += psi[o_idx] * (dr[0] * psi2_dx[p_idx] + dr[1] * psi2_dy[p_idx] + dr[2] * psi2_dz[p_idx]);
       }
     }
   }
