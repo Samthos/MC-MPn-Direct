@@ -71,7 +71,7 @@ std::ostream& Simple_Accumulator::write(std::ostream& os) {
   if (0 == master) {
 #ifndef FULL_PRINTING
     os << n_samples << "\t";
-    os << std::setprecision(7);
+    os << std::setprecision(10);
     os << e_x[0] << "\t";
     os << error << "\t";
 #else
@@ -297,7 +297,7 @@ std::ostream& ControlVariate::write(std::ostream& os) {
   if (0 == master) {
 #ifndef FULL_PRINTING
     os << n_samples << "\t";
-    os << std::setprecision(7);
+    os << std::setprecision(10);
     os << e_x[0] << "\t";
     os << error << "\t";
     os << e_cv << "\t";

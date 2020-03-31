@@ -206,6 +206,7 @@ void GF2_F12_VBX::calculate_bx(std::vector<std::vector<double>>& egf, std::unord
     for (int band = 0; band < numBand; band++) {
       x_traces.set(band, offBand, wavefunctions);
       x_traces.set_derivative_traces(band, offBand, wavefunctions, electron_pair_list, electron_list);
+      x_traces.set_fd_derivative_traces(band, offBand, wavefunctions, electron_pair_list, electron_list);
 
       traces.update_bx_fd_traces(wavefunctions, electron_list);
       egf[band][0] += calculate_bx_t_fd(electron_pair_list, electron_list);

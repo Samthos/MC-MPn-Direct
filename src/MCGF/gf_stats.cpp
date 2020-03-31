@@ -82,10 +82,10 @@ void GFStats::print(const int& step, const double& time_span) {
       qepsVar[band][deriv] = qepsVar[band][deriv] * multiplier;
       qepsVar[band][deriv] = sqrt(qepsVar[band][deriv]);
 
-      output_streams[band][deriv] << std::fixed << std::showpos << std::setprecision(7) << qepsAvg[band][deriv] << "\t";  //debug2
-      output_streams[band][deriv] << std::fixed << std::showpos << std::setprecision(7) << qepsVar[band][deriv] << "\t";  //debug2
+      output_streams[band][deriv] << std::fixed << std::showpos << std::setprecision(10) << qepsAvg[band][deriv] << "\t";  //debug2
+      output_streams[band][deriv] << std::fixed << std::showpos << std::setprecision(10) << qepsVar[band][deriv] << "\t";  //debug2
 
-      output_streams[band][deriv] << std::fixed << std::showpos << std::setprecision(7) << time_span << "\n";  //debug2
+      output_streams[band][deriv] << std::fixed << std::showpos << std::setprecision(10) << time_span << "\n";  //debug2
       output_streams[band][deriv].flush();
     }
   }

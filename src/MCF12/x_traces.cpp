@@ -89,7 +89,21 @@ void X_Traces::set_derivative_traces(int band, int offBand, std::unordered_map<i
       ds_x12[io][jo] = psi[io * lda] * (dr[0] * psi_dx[jo * lda] + dr[1] * psi_dy[jo * lda] + dr[2] * psi_dz[jo * lda]);
       ds_x21[io][jo] = psi[jo * lda] * (dr[0] * psi_dx[io * lda] + dr[1] * psi_dy[io * lda] + dr[2] * psi_dz[io * lda]);
       ds_x22[io][jo] = psi[jo * lda] * (dr[0] * psi_dx[jo * lda] + dr[1] * psi_dy[jo * lda] + dr[2] * psi_dz[jo * lda]);
+    }
+  }
+}
 
+void X_Traces::set_fd_derivative_traces(int band, int offBand, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+  std::array<double, 3> dr{0.0, 0.0, 0.0};
+  const double* psi = wavefunctions[WC::electrons].vir() + band - offBand;
+  const double* psi_dx = wavefunctions[WC::electrons_dx].vir() + band - offBand;
+  const double* psi_dy = wavefunctions[WC::electrons_dy].vir() + band - offBand;
+  const double* psi_dz = wavefunctions[WC::electrons_dz].vir() + band - offBand;
+
+  size_t lda = wavefunctions[WC::electrons].lda;
+  for (int io = 0; io < n_electrons; ++io) {
+    for (int jo = 0; jo < n_electrons; ++jo) {
+      std::transform(electron_list->pos[io].begin(), electron_list->pos[io].end(), electron_list->pos[jo].begin(), dr.begin(), std::minus<>());
       for (int ko = 0; ko < n_electrons; ++ko) {
         ds_x31[io][jo][ko] = psi[ko * lda] * (dr[0] * psi_dx[io * lda] + dr[1] * psi_dy[io * lda] + dr[2] * psi_dz[io * lda]);
         ds_x32[io][jo][ko] = psi[ko * lda] * (dr[0] * psi_dx[jo * lda] + dr[1] * psi_dy[jo * lda] + dr[2] * psi_dz[jo * lda]);

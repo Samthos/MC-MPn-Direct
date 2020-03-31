@@ -12,6 +12,7 @@ class X_Traces {
 
     void set(int band, int offBand, std::unordered_map<int, Wavefunction>& wavefunctions);
     void set_derivative_traces(int band, int offBand, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+    void set_fd_derivative_traces(int band, int offBand, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
     int n_electron_pairs;
     int n_electrons;
