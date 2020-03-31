@@ -409,10 +409,10 @@ double GF2_F12_VBX::calculate_bx_t_fb_4e(const Electron_Pair_List* electron_pair
         std::array<double, 2> t_ko{0.0, 0.0};
         for (int lo = 0; lo < electron_list->size(); ++lo) {
           t_ko[0] += T_io_jo[                   lo] * traces.op12[ko * traces.electrons + lo];
-          t_ko[0] += T_io_jo[traces.electrons + lo] * traces.op12[ko * traces.electrons + lo];
+          t_ko[1] += T_io_jo[traces.electrons + lo] * traces.op12[ko * traces.electrons + lo];
         }
         core_12o[io * traces.electrons + jo] += t_ko[0] *c_c4 * T_jo_ko[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko];
-        core_12o[io * traces.electrons + jo] -= t_ko[0] *c_c4 * T_jo_ko[jo * traces.electrons + ko] * traces.ov12[io * traces.electrons + ko];
+        core_12o[io * traces.electrons + jo] -= t_ko[1] *c_c4 * T_jo_ko[jo * traces.electrons + ko] * traces.ov12[io * traces.electrons + ko];
       }
     }
   }
