@@ -25,14 +25,14 @@ class X_Traces {
     std::vector<double> dx21;
     std::vector<double> dx22;
 
-    std::vector<std::vector<double>> x13;
-    std::vector<std::vector<double>> x23;
+    std::vector<double> x13;
+    std::vector<double> x23;
 
-    std::vector<std::vector<double>> dx31;
-    std::vector<std::vector<double>> dx32;
+    std::vector<double> dx31;
+    std::vector<double> dx32;
 
     std::vector<double> ox11;
-    std::vector<std::vector<double>> ox12;
+    std::vector<double> ox12;
 
     std::vector<std::vector<double>> ds_x11;
     std::vector<std::vector<double>> ds_x22;

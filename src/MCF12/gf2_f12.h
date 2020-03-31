@@ -22,7 +22,6 @@ class GF2_F12_V : public MCGF {
      std::unordered_map<int, Wavefunction>&,
      Electron_Pair_List*, Electron_List*);
 
-
  protected:
   double calculate_v_2e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list);
   double calculate_v_3e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list);
@@ -54,8 +53,6 @@ class GF2_F12_V : public MCGF {
   std::vector<double> core_11p;
   std::vector<double> core_12p;
   std::vector<double> core_22p;
-  std::vector<double> core_11o;
-  std::vector<double> core_12o;
   std::vector<double> core_13;
   std::vector<double> core_23;
 
@@ -105,6 +102,8 @@ class GF2_F12_VBX : public GF2_F12_V {
   double nsamp_one_4;
 
   // core arrays
+  std::vector<double> core_11o;
+  std::vector<double> core_12o;
   std::vector<double> core_d11p;
   std::vector<double> core_d12p;
   std::vector<double> core_d21p;
