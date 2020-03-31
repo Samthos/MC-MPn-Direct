@@ -115,6 +115,7 @@ class GF2_F12_VBX : public GF2_F12_V {
   std::vector<double> T_ip;
   std::vector<double> T_ip_jo;
   std::vector<double> T_ip_io;
+  std::vector<double> T_ip_ko;
   std::vector<double> T_io_jo;
   std::vector<double> T_io_ko;
   std::vector<double> T_io_lo;
