@@ -66,6 +66,6 @@ Reading MC basis from ../input/cc-pvdz.mc_basis
 2
 created simple accumulator
 created simple accumulator
-Begining MC run at: Wed Apr  1 15:23:45 2020
-Finished MC run at: Wed Apr  1 15:23:45 2020
-Spent 0.061715 second preforming MC integration
+Begining MC run at: Wed Apr  1 15:50:15 2020
+Finished MC run at: Wed Apr  1 15:50:15 2020
+Spent 0.077270 second preforming MC integration
