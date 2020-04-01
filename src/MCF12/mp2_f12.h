@@ -34,6 +34,11 @@ class MP2_F12_V : public MCMP {
 
   F12_Traces traces;
   Correlation_Factor* correlation_factor;
+
+  std::vector<double> T_ip_io;
+  std::vector<double> T_ip_jo;
+  std::vector<double> T_io_jo;
+
   double nsamp_pair;
   double nsamp_one_1;
   double nsamp_one_2;
@@ -84,10 +89,6 @@ class MP2_F12_VBX : public MP2_F12_V {
   double nsamp_one_4;
 
   std::vector<double> T_ip;
-  std::vector<double> T_ip_io;
-  std::vector<double> T_ip_jo;
-
-  std::vector<double> T_io_jo;
   std::vector<double> T_io_ko;
   std::vector<double> T_jo_ko;
 };
