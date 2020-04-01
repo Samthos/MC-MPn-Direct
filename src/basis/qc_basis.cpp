@@ -245,7 +245,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(&qc_nshl, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&qc_nprm, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -303,7 +303,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
+#ifdef HAVE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Bcast(alpha.data(), alpha.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(norm.data(), norm.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
