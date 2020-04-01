@@ -86,22 +86,28 @@ The following are required options. All paths are relative to director where the
 * **MC_BASIS**: (STRING) Path to MC basis set.
 
 The following are options technically options, but will be set for nearly every calculation.
-* **TASK**: (STRING) Specifies type of calculation to perform. Default=MP
+* **JOBTYPE**: (STRING) Specifies type of calculation to perform. Default=MP
 
-  * MP: Perturbation theory calculation.
+  * ENERGY: Energy calcualtion
   * GF: Green's function calculation for diagonal element.
   * GFDIFF: Green's function calculation for diagonal element only with derivatives.
   * GFFULL: Green's function calculation for full self-energy matrix.
   * GFFULLDIFF: Green's function calculation for full self-energy matrix with derivatives.
-  * F12V: MP2 calculation with F12-V cbs correction.
 
-* **ORDER**: (INT) Level of theory to perform. Default=2
+* **TASK**: (STRING) Specifies what energy corrections to calculate for the given job type.
   
-  * MP tasks are implemented through fourth order.
-  * GF tasks are implemented through third order.
+  * MP2: Only Energy job types. Specifies to calculate second-order correction to energy.
+  * MP3: Only Energy job types. Specifies to calculate third-order correction to energy.
+  * MP4: Only Energy job types. Specifies to calculate forth-order correction to energy.
+  * GF2: Only GF job types. Specifies to calculate second-order correction to energy.
+  * GF3: Only GF job types. Specifies to calculate third-order correction to energy.
+  * F12V: Any job types. Calculate second-order F12V correction.
+  * F12VB Any job types. Calculate second-order F12VBX correction.
 
-* **MC_NPAIR**: (INT) Number of electron-pair walkers to use for the calculation. Default=16
+* **ELECTRON_PAIRS**: (INT) Number of electron-pair walkers to use for the calculation. Default=16
 * **MC_TRIAL**: (INT) Number of MC steps to perform. Default=1024
+
+* **MP<N>CV_LEVEL**: (INT) Set the deepest loop that control variates may be calculated in for energy calculations. Higher values produce more control variates. Maximum values is N.
 
 The options control the sequence of random number used.
 
