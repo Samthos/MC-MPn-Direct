@@ -613,24 +613,41 @@ double MP2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List* electron_pair_li
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     std::array<double, 2> t_ip{0.0, 0.0};
     for (int io = 0; io < electron_list->size(); ++io) {
-      std::array<double, 2> t_io{0.0, 0.0};
       for (int ko = 0; ko < electron_list->size(); ++ko) {
-        T_ip_io[ko] = T_io_ko[io * traces.electrons + ko] * traces.p23[ip * traces.electrons + ko];
+        T_io_jo[io * traces.electrons + ko] = T_io_ko[io * traces.electrons + ko] * traces.p23[ip * traces.electrons + ko];
       }
-      for (int jo = 0; jo < electron_list->size(); ++jo) {
-        std::array<double, 2> t_jo{0.0, 0.0};
-        for (int ko = 0; ko < electron_list->size(); ++ko) {
-          t_jo[0] += T_ip_io[ko] * traces.ok12[jo * traces.electrons + ko];
-          t_jo[1] += T_ip_io[ko] * traces.ov12[jo * traces.electrons + ko];
-        }
-        t_io[0] += t_jo[0] * T_ip_jo[ip * traces.electrons + jo] * traces.op12[io * traces.electrons + jo]; 
-        t_io[1] += t_jo[1] * T_ip_jo[ip * traces.electrons + jo] * traces.op12[io * traces.electrons + jo]; 
-      }
-      t_ip[0] += t_io[0] * traces.k13[ip * traces.electrons + io];
-      t_ip[1] += t_io[1] * traces.v13[ip * traces.electrons + io];
     }
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+        traces.electrons, traces.electrons, traces.electrons,
+        1.0,
+        traces.ok12.data(), traces.electrons, // jo ko
+        T_io_jo.data(), traces.electrons, // io ko 
+        0.0,
+        T_jo_ko.data(), traces.electrons); // io jo 
+    for (int io = 0; io < electron_list->size(); ++io) {
+      double t_io = 0.0;
+      for (int jo = 0; jo < electron_list->size(); ++jo) {
+        t_io += T_jo_ko[io * traces.electrons + jo] * T_ip_jo[ip * traces.electrons + jo] * traces.op12[io * traces.electrons + jo]; 
+      }
+      t_ip[0] += t_io * traces.k13[ip * traces.electrons + io];
+    }
+
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+        traces.electrons, traces.electrons, traces.electrons,
+        1.0,
+        traces.ov12.data(), traces.electrons, // jo ko
+        T_io_jo.data(), traces.electrons, // io ko 
+        0.0,
+        T_jo_ko.data(), traces.electrons); // io jo 
+    for (int io = 0; io < electron_list->size(); ++io) {
+      double t_io = 0.0;
+      for (int jo = 0; jo < electron_list->size(); ++jo) {
+        t_io += T_jo_ko[io * traces.electrons + jo] * T_ip_jo[ip * traces.electrons + jo] * traces.op12[io * traces.electrons + jo]; 
+      }
+      t_ip[0] -= t_io * traces.v13[ip * traces.electrons + io];
+    }
+
     t[1] += t_ip[0] * traces.k12[ip];
-    t[1] -= t_ip[1] * traces.k12[ip];
   }
   return 2.0 * (c3 * t[0] + c4 * t[1]) * nsamp_pair * nsamp_one_3;
 }
