@@ -37,9 +37,6 @@ If you want to build with a MPI compiler prepend line three with
 In addition to the standard cmake build options, MC-MPn has a few additional option
 
 * -DEnable_MPI: Values={ON, OFF}; Default=Off
-* -DMP2CV: Controls the number of control variates produced at the MP2 level. Values={0, 1, 2}; Default=0
-* -DMP3CV: Controls the number of control variates produced at the MP3 level. Values={0, 1, 2, 3}; Default=0
-* -DMP4CV: Controls the number of control variates produced at the MP4 level. Values={0, 1, 2, 3, 4}; Default=0
 
 For the CV options, higher values correspond to more control variates being used.
 
@@ -107,7 +104,7 @@ The following are options technically options, but will be set for nearly every 
 * **ELECTRON_PAIRS**: (INT) Number of electron-pair walkers to use for the calculation. Default=16
 * **MC_TRIAL**: (INT) Number of MC steps to perform. Default=1024
 
-* **MP<N>CV_LEVEL**: (INT) Set the deepest loop that control variates may be calculated in for energy calculations. Higher values produce more control variates. Maximum values is N.
+* **MP\<N\>CV_LEVEL**: (INT) Set the deepest loop that control variates may be calculated in for energy calculations. Higher values produce more control variates. Maximum values is N.
 
 The options control the sequence of random number used.
 
