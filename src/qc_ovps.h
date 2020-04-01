@@ -67,14 +67,16 @@ struct OVPS_ARRAY {
   std::vector<double*> enEx1;
   std::vector<std::vector<double*>> enCov;
 
+  double *enGrouped;
+
   double *en2mCore, *en2pCore;
+  double *en2m, *en2p;
+
   double *en3_1pCore, *en3_2pCore, *en3_12pCore;
   double *en3_1mCore, *en3_2mCore, *en3_12mCore;
   double *en3_12cCore, *en3_22cCore;
   double *one, *en3c12, *en3c22;
 
-  double *enGrouped;
-  double *en2m, *en2p;
   double *en3_1p, *en3_2p, *en3_12p;
   double *en3_1m, *en3_2m, *en3_12m;
   double *en3_c;

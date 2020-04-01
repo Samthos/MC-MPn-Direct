@@ -6,10 +6,8 @@
 #include <string>
 #include <vector>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
 
+#include "../qc_mpi.h"
 #include "../qc_monte.h"
 
 std::string GF::genFileName(int checkNum, int type, int order, int band, int diff, int block) {
@@ -59,12 +57,8 @@ void GF::mc_gf_full_print(int band, int steps, int checkNum, int order,
   double numSteps;
   auto numTasks = static_cast<double>(mpi_info.numtasks);
   mc_gf_copy(ex1, d_ex1[band]);
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Reduce(ex1.data(), ex1All.data(), static_cast<int>(ex1.size()), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-#else
-  std::copy(ex1.begin(), ex1.end(), ex1All.begin());
-#endif
+  MPI_info::barrier();
+  MPI_info::reduce_double(ex1.data(), ex1All.data(), ex1.size());
 
   if (mpi_info.sys_master) {
     numSteps = numTasks * static_cast<double>(steps/blockPower2);
@@ -80,12 +74,8 @@ void GF::mc_gf_full_print(int band, int steps, int checkNum, int order,
   for (auto block = 0;  block < iops.iopns[KEYS::NBLOCK]; block++) {
     // copy first and second moments too host
     mc_gf_copy(cov, d_cov[band][block]);
-#ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Reduce(cov.data(), covAll.data(), static_cast<int>(cov.size()), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-#else
-    std::copy(cov.begin(), cov.end(), covAll.begin());
-#endif
+    MPI_info::barrier();
+    MPI_info::reduce_double(cov.data(), covAll.data(), cov.size());
 
 
     if (mpi_info.sys_master) {

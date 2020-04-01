@@ -8,11 +8,9 @@
 #include <sstream>
 #include <string>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
+#include "../qc_mpi.h"
 #include "qc_basis.h"
-#include "../atom_znum.h"
+#include "../atom_tag_parser.h"
 
 
 SHELL::Shell_Type SHELL::string_to_shell_type(const std::string& str) {
@@ -82,8 +80,10 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   nw_vectors_read(iops, mpi_info, molec);
 
   // declare memory
-  mc_pair_num = iops.iopns[KEYS::MC_NPAIR];
+  mc_pair_num = iops.iopns[KEYS::ELECTRON_PAIRS];
   h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
+  h_basis.contraction_amplitudes = new double[nShells * mc_pair_num];
+  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_pair_num];
 }
 Basis::~Basis() {
   /*
@@ -93,6 +93,8 @@ Basis::~Basis() {
 
   delete[] h_basis.nw_co;
   delete[] h_basis.ao_amplitudes;
+  delete[] h_basis.contraction_amplitudes;
+  delete[] h_basis.contraction_amplitudes_derivative;
   delete[] h_basis.contraction_exp;
   delete[] h_basis.contraction_coef;
 }
@@ -126,6 +128,8 @@ Basis::Basis(const Basis& param) {
   h_basis.nw_co = new double[nw_nbf * nw_nmo];
   std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo * nw_nbf, h_basis.nw_co);
 
+  h_basis.contraction_amplitudes = new double[nShells * mc_pair_num];
+  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_pair_num];
   h_basis.contraction_exp = new double[nPrimatives];
   h_basis.contraction_coef = new double[nPrimatives];
   std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + nPrimatives, h_basis.contraction_exp);
@@ -158,6 +162,8 @@ void swap(Basis& a, Basis& b) {
   std::swap(a.h_basis.ao_amplitudes, b.h_basis.ao_amplitudes);
   std::swap(a.nw_en, b.nw_en);
   std::swap(a.h_basis.nw_co, b.h_basis.nw_co);
+  std::swap(a.h_basis.contraction_amplitudes, b.h_basis.contraction_amplitudes);
+  std::swap(a.h_basis.contraction_amplitudes_derivative, b.h_basis.contraction_amplitudes_derivative);
   std::swap(a.h_basis.contraction_exp, b.h_basis.contraction_exp);
   std::swap(a.h_basis.contraction_coef, b.h_basis.contraction_coef);
 }
@@ -166,6 +172,8 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   std::ifstream input;
   std::string str;
   std::string atomName, basisName, basisType, shell_type;
+
+  Atom_Tag_Parser atom_tag_parser;
 
   int currentBasis = -1;
   std::vector<AtomBasis> atomBasis(100);
@@ -193,7 +201,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
           atomName = basisName.substr(0, pos);
 
           // find charge of atom
-          currentBasis = atomic_znum(atomName);
+          currentBasis = atom_tag_parser.parse(atomName);
 
           // store information in atomBasis;
           atomBasis[currentBasis].atomName = atomName;
@@ -232,7 +240,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     qc_nbf = 0;
     nShells = 0;
     nPrimatives = 0;
-    for (auto& it : molec.atom) {
+    for (auto& it : molec.atoms) {
       for (auto& jt : atomBasis[it.znum].shell) {
         nShells += jt.contracted_gaussian.front().second.size();
         nPrimatives += jt.contracted_gaussian.size() * jt.contracted_gaussian.front().second.size();
@@ -245,12 +253,10 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(&qc_nshl, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&qc_nprm, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&qc_nbf, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_int(&nShells, 1);
+  MPI_info::broadcast_int(&nPrimatives, 1);
+  MPI_info::broadcast_int(&qc_nbf, 1);
 
   h_basis.contraction_exp = new double[nPrimatives];
   h_basis.contraction_coef = new double[nPrimatives];
@@ -258,7 +264,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
   if (mpi_info.sys_master) {
     uint contraction= 0;
-    for (auto& atom : molec.atom) {
+    for (auto& atom : molec.atoms) {
       for (auto& shell : atomBasis[atom.znum].shell) {
         for (uint shell_contraction = 0; shell_contraction < shell.n_contractions(); shell_contraction++) {
           // set start and stop
@@ -303,13 +309,10 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     }
   }
 
-#ifdef USE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(alpha.data(), alpha.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(norm.data(), norm.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(basisMetaData.data(), basisMetaData.size() * sizeof(BasisMetaData),
-            MPI_CHAR, 0, MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_double(h_basis.contraction_exp, nPrimatives);
+  MPI_info::broadcast_double(h_basis.contraction_coef, nPrimatives);
+  MPI_info::broadcast_char((char*) h_basis.meta_data, nShells * sizeof(BasisMetaData));
 }
 
 void Basis::normalize_atom_basis(std::vector<AtomBasis>& atomBasis) {

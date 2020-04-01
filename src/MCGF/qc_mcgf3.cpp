@@ -6,6 +6,7 @@
 #include "cblas.h"
 #include "../blas_calls.h"
 #include "../qc_monte.h"
+#include "qc_mcgf3.h"
 
 
 void print_out(bool col_major, double* A, int rows, int cols) {
@@ -244,30 +245,30 @@ void strided_transform(
 
 void GF::mcgf3_local_energy_core() {
   std::array<double*, 4> T{};
-  T[0] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
-  T[1] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
-  T[2] = new double[iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR]];
-  T[3] = new double[iops.iopns[KEYS::MC_NPAIR]];
+  T[0] = new double[iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS]];
+  T[1] = new double[iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS]];
+  T[2] = new double[iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS]];
+  T[3] = new double[iops.iopns[KEYS::ELECTRON_PAIRS]];
 
   std::copy(electron_pair_list->rv.begin(), electron_pair_list->rv.end(), T[3]);
 
-  gf3_core_c(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
-  gf3_core_1(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
-  gf3_core_2(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
-  gf3_core_12(ovps, T[3], iops.iopns[KEYS::MC_NPAIR], T);
+  gf3_core_c(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
+  gf3_core_1(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
+  gf3_core_2(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
+  gf3_core_12(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
 
   cblas_dgemv(CblasColMajor, CblasNoTrans,
-      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+      iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
       1.0,
-      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.one, 1,
       0.0,
       ovps.d_ovps.en3c12, 1);
 
   cblas_dgemv(CblasColMajor, CblasNoTrans,
-      iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+      iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
       1.0,
-      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.one, 1,
       0.0,
       ovps.d_ovps.en3c22, 1);
@@ -277,7 +278,7 @@ void GF::mcgf3_local_energy_core() {
   }
 }
 void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
-  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  auto nsamp = static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
   for (int band = 0; band < numBand; band++) {
     double en3 = 0;
@@ -285,34 +286,34 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     const double *psi1;
     const double *psi2;
     if (band-offBand < 0) {
-      psi1 = electron_pair_psi1.occ() + (band+iocc2-iocc1-offBand);
-      psi2 = electron_pair_psi2.occ() + (band+iocc2-iocc1-offBand);
+      psi1 = wavefunctions[WC::electron_pairs_1].occ() + (band+iocc2-iocc1-offBand);
+      psi2 = wavefunctions[WC::electron_pairs_2].occ() + (band+iocc2-iocc1-offBand);
     } else {
-      psi1 = electron_pair_psi1.vir() + (band-offBand);
-      psi2 = electron_pair_psi2.vir() + (band-offBand);
+      psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band-offBand);
+      psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
     }
 
-    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c12, 1, psi1, electron_pair_psi1.lda, 0.0, ovps.d_ovps.ent, 1);
-    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c22, 1, psi2, electron_pair_psi2.lda, 1.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c12, 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c22, 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, ovps.d_ovps.ent, 1);
 
     // ent = ovps.ovps.tg_val1[band] * en3_1pCore . psi
     alpha = tau->get_gfn_tau(0, 0, band-offBand, false);
     beta = 1.0;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta, ovps.d_ovps.ent, 1);
 
     // ent = ovps.ovps.tg_val2[band] * en3_2pCore . psi + ent
     alpha = tau->get_gfn_tau(1, 1, band-offBand, false);
     beta = 1;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
@@ -320,10 +321,10 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     alpha = tau->get_gfn_tau(1, 0, band-offBand, false);
     beta = 1;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
@@ -331,10 +332,10 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     alpha = tau->get_gfn_tau(0, 0, band-offBand, true);
     beta = 1;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
@@ -342,10 +343,10 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     alpha = tau->get_gfn_tau(1, 1, band-offBand, true);
     beta = 1;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
@@ -353,16 +354,16 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     alpha = tau->get_gfn_tau(1, 0, band-offBand, true);
     beta = 1;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
 
     // en2 = psi2 . ent
-    en3 += cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    en3 += cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
 
     en3 = en3 * tau->get_wgt(2) / nsamp;
@@ -370,7 +371,7 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
   }
 }
 void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
-  auto nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  auto nsamp = static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
   for (int band = 0; band < numBand; band++) {
     int ip, dp;
@@ -380,32 +381,32 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     const double *psi1;
     const double *psi2;
     if (band - offBand < 0) {
-      psi1 = electron_pair_psi1.occ() + (band + iocc2 - iocc1 - offBand);
-      psi2 = electron_pair_psi2.occ() + (band + iocc2 - iocc1 - offBand);
+      psi1 = wavefunctions[WC::electron_pairs_1].occ() + (band + iocc2 - iocc1 - offBand);
+      psi2 = wavefunctions[WC::electron_pairs_2].occ() + (band + iocc2 - iocc1 - offBand);
     } else {
-      psi1 = electron_pair_psi1.vir() + (band - offBand);
-      psi2 = electron_pair_psi2.vir() + (band - offBand);
+      psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band - offBand);
+      psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band - offBand);
     }
 
-    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c12, 1, psi1, electron_pair_psi1.lda, 0.0, ovps.d_ovps.ent, 1);
-    strided_transform(iops.iopns[KEYS::MC_NPAIR], 1.0, ovps.d_ovps.en3c22, 1, psi2, electron_pair_psi2.lda, 1.0, ovps.d_ovps.ent, 1);
-    en3[0] = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c12, 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c22, 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, ovps.d_ovps.ent, 1);
+    en3[0] = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
 
     // ent = en3_1pCore . psi
     alpha = 1.0;
     beta = 0.0;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
     // en2 = psi2 . ent
-    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
     en3[1] = en3[1] + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
 
@@ -413,15 +414,15 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     alpha = 1.0;
     beta = 0.0;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
     // en2 = psi2 . ent
-    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
     en3[2] = en3[2] + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
 
@@ -429,15 +430,15 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     alpha = 1.0;
     beta = 0.0;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
     // en2 = psi2 . ent
-    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
     en3[3] = en3[3] + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
 
@@ -446,15 +447,15 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     alpha = 1.0;
     beta = 0.0;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
     // en2 = psi2 . ent
-    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
     en3[4] = en3[4] + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
 
@@ -462,15 +463,15 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     alpha = 1.0;
     beta = 0.0;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
     // en2 = psi2 . ent
-    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
     en3[5] = en3[5] + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
 
@@ -478,15 +479,15 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     alpha = 1.0;
     beta = 0.0;
     cblas_dgemv(CblasColMajor, CblasNoTrans,
-        iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::MC_NPAIR],
+        iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
         ovps.d_ovps.ent, 1);
     // en2 = psi2 . ent
-    en3t = cblas_ddot(iops.iopns[KEYS::MC_NPAIR],
-        psi2, electron_pair_psi2.lda,
+    en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
         ovps.d_ovps.ent, 1);
     en3[6] = en3[6] + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
 
@@ -548,25 +549,25 @@ void GF::mcgf3_local_energy_full(int band) {
   double nsamp;
   double alpha, beta;
 
-  nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp = nsamp * (nsamp - 1.0);
 
   // enCore = alpha en2pCore + beta en2mCore
   alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / nsamp;
   beta = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / nsamp;
   std::transform(ovps.d_ovps.en2pCore,
-      ovps.d_ovps.en2pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en2pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.en2mCore,
       ovps.d_ovps.enCore,
       [&](double a, double b) {return alpha*a + beta*b;});
 
-  nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
 
   // enCore = alpha en3_1p + enCore
   alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en3_1pCore,
-      ovps.d_ovps.en3_1pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_1pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.enCore,
       ovps.d_ovps.enCore,
       [&](double a, double b) {return alpha*a + b;});
@@ -574,7 +575,7 @@ void GF::mcgf3_local_energy_full(int band) {
   // enCore = alpha en3_2p + enCore
   alpha = tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en3_2pCore,
-      ovps.d_ovps.en3_2pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_2pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.enCore,
       ovps.d_ovps.enCore,
       [&](double a, double b) {return alpha*a + b;});
@@ -582,7 +583,7 @@ void GF::mcgf3_local_energy_full(int band) {
   // enCore = alpha en3_12p + enCore
   alpha = tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en3_12pCore,
-      ovps.d_ovps.en3_12pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_12pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.enCore,
       ovps.d_ovps.enCore,
       [&](double a, double b) {return alpha*a + b;});
@@ -590,7 +591,7 @@ void GF::mcgf3_local_energy_full(int band) {
   // enCore = alpha en3_1m + enCore
   alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en3_1mCore,
-      ovps.d_ovps.en3_1mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_1mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.enCore,
       ovps.d_ovps.enCore,
       [&](double a, double b) {return alpha*a + b;});
@@ -598,7 +599,7 @@ void GF::mcgf3_local_energy_full(int band) {
   // enCore = alpha en3_2m + enCore
   alpha = tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en3_2mCore,
-      ovps.d_ovps.en3_2mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_2mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.enCore,
       ovps.d_ovps.enCore,
       [&](double a, double b) {return alpha*a + b;});
@@ -606,24 +607,24 @@ void GF::mcgf3_local_energy_full(int band) {
   // enCore = alpha en3_12m + enCore
   alpha = tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en3_12mCore,
-      ovps.d_ovps.en3_12mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+      ovps.d_ovps.en3_12mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
       ovps.d_ovps.enCore,
       ovps.d_ovps.enCore,
       [&](double a, double b) {return alpha*a + b;});
 
   mcgf_full_helper(
-      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       1.00, 0.00,
       1.00, 1.00,
       ovps.d_ovps.enCore,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.enBlock[band][0]);
 
   // ent = diag[enc12] . psi1
   Ddgmm(DDGMM_SIDE_RIGHT,
-      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi1.occ(), electron_pair_psi1.lda,
+      ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
+      wavefunctions[WC::electron_pairs_1].occ(), wavefunctions[WC::electron_pairs_1].lda,
       ovps.d_ovps.en3c12, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -632,15 +633,15 @@ void GF::mcgf3_local_energy_full(int band) {
   alpha = tau->get_wgt(2) / nsamp;
   beta  = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
-      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
 
   // ent = diag[en3c22] . psi2
   Ddgmm(DDGMM_SIDE_RIGHT,
-      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.en3c22, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -648,8 +649,8 @@ void GF::mcgf3_local_energy_full(int band) {
   alpha = tau->get_wgt(2) / nsamp;
   beta  = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
-      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
 }
@@ -657,84 +658,84 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   double nsamp, nsamp2;
   double alpha, beta;
 
-  nsamp = static_cast<double>(iops.iopns[KEYS::MC_NPAIR]);
+  nsamp = static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp2 = nsamp * (nsamp - 1.0);
   nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
 
   alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / nsamp2;
   beta = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en2pCore,
-                 ovps.d_ovps.en2pCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+                 ovps.d_ovps.en2pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
                  ovps.d_ovps.en3_1pCore,
                  ovps.d_ovps.enCore,
                  [&](double a, double b) {return alpha*a + beta*b;});
   mcgf_full_helper(
-      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       1.00, 0.00,
       1.00, 0.00,
       ovps.d_ovps.enCore,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_1p);
 
   // ent = alpha en3_2pCore . psi2
   mcgf_full_helper(
-      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_2pCore,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_2p);
 
   // ent = alpha en3_12pCore . psi2
   mcgf_full_helper(
-      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_12pCore,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_12p);
 
   alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / nsamp2;
   beta = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
   std::transform(ovps.d_ovps.en2mCore,
-                 ovps.d_ovps.en2mCore + iops.iopns[KEYS::MC_NPAIR] * iops.iopns[KEYS::MC_NPAIR],
+                 ovps.d_ovps.en2mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
                  ovps.d_ovps.en3_1mCore,
                  ovps.d_ovps.enCore,
                  [&](double a, double b) {return alpha*a + beta*b;});
   mcgf_full_helper(
-      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       1.00, 0.00,
       1.00, 0.00,
       ovps.d_ovps.enCore,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_1m);
 
   mcgf_full_helper(
-      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_2mCore,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_2m);
 
   mcgf_full_helper(
-      iops.iopns[KEYS::MC_NPAIR], ivir2-iocc1,
+      iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
       ovps.d_ovps.en3_12mCore,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent,
       ovps.d_ovps.en3_12m);
 
   // ent = diag[enc12] . psi1
   Ddgmm(DDGMM_SIDE_RIGHT,
-      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi1.occ(), electron_pair_psi1.lda,
+      ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
+      wavefunctions[WC::electron_pairs_1].occ(), wavefunctions[WC::electron_pairs_1].lda,
       ovps.d_ovps.en3c12, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -743,15 +744,15 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   alpha = tau->get_wgt(2) / nsamp;
   beta  = 0.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
-      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.en3_c, ivir2-iocc1);
 
   // ent = diag[en3c22] . psi2
   Ddgmm(DDGMM_SIDE_RIGHT,
-      ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], 
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.en3c22, 1,
       ovps.d_ovps.ent, ivir2 - iocc1);
 
@@ -759,28 +760,446 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   alpha = tau->get_wgt(2) / nsamp;
   beta  = 1.00;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
-      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::MC_NPAIR], alpha,
-      electron_pair_psi2.occ(), electron_pair_psi2.lda,
+      ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
+      wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
       ovps.d_ovps.ent, ivir2 - iocc1,
       beta, ovps.d_ovps.en3_c, ivir2-iocc1);
 }
+
+
+
+GF3_Functional::GF3_Functional(IOPs& iops, Basis& basis) :
+  MCGF(iops, basis, 2, "23", false),
+  one(n_electron_pairs, 1.0),
+  en3c12(n_electron_pairs),
+  en3c22(n_electron_pairs),
+  en3_1pCore (n_electron_pairs * n_electron_pairs),
+  en3_2pCore (n_electron_pairs * n_electron_pairs),
+  en3_12pCore(n_electron_pairs * n_electron_pairs),
+  en3_1mCore (n_electron_pairs * n_electron_pairs),
+  en3_2mCore (n_electron_pairs * n_electron_pairs),
+  en3_12mCore(n_electron_pairs * n_electron_pairs),
+  en3_12cCore(n_electron_pairs * n_electron_pairs),
+  en3_22cCore(n_electron_pairs * n_electron_pairs)
+{
+  ent.resize(n_electron_pairs);
+  nsamp = static_cast<double>(n_electron_pairs);
+  nsamp = nsamp * (nsamp - 1.0) * (nsamp - 2.0);
+
+  T[0].resize(n_electron_pairs * n_electron_pairs);
+  T[1].resize(n_electron_pairs * n_electron_pairs);
+  T[2].resize(n_electron_pairs * n_electron_pairs);
+  T[3].resize(n_electron_pairs);
+
+  if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL || 
+        iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
+    std::cerr << "Full rountine not integrated into MCGF class\n";
+    exit(0);
+    ent.resize((basis.ivir2 - basis.iocc1) * n_electron_pairs);
+  }
+}
+
+void GF3_Functional::gf3_core_1(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+  std::fill(en3_1mCore.begin(), en3_1mCore.end(), 0.0);
+  std::fill(en3_1pCore.begin(), en3_1pCore.end(), 0.0);
+
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_12.data(), T[2].data(), en3_1pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_11.data(), T[2].data(), en3_1pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_21.data(), T[2].data(), en3_1pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_11.data(), T[2].data(), en3_1pCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_12.data(), T[2].data(), en3_1pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_21.data(), T[2].data(), en3_1pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_11.data(), T[2].data(), en3_1pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_11.data(), T[2].data(), en3_1pCore.data(),  2.00, n_electron_pairs);
+
+  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0].data(), ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_11.data(), T[2].data(), en3_1mCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_21.data(), T[2].data(), en3_1mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_11.data(), T[2].data(), en3_1mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0].data(), ovps.v_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_11.data(), T[2].data(), en3_1mCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_12.data(), T[2].data(), en3_1mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_12.data(), T[2].data(), en3_1mCore.data(),  2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_11.data(), T[2].data(), en3_1mCore.data(),  2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_21.data(), T[2].data(), en3_1mCore.data(),  2.00, n_electron_pairs);
+
+//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_22.data(), T[2].data(), en3_1pCore.data(),  4.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_22.data(), T[2].data(), en3_1mCore.data(), -4.00, n_electron_pairs);
+  m_m_add_mul(4.0, T[2].data(), ovps.v_set[0][0].s_22.data(), en3_1pCore.data(), n_electron_pairs);
+
+//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_22.data(), T[2].data(), en3_1pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_22.data(), T[2].data(), en3_1mCore.data(),  2.00, n_electron_pairs);
+  m_m_add_mul(-2.0, T[2].data(), ovps.v_set[0][0].s_22.data(), en3_1pCore.data(), n_electron_pairs);
+
+  vector_multiply(electron_pair_list->rv.data(), en3_1mCore.data(), n_electron_pairs);
+  vector_multiply(electron_pair_list->rv.data(), en3_1pCore.data(), n_electron_pairs);
+}
+void GF3_Functional::gf3_core_2(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+  std::fill(en3_2mCore.begin(), en3_2mCore.end(), 0.0);
+  std::fill(en3_2pCore.begin(), en3_2pCore.end(), 0.0);
+
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_12.data(), T[2].data(), en3_2pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_11.data(), T[2].data(), en3_2pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_21.data(), T[2].data(), en3_2pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0].data(), ovps.v_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_11.data(), T[2].data(), en3_2pCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_12.data(), T[2].data(), en3_2pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_21.data(), T[2].data(), en3_2pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_11.data(), T[2].data(), en3_2pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0].data(), ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_11.data(), T[2].data(), en3_2pCore.data(),  2.00, n_electron_pairs);
+
+  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_11.data(), T[2].data(), en3_2mCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0].data(), ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_12.data(), T[2].data(), en3_2mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_21.data(), T[2].data(), en3_2mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_11.data(), T[2].data(), en3_2mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.v_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_11.data(), T[2].data(), en3_2mCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_12.data(), T[2].data(), en3_2mCore.data(),  2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0].data(), ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_11.data(), T[2].data(), en3_2mCore.data(),  2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_21.data(), T[2].data(), en3_2mCore.data(),  2.00, n_electron_pairs);
+
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_22.data(), T[2].data(), en3_2pCore.data(),  4.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_22.data(), T[2].data(), en3_2mCore.data(), -4.00, n_electron_pairs);
+  m_m_add_mul(4.0, T[2].data(), ovps.v_set[1][1].s_22.data(), en3_2pCore.data(), n_electron_pairs);
+
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][1].s_22.data(), T[2].data(), en3_2pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0].data(), ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][1].s_22.data(), T[2].data(), en3_2mCore.data(),  2.00, n_electron_pairs);
+  m_m_add_mul(-2.0, T[2].data(), ovps.v_set[1][1].s_22.data(), en3_2pCore.data(), n_electron_pairs);
+
+  vector_multiply(electron_pair_list->rv.data(), en3_2mCore.data(), n_electron_pairs);
+  vector_multiply(electron_pair_list->rv.data(), en3_2pCore.data(), n_electron_pairs);
+}
+void GF3_Functional::gf3_core_12(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+  std::fill(en3_12mCore.begin(), en3_12mCore.end(), 0.0);
+  std::fill(en3_12pCore.begin(), en3_12pCore.end(), 0.0);
+
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_11.data(), T[2].data(), en3_12pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_12.data(), T[2].data(), en3_12pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_21.data(), T[2].data(), en3_12pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0].data(), ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_11.data(), T[2].data(), en3_12pCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_12.data(), T[2].data(), en3_12pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_11.data(), T[2].data(), en3_12pCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_11.data(), T[2].data(), en3_12pCore.data(),  2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_21.data(), T[2].data(), en3_12pCore.data(),  1.00, n_electron_pairs);
+
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_11.data(), T[2].data(), en3_12mCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_12.data(), T[2].data(), en3_12mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_21.data(), T[2].data(), en3_12mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_11.data(), T[2].data(), en3_12mCore.data(), -1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.o_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_11.data(), T[2].data(), en3_12mCore.data(),  1.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_12.data(), T[2].data(), en3_12mCore.data(),  2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_11.data(), T[2].data(), en3_12mCore.data(),  2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_21.data(), T[2].data(), en3_12mCore.data(),  2.00, n_electron_pairs);
+
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_22.data(), T[2].data(), en3_12pCore.data(),  4.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_22.data(), T[2].data(), en3_12mCore.data(), -4.00, n_electron_pairs);
+  m_m_add_mul(4.0, T[2].data(), ovps.v_set[1][0].s_22.data(), en3_12pCore.data(), n_electron_pairs);
+
+//gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_22.data(), T[2].data(), en3_12pCore.data(), -2.00, n_electron_pairs);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_22.data(), T[2].data(), en3_12mCore.data(),  2.00, n_electron_pairs);
+  m_m_add_mul(-2.0, T[2].data(), ovps.v_set[1][0].s_22.data(), en3_12pCore.data(), n_electron_pairs);
+
+  vector_multiply(electron_pair_list->rv.data(), en3_12mCore.data(), n_electron_pairs);
+  vector_multiply(electron_pair_list->rv.data(), en3_12pCore.data(), n_electron_pairs);
+}
+void GF3_Functional::gf3_core_c(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+  std::fill(en3_12cCore.begin(), en3_12cCore.end(), 0.0);
+  std::fill(en3_22cCore.begin(), en3_22cCore.end(), 0.0);
+
+  gf3_helper_c(ovps.v_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_11.data(), T[0].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1].data(), en3_12cCore.data(),  2.00,  en3_22cCore.data(), -4.00, n_electron_pairs);
+  gf3_helper_c(ovps.v_set[1][0].s_11.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_12.data(), T[0].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1].data(), en3_12cCore.data(), -1.00,  en3_22cCore.data(),  2.00, n_electron_pairs);
+  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[0].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1].data(), en3_12cCore.data(), -2.00,  en3_22cCore.data(),  4.00, n_electron_pairs);
+  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][1].s_12.data(), ovps.v_set[1][1].s_21.data(), ovps.o_set[1][1].s_11.data(), T[0].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1].data(), en3_12cCore.data(),  1.00,  en3_22cCore.data(), -2.00, n_electron_pairs);
+
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1].data(), en3_12cCore.data(), -1.00,  en3_22cCore.data(),  2.00, n_electron_pairs);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0].data(), electron_pair_list->rv.data(), ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1].data(), en3_12cCore.data(),  2.00,  en3_22cCore.data(), -4.00, n_electron_pairs);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1].data(), en3_12cCore.data(),  1.00,  en3_22cCore.data(), -2.00, n_electron_pairs);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_22.data(), T[0].data(), electron_pair_list->rv.data(), ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[1].data(), en3_12cCore.data(), -2.00,  en3_22cCore.data(),  4.00, n_electron_pairs);
+
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[1].data(), en3_12cCore.data(),  2.00,  en3_22cCore.data(), -4.00, n_electron_pairs);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0].data(), electron_pair_list->rv.data(), ovps.v_set[1][0].s_22.data(), ovps.v_set[1][0].s_21.data(), T[1].data(), en3_12cCore.data(), -1.00,  en3_22cCore.data(),  2.00, n_electron_pairs);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1].data(), en3_12cCore.data(), -2.00,  en3_22cCore.data(),  4.00, n_electron_pairs);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0].data(), electron_pair_list->rv.data(), ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1].data(), en3_12cCore.data(),  1.00,  en3_22cCore.data(), -2.00, n_electron_pairs);
+
+  vector_multiply(electron_pair_list->rv.data(), en3_12cCore.data(), n_electron_pairs);
+  vector_multiply(electron_pair_list->rv.data(), en3_22cCore.data(), n_electron_pairs);
+}
+void GF3_Functional::core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+  rv = electron_pair_list->rv.data();
+
+  gf3_core_c(ovps, electron_pair_list);
+  gf3_core_1(ovps, electron_pair_list);
+  gf3_core_2(ovps, electron_pair_list);
+  gf3_core_12(ovps, electron_pair_list);
+
+  cblas_dgemv(CblasColMajor, CblasNoTrans,
+      n_electron_pairs, n_electron_pairs,
+      1.0,
+      en3_12cCore.data(), n_electron_pairs,
+      one.data(), 1,
+      0.0,
+      en3c12.data(), 1);
+
+  cblas_dgemv(CblasColMajor, CblasNoTrans,
+      n_electron_pairs, n_electron_pairs,
+      1.0,
+      en3_22cCore.data(), n_electron_pairs,
+      one.data(), 1,
+      0.0,
+      en3c22.data(), 1);
+}
+
+void GF3_Functional::energy_no_diff(std::vector<std::vector<double>>& egf3, 
+       std::unordered_map<int, Wavefunction>& wavefunctions,
+       Electron_Pair_List* electron_pair_list, Tau* tau) {
+  for (int band = 0; band < numBand; band++) {
+    double en3 = 0;
+    double alpha, beta;
+    const double *psi1;
+    const double *psi2;
+    psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band-offBand);
+    psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
+
+    strided_transform(n_electron_pairs, 1.0, en3c12.data(), 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, ent.data(), 1);
+    strided_transform(n_electron_pairs, 1.0, en3c22.data(), 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, ent.data(), 1);
+
+    // ent = ovps.ovps.tg_val1[band] * en3_1pCore . psi
+    alpha = tau->get_gfn_tau(0, 0, band-offBand, false);
+    beta = 1.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_1pCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+
+    // ent = ovps.ovps.tg_val2[band] * en3_2pCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 1, band-offBand, false);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_2pCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+
+    // ent = ovps.ovps.tg_val12[band] * en3_12pCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 0, band-offBand, false);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_12pCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+
+    // ent = ovps.ovps.tgc_val1[band] * en3_1mCore . psi + ent
+    alpha = tau->get_gfn_tau(0, 0, band-offBand, true);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_1mCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+
+    // ent = ovps.ovps.tgc_val2[band] * en3_2mCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 1, band-offBand, true);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_2mCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+
+    // ent = ovps.ovps.tgc_val12[band] * en3_12mCore . psi + ent
+    alpha = tau->get_gfn_tau(1, 0, band-offBand, true);
+    beta = 1;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_12mCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+
+    // en2 = psi2 . ent
+    en3 += cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+
+    en3 = en3 * tau->get_wgt(2) / nsamp;
+    egf3[band].front() += en3;
+  }
+}
+
+void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3, 
+       std::unordered_map<int, Wavefunction>& wavefunctions,
+       Electron_Pair_List* electron_pair_list, Tau* tau) {
+  for (int band = 0; band < numBand; band++) {
+    int ip, dp;
+    std::array<double, 7> en3{0, 0, 0, 0, 0, 0, 0};
+    double en3t;
+    double alpha, beta;
+    const double *psi1;
+    const double *psi2;
+    psi1 = wavefunctions[WC::electron_pairs_1].vir() + (band-offBand);
+    psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
+
+    strided_transform(n_electron_pairs, 1.0, en3c12.data(), 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, ent.data(), 1);
+    strided_transform(n_electron_pairs, 1.0, en3c22.data(), 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, ent.data(), 1);
+    en3[0] = cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+
+    // ent.data() = en3_1pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_1pCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+    // en2 = psi2 . ent.data()
+    en3t = cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+    en3[1] = en3[1] + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
+
+    // ent.data() = en3_2pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_2pCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+    // en2 = psi2 . ent.data()
+    en3t = cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+    en3[2] = en3[2] + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
+
+    // ent.data() = en3_12pCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_12pCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+    // en2 = psi2 . ent.data()
+    en3t = cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+    en3[3] = en3[3] + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
+
+
+    // ent.data() = en3_1mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_1mCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+    // en2 = psi2 . ent.data()
+    en3t = cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+    en3[4] = en3[4] + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
+
+    // ent.data() = en3_2mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_2mCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+    // en2 = psi2 . ent.data()
+    en3t = cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+    en3[5] = en3[5] + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
+
+    // ent.data() = en3_12mCore . psi
+    alpha = 1.0;
+    beta = 0.0;
+    cblas_dgemv(CblasColMajor, CblasNoTrans,
+        n_electron_pairs, n_electron_pairs,
+        alpha,
+        en3_12mCore.data(), n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        beta,
+        ent.data(), 1);
+    // en2 = psi2 . ent.data()
+    en3t = cblas_ddot(n_electron_pairs,
+        psi2, wavefunctions[WC::electron_pairs_2].lda,
+        ent.data(), 1);
+    en3[6] = en3[6] + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
+
+    for (auto &it : en3) {
+      it = it * tau->get_wgt(2) / nsamp;
+    }
+
+    for (ip = 0; ip < numDiff; ip++) {
+      if (ip == 0) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] + en3[dp + 4];
+        }
+        egf3[band][ip] += en3[0];
+      } else if (ip % 2 == 1) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] - en3[dp + 4];
+        }
+      } else if (ip % 2 == 0) {
+        for (dp = 0; dp < 3; dp++) {
+          egf3[band][ip] += en3[dp + 1] + en3[dp + 4];
+        }
+      }
+      en3[1] = en3[1] * tau->get_tau(0);
+      en3[2] = en3[2] * tau->get_tau(1);
+      en3[3] = en3[3] * (tau->get_tau(0) + tau->get_tau(1));
+      en3[4] = en3[4] * tau->get_tau(0);
+      en3[5] = en3[5] * tau->get_tau(1);
+      en3[6] = en3[6] * (tau->get_tau(0) + tau->get_tau(1));
+    }
+  }
+}
+
+void GF3_Functional::energy_f12(std::vector<std::vector<double>>&, 
+   std::unordered_map<int, Wavefunction>&,
+   Electron_Pair_List*, Electron_List*) {}
 
 
 /*
 void GF::mc_gf3_func(double* en3, int ip, int jp, int kp, int band) {
   //  std::fill(en3,en3+7,0);
   //
-  //  int ijIndex = ip * iops.iopns[KEYS::MC_NPAIR] + jp;
-  //  int ikIndex = ip * iops.iopns[KEYS::MC_NPAIR] + kp;
-  //  int jkIndex = jp * iops.iopns[KEYS::MC_NPAIR] + kp;
+  //  int ijIndex = ip * iops.iopns[KEYS::ELECTRON_PAIRS] + jp;
+  //  int ikIndex = ip * iops.iopns[KEYS::ELECTRON_PAIRS] + kp;
+  //  int jkIndex = jp * iops.iopns[KEYS::ELECTRON_PAIRS] + kp;
   //
-  //  int ijbIndex = (band*iops.iopns[KEYS::MC_NPAIR] + ip)*iops.iopns[KEYS::MC_NPAIR] + jp;
-  //  int ikbIndex = (band*iops.iopns[KEYS::MC_NPAIR] + ip)*iops.iopns[KEYS::MC_NPAIR] + kp;
-  //  int jkbIndex = (band*iops.iopns[KEYS::MC_NPAIR] + jp)*iops.iopns[KEYS::MC_NPAIR] + kp;
+  //  int ijbIndex = (band*iops.iopns[KEYS::ELECTRON_PAIRS] + ip)*iops.iopns[KEYS::ELECTRON_PAIRS] + jp;
+  //  int ikbIndex = (band*iops.iopns[KEYS::ELECTRON_PAIRS] + ip)*iops.iopns[KEYS::ELECTRON_PAIRS] + kp;
+  //  int jkbIndex = (band*iops.iopns[KEYS::ELECTRON_PAIRS] + jp)*iops.iopns[KEYS::ELECTRON_PAIRS] + kp;
   //
-  //  int ibIndex = band*iops.iopns[KEYS::MC_NPAIR] + ip;
-  //  int jbIndex = band*iops.iopns[KEYS::MC_NPAIR] + jp;
-  //  int kbIndex = band*iops.iopns[KEYS::MC_NPAIR] + kp;
+  //  int ibIndex = band*iops.iopns[KEYS::ELECTRON_PAIRS] + ip;
+  //  int jbIndex = band*iops.iopns[KEYS::ELECTRON_PAIRS] + jp;
+  //  int kbIndex = band*iops.iopns[KEYS::ELECTRON_PAIRS] + kp;
 
   //12/34
   //  en3[0] = en3[0] + 2.00 * ovps.vs_15[ikIndex] * ovps.vs_26[ikIndex] * ovps.os_24[ijIndex] * ovps.os_46[jkIndex] * ovps.os_35[jkIndex] * ovps.ps_13[ijbIndex];

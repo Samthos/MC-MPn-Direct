@@ -9,55 +9,107 @@
 #include "qc_mpi.h"
 
 namespace KEYS {
-  enum KeyVal {
-    JOBNAME = 0,
-    SPHERICAL,
-    MC_TRIAL,
-    MC_NPAIR,
-    MC_DELX,  // 0-4
-    GEOM,
-    BASIS,
-    MC_BASIS,
-    NBLOCK,
-    MOVECS,  // 5-9
-    DEBUG,
-    MC_PAIR_GROUPS,
-    TASK,
-    NUM_BAND,
-    OFF_BAND,
-    DIFFS,
-    ORDER,
-    CPU,
-    SAMPLER,
-    TAU_INTEGRATION,
-    F12_CORRELATION_FACTOR,
-    F12_GAMMA,
-    F12_BETA,
-    ELECTRONS,
-    ELECTRON_PAIRS
+  enum KEYS {
+    JOBNAME = 0,             // simple 
+    JOBTYPE,                 // simple
+    SPHERICAL,               // basis
+    MC_TRIAL,                // simple
+    MC_DELX,                 // sampler?
+    GEOM,                    // geometry
+    BASIS,                   // basis
+    MC_BASIS,                // mc basis / sampler
+    NBLOCK,                  // try to depreciate
+    MOVECS,                  // basis?
+    DEBUG,                   // simple
+    TASK,                    // ????
+    NUM_BAND,                // gf
+    OFF_BAND,                // gf
+    DIFFS,                   // gf
+    ORDER,                   // ????????
+    SAMPLER,                 // sampler
+    TAU_INTEGRATION,         // sampler
+    F12_CORRELATION_FACTOR,  // F12
+    F12_GAMMA,               // F12
+    F12_BETA,                // F12
+    ELECTRONS,               // simple
+    ELECTRON_PAIRS,          // simple
+    MP2CV_LEVEL,
+    MP3CV_LEVEL,
+    MP4CV_LEVEL,
+  };
+  const std::vector<std::string> key_strings = {
+      "JOBNAME", "JOBTYPE", "SPHERICAL", "MC_TRIAL", "MC_DELX",
+      "GEOM", "BASIS", "MC_BASIS", "NBLOCK", "MOVECS",
+      "DEBUG", "TASK", "NUM_BAND", "OFF_BAND", 
+      "DIFFS", "ORDER", "SAMPLER", "TAU_INTEGRATION",
+      "F12_CORRELATION_FACTOR", "F12_GAMMA", "F12_BETA", "ELECTRONS", "ELECTRON_PAIRS",
+      "MP2CV_LEVEL", "MP3CV_LEVEL", "MP4CV_LEVEL",
   };
 }
-namespace SAMPLERS {
-  enum SAMPLERS {
+namespace SAMPLER {
+  enum SAMPLER {
     DIRECT,
-    METROPOLIS
+    METROPOLIS,
+  };
+  const std::vector<std::string> sampler_strings = {
+    "DIRECT",
+    "METROPOLIS"
   };
 }
 namespace TAU_INTEGRATION {
-  enum METHODS {
+  enum TAU_INTEGRATION {
     STOCHASTIC,
     QUADRATURE,
-    SUPER_STOCH
+    SUPER_STOCH,
+  };
+  const std::vector<std::string> tau_integration_strings = {
+    "STOCHASTIC",
+    "QUADRATURE",
+    "SUPER_STOCH"
   };
 }
-namespace TASKS {
-  enum TaskVal {
-    MP = 0,
+namespace JOBTYPE {
+  enum JOBTYPE {
+    ENERGY,
+    DIMER_ENERGY,
     GF,
     GFDIFF,
     GFFULL,
     GFFULLDIFF,
-    F12V
+  };
+  const std::vector<std::string> jobtype_strings = {
+    "ENERGY",
+    "DIMER_ENERGY",
+    "GF",
+    "GFDIFF",
+    "GFFULL",
+    "GFFULLDIFF",
+  };
+}
+namespace TASK {
+  enum TASK {
+    MP2 =         0b000000001,
+    MP3 =         0b000000010,
+    MP4 =         0b000000100,
+    MP2_F12_V =   0b000001000,
+    MP2_F12_VBX = 0b000010000,
+    GF2 =         0b000100000,
+    GF3 =         0b001000000,
+    GF2_F12_V =   0b010000000,
+    GF2_F12_VBX = 0b100000000,
+    ANY_F12     = 0b110011000,
+    ANY_F12_VBX = 0b100010000,
+  };
+  const std::vector<std::string> task_strings = {
+    "MP2", 
+    "MP3", 
+    "MP4",
+    "MP2_F12_V",
+    "MP2_F12_VBX", 
+    "GF2", 
+    "GF3",
+    "GF2_F12_V",
+    "GF2_F12_VBX", 
   };
 }
 

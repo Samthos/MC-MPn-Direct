@@ -37,11 +37,11 @@ void Electron_List::transpose() {
 
 Electron_List* create_electron_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight) {
   Electron_List* electron_list = nullptr;
-  if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
-    electron_list = new Direct_Electron_List(iops.iopns[KEYS::MC_NPAIR]);
-  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::METROPOLIS) {
+  if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
+    electron_list = new Direct_Electron_List(iops.iopns[KEYS::ELECTRONS]);
+  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
     Random rnd(iops.iopns[KEYS::DEBUG]);
-    electron_list = new Metropolis_Electron_List(iops.iopns[KEYS::MC_NPAIR], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
+    electron_list = new Metropolis_Electron_List(iops.iopns[KEYS::ELECTRONS], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
   }
   return electron_list;
 }
@@ -108,10 +108,10 @@ void Metropolis_Electron_List::initialize(Electron &electron, Random &random, co
   std::array<double, 3> pos;
   constexpr double twopi = 6.283185307179586;
 
-  atom = molec.natom * random.uniform();
-  pos[0] = molec.atom[atom].pos[0];
-  pos[1] = molec.atom[atom].pos[1];
-  pos[2] = molec.atom[atom].pos[2];
+  atom = molec.atoms.size() * random.uniform();
+  pos[0] = molec.atoms[atom].pos[0];
+  pos[1] = molec.atoms[atom].pos[1];
+  pos[2] = molec.atoms[atom].pos[2];
 
   amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
   amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));

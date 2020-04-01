@@ -1,12 +1,4 @@
 // Copyright 2017 Hirata Lab
-#ifdef HAVE_CONFIG_H_
-#include "config.h"
-#endif
-
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
-
 #include <cmath>
 #include <algorithm>
 #include <numeric>
@@ -16,7 +8,8 @@
 #include <iostream>
 #include <map>
 
-#include "atom_znum.h"
+#include "qc_mpi.h"
+#include "atom_tag_parser.h"
 #include "weight_function.h"
 
 Base_Weight::Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) {
@@ -28,6 +21,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
   std::vector<double> alpha, coef;
   std::string atname;
   std::ifstream input;
+  Atom_Tag_Parser atom_tag_parser;
 
   if (mpi_info.sys_master) {
     std::cout << std::endl << std::endl;
@@ -40,11 +34,9 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
     input >> mc_nbas >> mc_nprim;
   }
 
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Bcast(&mc_nbas, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&mc_nprim, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
+  MPI_info::barrier();
+  MPI_info::broadcast_int(&mc_nbas, 1);
+  MPI_info::broadcast_int(&mc_nprim, 1);
 
   alpha.resize(mc_nprim);
   coef.resize(mc_nprim);
@@ -66,9 +58,9 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
       for (int j = 0; j < mc_nprim; j++) {  // read in primatives coefs
         input >> alpha[j] >> coef[j];
       }
-      znum = atomic_znum(atname);
+      znum = atom_tag_parser.parse(atname);
       // print mc basis functions if <atom> in molecule
-      if (std::any_of(molec.atom.begin(), molec.atom.end(),
+      if (std::any_of(molec.atoms.begin(), molec.atoms.end(),
                       [znum](Atom a) { return a.znum == znum; })) {
         std::cout << "\t " << atname << "\t";
         std::cout << std::setw(30) << std::setprecision(16) << std::fixed
@@ -86,12 +78,10 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
       }
     }
 
-#ifdef HAVE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Bcast(&znum, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(alpha.data(), mc_nprim, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(coef.data(), mc_nprim, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-#endif
+    MPI_info::barrier();
+    MPI_info::broadcast_int(&znum, 1);
+    MPI_info::broadcast_double(alpha.data(), mc_nprim);
+    MPI_info::broadcast_double(coef.data(), mc_nprim);
 
     WEIGHT_BASIS_[znum] = {alpha, coef, {0, 0, 0}};
   }
@@ -105,7 +95,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
     std::cout << std::endl << std::endl;
   }
 
-  for (auto &it : molec.atom) {
+  for (auto &it : molec.atoms) {
     if (WEIGHT_BASIS_.count(it.znum) == 0) {
       if (mpi_info.sys_master) {
         std::cerr << "No MC basis function defined for atom with charge "
@@ -115,7 +105,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
     }
   }
 
-  for (auto &it : molec.atom) {
+  for (auto &it : molec.atoms) {
     mcBasisList.push_back({WEIGHT_BASIS_[it.znum], it.pos});
   }
 }

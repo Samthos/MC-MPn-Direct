@@ -12,17 +12,20 @@
 #include "../control_variate.h"
 #include "../timer.h"
 
-void MP::monte_energy() {
+void Energy::zero_energies() {
+  std::fill(emp.begin(), emp.end(), 0.0);
+  for (auto &c : control) {
+    std::fill(c.begin(), c.end(), 0.0);
+  }
+}
 
-  std::vector<std::ofstream> output(emp.size() + 1);
+void Energy::monte_energy() {
+  Timer mcTimer, stepTimer;
+  std::vector<std::ofstream> output(emp.size()+1);
 
 #ifdef DIMER_PRINT
-
   std::vector<std::ofstream> dimer_output(emp.size() + 1);
-
 #endif // DIMER_PRINT
-
-  Timer mcTimer, stepTimer;
 
   // open output stream and start clock for calculation
   if (mpi_info.sys_master) {
@@ -30,13 +33,15 @@ void MP::monte_energy() {
     stepTimer.Start();
     print_mc_head(mcTimer.StartTime());
 
-    std::string filename;
-    for (auto i = 0; i < emp.size(); i++) {
-      filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
+    for (auto i = 0; i < energy_functions.size(); i++) {
+      std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
       output[i].open(filename.c_str());
     }
-    filename = iops.sopns[KEYS::JOBNAME] + ".20";
-    output.back().open(filename.c_str());
+    {
+      std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
+      output.back().open(filename.c_str());
+    }
+
 
   // if DIMER_PRINT is defined: open binary ofstream for eneries and control
   // variates of each step.
@@ -54,8 +59,6 @@ void MP::monte_energy() {
 
 #endif // DIMER_PRINT
   }
-
-  size_t double_size = sizeof(double);
 
   // --- initialize
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
@@ -77,8 +80,8 @@ void MP::monte_energy() {
 // dump energies and control vars to dimer binary ofstream
 #ifdef DIMER_PRINT
 
-    dimer_output[0].write((char*) &emp[0], double_size);
-    dimer_output[1].write((char*) control[0].data(), double_size * control[0].size());
+    dimer_output[0].write((char*) &emp[0], sizeof(double));
+    dimer_output[1].write((char*) control[0].data(), sizeof(double) * control[0].size());
 
 #endif // DIMER_PRINT
 
@@ -108,7 +111,7 @@ void MP::monte_energy() {
 #ifndef DIMER_PRINT
 
   for (auto i = 0; i < emp.size(); i++) {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + ".2" + std::to_string(i + 2);
+      std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
       cv[i]->to_json(filename);
   }
   {
@@ -127,38 +130,17 @@ void MP::monte_energy() {
   }
 }
 
-void MP::zero_energies() {
-  std::fill(emp.begin(), emp.end(), 0.0);
-  for (auto &c : control) {
-    std::fill(c.begin(), c.end(), 0.0);
+void Energy::energy() {
+  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  for (int i = 0; i < energy_functions.size(); i++) {
+    if (!energy_functions[i]->is_f12) {
+      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy(emp[i], control[i], ovps, electron_pair_list, tau);
+      }
+    } else {
+      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy_f12(emp[i], control[i], wavefunctions, electron_pair_list, electron_list);
+      }
+    }
   }
 }
-
-void MP2::energy() {
-  mcmp2_energy_fast(emp[0], control[0]);
-}
-
-void MP3::energy() {
-  ovps.update_ovps(electron_pair_psi1, electron_pair_psi2, tau);
-  if (tau->is_new(1)) {
-    mcmp2_energy(emp[0], control[0]);
-  }
-  mcmp3_energy(emp[1], control[1]);
-}
-
-void MP4::energy() {
-  ovps.update_ovps(electron_pair_psi1, electron_pair_psi2, tau);
-  if (tau->is_new(1)) {
-    mcmp2_energy(emp[0], control[0]);
-  }
-  if (tau->is_new(2)) {
-    mcmp3_energy(emp[1], control[1]);
-  }
-  mcmp4_energy(emp[2], control[2]);
-}
-
-void MP2F12_V::energy() {
-  mcmp2_energy_fast(emp[0], control[0]);
-  emp[1] = mp2f12_v_engine.calculate_v(electron_pair_psi1, electron_pair_psi2, electron_psi, electron_pair_list, electron_list);
-}
-

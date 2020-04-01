@@ -53,11 +53,11 @@ void Electron_Pair_List::transpose() {
 
 Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molec& molec, Electron_Pair_GTO_Weight& weight) {
   Electron_Pair_List* electron_pair_list = nullptr;
-  if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::DIRECT) {
-    electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR]);
-  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLERS::METROPOLIS) {
+  if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
+    electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::ELECTRON_PAIRS]);
+  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
     Random rnd(iops.iopns[KEYS::DEBUG]);
-    electron_pair_list = new Metropolis_Electron_Pair_List(iops.iopns[KEYS::MC_NPAIR], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
+    electron_pair_list = new Metropolis_Electron_Pair_List(iops.iopns[KEYS::ELECTRON_PAIRS], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
   }
   return electron_pair_list;
 }
@@ -261,10 +261,10 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
   std::array<double, 3> pos;
   constexpr double twopi = 6.283185307179586;
 
-  atom = molec.natom * random.uniform();
-  pos[0] = molec.atom[atom].pos[0];
-  pos[1] = molec.atom[atom].pos[1];
-  pos[2] = molec.atom[atom].pos[2];
+  atom = molec.atoms.size() * random.uniform();
+  pos[0] = molec.atoms[atom].pos[0];
+  pos[1] = molec.atoms[atom].pos[1];
+  pos[2] = molec.atoms[atom].pos[2];
 
   amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
   amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));
@@ -276,10 +276,10 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
   electron_pair.pos1[2] = pos[2] + amp2*cos(theta2);
 
   //elec position 2;
-  atom = molec.natom * random.uniform();
-  pos[0] = molec.atom[atom].pos[0];
-  pos[1] = molec.atom[atom].pos[1];
-  pos[2] = molec.atom[atom].pos[2];
+  atom = molec.atoms.size() * random.uniform();
+  pos[0] = molec.atoms[atom].pos[0];
+  pos[1] = molec.atoms[atom].pos[1];
+  pos[2] = molec.atoms[atom].pos[2];
 
   amp1 = sqrt(-0.5 * log(random.uniform() * 0.2));
   amp2 = sqrt(-0.5 * log(random.uniform() * 0.5));

@@ -6,18 +6,12 @@
 #define MC_MP2_DIRECT_TIMER_H
 
 #include <chrono>
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
+#include "qc_mpi.h"
 
 class Timer {
  public:
   Timer() {
-#ifdef HAVE_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &master);
-#else
-    master = 0;
-#endif
+    MPI_info::comm_rank(&master);
   }
   void Start() {
     start = std::chrono::high_resolution_clock::now();
