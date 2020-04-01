@@ -1,30 +1,32 @@
 MC-GFn program developed by the Hirata lab
-Code compiled from Git-Commit dee9e49
+Code compiled from Git-Commit e923ff3
 
 MPI IS RUNNING WITH 1 CPUS
 
 Input read from molecule_water.task_MP.order_4.sampler_DIRECT.tau_STOCHASTIC.cv_FALSE.mcin
 JOBNAME: molecule_water.task_MP.order_4.sampler_DIRECT.tau_STOCHASTIC.cv_FALSE
- TASK: MP
- ORDER: 4
+ JOBTYPE: ENERGY
  MC_TRIAL: 1024
- MC_NPAIR: 16
- MC_DELX: 0.1
- SPHERICAL: 1
+ Electron Pairs: 16
  SAMPLER: DIRECT
  TAU_INTEGRATION: STOCHASTIC
+ SPHERICAL: 1
  RNG in debug mode
-	DIFFS = FALSE
-	Bands: HOMO-0
+ TASK: MP4   CV_LEVEL 0
+Number of Electrons Walkers = 16
+Correlation Factor = Slater
+F12_GAMMA = default
+F12_BETA = default
+
 Reading geometry from ../input/water.xyz
 Printing input geometry in angstroms
------------------------------------------------------------------------------------------------------------
-	Atom	            x                             y                             z
------------------------------------------------------------------------------------------------------------
-	 O	            0.0000000000000000            0.0000000000000000           -0.1354460000000000
-	 H	           -0.8668100000000000            0.0000000000000000            0.5417840000000000
-	 H	            0.8668100000000000            0.0000000000000000            0.5417840000000000
------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
+       Atom-Tag Charge       X                        Y                        Z
+-------------------------------------------------------------------------------------------------
+              O      8       0.0000000000000000       0.0000000000000000      -0.1354460000000000
+              H      1      -0.8668100000000000       0.0000000000000000       0.5417840000000000
+              H      1       0.8668100000000000       0.0000000000000000       0.5417840000000000
+-------------------------------------------------------------------------------------------------
 
 
 Basis set: ../input/cc-pvdz.basis
@@ -46,6 +48,24 @@ Reading MC basis from ../input/cc-pvdz.mc_basis
 -----------------------------------------------------------------------------------------------------------
 
 
-Begining MC run at: Wed Nov 20 21:12:11 2019
-Finished MC run at: Wed Nov 20 21:12:14 2019
-Spent 3.586163 second preforming MC integration
+
+
+Reading MC basis from ../input/cc-pvdz.mc_basis
+-----------------------------------------------------------------------------------------------------------
+	Atom	            contraction_exp                         coef
+-----------------------------------------------------------------------------------------------------------
+	 H	            0.4000000000000000            1.0000000000000000
+	  	            0.1000000000000000            0.1000000000000000
+
+	 O	            1.0000000000000000            6.0000000000000000
+	  	            0.2000000000000000            0.6000000000000000
+
+-----------------------------------------------------------------------------------------------------------
+
+
+4
+created simple accumulator
+created simple accumulator
+Begining MC run at: Wed Apr  1 15:23:45 2020
+Finished MC run at: Wed Apr  1 15:23:47 2020
+Spent 1.730912 second preforming MC integration
