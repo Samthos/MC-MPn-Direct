@@ -264,23 +264,43 @@ double MP2_F12_VBX::calculate_bx_t_fb_4e(const Electron_Pair_List* electron_pair
   for (int io = 0; io < electron_list->size(); ++io) {
     std::array<double, 2> t_io{0.0, 0.0};
     for (int jo = 0; jo < electron_list->size(); ++jo) {
-        std::array<double, 2> t_jo{0.0, 0.0};
-        for (int lo = 0; lo < electron_list->size(); ++lo) {
-          T_io_jo[lo] = T_jo_ko[io * traces.electrons + lo] * traces.ok12[jo * traces.electrons + lo];
-          T_io_ko[lo] = T_jo_ko[io * traces.electrons + lo] * traces.ov12[jo * traces.electrons + lo];
-        }
-        for (int ko = 0; ko < electron_list->size(); ++ko) {
-            std::array<double, 2> t_ko{0.0, 0.0};
-            for (int lo = 0; lo < electron_list->size(); ++lo) {
-                t_ko[0] += correlation_factor->f12o[ko * traces.electrons + lo] * T_io_jo[lo];
-                t_ko[1] += correlation_factor->f12o[ko * traces.electrons + lo] * T_io_ko[lo];
-            }
-            t_jo[0] += t_ko[0] * T_jo_ko[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko];
-            t_jo[1] += t_ko[1] * T_jo_ko[jo * traces.electrons + ko] * traces.ov12[io * traces.electrons + ko];
-        }
-        auto f_b = correlation_factor->f12o_b[io * traces.electrons + jo];
-        t_io[0] += t_jo[0] * f_b;
-        t_io[1] += t_jo[1] * f_b;
+      for (int lo = 0; lo < electron_list->size(); ++lo) {
+        T_io_jo[jo * traces.electrons + lo] = T_jo_ko[io * traces.electrons + lo] * traces.ok12[jo * traces.electrons + lo];
+      }
+    }
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+        traces.electrons, traces.electrons, traces.electrons,
+        1.0,
+        correlation_factor->f12o.data(), traces.electrons, // ko lo
+        T_io_jo.data(), traces.electrons, // jo lo 
+        0.0,
+        T_io_ko.data(), traces.electrons); // jo ko 
+    for (int jo = 0; jo < electron_list->size(); ++jo) {
+      double t_jo = 0.0;
+      for (int ko = 0; ko < electron_list->size(); ++ko) {
+        t_jo += T_io_ko[jo * traces.electrons + ko] * T_jo_ko[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko];
+      }
+      t_io[0] += t_jo * correlation_factor->f12o_b[io * traces.electrons + jo];
+    }
+            
+    for (int jo = 0; jo < electron_list->size(); ++jo) {
+      for (int lo = 0; lo < electron_list->size(); ++lo) {
+        T_io_jo[jo * traces.electrons + lo] = T_jo_ko[io * traces.electrons + lo] * traces.ov12[jo * traces.electrons + lo];
+      }
+    }
+    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+        traces.electrons, traces.electrons, traces.electrons,
+        1.0,
+        correlation_factor->f12o.data(), traces.electrons, // ko lo
+        T_io_jo.data(), traces.electrons, // jo lo 
+        0.0,
+        T_io_ko.data(), traces.electrons); // jo ko 
+    for (int jo = 0; jo < electron_list->size(); ++jo) {
+      double t_jo = 0.0;
+      for (int ko = 0; ko < electron_list->size(); ++ko) {
+        t_jo += T_io_ko[jo * traces.electrons + ko] * T_jo_ko[jo * traces.electrons + ko] * traces.ov12[io * traces.electrons + ko];
+      }
+      t_io[1] += t_jo * correlation_factor->f12o_b[io * traces.electrons + jo];
     }
     t[1] += t_io[0];
     t[1] -= t_io[1];
@@ -322,7 +342,6 @@ double MP2_F12_VBX::calculate_bx_t_fc_3e(const Electron_Pair_List* electron_pair
   }
   return -2.0 * (c3 * t[0] + c4 * t[1]) * nsamp_pair * nsamp_one_1;
 }
-
 double calculate_bx_t_fc_4e_help(
     std::vector<double>& T_ip_io, const std::vector<double>& S_ip_jo, const std::vector<double>& S_io_jo,
     const std::vector<double>& S_ip_io_1, const std::vector<double>& S_ip_io_2,
