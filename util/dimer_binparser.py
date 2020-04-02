@@ -4,15 +4,39 @@
 # MP2CV = 2, i.e. 6 control variates
 
 import numpy as np
-import re
+import os
+import os.path
 import sys
 
+def load_data(jobname):
+    # force paths to be relative to cwd e.g. removes initial './'
+    jobname = os.path.relpath(jobname)
+    files = os.scandir('.')
+    cv_files = []
+    emp_files = []
+    taskids = set()
 
-def load_data(fname):
-    emp_data = np.fromfile(fname)
-    cv_data = np.fromfile(re.sub('emp.bin', 'cv.bin', fname)).reshape(-1, 6)
-    return emp_data, cv_data
+    for file in files:
+        filename = file.name
+        if(filename.startswith(jobname) and os.path.isfile(filename)):
+            taskid = get_taskid(filename)
+            if taskid != -1: taskids.add(taskid)
+            if filename.endswith(".cv.bin"): cv_files.append(filename)
+            if filename.endswith(".emp.bin"): emp_files.append(filename)
 
+    taskids = sorted(taskids)
+    file_list = [list(pair) for pair in zip(sorted(cv_files), sorted(emp_files))]
+    file_list = [[np.fromfile(pair[0]).reshape(-1, 6), np.fromfile(pair[1])] for pair in file_list]
+    file_dict = dict(zip(taskids, file_list))
+
+    return file_dict
+
+def get_taskid(filename):
+    taskid_index = filename.find("taskid")
+    if taskid_index < 0:
+        return -1
+    else:
+        return int(filename[taskid_index + 7])
 
 def control_variate_analysis(emp, cv):
     step = emp.size
@@ -36,16 +60,20 @@ def control_variate_analysis(emp, cv):
 
 
 def main():
-    emp_data, cv_data = load_data(sys.argv[1])
+    file_dict = load_data(sys.argv[1])
 
-    print("Step \t Avg. E \t Err. E \t Avg. E Ctrled \t Err. E Ctrled")
-    for step in range(128, emp_data.size + 1, 128):
-        print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step,
-            *control_variate_analysis(emp_data[:step], cv_data[:step])))
+    for taskid in file_dict:
+        cv_data = file_dict[taskid][0]
+        emp_data = file_dict[taskid][1]
+        print("TASKID: ", taskid)
+        print("Step \t Avg. E \t Err. E \t Avg. E Ctrled \t Err. E Ctrled")
+        for step in range(128, emp_data.size + 1, 128):
+            print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step,
+                *control_variate_analysis(emp_data[:step], cv_data[:step])))
 
 
-if __name__ == main():
-    if len(sys.argv) != 3:
-        print("USAGE: dimer_binparser.py <emp binary file>")
+if __name__ == "__main__":
+    if(len(sys.argv) != 2):
+        print("USAGE: dimer_binparser.py <job name>")
     else:
         main()
