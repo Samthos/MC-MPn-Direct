@@ -11,8 +11,8 @@ set(source
         basis/nw_vectors.cpp
         basis/qc_basis.cpp
         basis/qc_basis.h
-        atom_znum.cpp
-        atom_znum.h
+        atom_tag_parser.h
+        atom_tag_parser.cpp
         qc_geom.cpp
         qc_geom.h
         qc_input.cpp
@@ -24,6 +24,7 @@ set(source
         qc_random.cpp
         qc_random.h
         control_variate.h
+        control_variate.cpp
         timer.h
         tau_integrals.h
         tau_integrals.cpp
@@ -38,19 +39,35 @@ set(source
         MCGF/qc_gfFullStatisticsHost.cpp
         MCGF/qc_mcgf.cpp
         MCMP/qc_mcmp.cpp
+        MCMP/mcmp.h
+        MCMP/qc_mcmp2.h
         MCMP/qc_mcmp2.cpp
+        MCMP/qc_mcmp3.h
         MCMP/qc_mcmp3.cpp
+        MCMP/qc_mcmp4.h
         MCMP/qc_mcmp4.cpp
+        MCF12/x_traces.cpp
+        MCF12/x_traces.h
         MCF12/F12_Traces.cpp
         MCF12/F12_Traces.h
         MCF12/correlation_factors.cpp
         MCF12/correlation_factors.h
-        MCF12/mp2_f12_integrals.cpp
-        MCF12/mp2f12_var.h
+        MCF12/mp2_f12.cpp
+        MCF12/mp2_f12.h
+        MCF12/gf2_f12.cpp
+        MCF12/gf2_f12.h
 )
 
 set(CPU_EXTRA_SOURCES
-        MCGF/qc_gfFullStatistics.cpp MCGF/qc_mcgf2.cpp MCGF/qc_mcgf3.cpp qc_ovps.cpp basis/qc_psi.cpp cpu_qc_monte.cpp
+        MCGF/qc_gfFullStatistics.cpp
+        MCGF/qc_mcgf.h
+        MCGF/qc_mcgf2.h
+        MCGF/qc_mcgf3.h
+        MCGF/qc_mcgf2.cpp
+        MCGF/qc_mcgf3.cpp 
+        qc_ovps.cpp 
+        basis/qc_psi.cpp basis/qc_psi_der.cpp
+        cpu_qc_monte.cpp
         MCMP/qc_mcmp4_ijk.h MCMP/qc_mcmp4_ijkl.h
         MCMP/qc_mcmp4_ij.h MCMP/qc_mcmp4_ij_k.h MCMP/qc_mcmp4_ij_l.h
         MCMP/qc_mcmp4_ik.h MCMP/qc_mcmp4_ik_j.h MCMP/qc_mcmp4_ik_l.h
@@ -67,10 +84,6 @@ target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
 
 target_include_directories(MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
 target_include_directories(MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
-
-target_compile_definitions(MC_MPn_Direct PUBLIC -DMP2CV=${MP2CV})
-target_compile_definitions(MC_MPn_Direct PUBLIC -DMP3CV=${MP3CV})
-target_compile_definitions(MC_MPn_Direct PUBLIC -DMP4CV=${MP4CV})
 
 IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to MC_MPn_Direct")

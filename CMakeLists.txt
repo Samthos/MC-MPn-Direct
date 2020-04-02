@@ -20,6 +20,9 @@ find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
 find_path(BLAS_INCLUDE_DIRS cblas.h)
 
+message(${BLAS_FOUND})
+message(${BLAS_LIBRARIES})
+
 option(Enable_MPI "Enables MPI Sampling" Off)
 if (Enable_MPI)
     find_package(MPI REQUIRED)
@@ -34,9 +37,5 @@ option(DIMER_PRINT "enables printing of all integrands for dimer calculation mac
 if(${DIMER_PRINT})
     add_definitions(-DDIMER_PRINT)
 endif()
-
-set(MP2CV 0 CACHE STRING "Sets MP2CV level")
-set(MP3CV 0 CACHE STRING "Sets MP3CV level")
-set(MP4CV 0 CACHE STRING "Sets MP4CV level")
 
 add_subdirectory(src)

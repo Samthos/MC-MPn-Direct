@@ -37,9 +37,6 @@ If you want to build with a MPI compiler prepend line three with
 In addition to the standard cmake build options, MC-MPn has a few additional option
 
 * -DEnable_MPI: Values={ON, OFF}; Default=Off
-* -DMP2CV: Controls the number of control variates produced at the MP2 level. Values={0, 1, 2}; Default=0
-* -DMP3CV: Controls the number of control variates produced at the MP3 level. Values={0, 1, 2, 3}; Default=0
-* -DMP4CV: Controls the number of control variates produced at the MP4 level. Values={0, 1, 2, 3, 4}; Default=0
 
 For the CV options, higher values correspond to more control variates being used.
 
@@ -86,21 +83,28 @@ The following are required options. All paths are relative to director where the
 * **MC_BASIS**: (STRING) Path to MC basis set.
 
 The following are options technically options, but will be set for nearly every calculation.
-* **TASK**: (STRING) Specifies type of calculation to perform. Default=MP
+* **JOBTYPE**: (STRING) Specifies type of calculation to perform. Default=MP
 
-  * MP: Perturbation theory calculation.
+  * ENERGY: Energy calcualtion
   * GF: Green's function calculation for diagonal element.
   * GFDIFF: Green's function calculation for diagonal element only with derivatives.
   * GFFULL: Green's function calculation for full self-energy matrix.
   * GFFULLDIFF: Green's function calculation for full self-energy matrix with derivatives.
 
-* **ORDER**: (INT) Level of theory to perform. Default=2
+* **TASK**: (STRING) Specifies what energy corrections to calculate for the given job type.
   
-  * MP tasks are implemented through fourth order.
-  * GF tasks are implemented through third order.
+  * MP2: Only Energy job types. Specifies to calculate second-order correction to energy.
+  * MP3: Only Energy job types. Specifies to calculate third-order correction to energy.
+  * MP4: Only Energy job types. Specifies to calculate forth-order correction to energy.
+  * GF2: Only GF job types. Specifies to calculate second-order correction to energy.
+  * GF3: Only GF job types. Specifies to calculate third-order correction to energy.
+  * F12V: Any job types. Calculate second-order F12V correction.
+  * F12VB Any job types. Calculate second-order F12VBX correction.
 
-* **MC_NPAIR**: (INT) Number of electron-pair walkers to use for the calculation. Default=16
+* **ELECTRON_PAIRS**: (INT) Number of electron-pair walkers to use for the calculation. Default=16
 * **MC_TRIAL**: (INT) Number of MC steps to perform. Default=1024
+
+* **MP\<N\>CV_LEVEL**: (INT) Set the deepest loop that control variates may be calculated in for energy calculations. Higher values produce more control variates. Maximum values is N.
 
 The options control the sequence of random number used.
 
@@ -124,13 +128,40 @@ If the sampler is set to Metropolis the following keywords may be set:
  * **MC_DELX**: (DOUBLE) Sets initial maximum offset for the Metropolis algorithm. Default=0.1
  * **NBLOCK**: (INT) May be depreciates. Set maximum number of blocking transformations. Default=1
 
-The options control the sequence the behavior of MC-GF calculations. 
+These options control the sequence the behavior of MC-GF calculations. 
  * **OFF_BAND**: (INT) Specifies offset of the first orbital relative to LUMO to target. Default=1 (HOMO)
  * **NUM_BAND**: (INT) Specifies number of orbitals to target. Default=1.
  * **DIFFS**: (INT) Maximum number of derivatives to calculate plus one. DIFFS=1 is a calculation with no derivatives. Diffs=2 is the self-energy  plus its first derivatives. Default=1
 
 The OFF_BAND and NUM_BAND keywords are used in conjunction to specify the range of orbitals that the MC-GF calculation will provide a correction to. 
 The range of orbitals is (LUMO - OFF_BAND, ..., LUMO - OFF_BAND + NUM_BAND - 1).
+
+These options control the behavior of F12V calculations
+ * **ELECTRONS**: (INT) Number of one electron walkers to use for the calculation. Default=16
+ * **F12_CORRELATION_FACTOR**: (STRING) Which functional form to use for the correlation factor. A list of the available correlation factors is given below. Default=Slater.
+ * **F12_GAMMA**: (DOUBLE) Value of the adjustable parameter used by the correlation factor. The default value is dependant of the correlation factor chosen. 
+ * **F12_BETA**: (DOUBLE) Value of the second adjustable parameter used by the correlation factor. Functionals that require a second parameter are noted. The default value is dependant of the correlation factor chosen. 
+
+MC-F12 methods have the unique ability to use nearly any function as the correlation factor, since the use of a function is not dependant of the availability of analytic integrals.  The choice of correlation factor can dramatically affect the accuracy of the resulting F12 calculation.  Because of this, it is recommend to use the Slater correlation factor as it generally performs well.  See (Cole's correlation function paper) for a detailed study comparing the usage of different correlation factors for F12 calculations.  The default values of the adjustable parameters are taken from this study.  The following correlation factors are implemented for MC-F12 calculations. 
+ * **Linear**: Zero-parameter functional.
+ * **Rational**: One-parameter functional. Default Gamma=1.2.
+ * **Slater**: One-parameter functional. Default Gamma=1.2.
+ * **Slater_Linear**: One-parameter functional. Default Gamma=0.5.
+ * **Gaussian**: One-parameter functional. Default Gamma=0.5.
+ * **Cusped_Gaussian**: One-parameter functional. Default Gamma=1.2.
+ * **Yukawa_Coulomb**: One-parameter functional. Default Gamma=2.0.
+ * **Jastrow**: One-parameter functional. Default Gamma=1.2.
+ * **ERFC**: One-parameter functional. Default Gamma=1.2.
+ * **ERFC_Linear**: One-parameter functional. Default Gamma=0.4.
+ * **Tanh**: One-parameter functional. Default Gamma=1.2.
+ * **ArcTan**: One-parameter functional. Default Gamma=1.6.
+ * **Logarithm**: One-parameter functional. Default Gamma=2.0.
+ * **Hybrid**: One-parameter functional. Default Gamma=1.2.
+ * **Two_Parameter_Rational**: Two-parameter functional. Default Gamma=NAN. Default Beta=NAN.
+ * **Higher_Rational**: Two-parameter functional. Default Gamma=1.6. Default Beta=3.0.
+ * **Cubic_Slater**: Two-parameter functional. Default Gamma=1.2. Default Beta=0.003.
+ * **Higher_Jastrow**: Two-parameter functional. Default Gamma=0.8. Default Beta=0.75.
+
 
 
 ### Running a Calculation

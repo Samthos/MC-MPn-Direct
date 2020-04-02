@@ -11,14 +11,14 @@
 struct Atom {
   double pos[3];
   int znum;
+  std::string tag;
 };
 
 class Molec {
  public:
-  void read(MPI_info&, std::string&);
-  void print(int);
+  void read(const MPI_info&, const std::string&);
+  void print();
 
-  std::vector<Atom> atom;
-  int natom;
+  std::vector<Atom> atoms;
 };
 #endif  // QC_GEOM_H_

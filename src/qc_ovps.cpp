@@ -154,13 +154,13 @@ void OVPs::alloc_03() {
 
     d_ovps.enGrouped = new double[(ivir2 - iocc1) * (ivir2 - iocc1) * 7];
     d_ovps.en2p = d_ovps.enGrouped + 0 * (ivir2 - iocc1) * (ivir2 - iocc1);
-    d_ovps.en2m = d_ovps.enGrouped + 3 * (ivir2 - iocc1) * (ivir2 - iocc1);
+    d_ovps.en2m = d_ovps.enGrouped + 1 * (ivir2 - iocc1) * (ivir2 - iocc1);
 
     d_ovps.en3_1p  = d_ovps.enGrouped + 0 * (ivir2 - iocc1) * (ivir2 - iocc1);
-    d_ovps.en3_2p  = d_ovps.enGrouped + 1 * (ivir2 - iocc1) * (ivir2 - iocc1);
-    d_ovps.en3_12p = d_ovps.enGrouped + 2 * (ivir2 - iocc1) * (ivir2 - iocc1);
-    d_ovps.en3_1m  = d_ovps.enGrouped + 3 * (ivir2 - iocc1) * (ivir2 - iocc1);
-    d_ovps.en3_2m  = d_ovps.enGrouped + 4 * (ivir2 - iocc1) * (ivir2 - iocc1);
+    d_ovps.en3_1m  = d_ovps.enGrouped + 1 * (ivir2 - iocc1) * (ivir2 - iocc1);
+    d_ovps.en3_2p  = d_ovps.enGrouped + 2 * (ivir2 - iocc1) * (ivir2 - iocc1);
+    d_ovps.en3_2m  = d_ovps.enGrouped + 3 * (ivir2 - iocc1) * (ivir2 - iocc1);
+    d_ovps.en3_12p = d_ovps.enGrouped + 4 * (ivir2 - iocc1) * (ivir2 - iocc1);
     d_ovps.en3_12m = d_ovps.enGrouped + 5 * (ivir2 - iocc1) * (ivir2 - iocc1);
     d_ovps.en3_c   = d_ovps.enGrouped + 6 * (ivir2 - iocc1) * (ivir2 - iocc1);
   }

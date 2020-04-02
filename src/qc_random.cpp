@@ -8,9 +8,7 @@
 #include <sstream>
 #include <string>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
+#include "qc_mpi.h"
 
 #include "qc_random.h"
 
@@ -32,11 +30,7 @@ Random::Random(int param) {
   } else if (1 == debug) {
     std::string str;
     std::stringstream sstr;
-#ifdef HAVE_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
-#else
-    taskid = 0;
-#endif
+    MPI_info::comm_rank(&taskid);
     long long seeds[] = {1793817729, 3227188512, 2530944000, 2295088101,
                          1099163413, 2366715906, 1817017634, 3192454568,
                          2199752324, 1911074146, 2867042420, 3591224665,

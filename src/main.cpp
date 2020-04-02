@@ -36,29 +36,20 @@ int main(int argc, char* argv[]) {
 
   Basis basis(iops, mpi_info, molec);
 
-  if (iops.iopns[KEYS::TASK] == TASKS::MP) {
-    if (iops.iopns[KEYS::ORDER] == 2) {
-      MP2 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
-    } else if (iops.iopns[KEYS::ORDER] == 3) {
-      MP3 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
-    } else if (iops.iopns[KEYS::ORDER] == 4) {
-      MP4 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
-    }
-  } else if (iops.iopns[KEYS::TASK] == TASKS::F12V) {
-    MP2F12_V qc_monte(mpi_info, iops, molec, basis);
-    qc_monte.monte_energy();
+  QC_monte* qc_monte;
+  if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
+    qc_monte = new Energy(mpi_info, iops, molec, basis);
+  } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {
+    qc_monte = new Diagonal_GF(mpi_info, iops, molec, basis);
   } else {
     if (iops.iopns[KEYS::ORDER] == 2) {
-      GF2 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
+      qc_monte = new GF2(mpi_info, iops, molec, basis);
     } else if (iops.iopns[KEYS::ORDER] == 3) {
-      GF3 qc_monte(mpi_info, iops, molec, basis);
-      qc_monte.monte_energy();
+      qc_monte = new GF3(mpi_info, iops, molec, basis);
     }
   }
+  qc_monte->monte_energy();
+  delete qc_monte;
 
 #ifdef HAVE_MPI
   MPI_Finalize();

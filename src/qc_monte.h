@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <unordered_map>
+
 #include "qc_mpi.h"
 #include "qc_input.h"
 #include "qc_geom.h"
@@ -20,18 +22,22 @@
 #include "qc_random.h"
 #include "tau_integrals.h"
 
-#include "MCF12/mp2f12_var.h"
+#include "MCMP/mcmp.h"
+#include "MCMP/qc_mcmp2.h"
+#include "MCMP/qc_mcmp3.h"
+#include "MCMP/qc_mcmp4.h"
+#include "MCF12/mp2_f12.h"
+
+#include "MCGF/qc_mcgf.h"
+#include "MCGF/qc_mcgf2.h"
+#include "MCGF/qc_mcgf3.h"
+#include "MCF12/gf2_f12.h"
 
 class GFStats {
- private:
-  std::vector<std::vector<double>> qepsEx1, qepsEx2, qepsAvg, qepsVar;
-  std::vector<std::ofstream*> output_streams;
-  bool isMaster;
-  double tasks;
-
  public:
   std::vector<std::vector<double>> qeps;
 
+  GFStats(bool, int, int, int, int, const std::string&, const std::string&);
   GFStats(bool, int, int, int, int, const std::string&, int);
   GFStats(const GFStats& gf) { throw std::runtime_error("Tried to copy GFStats"); }
   GFStats operator=(const GFStats& gf) { exit(0); }
@@ -41,6 +47,12 @@ class GFStats {
   void blockIt(const int&);
   void reduce();
   void print(const int& step, const double& time_span);
+
+ private:
+  std::vector<std::vector<double>> qepsEx1, qepsEx2, qepsAvg, qepsVar;
+  std::vector<std::ofstream*> output_streams;
+  bool isMaster;
+  double tasks;
 };
 
 class QC_monte {
@@ -56,9 +68,10 @@ class QC_monte {
   Basis basis;
   Electron_Pair_GTO_Weight electron_pair_weight;
   Electron_GTO_Weight electron_weight;
-  Wavefunction electron_pair_psi1;
-  Wavefunction electron_pair_psi2;
-  Wavefunction electron_psi;
+
+  std::unordered_map<int, Wavefunction> wavefunctions;
+  std::unordered_map<int, std::vector<int>> wavefunction_groups;
+
   Random random;
   OVPs ovps;
   
@@ -76,105 +89,22 @@ class QC_monte {
   static void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
 };
 
-class MP : public QC_monte {
+class Energy : public QC_monte {
  public:
-  void monte_energy();
-  virtual void energy() = 0;
+  Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  ~Energy();
+
+  void monte_energy() override;
+
  protected:
-  MP(MPI_info p1, IOPs p2, Molec p3, Basis p4, std::vector<int> cv_sizes) : QC_monte(p1, p2, p3, p4) {
-    tau->resize(cv_sizes.size());
-    emp.resize(cv_sizes.size());
-
-    if (electron_pair_list->requires_blocking()) {
-      for (int n : cv_sizes) {
-        control.emplace_back(std::vector<double>(n));
-        cv.push_back(new BlockingAccumulator(n, std::vector<double>(n, 0.0)));
-      }
-      cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
-      control.emplace_back(std::vector<double>(cv_sizes.back()));
-      cv.push_back(new BlockingAccumulator(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
-    } else {
-      for (int n : cv_sizes) {
-        control.emplace_back(std::vector<double>(n));
-        cv.push_back(new ControlVariate(n, std::vector<double>(n, 0.0)));
-      }
-      cv_sizes.push_back(std::accumulate(cv_sizes.begin(), cv_sizes.end(), 0));
-      control.emplace_back(std::vector<double>(cv_sizes.back()));
-      cv.push_back(new ControlVariate(cv_sizes.back(), std::vector<double>(cv_sizes.back(), 0.0)));
-    }
-  }
-  ~MP() {
-    for (auto &item : cv) {
-      delete item;
-    }
-  }
-
+  std::vector<MCMP*> energy_functions;
+  std::vector<Accumulator*> cv;
 
   std::vector<double> emp;
   std::vector<std::vector<double>> control;
-  std::vector<Accumulator*> cv;
+
   void zero_energies();
-
-  void mcmp2_energy_fast(double&, std::vector<double>&);
-  void mcmp2_energy(double&, std::vector<double>&);
-  void mcmp3_energy(double&, std::vector<double>&);
-  void mcmp4_energy(double&, std::vector<double>&);
-  void mcmp4_energy_ij(double&, std::vector<double>&);
-  void mcmp4_energy_ik(double&, std::vector<double>&);
-  void mcmp4_energy_il(double&, std::vector<double>&);
-  void mcmp4_energy_ijkl(double&, std::vector<double>&);
-  void mcmp4_energy_ijkl_fast(double&, std::vector<double>&);
-};
-
-class MP2 : public MP {
- public:
-  MP2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6}) {}
-  ~MP2() override = default;
-
- protected:
-  void energy() override;
-};
-
-class MP3 : public MP {
- public:
-  MP3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 36}) {
-    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
-  }
-  ~MP3() override {
-    ovps.free();
-  }
-
- protected:
-  void energy() override;
-};
-
-class MP4 : public MP {
- public:
-  MP4(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 36, 72}) {
-    ovps.init(cv.size() - 1, iops.iopns[KEYS::MC_NPAIR], basis);
-  }
-  ~MP4() {
-    ovps.free();
-  }
-
- protected:
-  void energy() override;
-};
-
-class MP2F12_V : public MP {
- public:
-  MP2F12_V(MPI_info p1, IOPs p2, Molec p3, Basis p4) : MP(p1, p2, p3, p4, {6, 1}),
-      mp2f12_v_engine(iops, basis)
-  {
-    electron_list = create_electron_sampler(iops, molec, electron_weight);
-  }
-  ~MP2F12_V() override {
-    delete electron_list;
-  }
-
- protected:
-  MP2F12_V_Engine mp2f12_v_engine;
-  void energy() override;
+  void energy();
 };
 
 class GF : public  QC_monte {
@@ -214,15 +144,28 @@ class GF : public  QC_monte {
       std::vector<std::vector<double*>>& d_cov);
 };
 
+class Diagonal_GF : public GF {
+ public:
+  Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  void monte_energy() override;
+
+ protected:
+  std::vector<MCGF*> energy_functions;
+  std::vector<GFStats> qeps;
+  void mc_local_energy(const int& step);
+  int full_print(int& step, int checkNum);
+  std::string genFileName(int, int, int, int, int, int);
+};
+
 class GPU_GF2 : public GF {
  protected:
   void mc_local_energy(std::vector<std::vector<double>>&, int);
 
  public:
   GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init_02(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
 
     ovps.alloc_02();
   }
@@ -236,10 +179,10 @@ class GPU_GF2 : public GF {
 class GF2 : public GF {
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init(1, iops.iopns[KEYS::MC_NPAIR], basis);
-    ovps.init_02(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init(1, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+    ovps.init_02(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
 
     ovps.alloc_02();
     tau->resize(2);
@@ -262,9 +205,9 @@ class GPU_GF3 : public GF {
 
  public:
   GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init_03(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
     ovps.alloc_03();
   }
   ~GPU_GF3() {
@@ -277,10 +220,10 @@ class GPU_GF3 : public GF {
 class GF3 : public GF {
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init(2, iops.iopns[KEYS::MC_NPAIR], basis);
-    ovps.init_03(iops.iopns[KEYS::MC_NPAIR], iops.iopns[KEYS::NUM_BAND],
+    ovps.init(2, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+    ovps.init_03(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::TASK] == TASKS::GFFULL) || (iops.iopns[KEYS::TASK] == TASKS::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
     ovps.alloc_03();
     tau->resize(2);
 
