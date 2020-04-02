@@ -14,7 +14,7 @@ MPI_info::MPI_info() {
    */
   comm_size(&numtasks);
   comm_rank(&taskid);
-  sys_master = 0 == taskid;
+  sys_master = (0 == taskid);
 }
 
 void MPI_info::print() {

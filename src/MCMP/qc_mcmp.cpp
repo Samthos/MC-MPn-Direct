@@ -25,6 +25,8 @@ void Energy::monte_energy() {
 
 #ifdef DIMER_PRINT
   std::vector<std::ofstream> dimer_output(emp.size() + 1);
+  MPI_info::barrier();
+  MPI_info::broadcast_string(iops.sopns[KEYS::JOBNAME]);
 #endif // DIMER_PRINT
 
   // open output stream and start clock for calculation
@@ -41,24 +43,26 @@ void Energy::monte_energy() {
       std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
       output.back().open(filename.c_str());
     }
-
+  }
 
   // if DIMER_PRINT is defined: open binary ofstream for eneries and control
-  // variates of each step.
-  //
+  // variates of each step, for each thread.
   // currently only works for MP2
 #ifdef DIMER_PRINT
+  std::string dimer_filename;
+  std::string jobname = iops.sopns[KEYS::JOBNAME].c_str();
 
-    std::string dimer_filename;
-    for (auto i = 0; i < emp.size(); i++) {
-      dimer_filename = iops.sopns[KEYS::JOBNAME] + ".22.emp.bin";
-      dimer_output[i].open(dimer_filename.c_str(), std::ios::binary);
-    }
-    dimer_filename = iops.sopns[KEYS::JOBNAME] + ".22.cv.bin";
-    dimer_output.back().open(dimer_filename.c_str(), std::ios::binary);
-
-#endif // DIMER_PRINT
+  for (auto i = 0; i < emp.size(); i++) {
+    dimer_filename = jobname;
+    dimer_filename += "_task_" + std::to_string(mpi_info.taskid);
+    dimer_filename += ".22.emp.bin";
+    dimer_output[i].open(dimer_filename.c_str(), std::ios::binary);
   }
+  dimer_filename = jobname;
+  dimer_filename += "_task_" + std::to_string(mpi_info.taskid);
+  dimer_filename += ".22.cv.bin";
+  dimer_output.back().open(dimer_filename.c_str(), std::ios::binary);
+#endif // DIMER_PRINT
 
   // --- initialize
   for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
