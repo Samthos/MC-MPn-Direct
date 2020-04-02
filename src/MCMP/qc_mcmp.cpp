@@ -54,12 +54,12 @@ void Energy::monte_energy() {
 
   for (auto i = 0; i < emp.size(); i++) {
     dimer_filename = jobname;
-    dimer_filename += "_task_" + std::to_string(mpi_info.taskid);
+    dimer_filename += "_taskid_" + std::to_string(mpi_info.taskid);
     dimer_filename += ".22.emp.bin";
     dimer_output[i].open(dimer_filename.c_str(), std::ios::binary);
   }
   dimer_filename = jobname;
-  dimer_filename += "_task_" + std::to_string(mpi_info.taskid);
+  dimer_filename += "_taskid_" + std::to_string(mpi_info.taskid);
   dimer_filename += ".22.cv.bin";
   dimer_output.back().open(dimer_filename.c_str(), std::ios::binary);
 #endif // DIMER_PRINT
