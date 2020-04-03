@@ -24,8 +24,8 @@ void Energy::monte_energy() {
   std::vector<std::ofstream> output(emp.size()+1);
 
 #ifdef DIMER_PRINT
-  std::vector<std::ofstream> dimer_output(emp.size() + 1);
-  MPI_info::barrier();
+  std::vector<std::ofstream> dimer_energy_output(emp.size() + 1);
+  std::vector<std::ofstream> dimer_control_output(emp.size() + 1);
   MPI_info::broadcast_string(iops.sopns[KEYS::JOBNAME]);
 #endif // DIMER_PRINT
 
@@ -37,11 +37,11 @@ void Energy::monte_energy() {
 
     for (auto i = 0; i < energy_functions.size(); i++) {
       std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
-      output[i].open(filename.c_str());
+      output[i].open(filename);
     }
     {
       std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
-      output.back().open(filename.c_str());
+      output.back().open(filename);
     }
   }
 
@@ -49,19 +49,14 @@ void Energy::monte_energy() {
   // variates of each step, for each thread.
   // currently only works for MP2
 #ifdef DIMER_PRINT
-  std::string dimer_filename;
-  std::string jobname = iops.sopns[KEYS::JOBNAME].c_str();
-
   for (auto i = 0; i < emp.size(); i++) {
-    dimer_filename = jobname;
-    dimer_filename += "_taskid_" + std::to_string(mpi_info.taskid);
-    dimer_filename += ".22.emp.bin";
-    dimer_output[i].open(dimer_filename.c_str(), std::ios::binary);
+    std::string dimer_filename = iops.sopns[KEYS::JOBNAME];
+    dimer_filename += ".taskid_" + std::to_string(mpi_info.taskid) + ".";
+    dimer_filename += energy_functions[i]->extension;
+
+    dimer_energy_output[i].open(dimer_filename + ".emp.bin", std::ios::binary);
+    dimer_control_output[i].open(dimer_filename + ".cv.bin", std::ios::binary);
   }
-  dimer_filename = jobname;
-  dimer_filename += "_taskid_" + std::to_string(mpi_info.taskid);
-  dimer_filename += ".22.cv.bin";
-  dimer_output.back().open(dimer_filename.c_str(), std::ios::binary);
 #endif // DIMER_PRINT
 
   // --- initialize
@@ -84,8 +79,10 @@ void Energy::monte_energy() {
 // dump energies and control vars to dimer binary ofstream
 #ifdef DIMER_PRINT
 
-    dimer_output[0].write((char*) &emp[0], sizeof(double));
-    dimer_output[1].write((char*) control[0].data(), sizeof(double) * control[0].size());
+    for (auto it = 0; it < cv.size()-1; it++) {
+      dimer_energy_output[it].write((char*) &emp[it], sizeof(double));
+      dimer_control_output[it].write((char*) control[it].data(), sizeof(double) * control[it].size());
+    }
 
 #endif // DIMER_PRINT
 
