@@ -8,35 +8,41 @@ import os
 import os.path
 import sys
 
+
 def load_data(jobname):
     # force paths to be relative to cwd e.g. removes initial './'
     jobname = os.path.relpath(jobname)
-    files = os.scandir('.')
+    filenames = os.scandir('.')
     cv_files = []
     emp_files = []
     taskids = set()
 
-    for file in files:
-        filename = file.name
+    for filename in filenames:
+        filename = filename.name
         if(filename.startswith(jobname) and os.path.isfile(filename)):
             taskid = get_taskid(filename)
-            if taskid != -1: taskids.add(taskid)
-            if filename.endswith(".cv.bin"): cv_files.append(filename)
-            if filename.endswith(".emp.bin"): emp_files.append(filename)
+            if taskid != -1:
+                taskids.add(taskid)
+
+            if filename.endswith(".cv.bin"):
+                cv_files.append(filename)
+            elif filename.endswith(".emp.bin"):
+                emp_files.append(filename)
 
     taskids = sorted(taskids)
-    file_list = [list(pair) for pair in zip(sorted(cv_files), sorted(emp_files))]
+    file_list = zip(sorted(cv_files), sorted(emp_files))
     file_list = [[np.fromfile(pair[0]).reshape(-1, 6), np.fromfile(pair[1])] for pair in file_list]
     file_dict = dict(zip(taskids, file_list))
 
     return file_dict
 
+
 def get_taskid(filename):
-    taskid_index = filename.find("taskid")
-    if taskid_index < 0:
-        return -1
-    else:
-        return int(filename[taskid_index + 7])
+    taskid = dict([s.split('_') for s in filename.split('.') if '_' in s])
+    if 'taskid' in taskid:
+        return int(taskid['taskid'])
+    return -1
+
 
 def control_variate_analysis(emp, cv):
     step = emp.size
@@ -69,7 +75,7 @@ def main():
         print("Step \t Avg. E \t Err. E \t Avg. E Ctrled \t Err. E Ctrled")
         for step in range(128, emp_data.size + 1, 128):
             print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step,
-                *control_variate_analysis(emp_data[:step], cv_data[:step])))
+                  *control_variate_analysis(emp_data[:step], cv_data[:step])))
 
 
 if __name__ == "__main__":
