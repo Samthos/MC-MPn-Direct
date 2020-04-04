@@ -34,7 +34,7 @@ def load_data(jobname):
     file_list = [[np.fromfile(pair[0]).reshape(-1, 6), np.fromfile(pair[1])] for pair in file_list]
     file_dict = dict(zip(taskids, file_list))
 
-    return file_dict
+    return file_dict, jobname
 
 
 def get_taskid(filename):
@@ -74,6 +74,8 @@ def control_variate_analysis(emp, cv, last):
     return E_avg, E_err, E_avg_ctrl, E_err_ctrl
 
 def to_json(json_data, taskid, jobname):
+    print("JOBNAME: ", jobname)
+    print("TASKID: ", taskid)
     print("EX2: ", json_data.EX2)
     print("EC: ", json_data.EC)
     print("EXC: ", json_data.EXC)
@@ -82,7 +84,7 @@ def to_json(json_data, taskid, jobname):
     print("COVCC: ", json_data.COVCC)
 
 def main():
-    file_dict = load_data(sys.argv[1])
+    file_dict, jobname = load_data(sys.argv[1])
 
     for taskid in file_dict:
         cv_data = file_dict[taskid][0]
@@ -93,11 +95,10 @@ def main():
             last = True if (step == emp_data.size) else False
             if last:
                 analysis, json_data = control_variate_analysis(emp_data[:step], cv_data[:step], last)
-                to_json(json_data, taskid, "JOB")
+                to_json(json_data, taskid, jobname)
             else:
                 analysis = control_variate_analysis(emp_data[:step], cv_data[:step], last)
             print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step, *analysis))
-
 
 if __name__ == "__main__":
     if(len(sys.argv) != 2):
