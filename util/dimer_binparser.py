@@ -61,6 +61,7 @@ def control_variate_analysis(emp, cv, last):
 
     if last:
         class json_data:
+            steps = step
             EX = E_avg
             EX2 = np.average(emp ** 2)
             EC = cv_avg
@@ -82,6 +83,18 @@ def to_json(json_data, taskid, jobname):
     print("COVXC: ", json_data.COVXC)
     print("ECC: ", json_data.ECC)
     print("COVCC: ", json_data.COVCC)
+    output = {"STEPS" : json_data.steps,
+              "EX" : json_data.EX,
+              "EX2" : json_data.EX2,
+              "EC" : json_data.EC.tolist(),
+              "EXC" : json_data.EXC.tolist(),
+              "COVXC" : json_data.COVXC.tolist(),
+              "ECC" : json_data.ECC.tolist(),
+              "COVCC" : json_data.COVCC.tolist()
+             }
+    json_filename = jobname + ".taskid_" + str(taskid) + ".22.json"
+    json_file = open(json_filename, mode = 'w', encoding = 'utf-8')
+    json.dump(output, json_file, separators = (',', ':'), indent = 4)
 
 def main():
     file_dict, jobname = load_data(sys.argv[1])
