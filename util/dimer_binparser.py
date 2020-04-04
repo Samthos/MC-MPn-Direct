@@ -43,6 +43,10 @@ def get_taskid(filename):
         return int(taskid['taskid'])
     return -1
 
+class json_data_class:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
 def control_variate_analysis(emp, cv, last):
     step = emp.size
 
@@ -60,32 +64,30 @@ def control_variate_analysis(emp, cv, last):
     E_err_ctrl = np.sqrt(E_var_ctrl / step) if E_var_ctrl >= 0 else -1
 
     if last:
-        class json_data:
-            steps = step
-            alphas = alpha
-            EX = E_avg
-            EX2 = np.average(emp ** 2)
-            EC = cv_avg
-            EXC = np.average(np.multiply(cv.T, emp), axis = 1)
-            COVXC = EXC - EC * EX
-            ECC = (1 / step) * np.einsum('ij,ik->jk', cv, cv)
-            COVCC = ECC - np.outer(EC, EC)
+        EX = E_avg
+        EX2 = np.average(emp ** 2)
+        EC = cv_avg
+        EXC = np.average(np.multiply(cv.T, emp), axis = 1)
+        COVXC = EXC - EC * EX
+        ECC = (1 / step) * np.einsum('ij,ik->jk', cv, cv)
+        COVCC = ECC - np.outer(EC, EC)
+
+        json_data = json_data_class(STEPS=step,
+                                    EX=EX,
+                                    EX2=EX2,
+                                    EC=EC.tolist(),
+                                    EXC=EXC.tolist(),
+                                    COVXC= COVXC.tolist(),
+                                    alpha= alpha.tolist(),
+                                    ECC= ECC.tolist(),
+                                    COVCC= COVCC.tolist())
 
         return (E_avg, E_err, E_avg_ctrl, E_err_ctrl), json_data
 
     return E_avg, E_err, E_avg_ctrl, E_err_ctrl
 
 def to_json(json_data, taskid, jobname):
-    output = {"STEPS" : json_data.steps,
-              "EX" : json_data.EX,
-              "EX2" : json_data.EX2,
-              "EC" : json_data.EC.tolist(),
-              "EXC" : json_data.EXC.tolist(),
-              "COVXC" : json_data.COVXC.tolist(),
-              "alpha" : json_data.alphas.tolist(),
-              "ECC" : json_data.ECC.tolist(),
-              "COVCC" : json_data.COVCC.tolist()
-             }
+    output = json_data.__dict__
     json_filename = jobname + ".taskid_" + str(taskid) + ".22.json"
     json_file = open(json_filename, mode = 'w', encoding = 'utf-8')
     json.dump(output, json_file, separators = (',', ':'), indent = 4)
