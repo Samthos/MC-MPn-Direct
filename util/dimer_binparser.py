@@ -9,6 +9,7 @@ import os.path
 import sys
 import json
 
+
 def load_data(jobname):
     # force paths to be relative to cwd e.g. removes initial './'
     jobname = os.path.relpath(jobname)
@@ -43,11 +44,8 @@ def get_taskid(filename):
         return int(taskid['taskid'])
     return -1
 
-class json_data_class:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
 
-def control_variate_analysis(emp, cv, last):
+def control_variate_analysis(emp, cv, json_filename=None):
     step = emp.size
 
     E_avg = np.average(emp)
@@ -63,7 +61,7 @@ def control_variate_analysis(emp, cv, last):
     E_var_ctrl = E_var - np.dot(alpha, E_cv_cov)
     E_err_ctrl = np.sqrt(E_var_ctrl / step) if E_var_ctrl >= 0 else -1
 
-    if last:
+    if json_filename is not None:
         EX = E_avg
         EX2 = np.average(emp ** 2)
         EC = cv_avg
@@ -71,26 +69,23 @@ def control_variate_analysis(emp, cv, last):
         COVXC = EXC - EC * EX
         ECC = (1 / step) * np.einsum('ij,ik->jk', cv, cv)
         COVCC = ECC - np.outer(EC, EC)
-
-        json_data = json_data_class(STEPS=step,
-                                    EX=EX,
-                                    EX2=EX2,
-                                    EC=EC.tolist(),
-                                    EXC=EXC.tolist(),
-                                    COVXC= COVXC.tolist(),
-                                    alpha= alpha.tolist(),
-                                    ECC= ECC.tolist(),
-                                    COVCC= COVCC.tolist())
-
-        return (E_avg, E_err, E_avg_ctrl, E_err_ctrl), json_data
-
+        json_data = {'STEPS': step,
+                     'EX': EX,
+                     'EX2': EX2,
+                     'EC': EC.tolist(),
+                     'EXC': EXC.tolist(),
+                     'COVXC': COVXC.tolist(),
+                     'alpha': alpha.tolist(),
+                     'ECC': ECC.tolist(),
+                     'COVCC': COVCC.tolist()}
+        to_json(json_data, json_filename)
     return E_avg, E_err, E_avg_ctrl, E_err_ctrl
 
-def to_json(json_data, taskid, jobname):
-    output = json_data.__dict__
-    json_filename = jobname + ".taskid_" + str(taskid) + ".22.json"
-    json_file = open(json_filename, mode = 'w', encoding = 'utf-8')
-    json.dump(output, json_file, separators = (',', ':'), indent = 4)
+
+def to_json(output, json_filename):
+    with open(json_filename, mode = 'w', encoding = 'utf-8') as json_file:
+        json.dump(output, json_file, separators = (',', ':'), indent = 4)
+
 
 def main():
     file_dict, jobname = load_data(sys.argv[1])
@@ -101,13 +96,12 @@ def main():
         print("TASKID: ", taskid)
         print("Step \t Avg. E \t Err. E \t Avg. E Ctrled \t Err. E Ctrled")
         for step in range(128, emp_data.size + 1, 128):
-            last = True if (step == emp_data.size) else False
-            if last:
-                analysis, json_data = control_variate_analysis(emp_data[:step], cv_data[:step], last)
-                to_json(json_data, taskid, jobname)
-            else:
-                analysis = control_variate_analysis(emp_data[:step], cv_data[:step], last)
+            json_filename =  None
+            if step == emp_data.size:
+                json_filename = jobname + ".taskid_" + str(taskid) + ".22.json"
+            analysis = control_variate_analysis(emp_data[:step], cv_data[:step], json_filename)
             print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step, *analysis))
+
 
 if __name__ == "__main__":
     if(len(sys.argv) != 2):
