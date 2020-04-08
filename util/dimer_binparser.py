@@ -89,22 +89,32 @@ def to_json(output, json_filename):
 
 def main():
     file_dict, jobname = load_data(sys.argv[1])
+    debug = True if (len(sys.argv) > 2 and sys.argv[2] == "--debug") else False
 
-    for taskid in file_dict:
-        cv_data = file_dict[taskid][0]
-        emp_data = file_dict[taskid][1]
-        print("TASKID: ", taskid)
+    if debug:
+        for taskid in file_dict:
+            cv_data = file_dict[taskid][0]
+            emp_data = file_dict[taskid][1]
+            print("TASKID: ", taskid)
+            print("Step \t Avg. E \t Err. E \t Avg. E Ctrled \t Err. E Ctrled")
+            for step in range(128, emp_data.size + 1, 128):
+                json_filename =  None
+                if step == emp_data.size:
+                    json_filename = jobname + ".taskid_" + str(taskid) + ".22.json"
+                analysis = control_variate_analysis(emp_data[:step], cv_data[:step], json_filename)
+                print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step, *analysis))
+    else:
+        cv_data = np.concatenate([file_dict[taskid][0] for taskid in file_dict], axis = 0)
+        emp_data = np.concatenate([file_dict[taskid][1] for taskid in file_dict], axis = 0)
+        json_filename = jobname + ".22.json"
+        step = emp_data.size
+        analysis = control_variate_analysis(emp_data, cv_data, json_filename)
         print("Step \t Avg. E \t Err. E \t Avg. E Ctrled \t Err. E Ctrled")
-        for step in range(128, emp_data.size + 1, 128):
-            json_filename =  None
-            if step == emp_data.size:
-                json_filename = jobname + ".taskid_" + str(taskid) + ".22.json"
-            analysis = control_variate_analysis(emp_data[:step], cv_data[:step], json_filename)
-            print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step, *analysis))
+        print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step, *analysis))
 
 
 if __name__ == "__main__":
-    if(len(sys.argv) != 2):
+    if(len(sys.argv) < 2):
         print("USAGE: dimer_binparser.py <job name>")
     else:
         main()
