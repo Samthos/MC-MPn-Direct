@@ -79,6 +79,14 @@ void Molec::read(const MPI_info& mpi_info, const std::string& filename) {
     atoms[i].pos[1] = pos[1];
     atoms[i].pos[2] = pos[2];
     atoms[i].tag = atom_tag;
+    atoms[i].is_ghost = false;
+
+    if (atoms[i].tag.substr(0, 2) == "bq") {
+      atoms[i].is_ghost = true;
+    } else if (atoms[i].tag[0] == 'x' && atoms[i].tag[1] != 'e') {
+      atoms[i].is_ghost = true;
+    }
+
   }
 
   if (mpi_info.sys_master) {

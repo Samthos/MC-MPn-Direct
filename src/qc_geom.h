@@ -12,6 +12,7 @@ struct Atom {
   double pos[3];
   int znum;
   std::string tag;
+  bool is_ghost;
 };
 
 class Molec {
