@@ -39,10 +39,12 @@ def load_data(jobname):
 
 
 def get_taskid(filename):
-    taskid = dict([s.split('_') for s in filename.split('.') if '_' in s])
-    if 'taskid' in taskid:
-        return int(taskid['taskid'])
-    return -1
+    taskid = -1
+    for s in filename.split('.'):
+        if s.startswith("taskid_"):
+            taskid = int(s[7:])
+
+    return taskid
 
 
 def control_variate_analysis(emp, cv, json_filename=None):
