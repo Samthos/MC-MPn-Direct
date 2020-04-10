@@ -57,6 +57,13 @@ void Energy::monte_energy() {
     dimer_energy_output[i].open(dimer_filename + ".emp.bin", std::ios::binary);
     dimer_control_output[i].open(dimer_filename + ".cv.bin", std::ios::binary);
   }
+  {
+    std::string dimer_filename = iops.sopns[KEYS::JOBNAME];
+    dimer_filename += ".taskid_" + std::to_string(mpi_info.taskid) + ".20";
+
+    dimer_energy_output.back().open(dimer_filename + ".emp.bin", std::ios::binary);
+    dimer_control_output.back().open(dimer_filename + ".cv.bin", std::ios::binary);
+  }
 #endif // DIMER_PRINT
 
   // --- initialize
@@ -76,16 +83,6 @@ void Energy::monte_energy() {
       energy();
     } while (tau->next());
 
-// dump energies and control vars to dimer binary ofstream
-#ifdef DIMER_PRINT
-
-    for (auto it = 0; it < cv.size()-1; it++) {
-      dimer_energy_output[it].write((char*) &emp[it], sizeof(double));
-      dimer_control_output[it].write((char*) control[it].data(), sizeof(double) * control[it].size());
-    }
-
-#endif // DIMER_PRINT
-
     // accumulate
     auto cv_back = control.back().begin();
     for (auto it = 0; it < cv.size()-1; it++) {
@@ -95,6 +92,20 @@ void Energy::monte_energy() {
       // std::cout << std::distance(control.back().begin(), cv_back) << std::endl;
     }
     cv.back()->add(std::accumulate(emp.begin(), emp.end(), 0.0), control.back());
+    
+// dump energies and control vars to dimer binary ofstream
+#ifdef DIMER_PRINT
+    for (auto it = 0; it < cv.size()-1; it++) {
+      dimer_energy_output[it].write((char*) &emp[it], sizeof(double));
+      dimer_control_output[it].write((char*) control[it].data(), sizeof(double) * control[it].size());
+    }
+    {
+      double total_energy = std::accumulate(emp.begin(), emp.end(), 0.0);
+      dimer_energy_output.back().write((char*) &total_energy, sizeof(double));
+      dimer_control_output.back().write((char*) control.back().data(), sizeof(double) * control.back().size());
+    }
+#endif // DIMER_PRINT
+
     // print if i is a multiple of 128
     if (0 == step % 128) {
       for (auto i = 0; i < emp.size(); i++) {
