@@ -20,11 +20,12 @@ def write_geometry(filename, xyz):
     for line in xyz[1:]:
         atoms.add(line.split(' ')[0])
 
+    dummy.insert(1, '\n')
     with open(filename + ".xyz", 'w') as f:
         f.write("".join(dummy))
     with open(filename + ".nwin", 'a') as f:
         f.write("geometry nocenter noautoz\n")
-        f.write("".join(["    " + line for line in dummy[1:]]))
+        f.write("".join(["    " + line for line in dummy[2:]]))
         f.write('end\n\n')
 
     return atoms
