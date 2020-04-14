@@ -98,13 +98,16 @@ The following are options technically options, but will be set for nearly every 
   * MP2: Only Energy job types. Specifies to calculate second-order correction to energy.
   * MP3: Only Energy job types. Specifies to calculate third-order correction to energy.
   * MP4: Only Energy job types. Specifies to calculate forth-order correction to energy.
-  * GF2: Only GF job types. Specifies to calculate second-order correction to energy.
-  * GF3: Only GF job types. Specifies to calculate third-order correction to energy.
-  * F12V: Any job types. Calculate second-order F12V correction.
-  * F12VB Any job types. Calculate second-order F12VBX correction.
+  * MP2_F12_V: Only Energy job types. Calculate second-order F12V correction.
+  * MP2_F12_VBX: Only Energy job types. Calculate second-order F12VBX correction.
+  * GF2: Only GF job types. Specifies to calculate second-order correction to the self-energy.
+  * GF3: Only GF job types. Specifies to calculate third-order correction to the self-energy.
+  * GF2_F12_V: Only GF job types. Calculate second-order F12V correction. Only for occupided orbitals.
+  * GF2_F12_VBX: Only GF job types. Calculate second-order F12VBX correction. Only for occupied orbitlas.
 
 * **ELECTRON_PAIRS**: (INT) Number of electron-pair walkers to use for the calculation. Default=16
 * **MC_TRIAL**: (INT) Number of MC steps to perform. Default=1024
+* **FREEZE_CORE**: (INT) Option to invoke the frozen core approximation. Values={0, 1}. Default=1
 
 * **MP\<N\>CV_LEVEL**: (INT) Set the deepest loop that control variates may be calculated in for energy calculations. Higher values produce more control variates. Maximum values is N.
 
