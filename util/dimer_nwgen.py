@@ -36,7 +36,7 @@ def write_basis(filename, atoms):
         f.write("    * library aug-cc-pvdz\n")
         for atom in atoms:
             f.write("    x{} library {} aug-cc-pvdz\n".format(atom, atom.lower()))
-        f.write("end\n")
+        f.write("end\n\n")
 
 
 def write_task(filename):
@@ -46,12 +46,13 @@ def write_task(filename):
         f.write("end\n\n")
         f.write("task scf")
 
+
 def main():
     input_xyz = sys.argv[1]
     output_dir = input_xyz[:-10]
     with open(input_xyz, "r") as f:
         xyz = f.readlines()
-        xyz = [str(line) for line in xyz]
+        xyz = [str(line).lstrip() for line in xyz if line != "\n"]
     filenames = (output_dir + "_dimer",
                  output_dir + "_monomer_a",
                  output_dir + "_monomer_b")
