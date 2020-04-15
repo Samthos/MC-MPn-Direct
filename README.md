@@ -113,12 +113,19 @@ The following are options technically options, but will be set for nearly every 
 
 The options control the sequence of random number used.
 
-* **DEBUG**: (INT) Values={0, 1}; Default=0
+* **DEBUG**: (INT) Values={0, 1, 2}; Default=0
 
-  0. The random number generators is seeded from std::random_devices.
+  0. The random number generators is seeded from std::random_devices. 
   1. The random number generators are seeded using preset seeds. **May only run upto 16 MPI threads**
+  2. The random number generators are seeded using the values is SEED_FILE. (See SEED_FILE options)
+
+* **SEED_FILE**: (String); Default=""
+
+  * DEBUG=0: The values used to seed the random number generators are saved to "SEED_FILE".
+  * DEBUG=2: The values used to seed the random number generators are read from "SEED_FILE". 
 
 * **SAMPLER**: (STRING) Sets method to use to sample the electron-pair importance function. Default=DIRECT
+
   * DIRECT: Use the direct sampling algorithm for the electron-pair coordinates.
   * METROPOLIS: Use the Metropolis sampling algorithm for the electron-pair coordinates. **Not compatable with control variates**
 

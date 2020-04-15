@@ -37,6 +37,7 @@ namespace KEYS {
     MP3CV_LEVEL,             // simple
     MP4CV_LEVEL,             // simple
     FREEZE_CORE,             // simple
+    SEED_FILE,
   };
   const std::vector<std::string> key_strings = {
       "JOBNAME", "JOBTYPE", "SPHERICAL", "MC_TRIAL", "MC_DELX",
@@ -44,7 +45,7 @@ namespace KEYS {
       "DEBUG", "TASK", "NUM_BAND", "OFF_BAND", 
       "DIFFS", "ORDER", "SAMPLER", "TAU_INTEGRATION",
       "F12_CORRELATION_FACTOR", "F12_GAMMA", "F12_BETA", "ELECTRONS", "ELECTRON_PAIRS",
-      "MP2CV_LEVEL", "MP3CV_LEVEL", "MP4CV_LEVEL", "FREEZE_CORE",
+      "MP2CV_LEVEL", "MP3CV_LEVEL", "MP4CV_LEVEL", "FREEZE_CORE", "SEED_FILE"
   };
 }
 namespace SAMPLER {

@@ -25,6 +25,7 @@ IOPs::IOPs() {
   bopns[KEYS::FREEZE_CORE] = true;
 
   dopns[KEYS::MC_DELX] = 0.1;
+  sopns[KEYS::SEED_FILE] = "";
 
   iopns[KEYS::ELECTRON_PAIRS] = 16;
   iopns[KEYS::ELECTRONS] = 16;
@@ -224,6 +225,10 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
               bopns[keyval] = (stoi(key, nullptr) != 0);
               keySet = false;
               break;
+            case KEYS::SEED_FILE:
+              sopns[keyval] = key;
+              keySet = false;
+              break;
             default:
               std::cerr << "KEY \"" << key << "\" NOT RECONGNIZED" << std::endl;
               exit(EXIT_FAILURE);
@@ -242,6 +247,9 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
   MPI_info::broadcast_int(iopns.data(), iopns.size());
   MPI_info::broadcast_double(dopns.data(), dopns.size());
   MPI_info::broadcast_char((char*) bopns.data(), bopns.size());
+  for (auto &it : sopns) {
+    MPI_info::broadcast_string(it);
+  }
 }
 
 void IOPs::print(const MPI_info& mpi_info, const std::string& file) {

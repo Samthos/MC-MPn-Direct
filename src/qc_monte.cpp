@@ -17,7 +17,7 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
     basis(p3),
     electron_pair_weight(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]),
     electron_weight(mpi_info, molec, iops.sopns[KEYS::MC_BASIS]),
-    random(iops.iopns[KEYS::DEBUG])
+    random(iops.iopns[KEYS::DEBUG], iops.sopns[KEYS::SEED_FILE])
 {
   numBand = iops.iopns[KEYS::NUM_BAND];
   offBand = iops.iopns[KEYS::OFF_BAND];
