@@ -10,8 +10,8 @@ double calculate_v_4e_help(
     const std::vector<double>& S_ip_io_1, const std::vector<double>& S_ip_io_2,
     const std::vector<double>& S_ip, size_t size, size_t size_ep
     ) {
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-      size_ep, size, size,
+  cblas_dgemm( CblasColMajor, CblasTrans, CblasNoTrans,
+      size, size_ep, size,
       1.0,
       S_io_jo.data(), size,
       S_ip_jo.data(), size,
@@ -565,7 +565,7 @@ double MP2_F12_VBX::calculate_bx_k_5e_help(
   }
 
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-      size, size, size_ep,
+      size, size, size,
       1.0,
       T_jo_ko.data(), size,
       S_io_ko.data(), size,
