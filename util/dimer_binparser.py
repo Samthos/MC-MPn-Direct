@@ -8,6 +8,7 @@ import os
 import os.path
 import sys
 import json
+from argparse import ArgumentParser
 
 
 def load_data(jobname):
@@ -89,11 +90,26 @@ def to_json(output, json_filename):
         json.dump(output, json_file, separators = (',', ':'), indent = 4)
 
 
-def main():
-    file_dict, jobname = load_data(sys.argv[1])
-    debug = True if (len(sys.argv) > 2 and sys.argv[2] == "--debug") else False
+def main(args):
+    if(args.single):
+        file_dict, jobname = load_data(args.single)
+    elif(args.auto_dimer):
+        # TODO
+        # find dimer files automatically
+        pass
+    else:
+        # i.e. dimer and monomers are explicitly specified in args.dimer
+        dimer_file_dict, dimer_jobname = load_data(args.dimer[0])
+        monomerA_file_dict, monomerA_jobname = load_data(args.dimer[1])
+        monomberB_file_dict, monomerB_jobname = load_data(args.dimer[2])
 
-    if debug:
+        file_dict = dict()
+        jobname = "DIMER_ANALYSIS_" + dimer_jobname
+        for i in dimer_file_dict:
+            file_dict[i][0] = dimer_file_dict[i][0] - monomerA_file_dict[i][0] - monomerB_file_dict[i][0]
+            file_dict[i][1] = dimer_file_dict[i][1] - monomerA_file_dict[i][1] - monomerB_file_dict[i][1]
+
+    if args.debug:
         for taskid in file_dict:
             cv_data = file_dict[taskid][0]
             emp_data = file_dict[taskid][1]
@@ -116,7 +132,19 @@ def main():
 
 
 if __name__ == "__main__":
-    if(len(sys.argv) < 2):
-        print("USAGE: dimer_binparser.py <job name>")
+    parser = ArgumentParser()
+    parser.add_argument("--debug",
+                        help = "run in debug mode and print calculated trajectory every 128 steps per thread. significantly slows script.",
+                        action = "store_true")
+    dimer_calc = parser.add_mutually_exclusive_group()
+    dimer_calc.add_argument("--single", metavar = "[JOB NAME]",
+                                    help = "extract energy and control variate data from a single job (req. job name without .taskid_[n].[cv,emp].bin suffix).")
+    dimer_calc.add_argument("--dimer", nargs = 3, metavar=("[DIMER NAME]", "[MONOMER A NAME]", "[MONOMER B NAME]"),
+                            help = "run in dimer mode and calculate stabilization energy. requires specifying dimer and both monomer job names (without .taskid_[n].[cv,emp].bin suffix).")
+    dimer_calc.add_argument("--auto-dimer", action="store_true",
+                            help = "same as '--dimer', but automatically finds job names by searching for files in the current directory containing 'dimer', 'monomer_a', 'monomer_b'.")
+    args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
     else:
-        main()
+        main(args)
