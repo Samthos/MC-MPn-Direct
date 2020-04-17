@@ -22,8 +22,10 @@ IOPs::IOPs() {
   bopns[KEYS::SPHERICAL] = true;
   bopns[KEYS::F12_GAMMA] = false;
   bopns[KEYS::F12_BETA] = false;
+  bopns[KEYS::FREEZE_CORE] = true;
 
   dopns[KEYS::MC_DELX] = 0.1;
+  sopns[KEYS::SEED_FILE] = "";
 
   iopns[KEYS::ELECTRON_PAIRS] = 16;
   iopns[KEYS::ELECTRONS] = 16;
@@ -219,6 +221,14 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
               iopns[keyval] = stoi(key, nullptr);
               keySet = false;
               break;
+            case KEYS::FREEZE_CORE:
+              bopns[keyval] = (stoi(key, nullptr) != 0);
+              keySet = false;
+              break;
+            case KEYS::SEED_FILE:
+              sopns[keyval] = key;
+              keySet = false;
+              break;
             default:
               std::cerr << "KEY \"" << key << "\" NOT RECONGNIZED" << std::endl;
               exit(EXIT_FAILURE);
@@ -237,6 +247,9 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
   MPI_info::broadcast_int(iopns.data(), iopns.size());
   MPI_info::broadcast_double(dopns.data(), dopns.size());
   MPI_info::broadcast_char((char*) bopns.data(), bopns.size());
+  for (auto &it : sopns) {
+    MPI_info::broadcast_string(it);
+  }
 }
 
 void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
@@ -259,6 +272,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
     std::cout << " MC_TRIAL: " << iopns[KEYS::MC_TRIAL] << std::endl;
     std::cout << " Electron Pairs: " << iopns[KEYS::ELECTRON_PAIRS] << std::endl;
     std::cout << " SAMPLER: " << SAMPLER::sampler_strings[iopns[KEYS::SAMPLER]] << std::endl;
+    std::cout << " FREEZE_CORE: " << bopns[KEYS::FREEZE_CORE] << std::endl;
     if (iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
       std::cout << " MC_DELX: " << dopns[KEYS::MC_DELX] << std::endl;
     }

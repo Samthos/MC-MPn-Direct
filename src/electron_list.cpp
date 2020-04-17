@@ -40,7 +40,11 @@ Electron_List* create_electron_sampler(IOPs& iops, Molec& molec, Electron_GTO_We
   if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
     electron_list = new Direct_Electron_List(iops.iopns[KEYS::ELECTRONS]);
   } else if (iops.iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
-    Random rnd(iops.iopns[KEYS::DEBUG]);
+    std::string str = iops.sopns[KEYS::SEED_FILE];
+    if (!str.empty()) {
+      str += ".electron_list_metropolis";
+    }
+    Random rnd(iops.iopns[KEYS::DEBUG], str);
     electron_list = new Metropolis_Electron_List(iops.iopns[KEYS::ELECTRONS], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
   }
   return electron_list;

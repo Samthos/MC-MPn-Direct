@@ -56,7 +56,11 @@ Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molec& molec, Elect
   if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
     electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::ELECTRON_PAIRS]);
   } else if (iops.iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
-    Random rnd(iops.iopns[KEYS::DEBUG]);
+    std::string str = iops.sopns[KEYS::SEED_FILE];
+    if (!str.empty()) {
+      str += ".electron_pair_list_metropolis";
+    }
+    Random rnd(iops.iopns[KEYS::DEBUG], str);
     electron_pair_list = new Metropolis_Electron_Pair_List(iops.iopns[KEYS::ELECTRON_PAIRS], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
   }
   return electron_pair_list;
