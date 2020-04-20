@@ -4,38 +4,19 @@
 # MP2CV = 2, i.e. 6 control variates
 
 import numpy as np
-import os
-import os.path
 import sys
 import json
+import glob
 from argparse import ArgumentParser
 
 
-def load_data(jobname):
-    # force paths to be relative to cwd e.g. removes initial './'
-    jobname = os.path.relpath(jobname)
-    filenames = os.scandir('.')
-    cv_files = []
-    emp_files = []
-    taskids = set()
-
-    for filename in filenames:
-        filename = filename.name
-        if(filename.startswith(jobname) and os.path.isfile(filename)):
-            taskid = get_taskid(filename)
-            if taskid != -1:
-                taskids.add(taskid)
-
-            if filename.endswith(".cv.bin"):
-                cv_files.append(filename)
-            elif filename.endswith(".emp.bin"):
-                emp_files.append(filename)
-
-    taskids = sorted(taskids)
-    file_list = zip(sorted(cv_files), sorted(emp_files))
-    file_list = [[np.fromfile(pair[0]).reshape(-1, 6), np.fromfile(pair[1])] for pair in file_list]
-    file_dict = dict(zip(taskids, file_list))
-
+def load_data(jobname, extension="22"):
+    fnames = sorted(glob.glob(''.join([jobname, '*',  extension, '.emp.bin'])))
+    data = []
+    for fname in fnames:
+        data.append([np.fromfile(fname)])
+        data[-1].insert(0, np.fromfile(fname[:-7] + 'cv.bin').reshape(data[-1][0].size, -1))
+    file_dict = dict(zip(range(len(data)), data))
     return file_dict, jobname
 
 
@@ -92,22 +73,23 @@ def to_json(output, json_filename):
 
 def main(args):
     if(args.single):
-        file_dict, jobname = load_data(args.single)
+        file_dict, jobname = load_data(args.single, args.extension)
     elif(args.auto_dimer):
         # TODO
         # find dimer files automatically
         pass
     else:
         # i.e. dimer and monomers are explicitly specified in args.dimer
-        dimer_file_dict, dimer_jobname = load_data(args.dimer[0])
-        monomerA_file_dict, monomerA_jobname = load_data(args.dimer[1])
-        monomberB_file_dict, monomerB_jobname = load_data(args.dimer[2])
+        dimer_file_dict, dimer_jobname = load_data(args.dimer[0], args.extension)
+        monomerA_file_dict, monomerA_jobname = load_data(args.dimer[1], args.extension)
+        monomerB_file_dict, monomerB_jobname = load_data(args.dimer[2], args.extension)
 
         file_dict = dict()
         jobname = "DIMER_ANALYSIS_" + dimer_jobname
         for i in dimer_file_dict:
-            file_dict[i][0] = dimer_file_dict[i][0] - monomerA_file_dict[i][0] - monomerB_file_dict[i][0]
-            file_dict[i][1] = dimer_file_dict[i][1] - monomerA_file_dict[i][1] - monomerB_file_dict[i][1]
+            file_dict[i] = [dimer_file_dict[i][0] - monomerA_file_dict[i][0] - monomerB_file_dict[i][0],
+                            dimer_file_dict[i][1] - monomerA_file_dict[i][1] - monomerB_file_dict[i][1]]
+
 
     if args.debug:
         for taskid in file_dict:
@@ -136,6 +118,7 @@ if __name__ == "__main__":
     parser.add_argument("--debug",
                         help = "run in debug mode and print calculated trajectory every 128 steps per thread. significantly slows script.",
                         action = "store_true")
+    parser.add_argument('-e', '--extension', default='22', help='sets extension of bin files')
     dimer_calc = parser.add_mutually_exclusive_group()
     dimer_calc.add_argument("--single", metavar = "[JOB NAME]",
                                     help = "extract energy and control variate data from a single job (req. job name without .taskid_[n].[cv,emp].bin suffix).")
