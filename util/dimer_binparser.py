@@ -125,16 +125,17 @@ def main(args):
         json_filename = jobname + ".22.json"
         step = emp_data.size
         analysis = control_variate_analysis(emp_data, cv_data, json_filename)
-        print("Step \t Avg. E \t Err. E \t Avg. E Ctrled \t Err. E Ctrled")
-        print("{} \t {:.7f} \t {:.7f} \t {:.7f} \t {:.7f}".format(step, *analysis))
+        row_header_format = "{:10}  " + "{:16}  " * 4
+        row_format = "{:<10d}  " + "{:<+16.8e}  " * 4
+        print(row_header_format.format("Step", "Avg. E", "Err. E", "Avg. E Ctrled", "Err. E Ctrled"))
+        print(row_format.format(step, *analysis))
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--debug",
-                        help = "run in debug mode and print calculated trajectory every 128 steps per thread. significantly slows script.",
-                        action = "store_true")
-    parser.add_argument('-e', '--extension', default='22', help='sets extension of bin files')
+    parser.add_argument("--debug", action = "store_true",
+                        help = "run in debug mode and print calculated trajectory every 128 steps per thread. significantly slows script.")
+    parser.add_argument('-e', '--extension', default='22', help='sets extension of bin files.')
     dimer_calc = parser.add_mutually_exclusive_group()
     dimer_calc.add_argument("--single", metavar = "[JOB NAME]",
                             help = "extract energy and control variate data from a single job (req. job name without .taskid_[n].[cv,emp].bin suffix).")
