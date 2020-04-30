@@ -74,22 +74,38 @@ def to_json(output, json_filename):
 def main(args):
     if(args.single):
         file_dict, jobname = load_data(args.single, args.extension)
-    elif(args.auto_dimer):
-        # TODO
-        # find dimer files automatically
-        pass
     else:
-        # i.e. dimer and monomers are explicitly specified in args.dimer
-        dimer_file_dict, dimer_jobname = load_data(args.dimer[0], args.extension)
-        monomerA_file_dict, monomerA_jobname = load_data(args.dimer[1], args.extension)
-        monomerB_file_dict, monomerB_jobname = load_data(args.dimer[2], args.extension)
+        if (args.auto_dimer):
+            dmm_jobnames = list(range(3))
+            for filename in glob.glob("*.bin"):
+                first_word = filename.split(".")[0]
+                jobname = filename.split(".taskid_")[0]
+                if first_word.endswith("dimer"):
+                    dmm_jobnames[0] = jobname
+                elif first_word.endswith("monomer_a"):
+                    dmm_jobnames[1] = jobname
+                elif first_word.endswith("monomer_b"):
+                    dmm_jobnames[2] = jobname
+
+            print("Detected dimer jobname:     ", dmm_jobnames[0])
+            print("Detected monomer A jobname: ", dmm_jobnames[1])
+            print("Detected monomer B jobname: ", dmm_jobnames[2])
+            if input("Is this correct? [Y/n]: ") in ["n", "N"]:
+                print("Aborted per user direction.")
+                return -1
+        else:
+            dmm_jobnames = args.dimer
+
+        dimer_file_dict, dimer_jobname = load_data(dmm_jobnames[0], args.extension)
+        monomerA_file_dict, monomerA_jobname = load_data(dmm_jobnames[1], args.extension)
+        monomerB_file_dict, monomerB_jobname = load_data(dmm_jobnames[2], args.extension)
 
         file_dict = dict()
+
         jobname = "DIMER_ANALYSIS_" + dimer_jobname
         for i in dimer_file_dict:
             file_dict[i] = [dimer_file_dict[i][0] - monomerA_file_dict[i][0] - monomerB_file_dict[i][0],
                             dimer_file_dict[i][1] - monomerA_file_dict[i][1] - monomerB_file_dict[i][1]]
-
 
     if args.debug:
         for taskid in file_dict:
@@ -121,11 +137,12 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--extension', default='22', help='sets extension of bin files')
     dimer_calc = parser.add_mutually_exclusive_group()
     dimer_calc.add_argument("--single", metavar = "[JOB NAME]",
-                                    help = "extract energy and control variate data from a single job (req. job name without .taskid_[n].[cv,emp].bin suffix).")
+                            help = "extract energy and control variate data from a single job (req. job name without .taskid_[n].[cv,emp].bin suffix).")
     dimer_calc.add_argument("--dimer", nargs = 3, metavar=("[DIMER NAME]", "[MONOMER A NAME]", "[MONOMER B NAME]"),
                             help = "run in dimer mode and calculate stabilization energy. requires specifying dimer and both monomer job names (without .taskid_[n].[cv,emp].bin suffix).")
     dimer_calc.add_argument("--auto-dimer", action="store_true",
                             help = "same as '--dimer', but automatically finds job names by searching for files in the current directory containing 'dimer', 'monomer_a', 'monomer_b'.")
+
     args = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
