@@ -102,7 +102,7 @@ def main(args):
 
         file_dict = dict()
 
-        jobname = "DIMER_ANALYSIS_" + dimer_jobname
+        jobname = "DIMER_ANALYSIS_" + dimer_jobname.replace("_dimer", "")
         for i in dimer_file_dict:
             file_dict[i] = [dimer_file_dict[i][0] - monomerA_file_dict[i][0] - monomerB_file_dict[i][0],
                             dimer_file_dict[i][1] - monomerA_file_dict[i][1] - monomerB_file_dict[i][1]]
