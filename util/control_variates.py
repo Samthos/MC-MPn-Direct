@@ -45,9 +45,25 @@ def from_trajectory_file(emp_filename):
     return from_trajectory(emp, cv)
 
 
-def from_json(filename):
-    # TODO
-    pass
+def from_json(json_filename):
+    with open(json_filename, 'r') as f:
+        data = f.read()
+
+    json_dict = json.loads(data)
+
+    CV_obj = CV()
+    CV_obj.steps = json_dict['STEPS']
+    CV_obj.EX = json_dict['EX']
+    CV_obj.EX2 = json_dict['EX2']
+    CV_obj.EC = np.array(json_dict['EC'])
+    CV_obj.EXC = np.array(json_dict['EXC'])
+    CV_obj.ECC = np.array(json_dict['ECC'])
+    CV_obj.COVXC = np.array(json_dict['COVXC'])
+    CV_obj.alpha = np.array(json_dict['alpha'])
+    CV_obj.COVCC = np.array(json_dict['COVCC'])
+
+    return CV_obj
+
 
 
 class CV:
