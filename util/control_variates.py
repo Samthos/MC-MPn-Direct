@@ -14,20 +14,19 @@ def from_trajectory(emp, cv):
     # average of energies
     CV_obj.EX = np.average(emp)
 
-    # average of squared energies
+    # average of squared energies (to calculate variance)
     CV_obj.EX2 = np.average(emp ** 2)
 
-    # average of each control variate
+    # vector of average control variates
     CV_obj.EC = np.average(cv, axis=0)
+
+    # vector of average energy-control variate products
+    CV_obj.EXC = np.average(np.multiply(cv.T, emp), axis = 1)
 
     # matrix of average control variate products
     CV_obj.ECC = (1 / N) * np.einsum('ij,ik->jk', cv, cv)
 
-    # variance and standard error
-    E_var = np.var(emp)
-    E_err = np.sqrt(E_var / N)
-
-    # compute energy/control variate covariance
+    # compute energy/control variate covariance vector
     CV_obj.COVXC = CV_obj.EXC - CV_obj.EC * CV_obj.EX
 
     # compute covariance matrix of control variates
@@ -35,14 +34,6 @@ def from_trajectory(emp, cv):
 
     # compute alpha
     CV_obj.alpha = np.linalg.solve(CV_obj.COVCC, CV_obj.COVXC)
-
-    E_avg_ctrl = CV_obj.EX - np.dot(CV_obj.alpha, CV_obj.EC)
-    E_var_ctrl = E_var - np.dot(CV_obj.alpha, CV_obj.COVXC)
-    E_err_ctrl = np.sqrt(E_var_ctrl / N) if E_var_ctrl >= 0 else -1
-
-    CV_obj.EXC = np.average(np.multiply(cv.T, emp), axis = 1)
-
-    CV_obj.analysis = [CV_obj.EX, E_err, E_avg_ctrl, E_err_ctrl]
 
     return CV_obj
 
@@ -72,13 +63,10 @@ class CV:
         self.alpha = 0
         self.COVCC = 0
 
-        # TODO get rid of this
-        self.analysis = None
-
 
     def __repr__(self):
         row_format = "{:<10d}  " + "{:<+16.8e}  " * 4
-        row = row_format.format(self.steps, *self.analysis)
+        row = row_format.format(self.steps, *self.analysis())
         return row
 
 
@@ -100,13 +88,6 @@ class CV:
         CV_obj.EXC = self_ratio * self.EXC + other_ratio * other.EXC
         CV_obj.ECC = self_ratio * self.ECC + other_ratio * other.ECC
 
-        # re-computed quantities
-        # TODO: move analysis to a separate function; avoid cut and paste code
-
-        # compute variance and standard error
-        E_var = CV_obj.EX2 - (CV_obj.EX ** 2)
-        E_err = np.sqrt(E_var / N)
-
         # re-compute energy/control variate covariance
         CV_obj.COVXC = CV_obj.EXC - CV_obj.EC * CV_obj.EX
 
@@ -115,13 +96,6 @@ class CV:
 
         # re-compute alpha
         CV_obj.alpha = np.linalg.solve(CV_obj.COVCC, CV_obj.COVXC)
-
-        E_avg_ctrl = CV_obj.EX - np.dot(CV_obj.alpha, CV_obj.EC)
-        E_var_ctrl = E_var - np.dot(CV_obj.alpha, CV_obj.COVXC)
-        E_err_ctrl = np.sqrt(E_var_ctrl / N) if E_var_ctrl >= 0 else -1
-
-        CV_obj.analysis = [CV_obj.EX, E_err, E_avg_ctrl, E_err_ctrl]
-        analysis = [CV_obj.EX, E_err, E_avg_ctrl, E_err_ctrl]
 
         return CV_obj
 
@@ -139,3 +113,19 @@ class CV:
 
         with open(json_filename, mode = 'w', encoding = 'utf-8') as json_file:
             json.dump(json_data, json_file, separators = (',', ':'), indent = 4)
+
+
+    def analysis(self):
+        N = self.steps
+
+        # compute variance and standard error of energy
+        E_avg = self.EX
+        E_var = self.EX2 - (self.EX ** 2)
+        E_err = np.sqrt(E_var / N)
+
+        # compute controlled energy and its variance, standard error
+        E_avg_ctrl = self.EX - np.dot(self.alpha, self.EC)
+        E_var_ctrl = E_var - np.dot(self.alpha, self.COVXC)
+        E_err_ctrl = np.sqrt(E_var_ctrl / N) if E_var_ctrl >= 0 else -1
+
+        return [E_avg, E_err, E_avg_ctrl, E_err_ctrl]
