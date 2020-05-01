@@ -22,6 +22,8 @@ def print_header():
 def main(args):
 
     emp2cv = lambda s: s.rstrip(".emp.bin") + ".cv.bin"
+    print(args.name)
+    print(args.method)
 
     if args.single:
         emp_filename = args.single
@@ -87,10 +89,10 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--extension', default = '22', help='sets extension of bin files.')
     parser.add_argument('-j', '--include-json', nargs = '*', metavar = 'JSON FILES',
                         help = "specify JSON trajectories of previous calculations to include in energy calculation.")
-    parser.add_argument('-n', '--name', nargs = 1, default = "A", metavar = '[SYSTEM NAME]',
+    parser.add_argument('-n', '--name', nargs = '?', default = "A", metavar = '[SYSTEM NAME]',
                         help = "specify name of the system (up to 14 chars).")
-    parser.add_argument('-m', '--method', nargs = 1, default = "MP2", metavar = '[METHOD NAME]',
-                        help = "specify name of the method used (up to 14 chars).")
+    parser.add_argument('-m', '--method', nargs = '?', default = "MP2", metavar = '[METHOD NAME]',
+                        help = "specif y name of the method used (up to 14 chars).")
 
     dimer_calc = parser.add_mutually_exclusive_group()
     dimer_calc.add_argument("--single", metavar = "[EMP FILENAME]",
