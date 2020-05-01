@@ -22,8 +22,6 @@ def print_header():
 def main(args):
 
     emp2cv = lambda s: s.rstrip(".emp.bin") + ".cv.bin"
-    print(args.name)
-    print(args.method)
 
     if args.single:
         emp_filename = args.single
