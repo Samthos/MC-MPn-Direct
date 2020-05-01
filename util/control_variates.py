@@ -38,9 +38,12 @@ def from_trajectory(emp, cv):
     return CV_obj
 
 
-def from_trajectory_file(emp, cv):
-    # TODO
-    pass
+def from_trajectory_file(emp_filename, cv_filename = None):
+
+    emp = np.fromfile(emp_filename)
+    cv = np.fromfile(cv_filename).reshape(emp.size, -1)
+
+    return from_trajectory(emp, cv)
 
 
 def from_json(filename):
