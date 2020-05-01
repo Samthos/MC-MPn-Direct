@@ -13,6 +13,12 @@ from argparse import ArgumentParser
 import control_variates as CV
 
 
+def print_header():
+    header_format = "{:10}  " + "{:16}  " * 4
+    header = header_format.format("Step", "Avg. E", "Err. E", "Avg. E Ctrled", "Err. E Ctrled")
+    print(header)
+
+
 def main(args):
     if(args.single):
         # TODO
@@ -58,6 +64,7 @@ def main(args):
 
         new_data = new_data + CV.from_trajectory(emp, cv)
 
+    print_header()
     print(new_data)
 
     # TODO: specify json files to average over
