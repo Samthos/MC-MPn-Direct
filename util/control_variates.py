@@ -38,8 +38,7 @@ def from_trajectory(emp, cv):
     return CV_obj
 
 
-def from_trajectory_file(emp_filename, cv_filename = None):
-
+def from_trajectory_file(emp_filename):
     emp = np.fromfile(emp_filename)
     cv = np.fromfile(cv_filename).reshape(emp.size, -1)
 
@@ -74,7 +73,11 @@ class CV:
 
 
     def __radd__(self, other):
-        return self
+        if type(other) == int:
+            return self
+        else:
+            message = "unsupported operand type(s) for +: '{}' and 'CV'".format(other.__class__.__name__)
+            raise TypeError(message)
 
 
     def __add__(self, other):
