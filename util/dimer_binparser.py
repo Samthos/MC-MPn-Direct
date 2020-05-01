@@ -13,73 +13,13 @@ from argparse import ArgumentParser
 import control_variates as CV
 
 
-def load_data(jobname, extension="22"):
-    fnames = sorted(glob.glob(''.join([jobname, '*',  extension, '.emp.bin'])))
-    data = []
-    for fname in fnames:
-        data.append([np.fromfile(fname)])
-        data[-1].insert(0, np.fromfile(fname[:-7] + 'cv.bin').reshape(data[-1][0].size, -1))
-    file_dict = dict(zip(range(len(data)), data))
-    return file_dict, jobname
-
-
-def get_taskid(filename):
-    taskid = -1
-    for s in filename.split('.'):
-        if s.startswith("taskid_"):
-            taskid = int(s[7:])
-
-    return taskid
-
-
-def control_variate_analysis(emp, cv, json_filename=None):
-    step = emp.size
-
-    E_avg = np.average(emp)
-    E_var = np.var(emp)
-    E_err = np.sqrt(E_var / step)
-
-    cv_avg = np.average(cv, axis=0)
-    E_cv_cov = np.cov(cv, emp[:step], rowvar=False, bias=True)[-1, :6]
-    cv_cv_cov = np.cov(cv, rowvar=False, bias=True)
-    alpha = np.linalg.solve(cv_cv_cov, E_cv_cov)
-
-    E_avg_ctrl = E_avg - np.dot(alpha, cv_avg)
-    E_var_ctrl = E_var - np.dot(alpha, E_cv_cov)
-    E_err_ctrl = np.sqrt(E_var_ctrl / step) if E_var_ctrl >= 0 else -1
-
-    if json_filename is not None:
-        EX = E_avg
-        EX2 = np.average(emp ** 2)
-        EC = cv_avg
-        EXC = np.average(np.multiply(cv.T, emp), axis = 1)
-        COVXC = EXC - EC * EX
-        ECC = (1 / step) * np.einsum('ij,ik->jk', cv, cv)
-        COVCC = ECC - np.outer(EC, EC)
-        json_data = {'STEPS': step,
-                     'EX': EX,
-                     'EX2': EX2,
-                     'EC': EC.tolist(),
-                     'EXC': EXC.tolist(),
-                     'COVXC': COVXC.tolist(),
-                     'alpha': alpha.tolist(),
-                     'ECC': ECC.tolist(),
-                     'COVCC': COVCC.tolist()}
-        to_json(json_data, json_filename)
-    return E_avg, E_err, E_avg_ctrl, E_err_ctrl
-
-
-def to_json(output, json_filename):
-    with open(json_filename, mode = 'w', encoding = 'utf-8') as json_file:
-        json.dump(output, json_file, separators = (',', ':'), indent = 4)
-
-
 def main(args):
     if(args.single):
         # TODO
         file_dict, jobname = load_data(args.single, args.extension)
     else:
         if (args.auto_dimer):
+            # TODO: redo the code here
             dmm_jobnames = list(range(3))
             for filename in glob.glob("*.bin"):
                 first_word = filename.split(".")[0]
@@ -101,8 +41,9 @@ def main(args):
             dmm_jobnames = args.dimer
 
 
+    dimer_jobname = dmm_jobnames[0]
     new_data = CV.CV()
-    for dimer_emp_file in glob.glob(dmm_jobnames[0] + "*" + args.extension + ".emp.bin"):
+    for dimer_emp_file in glob.glob(dimer_jobname + "*" + args.extension + ".emp.bin"):
         monomer_a_emp_file = re.sub("dimer", "monomer_a", dimer_emp_file)
         monomer_b_emp_file = re.sub("dimer", "monomer_b", dimer_emp_file)
 
@@ -122,7 +63,9 @@ def main(args):
     # TODO: specify json files to average over
     # old_data = sum([CV.CV.from_json(json_file) for json_file in glob.glob("*.json")])
 
+    json_filename = "DIMER_ANALYSIS_" + dimer_jobname.replace("_dimer", "") + ".{0}.json".format(args.extension)
     data = new_data
+    data.to_json(json_filename)
 
 
 #        dimer_file_dict, dimer_jobname = load_data(dmm_jobnames[0], args.extension)

@@ -3,6 +3,7 @@
 # defines CV class storing all energy and control variate data
 
 import numpy as np
+import json
 
 
 def from_trajectory(emp, cv):
@@ -84,7 +85,7 @@ class CV:
         CV_obj.steps = N
         CV_obj.EX = self_ratio * self.EX + other_ratio * other.EX
         CV_obj.EX2 = self_ratio * self.EX2 + other_ratio * other.EX2
-        CV_obj.EC = self_ratio * self.EC + other_ratio * other.EX2
+        CV_obj.EC = self_ratio * self.EC + other_ratio * other.EC
         CV_obj.EXC = self_ratio * self.EXC + other_ratio * other.EXC
         CV_obj.COVXC = self_ratio * self.COVXC + other_ratio * other.COVXC
         CV_obj.alpha = self_ratio * self.alpha + other_ratio * other.alpha
@@ -109,6 +110,16 @@ class CV:
         return CV_obj
 
 
-    def to_json(self, filename):
-        # TODO
-        pass
+    def to_json(self, json_filename):
+        json_data = {'STEPS': self.steps,
+                     'EX'   : self.EX,
+                     'EX2'  : self.EX2,
+                     'EC'   : self.EC.tolist(),
+                     'EXC'  : self.EXC.tolist(),
+                     'COVXC': self.COVXC.tolist(),
+                     'alpha': self.alpha.tolist(),
+                     'ECC'  : self.ECC.tolist(),
+                     'COVCC': self.COVCC.tolist()}
+
+        with open(json_filename, mode = 'w', encoding = 'utf-8') as json_file:
+            json.dump(json_data, json_file, separators = (',', ':'), indent = 4)
