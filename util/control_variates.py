@@ -104,7 +104,7 @@ class CV:
         # TODO: move analysis to a separate function; avoid cut and paste code
 
         # compute variance and standard error
-        E_var = CV_obj.EX2 - CV_obj.EX
+        E_var = CV_obj.EX2 - (CV_obj.EX ** 2)
         E_err = np.sqrt(E_var / N)
 
         # re-compute energy/control variate covariance
