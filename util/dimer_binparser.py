@@ -32,29 +32,22 @@ def main(args):
         return 0
 
     if args.auto_dimer:
-        # TODO: redo the code here
-        dmm_jobnames = list(range(3))
-        for filename in glob.glob("*.bin"):
-            first_word = filename.split(".")[0]
-            jobname = filename.split(".taskid_")[0]
-            if first_word.endswith("dimer"):
-                dmm_jobnames[0] = jobname
-            elif first_word.endswith("monomer_a"):
-                dmm_jobnames[1] = jobname
-            elif first_word.endswith("monomer_b"):
-                dmm_jobnames[2] = jobname
+        try:
+            dimer_emp_file_0 = glob.glob("*dimer*.taskid_0." + args.extension + ".emp.bin")[0]
+            dimer_jobname = dimer_emp_file_0.split(".taskid_")[0]
+        except IndexError:
+            print("Failed to find dimer file with '--auto-dimer'. Please manually specify it with '--dimer'.")
+            return -1
 
-        print("Detected dimer jobname:     ", dmm_jobnames[0])
-        print("Detected monomer A jobname: ", dmm_jobnames[1])
-        print("Detected monomer B jobname: ", dmm_jobnames[2])
+        print("Detected dimer jobname:     ", dimer_jobname)
+        print("Detected monomer A jobname: ", re.sub("dimer", "monomer_a", dimer_jobname))
+        print("Detected monomer B jobname: ", re.sub("dimer", "monomer_b", dimer_jobname))
         if input("Is this correct? [Y/n]: ") in ["n", "N"]:
             print("Aborted per user direction.")
             return -1
     else:
-        dmm_jobnames = args.dimer
+        dimer_jobname = args.dimer
 
-
-    dimer_jobname = dmm_jobnames[0]
     data = CV.CV()
     for dimer_emp_file in glob.glob(dimer_jobname + "*" + args.extension + ".emp.bin"):
         monomer_a_emp_file = re.sub("dimer", "monomer_a", dimer_emp_file)
@@ -95,12 +88,12 @@ if __name__ == "__main__":
                         help = "specify JSON trajectories of previous calculations to include in energy calculation.")
 
     dimer_calc = parser.add_mutually_exclusive_group()
-    dimer_calc.add_argument("--single", metavar = "[EMP FILE NAME]",
+    dimer_calc.add_argument("--single", metavar = "[EMP FILENAME]",
                             help = "process energy and control variate trajectory from a single file.")
-    dimer_calc.add_argument("--dimer", nargs = 3, metavar=("[DIMER NAME]", "[MONOMER A NAME]", "[MONOMER B NAME]"),
-                            help = "run in dimer mode and calculate stabilization energy. requires specifying dimer and both monomer job names (without .taskid_[n].[cv,emp].bin suffix).")
+    dimer_calc.add_argument("--dimer", nargs = 1, metavar="[DIMER EMP FILENAME]",
+                            help = "run in dimer mode and calculate stabilization energy. requires specifying dimer emp filename.")
     dimer_calc.add_argument("--auto-dimer", action="store_true",
-                            help = "same as '--dimer', but automatically finds job names by searching for files in the current directory containing 'dimer', 'monomer_a', 'monomer_b'.")
+                            help = "same as '--dimer', but takes no arguments and automatically finds dimer filename by searching for files in the current directory containing 'dimer'.")
 
     args = parser.parse_args()
     if len(sys.argv) == 1:
