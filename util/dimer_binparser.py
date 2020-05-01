@@ -14,8 +14,8 @@ import control_variates as CV
 
 
 def print_header():
-    header_format = "{:10}  " + "{:16}  " * 4
-    header = header_format.format("Step", "Avg. E", "Err. E", "Avg. E Ctrled", "Err. E Ctrled")
+    header_format = "{:14}  " * 2 + "{:10}  " + "{:16}  " * 4
+    header = header_format.format("Molecule", "Method", "Step", "Avg. E", "Err. E", "Avg. E Ctrled", "Err. E Ctrled")
     print(header)
 
 
@@ -70,6 +70,7 @@ def main(args):
 
     # print CV object
     print_header()
+    print(("{:14}  " * 2).format(args.name, args.method), end = "")
     print(data)
 
     # write summary to JSON file
@@ -84,8 +85,12 @@ if __name__ == "__main__":
     parser.add_argument("--debug", action = "store_true",
                         help = "run in debug mode and print calculated trajectory every 128 steps per thread. significantly slows script. (currently not implemented)")
     parser.add_argument('-e', '--extension', default = '22', help='sets extension of bin files.')
-    parser.add_argument('--include-json', nargs = '*', metavar = '[JSON FILES]',
+    parser.add_argument('-j', '--include-json', nargs = '*', metavar = 'JSON FILES',
                         help = "specify JSON trajectories of previous calculations to include in energy calculation.")
+    parser.add_argument('-n', '--name', nargs = 1, default = "A", metavar = '[SYSTEM NAME]',
+                        help = "specify name of the system (up to 14 chars).")
+    parser.add_argument('-m', '--method', nargs = 1, default = "MP2", metavar = '[METHOD NAME]',
+                        help = "specify name of the method used (up to 14 chars).")
 
     dimer_calc = parser.add_mutually_exclusive_group()
     dimer_calc.add_argument("--single", metavar = "[EMP FILENAME]",
