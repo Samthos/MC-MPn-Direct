@@ -13,10 +13,10 @@
 
 class F12_Traces {
  public:
-  F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, int electrons_);
+  F12_Traces(int electron_pairs_, int electrons_);
 
   // wavefunction shim
-  int iocc1, iocc2, ivir1, ivir2, electron_pairs, electrons;
+  int electron_pairs, electrons;
 
   // traces of single electrons with themselves
   std::vector<double> op11;

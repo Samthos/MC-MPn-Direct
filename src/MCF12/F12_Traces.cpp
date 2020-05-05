@@ -11,11 +11,7 @@
 
 #include "F12_Traces.h"
 
-F12_Traces::F12_Traces(int io1, int io2, int iv1, int iv2, int electron_pairs_, int electrons_) :
-    iocc1(io1),
-    iocc2(io2),
-    ivir1(iv1),
-    ivir2(iv2),
+F12_Traces::F12_Traces(int electron_pairs_, int electrons_) :
     electron_pairs(electron_pairs_),
     electrons(electrons_),
     op11(electrons, 0.0),
@@ -62,6 +58,10 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wave
   std::array<double, 3> dr{};
 
   auto lda = wavefunctions[WC::electrons].lda;
+  auto iocc1 = wavefunctions[WC::electrons].iocc1;
+  auto iocc2 = wavefunctions[WC::electrons].iocc2;
+  auto ivir1 = wavefunctions[WC::electrons].ivir1;
+  auto ivir2 = wavefunctions[WC::electrons].ivir2;
   const double* psi = wavefunctions[WC::electrons].data();
   const double* psi_dx = wavefunctions[WC::electrons_dx].data();
   const double* psi_dy = wavefunctions[WC::electrons_dy].data();
@@ -114,6 +114,10 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wave
 void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
   double alpha = 1.0;
   double beta = 0.0;
+  auto iocc1 = electron_psi.iocc1;
+  auto iocc2 = electron_psi.iocc2;
+  auto ivir1 = electron_psi.ivir1;
+  auto ivir2 = electron_psi.ivir2;
   cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
       electrons, iocc2 - iocc1,
       alpha,
@@ -150,6 +154,10 @@ void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
 }
 
 void F12_Traces::build_two_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2) {
+  auto iocc1 = electron_pair_psi1.iocc1;
+  auto iocc2 = electron_pair_psi1.iocc2;
+  auto ivir1 = electron_pair_psi1.ivir1;
+  auto ivir2 = electron_pair_psi1.ivir2;
   for(int ip = 0; ip < electron_pairs;ip++) {
     p11[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
         electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
@@ -173,6 +181,10 @@ void F12_Traces::build_two_e_traces(const Wavefunction& electron_pair_psi1, cons
 void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi) {
   double alpha = 1.0;
   double beta = 0.0;
+  auto iocc1 = electron_psi.iocc1;
+  auto iocc2 = electron_psi.iocc2;
+  auto ivir1 = electron_psi.ivir1;
+  auto ivir2 = electron_psi.ivir2;
 
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
       electrons, electron_pairs, iocc2 - iocc1,
@@ -229,6 +241,10 @@ void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1
 void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list) {
   std::array<double, 3> dr{};
   auto lda = wavefunctions[WC::electron_pairs_1].lda;
+  auto iocc1 = wavefunctions[WC::electrons].iocc1;
+  auto iocc2 = wavefunctions[WC::electrons].iocc2;
+  auto ivir1 = wavefunctions[WC::electrons].ivir1;
+  auto ivir2 = wavefunctions[WC::electrons].ivir2;
 
   const double* psi1 = wavefunctions[WC::electron_pairs_1].data();
   const double* psi2 = wavefunctions[WC::electron_pairs_2].data();
@@ -259,6 +275,10 @@ void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunct
 void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   std::array<double, 3> dr{};
 
+  auto iocc1 = wavefunctions[WC::electrons].iocc1;
+  auto iocc2 = wavefunctions[WC::electrons].iocc2;
+  auto ivir1 = wavefunctions[WC::electrons].ivir1;
+  auto ivir2 = wavefunctions[WC::electrons].ivir2;
   auto o_lda = wavefunctions[WC::electrons].lda;
   auto p_lda = wavefunctions[WC::electron_pairs_1].lda;
 

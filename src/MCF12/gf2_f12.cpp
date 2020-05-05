@@ -6,7 +6,7 @@
 
 GF2_F12_V::GF2_F12_V(IOPs& iops, Basis& basis, std::string extension) :
     MCGF(iops, basis, 0, extension, true),
-    traces(basis.iocc1, basis.iocc2, basis.ivir1, basis.ivir2, iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
+    traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     x_traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     core_11p(iops.iopns[KEYS::ELECTRON_PAIRS]),
     core_12p(iops.iopns[KEYS::ELECTRON_PAIRS]),
