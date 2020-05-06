@@ -9,8 +9,8 @@
 #include <string>
 
 #include "../qc_mpi.h"
-#include "qc_basis.h"
 #include "../atom_tag_parser.h"
+#include "qc_basis.h"
 
 
 SHELL::Shell_Type SHELL::string_to_shell_type(const std::string& str) {
@@ -77,21 +77,20 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   read(iops, mpi_info, molec);
 
   // molecular orbital coefficients and energies
-  nw_vectors_read(iops, mpi_info, molec);
+  // NWChem_Movec_Parser movec_parser(iops, mpi_info);
+  // nw_vectors_read(iops, mpi_info, molec);
 
   // declare memory
-  mc_pair_num = iops.iopns[KEYS::ELECTRON_PAIRS];
-  h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
-  h_basis.contraction_amplitudes = new double[nShells * mc_pair_num];
-  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_pair_num];
+  // mc_pair_num = iops.iopns[KEYS::ELECTRON_PAIRS];
+  mc_num = std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]);
+  h_basis.ao_amplitudes = new double[qc_nbf * mc_num];
+  h_basis.contraction_amplitudes = new double[nShells * mc_num];
+  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_num];
 }
 Basis::~Basis() {
   /*
    * Basis destructor
    */
-  delete[] nw_en;
-
-  delete[] h_basis.nw_co;
   delete[] h_basis.ao_amplitudes;
   delete[] h_basis.contraction_amplitudes;
   delete[] h_basis.contraction_amplitudes_derivative;
@@ -106,30 +105,15 @@ Basis::Basis(const Basis& param) {
   qc_nbf = param.qc_nbf;
   nShells = param.nShells;
   lspherical = param.lspherical;
+  mc_num = param.mc_num;
 
   h_basis.meta_data = new BasisMetaData[nShells];
   std::copy(param.h_basis.meta_data, param.h_basis.meta_data + nShells, h_basis.meta_data);
 
-  iocc1 = param.iocc1;
-  iocc2 = param.iocc2;
-  ivir1 = param.ivir1;
-  ivir2 = param.ivir2;
+  h_basis.ao_amplitudes = new double[qc_nbf * mc_num];
 
-  // from nwchem
-  nw_nbf = param.nw_nbf;
-  nw_nmo = param.nw_nmo;
-
-  mc_pair_num = param.mc_pair_num;
-  h_basis.ao_amplitudes = new double[nw_nbf * mc_pair_num];
-
-  nw_en = new double[nw_nbf];
-  std::copy(param.nw_en, param.nw_en + nw_nbf, nw_en);
-
-  h_basis.nw_co = new double[nw_nbf * nw_nmo];
-  std::copy(param.h_basis.nw_co, param.h_basis.nw_co + nw_nmo * nw_nbf, h_basis.nw_co);
-
-  h_basis.contraction_amplitudes = new double[nShells * mc_pair_num];
-  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_pair_num];
+  h_basis.contraction_amplitudes = new double[nShells * mc_num];
+  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_num];
   h_basis.contraction_exp = new double[nPrimatives];
   h_basis.contraction_coef = new double[nPrimatives];
   std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + nPrimatives, h_basis.contraction_exp);
@@ -150,18 +134,10 @@ void swap(Basis& a, Basis& b) {
   std::swap(a.qc_nbf, b.qc_nbf);
   std::swap(a.nShells, b.nShells);
   std::swap(a.lspherical, b.lspherical);
+  std::swap(a.mc_num, b.mc_num);
   std::swap(a.h_basis.meta_data, b.h_basis.meta_data);
-  std::swap(a.iocc1, b.iocc1);
-  std::swap(a.iocc2, b.iocc2);
-  std::swap(a.ivir1, b.ivir1);
-  std::swap(a.ivir2, b.ivir2);
-
-  std::swap(a.nw_nbf, b.nw_nbf);
-  std::swap(a.nw_nmo, b.nw_nmo);
 
   std::swap(a.h_basis.ao_amplitudes, b.h_basis.ao_amplitudes);
-  std::swap(a.nw_en, b.nw_en);
-  std::swap(a.h_basis.nw_co, b.h_basis.nw_co);
   std::swap(a.h_basis.contraction_amplitudes, b.h_basis.contraction_amplitudes);
   std::swap(a.h_basis.contraction_amplitudes_derivative, b.h_basis.contraction_amplitudes_derivative);
   std::swap(a.h_basis.contraction_exp, b.h_basis.contraction_exp);
@@ -461,12 +437,7 @@ void Basis::normalize_g(SHELL::Shell& shell) {
 void Basis::dump(const std::string& fname) {
   std::ofstream os(fname);
   os << "\n-----------------------------------------------------------------------------------------------------------\nBasis Dump\n";
-  os << "mc_pair_num: " << mc_pair_num << "\n";
-  os << "iocc1: " << iocc1 << "\n";        // index first occupied orbital to be used
-  os << "iocc2: " << iocc2 << "\n";        // index of HOMO+1
-  os << "ivir1: " << ivir1 << "\n";        // index of LUMO
-  os << "ivir2: " << ivir2 << "\n";        // index of last virtual to be used + 1
-  os << "qc_nbf: " << qc_nbf << "\t" << nw_nbf << "\n";       // number basis functions
+  os << "qc_nbf: " << qc_nbf << "\n";       // number basis functions
   os << "nShells: " << nShells << "\n";      // number of shells
   os << "nPrimatives: " << nPrimatives << "\n";  // number of primitives
   os << "lspherical: " << lspherical << "\n";  // true if spherical

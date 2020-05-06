@@ -26,10 +26,10 @@ void Basis::host_psi_get(
     std::vector<std::array<double, 3>>& pos) {
   build_ao_amplitudes(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi.lda, nw_nbf,
+      pos.size(), psi.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co, nw_nbf,
+      h_basis.ao_amplitudes, qc_nbf,
+      psi.movecs.data(), qc_nbf,
       0.0,
       psi.psi.data(), psi.lda);
 }
@@ -53,7 +53,7 @@ void Basis::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
     for (int shell = 0; shell < nShells; shell++, index++) {
 
       auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * nw_nbf + h_basis.meta_data[shell].ao_begin;
+      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
       auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
       std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
 

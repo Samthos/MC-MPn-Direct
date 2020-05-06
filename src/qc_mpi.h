@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 
+#ifdef HAVE_MPI
 #include "mpi.h"
+#endif
 
 class MPI_info {
  public:

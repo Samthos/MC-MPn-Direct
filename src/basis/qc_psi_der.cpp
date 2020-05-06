@@ -32,10 +32,10 @@ void Basis::host_psi_get_dx(
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi_dx.lda, nw_nbf,
+      pos.size(), psi_dx.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co, nw_nbf,
+      h_basis.ao_amplitudes, qc_nbf,
+      psi_dx.movecs.data(), qc_nbf,
       0.0,
       psi_dx.psi.data(), psi_dx.lda);
 }
@@ -45,10 +45,10 @@ void Basis::host_psi_get_dy(
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi_dy.lda, nw_nbf,
+      pos.size(), psi_dy.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co, nw_nbf,
+      h_basis.ao_amplitudes, qc_nbf,
+      psi_dy.movecs.data(), qc_nbf,
       0.0,
       psi_dy.psi.data(), psi_dy.lda);
 }
@@ -58,10 +58,10 @@ void Basis::host_psi_get_dz(
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi_dz.lda, nw_nbf,
+      pos.size(), psi_dz.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, nw_nbf,
-      h_basis.nw_co, nw_nbf,
+      h_basis.ao_amplitudes, qc_nbf,
+      psi_dz.movecs.data(), qc_nbf,
       0.0,
       psi_dz.psi.data(), psi_dz.lda);
 }
@@ -355,7 +355,7 @@ void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
       auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * nw_nbf + h_basis.meta_data[shell].ao_begin;
+      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
       auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
       auto contraction_amplitude = h_basis.contraction_amplitudes[index];
       auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
@@ -387,7 +387,7 @@ void Basis::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos
     for (int shell = 0; shell < nShells; shell++, index++) {
 
       auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * nw_nbf + h_basis.meta_data[shell].ao_begin;
+      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
       auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
       auto contraction_amplitude = h_basis.contraction_amplitudes[index];
       auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
@@ -419,7 +419,7 @@ void Basis::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos
     for (int shell = 0; shell < nShells; shell++, index++) {
 
       auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * nw_nbf + h_basis.meta_data[shell].ao_begin;
+      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
       auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
       auto contraction_amplitude = h_basis.contraction_amplitudes[index];
       auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];

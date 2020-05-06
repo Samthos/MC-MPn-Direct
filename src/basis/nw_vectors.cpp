@@ -1,12 +1,213 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
-#ifdef HAVE_MPI
-#include "mpi.h"
-#endif
+#include "nw_vectors.h"
 #include "qc_basis.h"
 
+NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
+  if (mpi_info.sys_master) {
+    if (0 == iops.iopns[KEYS::MOVECS]) {
+      parse_binary_movecs(iops.sopns[KEYS::MOVECS]);
+    } else {
+      parse_binary_movecs(iops.sopns[KEYS::MOVECS]);
+    }
+
+    std::cout << "nw_vectors: nbf " << n_basis_functions << "\n";
+    std::cout << "nw_vectors: nmo " << n_molecular_orbitals << "\n";
+    n_occupied_orbitals = std::count_if(occupancy.begin(), occupancy.end(), [](double x){return x > 0.0;});
+    for(auto &it : occupancy) {
+      std::cout << it << " ";
+    }
+    std::cout << "\n";
+
+  }
+
+  broadcast();
+
+
+  //orbital_check();
+  iocc1 = 0;
+  if (iops.bopns[KEYS::FREEZE_CORE]) {
+    for (auto &atom : molec.atoms) {
+      if (atom.znum > 3 && atom.znum < 10 && !atom.is_ghost) {
+        iocc1 += 1;
+      }
+    }
+  }
+  iocc2 = n_occupied_orbitals;
+  ivir1 = n_occupied_orbitals;
+  ivir2 = n_molecular_orbitals;
+
+  if (mpi_info.sys_master) {
+    if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF ||
+        iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF ||
+        iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL ||
+        iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
+      log_orbital_energies(iops.sopns[KEYS::JOBNAME]);
+    }
+  }
+}
+
+void verfiy(int qc_nbf, int nw_nbf) {
+  if (qc_nbf != nw_nbf) {
+    std::cerr << "You might use the different basis sets or geometry" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
+void NWChem_Movec_Parser::read(std::ifstream& input, char* v, bool set_null=false) {
+  int size;
+  input.read((char*)&size, 4);
+  input.read(v, size);
+  if (set_null) {
+    v[size] = '\0';
+  }
+  input.read((char*)&size, 4);
+}
+
+void NWChem_Movec_Parser::log_orbital_energies(std::string jobname) {
+  std::ofstream output(jobname + ".orbital_energies");
+
+  // print out data
+  output << "# File contains orbitral eigenvalue energies\n";
+  output << "# Indexing is 0 based.\n";
+  output << "# Last occupied orbitals is " << iocc1 - 1 << "\n";
+  for (auto it = 0; it < ivir2; it++) {
+    output << orbital_energies[it] << std::endl;
+  }
+}
+
+void NWChem_Movec_Parser::broadcast() {
+  MPI_info::barrier();
+  MPI_info::broadcast_int(&n_basis_functions, 1);
+  MPI_info::broadcast_int(&n_molecular_orbitals, 1);
+  MPI_info::broadcast_int(&n_occupied_orbitals, 1);
+  MPI_info::broadcast_vector_double(orbital_energies);
+  MPI_info::broadcast_vector_double(movecs);
+}
+
+void NWChem_Movec_Parser::resize() {
+  occupancy.resize(n_molecular_orbitals);
+  orbital_energies.resize(n_molecular_orbitals);
+  movecs.resize(n_basis_functions * n_molecular_orbitals);
+}
+
+void NWChem_Movec_Parser::parse_binary_movecs(std::string filename) {
+  long long title_length;
+  long long basis_title_length;
+  char ignoreChar[256];
+
+  std::ifstream input;
+
+  std::cout << "Reading binary MOVECS from " << filename << std::endl;
+  input.open(filename, std::ios::binary);
+  if (!input.is_open()) {
+    std::cerr << "no movecs file" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  //get calcaultion info
+  read(input, ignoreChar, true);
+
+  //calcualtion type
+  read(input, ignoreChar, true);
+
+  //title length
+  read(input, (char*) &title_length);
+
+  //title
+  read(input, ignoreChar, true);
+
+  //basis name length
+  read(input, (char*) &basis_title_length);
+
+  //basis name
+  read(input, ignoreChar, true);
+
+  //nwsets
+  read(input, (char*) &nw_nsets);
+
+  //nw_nbf
+  read(input, (char*) &n_basis_functions);
+
+  //nw_nmo
+  if (nw_nsets > 1) {
+    std::cerr << "nw_nsets > 1" << std::endl;
+    std::cerr << "Code only supports nw_nset==1" << std::endl;
+    exit(EXIT_FAILURE);
+  } else {
+    read(input, (char*) &n_molecular_orbitals);
+  }
+
+  resize();
+
+  read(input, (char*) occupancy.data());
+  read(input, (char*) orbital_energies.data());
+  for (int i = 0; i < n_molecular_orbitals; i++) {
+    read(input, (char*) (movecs.data() + i * n_basis_functions));
+  }
+}
+
+void NWChem_Movec_Parser::parse_ascii_movecs(std::string filename) {
+  long long title_length;
+  long long basis_title_length;
+  std::string scftype20;
+  std::string title;
+  std::string basis_name;
+
+  std::ifstream input;
+
+  std::cout << "Reading ascii MOVECS from " << filename << std::endl;
+  input.open(filename);
+  if (!input.is_open()) {
+    std::cerr << "no movecs file" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  input.ignore(1000, '\n');  // #
+  input.ignore(1000, '\n');  // skip convergence info
+  input.ignore(1000, '\n');  // skip convergence info
+  input.ignore(1000, '\n');  // space
+  input.ignore(1000, '\n');  // scftype20
+  input.ignore(1000, '\n');  // date lentit
+  input >> scftype20;
+  input >> title_length;
+  input.ignore(1000, '\n');
+  std::getline(input, title);
+
+  input >> basis_title_length;
+  input.ignore(1000, '\n');
+  std::getline(input, basis_name);
+
+  input >> nw_nsets >> n_basis_functions;
+
+  if (nw_nsets > 1) {
+    std::cerr << "nw_nsets > 1" << std::endl;
+    std::cerr << "Code only supports nw_nset==1" << std::endl;
+    exit(EXIT_FAILURE);
+  } else {
+    input >> n_molecular_orbitals;
+  }
+
+  resize();
+
+  for (int i = 0; i < n_molecular_orbitals; i++) {
+    input >> occupancy[i];
+  }
+  for (int i = 0; i < n_molecular_orbitals; i++) {
+    input >> orbital_energies[i];
+  }
+
+  for (int i = 0, index = 0; i < n_molecular_orbitals; i++) {
+    for (int j = 0; j < n_basis_functions; j++) {
+      input >> movecs[index++];
+    }
+  }
+}
+
+/*
 void Basis::nw_vectors_read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   int i, j;
   long long titleLength;
@@ -163,12 +364,10 @@ void Basis::nw_vectors_read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   occ = new double[nw_nbf];
   nw_en = new double[nw_nbf];
   h_basis.nw_co = new double[nw_nbf * nw_nmo];
-  /*
-	nw_co = new double*[nw_nbf];
-	for(i=0;i<nw_nbf;i++) {
-		nw_co[i] = new double[nw_nmo];
-	}
-	*/
+//nw_co = new double*[nw_nbf];
+//for(i=0;i<nw_nbf;i++) {
+//	nw_co[i] = new double[nw_nmo];
+//}
 
   if (mpi_info.sys_master) {
     if (readmode == 0) {
@@ -289,24 +488,5 @@ void Basis::nw_vectors_read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     // close ofstream
     output.close();
   }
-}
-
-/*
-void orbital_check(){
-	int i, j;
-	int znum, iocc;
-
-	j = 0
-	for(i=0;i<molec.natom;i++) {
-		j = j + molec.atom[i].znum;
-	}
-
-	iocc = j/2;
-
-	//if (iocc .ne. nw_iocc) then
-	//   call qc_abort('iocc error')
-	//end if
-
-
 }
 */

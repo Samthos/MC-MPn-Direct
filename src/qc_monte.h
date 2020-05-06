@@ -107,6 +107,29 @@ class Energy : public QC_monte {
   void energy();
 };
 
+/*
+class Dimer : public QC_monte {
+ public:
+  Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  ~Energy();
+
+  void monte_energy() override;
+
+ protected:
+  std::vector<MCMP*> energy_functions;
+  std::vector<Accumulator*> cv;
+
+  std::vector<double> emp;
+  std::vector<std::vector<double>> control;
+
+  Tau* monomer_a_tau;
+  Tau* monomer_b_tau;
+
+  void zero_energies();
+  void energy();
+};
+*/
+
 class GF : public  QC_monte {
  public:
   void monte_energy() override;
@@ -165,7 +188,7 @@ class GPU_GF2 : public GF {
   GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
     ovps.init_02(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], NWChem_Movec_Parser(iops, mpi_info, molec), (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
 
     ovps.alloc_02();
   }
@@ -179,10 +202,10 @@ class GPU_GF2 : public GF {
 class GF2 : public GF {
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init(1, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+    ovps.init(1, iops.iopns[KEYS::ELECTRON_PAIRS]);
     ovps.init_02(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], NWChem_Movec_Parser(iops, mpi_info, molec), (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
 
     ovps.alloc_02();
     tau->resize(2);
@@ -207,7 +230,7 @@ class GPU_GF3 : public GF {
   GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
     ovps.init_03(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], NWChem_Movec_Parser(iops, mpi_info, molec), (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
     ovps.alloc_03();
   }
   ~GPU_GF3() {
@@ -220,10 +243,10 @@ class GPU_GF3 : public GF {
 class GF3 : public GF {
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    ovps.init(2, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+    ovps.init(2, iops.iopns[KEYS::ELECTRON_PAIRS]);
     ovps.init_03(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::NUM_BAND],
                  iops.iopns[KEYS::OFF_BAND], iops.iopns[KEYS::DIFFS],
-                 iops.iopns[KEYS::NBLOCK], basis, (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
+                 iops.iopns[KEYS::NBLOCK], NWChem_Movec_Parser(iops, mpi_info, molec), (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF));
     ovps.alloc_03();
     tau->resize(2);
 

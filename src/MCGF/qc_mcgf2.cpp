@@ -136,7 +136,7 @@ GF2_Functional::GF2_Functional(IOPs& iops, Basis& basis) :
         iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
     std::cerr << "Full rountine not integrated into MCGF class\n";
     exit(0);
-    ent.resize((basis.ivir2 - basis.iocc1) * n_electron_pairs);
+    // ent.resize((basis.ivir2 - basis.iocc1) * n_electron_pairs);
   }
 }
 

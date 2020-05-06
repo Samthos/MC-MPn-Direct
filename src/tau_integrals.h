@@ -9,20 +9,16 @@
 #include <iostream>
 #include <vector>
 
-#include "basis/qc_basis.h"
+#include "basis/nw_vectors.h"
 #include "qc_random.h"
 
 class Tau {
  public:
-  explicit Tau(const Basis& basis) {
+  explicit Tau(const NWChem_Movec_Parser& basis) : evals(basis.orbital_energies) {
     iocc1 = basis.iocc1;
     iocc2 = basis.iocc2;
     ivir1 = basis.ivir1;
     ivir2 = basis.ivir2;
-
-    evals.resize(ivir2);
-    std::copy(basis.nw_en, basis.nw_en + ivir2, evals.begin());
-
     scratch.resize(ivir2);
   }
   virtual void resize(int dimm) = 0;
@@ -45,7 +41,7 @@ class Tau {
 
 class Stochastic_Tau : public Tau {
  public:
-  explicit Stochastic_Tau(const Basis& basis) : Tau(basis) {
+  explicit Stochastic_Tau(const NWChem_Movec_Parser& basis) : Tau(basis) {
     lambda = 2.0 * (evals[ivir1] - evals[iocc2 - 1]);
   }
   ~Stochastic_Tau() = default;
@@ -120,7 +116,7 @@ class Stochastic_Tau : public Tau {
 
 class Super_Stochastic_Tau : public Tau {
  public:
-  explicit Super_Stochastic_Tau(const Basis& basis) : Tau(basis) {
+  explicit Super_Stochastic_Tau(const NWChem_Movec_Parser& basis) : Tau(basis) {
     set_pdf_cdf(hole_pdf, hole_cdf, iocc1, iocc2);
     set_pdf_cdf(particle_pdf, particle_cdf, ivir1, ivir2);
   }
@@ -243,7 +239,7 @@ class Super_Stochastic_Tau : public Tau {
 
 class Quadrature_Tau : public Tau {
  public:
-  Quadrature_Tau(const Basis& basis) : Tau(basis) {
+  Quadrature_Tau(const NWChem_Movec_Parser& basis) : Tau(basis) {
     tau = {
         459.528454529921248195023509,
         0.002176143805986910199912,
@@ -374,5 +370,5 @@ class Quadrature_Tau : public Tau {
   std::vector<int> indices;
 };
 
-Tau* create_tau_sampler(const IOPs& iops, const Basis& basis);
+Tau* create_tau_sampler(const IOPs& iops, const NWChem_Movec_Parser& basis);
 #endif //MC_MP3_DIRECT_TAU_INTEGRALS_H

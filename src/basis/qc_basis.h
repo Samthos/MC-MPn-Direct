@@ -10,94 +10,7 @@
 #include "../qc_mpi.h"
 #include "../electron_pair_list.h"
 
-namespace WS {
-  enum Wavefunction_Sources {
-    electron_pairs_1 = 0b0000,
-    electron_pairs_2 = 0b0001,
-    electrons        = 0b0010,
-  };
-}
-
-namespace WT {
-  enum Wavefunction_Types {
-    normal = 0b0000,
-    dx     = 0b0100,
-    dy     = 0b1000,
-    dz     = 0b1100,
-    mask   = 0b1100,
-  };
-}
-
-namespace WC {
-  enum Wavefunction_Code {
-    electron_pairs_1 = WS::electron_pairs_1,
-    electron_pairs_2 = WS::electron_pairs_2,
-    electrons        = WS::electrons,
-    electron_pairs_1_dx = WT::dx | WS::electron_pairs_1,
-    electron_pairs_2_dx = WT::dx | WS::electron_pairs_2,
-    electrons_dx        = WT::dx | WS::electrons,
-    electron_pairs_1_dy = WT::dy | WS::electron_pairs_1,
-    electron_pairs_2_dy = WT::dy | WS::electron_pairs_2,
-    electrons_dy        = WT::dy | WS::electrons,
-    electron_pairs_1_dz = WT::dz | WS::electron_pairs_1,
-    electron_pairs_2_dz = WT::dz | WS::electron_pairs_2,
-    electrons_dz        = WT::dz | WS::electrons,
-  };
-}
-
-class Wavefunction {
- public:
-  Wavefunction() {}
-  Wavefunction(std::vector<std::array<double, 3>>* p, int io1, int io2, int iv1, int iv2) :
-    iocc1(io1),
-    iocc2(io2),
-    ivir1(iv1),
-    ivir2(iv2),
-    electrons(p->size()),
-    lda(ivir2),
-    psi(lda * electrons, 0.0),
-    psiTau(lda * electrons, 0.0),
-    pos(p)
-  {}
-
-  const double *data() const {
-    return psi.data();
-  }
-  const double *occ() const {
-    return psi.data() + iocc1;
-  }
-  const double *vir() const {
-    return psi.data() + ivir1;
-  }
-  double *dataTau() {
-    return psiTau.data();
-  }
-  double *occTau() {
-    return psiTau.data() + iocc1;
-  }
-  double *virTau() {
-    return psiTau.data() + ivir1;
-  }
-
-  size_t iocc1;
-  size_t iocc2;
-  size_t ivir1;
-  size_t ivir2;
-  size_t number_of_molecuar_orbitals;
-
-  size_t electrons;
-
-  size_t lda;
-  size_t rows;
-  size_t col;
-  // type for row/col major
-
-  std::vector<double> psi;
-  std::vector<double> psiTau;
-  std::vector<std::array<double, 3>>* pos;
-
- private:
-};
+#include "wavefunction.h"
 
 namespace Cartesian_Poly {
   enum Cartesian_P {
@@ -208,7 +121,7 @@ struct BasisData {
   double *ao_amplitudes;  // stores AO amplidutes
   double *contraction_amplitudes;  // stores contraction amplidutes
   double *contraction_amplitudes_derivative;  // stores contraction amplidutes
-  double *nw_co;          // obital coefs from nwchem
+//  double *nw_co;          // obital coefs from nwchem
   BasisMetaData *meta_data;
 };
 
@@ -247,20 +160,20 @@ class Basis {
   void gpu_free();
 
   // basis set info
-  int mc_pair_num;
-  int iocc1;        // index first occupied orbital to be used
-  int iocc2;        // index of HOMO+1
-  int ivir1;        // index of LUMO
-  int ivir2;        // index of last virtual to be used + 1
+  int mc_num;
+  // int iocc1;        // index first occupied orbital to be used
+  // int iocc2;        // index of HOMO+1
+  // int ivir1;        // index of LUMO
+  // int ivir2;        // index of last virtual to be used + 1
   int qc_nbf;       // number basis functions
   int nShells;      // number of shells
   int nPrimatives;  // number of primitives
   bool lspherical;  // true if spherical
 
   // from nwchem
-  int nw_nbf;  // number of basis functions
-  int nw_nmo;  // number of basis molecular orbital in basis set i
-  double *nw_en;  // orbital energies from nwchem
+  // int nw_nbf;  // number of basis functions
+  // int nw_nmo;  // number of basis molecular orbital in basis set i
+  // double *nw_en;  // orbital energies from nwchem
 
   BasisData h_basis, d_basis;
 

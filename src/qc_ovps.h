@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "basis/qc_basis.h"
+#include "basis/nw_vectors.h"
 #include "qc_random.h"
 #include "tau_integrals.h"
 
@@ -86,18 +87,18 @@ struct OVPS_ARRAY {
 
 class OVPs {
  public:
-  void init(int dimm, int mc_pair_num_, const Basis &basis);
+  void init(int dimm, int mc_pair_num_);
   void free();
   void update_ovps(Wavefunction&, Wavefunction&, Tau*);
 
-  void init_02(int, int, int, int, int, const Basis &, bool);
+  void init_02(int, int, int, int, int, const NWChem_Movec_Parser&, bool);
   void alloc_02();
   void free_tau_02();
   void free_02();
   void zero_energy_arrays_02();
   void update_ovps_02(const BasisData&);
 
-  void init_03(int, int, int, int, int, const Basis &, bool);
+  void init_03(int, int, int, int, int, const NWChem_Movec_Parser&, bool);
   void alloc_03();
   void free_tau_03();
   void free_03();
@@ -109,7 +110,7 @@ class OVPs {
 
  private:
   int numBand, offBand, numDiff, numBlock;
-  int mc_pair_num, iocc1, iocc2, ivir1, ivir2;
+  int mc_pair_num, my_iocc1, my_iocc2, my_ivir1, my_ivir2;
   bool full;
 };
 #endif  // QC_OVPS_H_

@@ -67,6 +67,7 @@ set(CPU_EXTRA_SOURCES
         MCGF/qc_mcgf3.cpp 
         qc_ovps.cpp 
         basis/qc_psi.cpp basis/qc_psi_der.cpp
+        basis/wavefunction.cpp basis/wavefunction.h
         cpu_qc_monte.cpp
         MCMP/qc_mcmp4_ijk.h MCMP/qc_mcmp4_ijkl.h
         MCMP/qc_mcmp4_ij.h MCMP/qc_mcmp4_ij_k.h MCMP/qc_mcmp4_ij_l.h

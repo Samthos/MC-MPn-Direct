@@ -1,6 +1,7 @@
 calculations/
 cmake-build-*/
 release/
+__pycache__/
 *.swp
 .idea
 *.bash

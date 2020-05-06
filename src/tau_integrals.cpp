@@ -1,9 +1,9 @@
 
 #include "qc_input.h"
-#include "basis/qc_basis.h"
+#include "basis/nw_vectors.h"
 #include "tau_integrals.h"
 
-Tau* create_tau_sampler(const IOPs& iops, const Basis& basis) {
+Tau* create_tau_sampler(const IOPs& iops, const NWChem_Movec_Parser& basis) {
   Tau* tau;
   switch (iops.iopns[KEYS::TAU_INTEGRATION]) {
     case TAU_INTEGRATION::STOCHASTIC:  tau = new Stochastic_Tau(basis); break;

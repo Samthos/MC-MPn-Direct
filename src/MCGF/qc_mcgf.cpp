@@ -208,7 +208,7 @@ Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4)
   }
 
   tau->resize(max_tau_coordinates);
-  ovps.init(max_tau_coordinates, iops.iopns[KEYS::ELECTRON_PAIRS], basis);
+  ovps.init(max_tau_coordinates, iops.iopns[KEYS::ELECTRON_PAIRS]);
 }
 
 void Diagonal_GF::monte_energy() {
