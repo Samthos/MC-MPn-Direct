@@ -17,11 +17,6 @@ NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& 
     std::cout << "nw_vectors: nbf " << n_basis_functions << "\n";
     std::cout << "nw_vectors: nmo " << n_molecular_orbitals << "\n";
     n_occupied_orbitals = std::count_if(occupancy.begin(), occupancy.end(), [](double x){return x > 0.0;});
-    for(auto &it : occupancy) {
-      std::cout << it << " ";
-    }
-    std::cout << "\n";
-
   }
 
   broadcast();

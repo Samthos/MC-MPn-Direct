@@ -80,6 +80,7 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
    *  -clean up keys
    */
   KEYS::KEYS keyval;
+  KEYS::KEY_TYPE key_type;
 
   bool keySet;
   std::string str;
@@ -99,139 +100,90 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
         if (keySet == false) {  // if key not set, determine key value from key_vals arrays
           keyval = string_to_enum<KEYS::KEYS>(key, KEYS::key_strings);
           keySet = true;
+
+          auto keyval_it = KEYS::KEY_TYPE_TABLE.find(keyval);
+          if (keyval_it != KEYS::KEY_TYPE_TABLE.end()) {
+            key_type = keyval_it->second;
+          } else {
+            key_type = KEYS::OTHER;
+          }
         } else {
-          switch (keyval) {
-            case KEYS::JOBNAME:
-              sopns[keyval] = key;
-              keySet = false;
-              break;
-            case KEYS::JOBTYPE:
-              iopns[keyval] = string_to_enum<JOBTYPE::JOBTYPE>(key, JOBTYPE::jobtype_strings);
-              keySet = false;
-              break;
-            case KEYS::SPHERICAL:
-              bopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::MC_TRIAL:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::MC_DELX:
-              dopns[keyval] = stod(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::GEOM:
-              sopns[keyval] = key;
-              keySet = false;
-              break;
-            case KEYS::BASIS:
-              sopns[keyval] = key;
-              keySet = false;
-              break;
-            case KEYS::MC_BASIS:
-              sopns[keyval] = key;
-              keySet = false;
-              break;
-            case KEYS::NBLOCK:
-              iopns[keyval] = stoi(key, nullptr);
-              if (iopns[keyval] > 20) {
-                std::cerr << "NBlock must be less than 20" << std::endl;
-                exit(EXIT_FAILURE);
-              } else if (iopns[keyval] <= 0) {
-                iopns[keyval] = 1;
-              }
-              keySet = false;
-              break;
-            case KEYS::MOVECS:
-              if (key == "ASCII") {
-                iopns[keyval] = 1;
-              } else if (key == "END") {
+          if (key_type == KEYS::STRING) {
+            sopns[keyval] = key;
+            keySet = false;
+          } else if (key_type == KEYS::BOOL) {
+            bopns[keyval] = (stoi(key, nullptr) != 0);
+            keySet = false;
+          } else if (key_type == KEYS::INT) {
+            iopns[keyval] = stoi(key, nullptr);
+            keySet = false;
+          } else if (key_type == KEYS::DOUBLE) {
+            dopns[keyval] = stod(key, nullptr);
+            keySet = false;
+          } else {
+            switch (keyval) {
+              case KEYS::JOBTYPE:
+                iopns[keyval] = string_to_enum<JOBTYPE::JOBTYPE>(key, JOBTYPE::jobtype_strings);
                 keySet = false;
-              } else {
-                sopns[keyval] = key;
-              }
-              break;
-            case KEYS::DEBUG:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::TASK:
-              iopns[keyval] |= (1 << string_to_enum<TASK::TASK>(key, TASK::task_strings));
-              keySet = false;
-              break;
-            case KEYS::NUM_BAND:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::OFF_BAND:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::DIFFS:
-              iopns[keyval] = stoi(key, nullptr) + 1;
-              if (iopns[keyval] <= 0) {
-                iopns[keyval] = 1;
-              }
-              keySet = false;
-              break;
-            case KEYS::ORDER:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::SAMPLER:
-              iopns[keyval] = string_to_enum<SAMPLER::SAMPLER>(key, SAMPLER::sampler_strings);
-              keySet = false;
-              break;
-            case KEYS::TAU_INTEGRATION:
-              iopns[keyval] = string_to_enum<TAU_INTEGRATION::TAU_INTEGRATION>(key, TAU_INTEGRATION::tau_integration_strings);
-              keySet = false;
-              break;
-            case KEYS::F12_CORRELATION_FACTOR:
-              iopns[keyval] = string_to_correlation_factors(key);
-              keySet = false;
-              break;
-            case KEYS::F12_GAMMA:
-              bopns[keyval] = true;
-              dopns[keyval] = stod(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::F12_BETA:
-              bopns[keyval] = true;
-              dopns[keyval] = stod(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::ELECTRONS:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::ELECTRON_PAIRS:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::MP2CV_LEVEL:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::MP3CV_LEVEL:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::MP4CV_LEVEL:
-              iopns[keyval] = stoi(key, nullptr);
-              keySet = false;
-              break;
-            case KEYS::FREEZE_CORE:
-              bopns[keyval] = (stoi(key, nullptr) != 0);
-              keySet = false;
-              break;
-            case KEYS::SEED_FILE:
-              sopns[keyval] = key;
-              keySet = false;
-              break;
-            default:
-              std::cerr << "KEY \"" << key << "\" NOT RECONGNIZED" << std::endl;
-              exit(EXIT_FAILURE);
+                break;
+              case KEYS::NBLOCK:
+                iopns[keyval] = stoi(key, nullptr);
+                if (iopns[keyval] > 20) {
+                  std::cerr << "NBlock must be less than 20" << std::endl;
+                  exit(EXIT_FAILURE);
+                } else if (iopns[keyval] <= 0) {
+                  iopns[keyval] = 1;
+                }
+                keySet = false;
+                break;
+              case KEYS::MONOMER_A_MOVECS: // fallthrought to MOVECS
+              case KEYS::MONOMER_B_MOVECS: // fallthrought to MOVECS
+              case KEYS::MOVECS:
+                if (key == "ASCII") {
+                  iopns[keyval] = 1;
+                } else if (key == "END") {
+                  keySet = false;
+                } else {
+                  sopns[keyval] = key;
+                }
+                break;
+              case KEYS::TASK:
+                iopns[keyval] |= (1 << string_to_enum<TASK::TASK>(key, TASK::task_strings));
+                keySet = false;
+                break;
+              case KEYS::DIFFS:
+                iopns[keyval] = stoi(key, nullptr) + 1;
+                if (iopns[keyval] <= 0) {
+                  iopns[keyval] = 1;
+                }
+                keySet = false;
+                break;
+              case KEYS::SAMPLER:
+                iopns[keyval] = string_to_enum<SAMPLER::SAMPLER>(key, SAMPLER::sampler_strings);
+                keySet = false;
+                break;
+              case KEYS::TAU_INTEGRATION:
+                iopns[keyval] = string_to_enum<TAU_INTEGRATION::TAU_INTEGRATION>(key, TAU_INTEGRATION::tau_integration_strings);
+                keySet = false;
+                break;
+              case KEYS::F12_CORRELATION_FACTOR:
+                iopns[keyval] = string_to_correlation_factors(key);
+                keySet = false;
+                break;
+              case KEYS::F12_GAMMA:
+                bopns[keyval] = true;
+                dopns[keyval] = stod(key, nullptr);
+                keySet = false;
+                break;
+              case KEYS::F12_BETA:
+                bopns[keyval] = true;
+                dopns[keyval] = stod(key, nullptr);
+                keySet = false;
+                break;
+              default:
+                std::cerr << "KEY \"" << key << "\" NOT RECONGNIZED" << std::endl;
+                exit(EXIT_FAILURE);
+            }
           }
         }
       }

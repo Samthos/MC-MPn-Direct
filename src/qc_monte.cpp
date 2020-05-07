@@ -122,6 +122,19 @@ Energy::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, 
   cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
 }
 
+Energy::~Energy() {
+  for (auto &item : cv) {
+    delete item;
+  }
+  for (auto &item : energy_functions) {
+    delete item;
+  }
+}
+
+Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4) : Energy(p1, p2, p3, p4) {
+}
+Dimer::~Dimer() {
+}
 /*
 Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
   int max_tau_coordinates = 0;
@@ -169,9 +182,8 @@ Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4
   control.emplace_back(total_control_variates);
   cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
 }
-*/
 
-Energy::~Energy() {
+Dimer::~Dimer() {
   for (auto &item : cv) {
     delete item;
   }
@@ -179,3 +191,5 @@ Energy::~Energy() {
     delete item;
   }
 }
+*/
+

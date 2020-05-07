@@ -107,28 +107,14 @@ class Energy : public QC_monte {
   void energy();
 };
 
-/*
-class Dimer : public QC_monte {
+class Dimer : public Energy {
  public:
-  Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
-  ~Energy();
-
-  void monte_energy() override;
+  Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  ~Dimer();
 
  protected:
-  std::vector<MCMP*> energy_functions;
-  std::vector<Accumulator*> cv;
-
-  std::vector<double> emp;
-  std::vector<std::vector<double>> control;
-
-  Tau* monomer_a_tau;
-  Tau* monomer_b_tau;
-
-  void zero_energies();
   void energy();
 };
-*/
 
 class GF : public  QC_monte {
  public:

@@ -5,47 +5,32 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "qc_mpi.h"
 
 namespace KEYS {
+  enum KEY_TYPE {
+    STRING,
+    INT,
+    DOUBLE,
+    BOOL,
+    OTHER
+  };
   enum KEYS {
-    JOBNAME = 0,             // simple 
-    JOBTYPE,                 // simple
-    SPHERICAL,               // basis
-    MC_TRIAL,                // simple
-    MC_DELX,                 // sampler?
-    GEOM,                    // geometry
-    BASIS,                   // basis
-    MC_BASIS,                // mc basis / sampler
-    NBLOCK,                  // try to depreciate
-    MOVECS,                  // basis?
-    DEBUG,                   // simple
-    TASK,                    // ????
-    NUM_BAND,                // gf
-    OFF_BAND,                // gf
-    DIFFS,                   // gf
-    ORDER,                   // depreciate
-    SAMPLER,                 // sampler
-    TAU_INTEGRATION,         // sampler
-    F12_CORRELATION_FACTOR,  // F12
-    F12_GAMMA,               // F12
-    F12_BETA,                // F12
-    ELECTRONS,               // simple
-    ELECTRON_PAIRS,          // simple
-    MP2CV_LEVEL,             // simple
-    MP3CV_LEVEL,             // simple
-    MP4CV_LEVEL,             // simple
-    FREEZE_CORE,             // simple
-    SEED_FILE,
+#define FORMAT(X, Y) X,
+#include "qc_input_keys.h"
+#undef FORMAT
+  };
+  const std::map<KEYS, KEY_TYPE> KEY_TYPE_TABLE = {
+#define FORMAT(X, Y) {X, Y},
+#include "qc_input_keys.h"
+#undef FORMAT
   };
   const std::vector<std::string> key_strings = {
-      "JOBNAME", "JOBTYPE", "SPHERICAL", "MC_TRIAL", "MC_DELX",
-      "GEOM", "BASIS", "MC_BASIS", "NBLOCK", "MOVECS",
-      "DEBUG", "TASK", "NUM_BAND", "OFF_BAND", 
-      "DIFFS", "ORDER", "SAMPLER", "TAU_INTEGRATION",
-      "F12_CORRELATION_FACTOR", "F12_GAMMA", "F12_BETA", "ELECTRONS", "ELECTRON_PAIRS",
-      "MP2CV_LEVEL", "MP3CV_LEVEL", "MP4CV_LEVEL", "FREEZE_CORE", "SEED_FILE"
+#define FORMAT(X, Y) #X,
+#include "qc_input_keys.h"
+#undef FORMAT
   };
 }
 namespace SAMPLER {
@@ -73,7 +58,7 @@ namespace TAU_INTEGRATION {
 namespace JOBTYPE {
   enum JOBTYPE {
     ENERGY,
-    DIMER_ENERGY,
+    DIMER,
     GF,
     GFDIFF,
     GFFULL,
@@ -81,7 +66,7 @@ namespace JOBTYPE {
   };
   const std::vector<std::string> jobtype_strings = {
     "ENERGY",
-    "DIMER_ENERGY",
+    "DIMER",
     "GF",
     "GFDIFF",
     "GFFULL",
