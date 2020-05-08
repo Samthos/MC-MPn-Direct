@@ -45,10 +45,16 @@ IOPs::IOPs() {
   iopns[KEYS::MP4CV_LEVEL] = 0;
 
   sopns[KEYS::GEOM] = "geom.xyz";
+  sopns[KEYS::MONOMER_A_GEOM] = "geom.xyz";
+  sopns[KEYS::MONOMER_B_GEOM] = "geom.xyz";
   sopns[KEYS::BASIS] = "basis.dat";
   sopns[KEYS::MC_BASIS] = "mc_basis.dat";
   sopns[KEYS::MOVECS] = "nwchem.movecs";
   iopns[KEYS::MOVECS] = 0;  // default is binary
+  sopns[KEYS::MONOMER_A_MOVECS] = "nwchem.movecs";
+  iopns[KEYS::MONOMER_A_MOVECS] = 0;  // default is binary
+  sopns[KEYS::MONOMER_B_MOVECS] = "nwchem.movecs";
+  iopns[KEYS::MONOMER_B_MOVECS] = 0;  // default is binary
 }
 
 template <class T>

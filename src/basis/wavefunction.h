@@ -12,6 +12,7 @@ namespace WS {
     electron_pairs_1 = 0b0000,
     electron_pairs_2 = 0b0001,
     electrons        = 0b0010,
+    mask             = 0b0011,
   };
 }
 
@@ -39,6 +40,15 @@ namespace WC {
     electron_pairs_1_dz = WT::dz | WS::electron_pairs_1,
     electron_pairs_2_dz = WT::dz | WS::electron_pairs_2,
     electrons_dz        = WT::dz | WS::electrons,
+  };
+}
+
+namespace WM {
+  enum Wavefunction_Molecules {
+    primary   = 0b000000,
+    monomer_a = 0b010000,
+    monomer_b = 0b100000,
+    mask      = 0b110000,
   };
 }
 

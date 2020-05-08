@@ -83,7 +83,7 @@ class QC_monte {
   int numBand, offBand;
   int iocc1, iocc2, ivir1, ivir2;
 
-  void update_wavefunction();
+  virtual void update_wavefunction();
   void move_walkers();
   static void print_mc_head(std::chrono::high_resolution_clock::time_point);
   static void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
@@ -104,7 +104,7 @@ class Energy : public QC_monte {
   std::vector<std::vector<double>> control;
 
   void zero_energies();
-  void energy();
+  virtual void energy();
 };
 
 class Dimer : public Energy {
@@ -113,7 +113,18 @@ class Dimer : public Energy {
   ~Dimer();
 
  protected:
-  void energy();
+  Tau* monomer_a_tau;
+  Tau* monomer_b_tau;
+  std::unordered_map<int, Wavefunction> monomer_a_wavefunctions;
+  std::unordered_map<int, Wavefunction> monomer_b_wavefunctions;
+  void update_wavefunction() override;
+  void energy() override;
+
+  template <class Binary_Op> 
+  void local_energy(std::unordered_map<int, Wavefunction>& l_wavefunction, Tau* l_tau, Binary_Op);
+
+  std::vector<double> l_emp;
+  std::vector<std::vector<double>> l_control;
 };
 
 class GF : public  QC_monte {

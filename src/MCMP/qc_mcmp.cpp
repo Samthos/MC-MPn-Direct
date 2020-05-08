@@ -151,3 +151,38 @@ void Energy::energy() {
     }
   }
 }
+
+template <class Binary_Op>
+void Dimer::local_energy(std::unordered_map<int, Wavefunction>& l_wavefunctions, Tau* l_tau, Binary_Op op) {
+  std::fill(l_emp.begin(), l_emp.end(), 0.0);
+  for (auto &c : l_control) {
+    std::fill(c.begin(), c.end(), 0.0);
+  }
+
+  ovps.update_ovps(l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], l_tau);
+  for (int i = 0; i < energy_functions.size(); i++) {
+    if (!energy_functions[i]->is_f12) {
+      if (l_tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy(l_emp[i], l_control[i], ovps, electron_pair_list, l_tau);
+      }
+    } else {
+      if (l_tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy_f12(l_emp[i], l_control[i], l_wavefunctions, electron_pair_list, electron_list);
+      }
+    }
+  }
+
+  std::transform(emp.begin(), emp.end(), l_emp.begin(), emp.begin(), op);
+  for (auto it = control.begin(), jt = l_control.begin(); it != control.end(); it++, jt++) {
+    std::transform(it->begin(), it->end(), jt->begin(), it->begin(), op);
+  }
+}
+
+void Dimer::energy() {
+  monomer_a_tau->set_from_other(tau);
+  monomer_b_tau->set_from_other(tau);
+
+  local_energy(monomer_a_wavefunctions, monomer_a_tau, std::minus<>());
+  local_energy(monomer_b_wavefunctions, monomer_b_tau, std::minus<>());
+  local_energy(wavefunctions, tau, std::plus<>());
+}

@@ -8,7 +8,7 @@
 
 class NWChem_Movec_Parser {
  public:
-  NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec);
+  NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source=KEYS::MOVECS);
 
   int iocc1, iocc2, ivir1, ivir2;
 

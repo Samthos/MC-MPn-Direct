@@ -6,12 +6,12 @@
 #include "nw_vectors.h"
 #include "qc_basis.h"
 
-NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
+NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source) {
   if (mpi_info.sys_master) {
-    if (0 == iops.iopns[KEYS::MOVECS]) {
-      parse_binary_movecs(iops.sopns[KEYS::MOVECS]);
+    if (0 == iops.iopns[source]) {
+      parse_binary_movecs(iops.sopns[source]);
     } else {
-      parse_binary_movecs(iops.sopns[KEYS::MOVECS]);
+      parse_binary_movecs(iops.sopns[source]);
     }
 
     std::cout << "nw_vectors: nbf " << n_basis_functions << "\n";
