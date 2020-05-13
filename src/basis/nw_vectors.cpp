@@ -35,6 +35,11 @@ NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& 
   ivir1 = n_occupied_orbitals;
   ivir2 = n_molecular_orbitals;
 
+  std::cout << iocc1 << "\t";
+  std::cout << iocc2 << "\t";
+  std::cout << ivir1 << "\t";
+  std::cout << ivir2 << "\n";
+
   if (mpi_info.sys_master) {
     if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF ||
         iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF ||
@@ -79,6 +84,7 @@ void NWChem_Movec_Parser::broadcast() {
   MPI_info::broadcast_int(&n_basis_functions, 1);
   MPI_info::broadcast_int(&n_molecular_orbitals, 1);
   MPI_info::broadcast_int(&n_occupied_orbitals, 1);
+  resize();
   MPI_info::broadcast_vector_double(orbital_energies);
   MPI_info::broadcast_vector_double(movecs);
 }
