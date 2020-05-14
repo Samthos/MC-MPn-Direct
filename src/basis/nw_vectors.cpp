@@ -90,8 +90,8 @@ void NWChem_Movec_Parser::broadcast() {
 }
 
 void NWChem_Movec_Parser::resize() {
-  occupancy.resize(n_molecular_orbitals);
-  orbital_energies.resize(n_molecular_orbitals);
+  occupancy.resize(n_basis_functions);
+  orbital_energies.resize(n_basis_functions);
   movecs.resize(n_basis_functions * n_molecular_orbitals);
 }
 
