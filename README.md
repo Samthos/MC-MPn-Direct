@@ -14,7 +14,7 @@ In order to build MC-MPn the following are required
 2. c++14 compliant compiler
 3. A C BLAS implementation (preferable fast, i.e., [openblas](https://github.com/xianyi/OpenBLAS), mkl, etc.)
 4. [Armadillo](http://arma.sourceforge.net/)
-5. [LAPACK](https://performance.netlib.org/lapack/)
+5. [LAPACK](https://performance.netlib.org/lapack/): Lapack is required for Armdillo.
 
 For performance, it is optional but highly recommended to use an MPI compiler
 for multithreading support.
@@ -51,10 +51,6 @@ There are several files needed to run a calculation with MC-MPN
 2. The molecular orbital coefficients and molecule orbital energies from an RHF calculation output by [**NWChem**](http://www.NWChem-sw.org/index.php/Main_Page). These are stored in the **movecs** file.
 3. The molecular geometry stored in the [xyz format](https://en.wikipedia.org/wiki/XYZ_file_format).
 4. The basis set used for the RHF calculation. Basis set files can be found in \<NWChem-source-directory\>/src/basis/libraries.
-
-  * Basis set format is currently custom (see example/intput/cc-pvdz.basis)
-  * **Will be standardized to NWChem shortly**
-
 5. An MC basis set to build the electron-pair importance function.
 
 ####  Notes on NWChem
