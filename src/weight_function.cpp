@@ -156,14 +156,14 @@ void Electron_Pair_GTO_Weight::normalize() {
 
   // constants
   double igamma[1501][17];
-  constexpr double PI = 3.141592653589793;
-  constexpr double sqrt_pi = sqrt(PI);
-  constexpr double pisub = 2.0 / sqrt_pi;
-  constexpr double pisub2 = 2.0 * pow(sqrt_pi, 5);
-  constexpr double f2[] = {-0.5, -1.5, -2.5, -3.5, -4.5, -5.5, -6.5, -7.5, -8.5, -9.5};
-  constexpr double tf[] = {33.0, 37.0, 41.0, 43.0, 46.0, 49.0, 51.0, 54.0, 56.0,
-                           58.0, 61.0, 63.0, 66.0, 68.0, 70.0, 72.0, 74.0};
-  constexpr double f1[] = {1.0 / pisub, 1.0 / 2.0 / pisub,
+  double PI = 3.141592653589793;
+  double sqrt_pi = sqrt(PI);
+  double pisub = 2.0 / sqrt_pi;
+  double pisub2 = 2.0 * pow(sqrt_pi, 5);
+  double f2[] = {-0.5, -1.5, -2.5, -3.5, -4.5, -5.5, -6.5, -7.5, -8.5, -9.5};
+  double tf[] = {33.0, 37.0, 41.0, 43.0, 46.0, 49.0, 51.0, 54.0, 56.0,
+                          58.0, 61.0, 63.0, 66.0, 68.0, 70.0, 72.0, 74.0};
+  double f1[] = {1.0 / pisub, 1.0 / 2.0 / pisub,
                            3.0 / 4.0 / pisub, 15.0 / 8.0 / pisub,
                            105.0 / 16.0 / pisub, 945.0 / 32.0 / pisub,
                            10395.0 / 64.0 / pisub, 135135.0 / 128.0 / pisub,
@@ -239,6 +239,7 @@ void Electron_Pair_GTO_Weight::normalize() {
     }
   }
 
+  std::cout << "Weight normalization " << g_wgt << "\n";
   std::for_each(cum_sum.begin(), cum_sum.end(), [&](double& x) {x = x/g_wgt;});
   std::partial_sum(cum_sum.begin(), cum_sum.end(), cum_sum.begin());
 
