@@ -188,7 +188,7 @@ void Electron_Pair_GTO_Weight::normalize() {
   for (auto &it : mcBasisList) {
     std::transform(
         it.norm.begin(), it.norm.end(), it.alpha.begin(), it.norm.begin(),
-        [](double c, double a) { return c * pow(2.0 * a / PI, 0.75); });
+        [&](double c, double a) { return c * pow(2.0 * a / PI, 0.75); });
   }
 
   // calculate g_wgt
