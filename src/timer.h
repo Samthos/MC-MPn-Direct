@@ -14,16 +14,16 @@ class Timer {
     MPI_info::comm_rank(&master);
   }
   void Start() {
-    start = std::chrono::high_resolution_clock::now();
+    start = std::chrono::system_clock::now();
   }
   void Stop() {
-    stop = std::chrono::high_resolution_clock::now();
+    stop = std::chrono::system_clock::now();
     span = std::chrono::duration_cast<std::chrono::duration<double>>(stop - start);
   }
-  std::chrono::high_resolution_clock::time_point StartTime() {
+  std::chrono::system_clock::time_point StartTime() {
     return start;
   }
-  std::chrono::high_resolution_clock::time_point EndTime() {
+  std::chrono::system_clock::time_point EndTime() {
     return stop;
   }
   double Span() {
@@ -38,7 +38,7 @@ class Timer {
   }
  private:
   int master;
-  std::chrono::high_resolution_clock::time_point start, stop;
+  std::chrono::system_clock::time_point start, stop;
   std::chrono::duration<double> span;
 };
 

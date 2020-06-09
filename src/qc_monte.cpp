@@ -74,14 +74,14 @@ void QC_monte::move_walkers() {
   }
 }
 
-void QC_monte::print_mc_head(std::chrono::high_resolution_clock::time_point mc_start) {
-  std::time_t tt = std::chrono::high_resolution_clock::to_time_t(mc_start);
+void QC_monte::print_mc_head(std::chrono::system_clock::time_point mc_start) {
+  std::time_t tt = std::chrono::system_clock::to_time_t(mc_start);
   std::cout << "Begining MC run at: " << ctime(&tt);
   std::cout.flush();
 }
 
-void QC_monte::print_mc_tail(double time_span, std::chrono::high_resolution_clock::time_point mc_end) {
-  std::time_t tt = std::chrono::high_resolution_clock::to_time_t(mc_end);
+void QC_monte::print_mc_tail(double time_span, std::chrono::system_clock::time_point mc_end) {
+  std::time_t tt = std::chrono::system_clock::to_time_t(mc_end);
   std::cout << "Finished MC run at: " << ctime(&tt);
   std::cout << "Spent " << time_span << " second preforming MC integration" << std::endl;
 }

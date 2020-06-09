@@ -16,13 +16,13 @@ void GF::monte_energy() {
   int print_mat;
 
   //clock
-  std::chrono::high_resolution_clock::time_point step_start, step_end, mc_start, mc_end;
+  std::chrono::system_clock::time_point step_start, step_end, mc_start, mc_end;
   std::chrono::duration<double> time_span{};
 
   //start clock and print out time
   if (mpi_info.sys_master) {
-    step_start = std::chrono::high_resolution_clock::now();
-    mc_start = std::chrono::high_resolution_clock::now();
+    step_start = std::chrono::system_clock::now();
+    mc_start = std::chrono::system_clock::now();
     print_mc_head(mc_start);
   }
 
@@ -52,9 +52,9 @@ void GF::monte_energy() {
       }
 
       if (mpi_info.sys_master) {  //print out results
-        step_end = std::chrono::high_resolution_clock::now();
+        step_end = std::chrono::system_clock::now();
         time_span = std::chrono::duration_cast<std::chrono::duration<double>>(step_end - step_start);
-        step_start = std::chrono::high_resolution_clock::now();
+        step_start = std::chrono::system_clock::now();
         for (auto & qep : qeps) {
           qep.print(step, time_span.count());
         }
@@ -62,7 +62,7 @@ void GF::monte_energy() {
     }
 
     if ((iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL) || (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF)) {
-      mc_end = std::chrono::high_resolution_clock::now();
+      mc_end = std::chrono::system_clock::now();
       time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
       print_mat = (time_span.count() > checkNum * 900);
       MPI_info::barrier();
@@ -80,7 +80,7 @@ void GF::monte_energy() {
 
   //close streams and print out time
   if (mpi_info.sys_master) {
-    mc_end = std::chrono::high_resolution_clock::now();
+    mc_end = std::chrono::system_clock::now();
     time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
     print_mc_tail(time_span.count(), mc_end);
   }
@@ -213,13 +213,13 @@ Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4)
 
 void Diagonal_GF::monte_energy() {
   // clock
-  std::chrono::high_resolution_clock::time_point step_start, step_end, mc_start, mc_end;
+  std::chrono::system_clock::time_point step_start, step_end, mc_start, mc_end;
   std::chrono::duration<double> time_span{};
 
   // start clock and print out time
   if (mpi_info.sys_master) {
-    step_start = std::chrono::high_resolution_clock::now();
-    mc_start = std::chrono::high_resolution_clock::now();
+    step_start = std::chrono::system_clock::now();
+    mc_start = std::chrono::system_clock::now();
     print_mc_head(mc_start);
   }
 
@@ -254,9 +254,9 @@ void Diagonal_GF::monte_energy() {
       }
 
       if (mpi_info.sys_master) {  // print out results
-        step_end = std::chrono::high_resolution_clock::now();
+        step_end = std::chrono::system_clock::now();
         time_span = std::chrono::duration_cast<std::chrono::duration<double>>(step_end - step_start);
-        step_start = std::chrono::high_resolution_clock::now();
+        step_start = std::chrono::system_clock::now();
         for (auto & qep : qeps) {
           qep.print(step, time_span.count());
         }
@@ -266,7 +266,7 @@ void Diagonal_GF::monte_energy() {
 
   // close streams and print out time
   if (mpi_info.sys_master) {
-    mc_end = std::chrono::high_resolution_clock::now();
+    mc_end = std::chrono::system_clock::now();
     time_span = std::chrono::duration_cast<std::chrono::duration<double>>(mc_end - mc_start);
     print_mc_tail(time_span.count(), mc_end);
   }

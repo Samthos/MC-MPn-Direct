@@ -85,8 +85,8 @@ class QC_monte {
 
   virtual void update_wavefunction();
   void move_walkers();
-  static void print_mc_head(std::chrono::high_resolution_clock::time_point);
-  static void print_mc_tail(double, std::chrono::high_resolution_clock::time_point);
+  static void print_mc_head(std::chrono::system_clock::time_point);
+  static void print_mc_tail(double, std::chrono::system_clock::time_point);
 };
 
 class Energy : public QC_monte {
