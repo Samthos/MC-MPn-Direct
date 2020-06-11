@@ -1,5 +1,3 @@
-// Copyright 2017
-
 #ifndef QC_BASIS_H_
 #define QC_BASIS_H_
 

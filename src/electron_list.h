@@ -1,5 +1,3 @@
-// Copyright 2017 Hirata Lab
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

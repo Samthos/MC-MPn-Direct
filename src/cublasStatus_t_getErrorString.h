@@ -1,5 +1,3 @@
-// Copyright 2017
-
 #include <string>
 
 #include <cuda.h>

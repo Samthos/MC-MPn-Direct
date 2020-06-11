@@ -1,5 +1,3 @@
-// Copyright 2017
-
 #ifndef BLAS_CALLS_H_
 #define BLAS_CALLS_H_
 

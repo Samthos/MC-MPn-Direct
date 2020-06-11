@@ -1,4 +1,3 @@
-// Copyright 2019
 #ifndef QC_MPI_H_
 #define QC_MPI_H_
 

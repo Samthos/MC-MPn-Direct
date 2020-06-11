@@ -1,5 +1,3 @@
-// Copyright 2019
-
 #ifndef WAVEFUNCTION_H_
 #define WAVEFUNCTION_H_
 

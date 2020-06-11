@@ -1,4 +1,3 @@
-// Copyright 2017
 #ifndef QC_MONTE_H_
 #define QC_MONTE_H_
 

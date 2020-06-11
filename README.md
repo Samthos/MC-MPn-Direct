@@ -1,6 +1,6 @@
 # MC-MPn
 
-TBD
+This project implements the Monte Carlo many-body perturbation theory (MC-MP) and Monte Carlo many-body Green's function methods (MC-GF) developed by the Hirata Lab. 
 
 ## Getting Started
 
@@ -14,7 +14,7 @@ In order to build MC-MPn the following are required
 2. c++14 compliant compiler
 3. A C BLAS implementation (preferable fast, i.e., [openblas](https://github.com/xianyi/OpenBLAS), mkl, etc.)
 4. [Armadillo](http://arma.sourceforge.net/)
-5. [LAPACK](https://performance.netlib.org/lapack/): Lapack is required for Armdillo.
+5. [LAPACK](https://performance.netlib.org/lapack/): Lapack is required for Armadillo.
 
 For performance, it is optional but highly recommended to use an MPI compiler
 for multithreading support.
@@ -30,17 +30,11 @@ Build a simple reversion of MC-MPn is quite simple. From the top-level director 
  make
 ```
 
-If you want to build with a MPI compiler prepend line three with
+If you want to build with a MPI support, substitute the cmake command with 
 
 ```bash
- MPI_CXX_COMPILER=<path-to-c++-mpi-compiler>
+ MPI_CXX_COMPILER=<path-to-c++-mpi-compiler> cmake .. -DCMAKE_BUILD_TYPE=Release -DEnable_MPI=On
 ```
-
-In addition to the standard cmake build options, MC-MPn has a few additional options.
-
-* -DEnable_MPI: Values={ON, OFF}; Default=Off.
-
-* CV options: higher values correspond to more control variates being used.
 
 ## Running MC-MPn
 ### Prerequisites
@@ -49,7 +43,7 @@ There are several files needed to run a calculation with MC-MPN
 
 1. An input file (typically ending in mcin).
 2. The molecular orbital coefficients and molecule orbital energies from an RHF calculation output by [**NWChem**](http://www.NWChem-sw.org/index.php/Main_Page). These are stored in the **movecs** file.
-3. The molecular geometry stored in the [xyz format](https://en.wikipedia.org/wiki/XYZ_file_format).
+3. The molecular geometry stored in the [xyz format](https://en.wikipedia.org/wiki/XYZ_file_format). The atom specifiers in the XYZ file adopt the atom tag conventions used by [NWChem](http://www.nwchem-sw.org/index.php/Geometry#Cartesian_coordinate_input).
 4. The basis set used for the RHF calculation. Basis set files can be found in \<NWChem-source-directory\>/src/basis/libraries.
 5. An MC basis set to build the electron-pair importance function.
 
@@ -64,26 +58,49 @@ Because of this, its typically worth pulling the geometry from the NWChem output
 The movecs file produced by NWChem is stored in a binary format.
 MC-MPn can read the binary as is, although, there could potentially be issues with endianness if NWChem and MC-MPn are run on different machines.
 If there are issues with the binary movecs file, convert it to an ascii format on the machine used to run NWChem.
-NWChem provides a utility called mov2asc that will convert the binary into an ascii format. Godspeed getting mov2asc to compile.
-See keywords for how to specify the movecs format.
+NWChem provides a utility called mov2asc that will convert the binary into an ascii format.  See keywords for how to specify the movecs format.
 
 ####  The MC-Basis Set
-TBD
+  The MC-Basis is used to construct distributions for electron pairs (all methods) and for electrons (only F12 methods). The distribution for an electron pair is proportional to two sums of atom centered S-type Gaussians, one for each electron coordinate, and inversely proportional to the interelectronic distance. The distribution for an electron is proportional to a single sum  of atom centered S-type Gaussians. The sums of S-type Gaussian for the electron-pair and electron distributions are identical.
+
+  Typically, two Gaussians are placed on each atom. If the atomic basis set contains diffuse atomic orbitals, such as the aug-cc-pVDZ basis set, using more than two Gaussians per atom may reduce the variance of the simulation.
+
+  In the case of placing two Gaussians on each atom, reasonable values for the parameters of the Gaussians are as follows.  The height of the first Gaussian is set to be equal to the atom's number of valence electrons. Its width is approximately equal to the exponent of the most diffuse Gaussian in the most highly contracted S-type orbital of the atomic basis set.  The height of the second Gaussian is set to be one-tenth of the atom's number of valence electrons. Its width is approximately equal to the exponent of the most diffuse Gaussian in the least contracted S-type orbital of the atomic basis set.  
+
+The format for the MC-Basis is as followed
+```
+<number of atoms> <guassians per atom>
+<atom tag 1>
+<gaussian width 1> <gaussian height 1>
+. . .
+<gaussian width n> <gaussian height n>
+...
+<atom tag m>
+<gaussian width 1> <gaussian height 1>
+.  .  .
+<gaussian width n> <gaussian height n>
+```
+
+  See examples/input/cc-pvdz.mc_basis for an explicit example of the MC_Basis file format.
 
 ### Keywords
-These are option to be specified in the input file. See the examples subdirectory of the project tree for examples of valid input files.
+The input file for MC-MPn is a simple text file. Most of the options consist of keyword values pairs. 
+See the examples subdirectory of the project tree for examples of valid input files.
 
+#### High Level Options
 The following are required options. All paths are relative to director where the job is launched.
 * **JOBNAME**: (STRING) Name of job. Influences the names of output files.
 * **GEOM**: (STRING) Path to xyz geometry file.
-* **MOVECS**: (STRING) Path to movecs file generated by NWChem.
 * **BASIS**: (STRING) Path to basis set.
 * **MC_BASIS**: (STRING) Path to MC basis set.
 
+* **MOVECS**: (STRING) Path to movecs file generated by NWChem.
+
 The following are options technically options, but will be set for nearly every calculation.
-* **JOBTYPE**: (STRING) Specifies type of calculation to perform. Default=MP
+* **JOBTYPE**: (STRING) Specifies type of calculation to perform. Default=Energy
 
   * ENERGY: Energy calcualtion
+  * DIMER: Energy calcualtion
   * GF: Green's function calculation for diagonal element.
   * GFDIFF: Green's function calculation for diagonal element only with derivatives.
   * GFFULL: Green's function calculation for full self-energy matrix.
@@ -105,15 +122,14 @@ The following are options technically options, but will be set for nearly every 
 * **MC_TRIAL**: (INT) Number of MC steps to perform. Default=1024
 * **FREEZE_CORE**: (INT) Option to invoke the frozen core approximation. Values={0, 1}. Default=1
 
-* **MP\<N\>CV_LEVEL**: (INT) Set the deepest loop that control variates may be calculated in for energy calculations. Higher values produce more control variates. Maximum values is N.
 
-The options control the sequence of random number used.
+#### Random Number Generation
 
 * **DEBUG**: (INT) Values={0, 1, 2}; Default=0
 
-  0. The random number generators is seeded from std::random_devices. 
-  1. The random number generators are seeded using preset seeds. **May only run upto 16 MPI threads**
-  2. The random number generators are seeded using the values is SEED_FILE. (See SEED_FILE options)
+  * 0: The random number generators is seeded from std::random_devices. 
+  * 1: The random number generators are seeded using preset seeds. **May only run upto 16 MPI threads**
+  * 2: The random number generators are seeded using the values is SEED_FILE. (See SEED_FILE options)
 
 * **SEED_FILE**: (String); Default=""
 
@@ -123,7 +139,7 @@ The options control the sequence of random number used.
 * **SAMPLER**: (STRING) Sets method to use to sample the electron-pair importance function. Default=DIRECT
 
   * DIRECT: Use the direct sampling algorithm for the electron-pair coordinates.
-  * METROPOLIS: Use the Metropolis sampling algorithm for the electron-pair coordinates. **Not compatable with control variates**
+  * METROPOLIS: Use the Metropolis sampling algorithm for the electron-pair coordinates. **Only if all CV_LEVELS are zero**
 
 * **TAU_INTEGRATION**: (STRING) Sets method to integrate imaginary-time coordinates.  Default=STOCHASTIC
 
@@ -136,14 +152,11 @@ If the sampler is set to Metropolis the following keywords may be set:
  * **MC_DELX**: (DOUBLE) Sets initial maximum offset for the Metropolis algorithm. Default=0.1
  * **NBLOCK**: (INT) May be depreciates. Set maximum number of blocking transformations. Default=1
 
-These options control the sequence the behavior of MC-GF calculations.
- * **OFF_BAND**: (INT) Specifies offset of the first orbital relative to LUMO to target. Default=1 (HOMO)
- * **NUM_BAND**: (INT) Specifies number of orbitals to target. Default=1.
- * **DIFFS**: (INT) Maximum number of derivatives to calculate plus one. DIFFS=1 is a calculation with no derivatives. Diffs=2 is the self-energy  plus its first derivatives. Default=1
+#### MC-MP Task Options
 
-The OFF_BAND and NUM_BAND keywords are used in conjunction to specify the range of orbitals that the MC-GF calculation will provide a correction to.
-The range of orbitals is (LUMO - OFF_BAND, ..., LUMO - OFF_BAND + NUM_BAND - 1).
+* **MP\<N\>CV_LEVEL**: (INT) Set the deepest loop that control variates may be calculated in for energy calculations. Higher values produce more control variates. Maximum values is N.
 
+#### MC-F12 Task Options
 These options control the behavior of F12V calculations
  * **ELECTRONS**: (INT) Number of one electron walkers to use for the calculation. Default=16
  * **F12_CORRELATION_FACTOR**: (STRING) Which functional form to use for the correlation factor. A list of the available correlation factors is given below. Default=Slater.
@@ -169,6 +182,23 @@ MC-F12 methods have the unique ability to use nearly any function as the correla
  * **Higher_Rational**: Two-parameter functional. Default Gamma=1.6. Default Beta=3.0.
  * **Cubic_Slater**: Two-parameter functional. Default Gamma=1.2. Default Beta=0.003.
  * **Higher_Jastrow**: Two-parameter functional. Default Gamma=0.8. Default Beta=0.75.
+
+#### Dimer Job type Options
+Dimer jobs require several additional inputs compared to a standard energy job type. The dimer job type requires three geometries and molecular orbital vectors, one each of the DIMER, MONOMER_A, and MONOMER_B subsystem. The input for the DIMER subsystem is received from the standard inputs above. The calculation assumes the all three subsystems use the same set of atomic orbitals basis.
+
+* **MONOMER_A_GEOM**: (STRING) Path to xyz geometry file for monomer A.
+* **MONOMER_B_GEOM**: (STRING) Path to xyz geometry file for monomer B.
+* **MONOMER_A_MOVECS**: (STRING) Specifies monomer A molecule orbitals. Same format as MOVECS keyword.
+* **MONOMER_B_MOVECS**: (STRING) Specifies monomer B molecule orbitals. Same format as MOVECS keyword.
+
+#### GF Job type Options
+These options control the sequence the behavior of MC-GF calculations.
+ * **OFF_BAND**: (INT) Specifies offset of the first orbital relative to LUMO to target. Default=1 (HOMO)
+ * **NUM_BAND**: (INT) Specifies number of orbitals to target. Default=1.
+ * **DIFFS**: (INT) Maximum number of derivatives to calculate plus one. DIFFS=1 is a calculation with no derivatives. Diffs=2 is the self-energy  plus its first derivatives. Default=1
+
+The OFF_BAND and NUM_BAND keywords are used in conjunction to specify the range of orbitals that the MC-GF calculation will provide a correction to.
+The range of orbitals is (LUMO - OFF_BAND, ..., LUMO - OFF_BAND + NUM_BAND - 1).
 
 
 
@@ -218,8 +248,4 @@ Please read [CONTRIBUTING.md](https://gist.github.com/Samthos/MC-MPn-Direct/CONT
 * **Alexander Doran**
 
 See also the list of [contributors](https://github.com/Samthos/MC-MPn-Direct/contributors) who participated in this project.
-
-## License
-
-TBD
 

@@ -1,5 +1,3 @@
-// Copyright 2017
-
 #ifdef HAVE_MPI
 #include "mpi.h"
 #endif

@@ -1,5 +1,3 @@
-// copyright 2017
-
 #ifndef QC_OVPS_H_
 #define QC_OVPS_H_
 #include <vector>

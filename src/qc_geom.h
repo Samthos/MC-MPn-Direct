@@ -1,4 +1,3 @@
-// Copyright 2019
 #ifndef QC_GEOM_H_
 #define QC_GEOM_H_
 

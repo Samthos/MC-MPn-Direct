@@ -1,5 +1,3 @@
-// Copyright 2017
-
 #include <algorithm>
 #include <cmath>
 #include <cstdio>

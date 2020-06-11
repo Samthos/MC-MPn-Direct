@@ -1,4 +1,3 @@
-// Copyright 2017 Hirata Lab
 #include <cmath>
 #include <algorithm>
 #include <numeric>

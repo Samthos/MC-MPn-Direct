@@ -1,4 +1,3 @@
-// Copyright 2017
 #ifndef QC_INPUT_H_
 #define QC_INPUT_H_
 

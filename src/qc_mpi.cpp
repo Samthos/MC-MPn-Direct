@@ -1,5 +1,3 @@
-// Copyright 2017
-
 #include <cstdio>
 
 #ifdef HAVE_MPI

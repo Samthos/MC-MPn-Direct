@@ -1,4 +1,3 @@
-// Copyright 2017
 #ifndef QC_RANDOM_H_
 #define QC_RANDOM_H_
 #include <array>
