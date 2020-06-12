@@ -9,6 +9,7 @@
 
 #include "../qc_mpi.h"
 #include "../qc_monte.h"
+#include "../blas_calls.h"
 
 std::string GF::genFileName(int checkNum, int type, int order, int band, int diff, int block) {
   std::stringstream ss;

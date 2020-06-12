@@ -28,6 +28,8 @@ set(source
         timer.h
         tau_integrals.h
         tau_integrals.cpp
+      	ovps_set.h
+      	ovps_set.cpp
         MCGF/gf3_core_c.h
         MCGF/gf3_core_m_1.h
         MCGF/gf3_core_m_12.h

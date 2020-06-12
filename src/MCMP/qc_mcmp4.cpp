@@ -2,6 +2,7 @@
 // Created by aedoran on 6/13/18.
 //
 #include "../qc_monte.h"
+#include "../blas_calls.h"
 #include "qc_mcmp4.h"
 #include "cblas.h"
 

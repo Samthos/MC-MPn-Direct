@@ -2,6 +2,7 @@
 #define QC_MCMP4_H_
 
 #include "mcmp.h"
+#include "cblas.h"
 
 template <int CVMP4>
 class MCMP4 : public MCMP {

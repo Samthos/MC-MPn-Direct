@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <numeric>
+#include "cblas.h"
 
 #include "gf2_f12.h"
 

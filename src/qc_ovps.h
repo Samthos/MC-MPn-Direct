@@ -6,59 +6,9 @@
 #include "basis/nw_vectors.h"
 #include "qc_random.h"
 #include "tau_integrals.h"
+#include "ovps_set.h"
 
-#include "cblas.h"
-#include "blas_calls.h"
 
-class OVPS_SET {
- public:
-  OVPS_SET() = default;
-  OVPS_SET(int mc_pair_num_) {
-    resize(mc_pair_num_);
-  }
-  void resize(int mc_pair_num_) {
-    mc_pair_num = mc_pair_num_;
-    s_11.resize(mc_pair_num * mc_pair_num);
-    s_12.resize(mc_pair_num * mc_pair_num);
-    s_21.resize(mc_pair_num * mc_pair_num);
-    s_22.resize(mc_pair_num * mc_pair_num);
-  }
-  void update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
-    double alpha = 1.0;
-    double beta = 0.0;
-
-    cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
-        mc_pair_num, inner,
-        alpha,
-        psi1Tau, lda,
-        beta,
-        s_11.data(), mc_pair_num);
-    set_Upper_from_Lower(s_11.data(), mc_pair_num);
-    cblas_dscal(mc_pair_num, 0.0, s_11.data(), mc_pair_num+1);
-
-    cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
-        mc_pair_num, inner,
-        alpha,
-        psi2Tau, lda,
-        beta,
-        s_22.data(), mc_pair_num);
-    set_Upper_from_Lower(s_22.data(), mc_pair_num);
-    cblas_dscal(mc_pair_num, 0.0, s_22.data(), mc_pair_num+1);
-
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-        mc_pair_num, mc_pair_num, inner,
-        alpha,
-        psi1Tau, lda,
-        psi2Tau, lda,
-        beta,
-        s_21.data(), mc_pair_num);
-    cblas_dscal(mc_pair_num, 0.0, s_21.data(), mc_pair_num+1);
-    Transpose(s_21.data(), mc_pair_num, s_12.data());
-  }
-
-  int mc_pair_num;
-  std::vector<double> s_11, s_12, s_21, s_22;
-};
 
 struct OVPS_ARRAY {
   double *ent, *enCore;
