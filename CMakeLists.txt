@@ -12,9 +12,9 @@ execute_process(
 )
 add_definitions("-DVERSION=\"${GIT_COMMIT_HASH}\"")
 
-#find_package(CUDA)
-#list(APPEND CUDA_NVCC_FLAGS "-std=c++14;-O3;-DVERBOSE")
-#set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+find_package(CUDA)
+list(APPEND CUDA_NVCC_FLAGS "-std=c++14;-O3;-DVERBOSE")
+set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
 find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)

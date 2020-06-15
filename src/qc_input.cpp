@@ -17,6 +17,9 @@ IOPs::IOPs() {
    * TODO
    *  -read values directly instead of setting them
    */
+  bopns.fill(false);
+  dopns.fill(0.0);
+  iopns.fill(0);
   bopns[KEYS::SPHERICAL] = true;
   bopns[KEYS::F12_GAMMA] = false;
   bopns[KEYS::F12_BETA] = false;

@@ -28,6 +28,10 @@ void OVPs::free() {
 void OVPs::update_ovps(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
   // update green's function trace objects
 
+#ifdef HAVE_CUDA
+  OVPS_SET_DEVICE temp(mc_pair_num);
+#endif // HAVE_CUDA
+
   auto iocc1 = electron_pair_psi1.iocc1;
   auto iocc2 = electron_pair_psi1.iocc2;
   auto ivir1 = electron_pair_psi1.ivir1;
@@ -40,8 +44,16 @@ void OVPs::update_ovps(Wavefunction& electron_pair_psi1, Wavefunction& electron_
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi1.occ(), electron_pair_psi1.lda, &t_val[iocc1], 1, electron_pair_psi1.occTau(), electron_pair_psi1.lda);
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, mc_pair_num, electron_pair_psi2.occ(), electron_pair_psi2.lda, &t_val[iocc1], 1, electron_pair_psi2.occTau(), electron_pair_psi2.lda);
 
+#ifdef HAVE_CUDA
+      temp.update(electron_pair_psi1.occTau(), electron_pair_psi2.occTau(), electron_pair_psi2.iocc2 - electron_pair_psi2.iocc1, electron_pair_psi2.lda);
+      copy_OVPS_DEVICE_TO_HOST(temp, o_set[stop][start]);
+
+      temp.update(electron_pair_psi1.virTau(), electron_pair_psi2.virTau(), electron_pair_psi2.ivir2 - electron_pair_psi2.ivir1, electron_pair_psi2.lda);
+      copy_OVPS_DEVICE_TO_HOST(temp, v_set[stop][start]);
+#else
       o_set[stop][start].update(electron_pair_psi1.occTau(), electron_pair_psi2.occTau(), electron_pair_psi2.iocc2 - electron_pair_psi2.iocc1, electron_pair_psi2.lda);
       v_set[stop][start].update(electron_pair_psi1.virTau(), electron_pair_psi2.virTau(), electron_pair_psi2.ivir2 - electron_pair_psi2.ivir1, electron_pair_psi2.lda);
+#endif // HAVE_CUDA
     }
   }
 }

@@ -1,20 +1,40 @@
+#include <iostream>
+
 #include "ovps_set.h"
 #include "cblas.h"
 #include "blas_calls.h"
 
-OVPS_SET::OVPS_SET(int mc_pair_num_) {
+template <class Container>
+OVPS_SET_BASE<Container>::OVPS_SET_BASE(int mc_pair_num_) {
   resize(mc_pair_num_);
 }
-void OVPS_SET::resize(int mc_pair_num_) {
+
+template <class Container>
+void OVPS_SET_BASE<Container>::resize(int mc_pair_num_) {
   mc_pair_num = mc_pair_num_;
   s_11.resize(mc_pair_num * mc_pair_num);
   s_12.resize(mc_pair_num * mc_pair_num);
   s_21.resize(mc_pair_num * mc_pair_num);
   s_22.resize(mc_pair_num * mc_pair_num);
 }
-void OVPS_SET::update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
+
+template <class Container>
+void OVPS_SET_BASE<Container>::update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
+
+  std::cerr << "OVPS SET DEFAULT DEFINIONTAL REQUIRED BY LAW\n";
+  exit(0);
+}
+
+template <>
+void OVPS_SET_BASE<std::vector<double>>::update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
   double alpha = 1.0;
   double beta = 0.0;
+
+// for (int i = 0; i < lda; i++) {
+//   printf("DEBUGING: psi %2i %12.4f %12.4f\n", i, psi1Tau[i], psi1Tau[i + lda]);
+// }
+// printf("DEBUGING\n");
+// printf("DEBUGING: inner = %i; lda = %i\n", inner, lda);
 
   cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
       mc_pair_num, inner,

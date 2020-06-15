@@ -29,7 +29,6 @@ set(source
         tau_integrals.h
         tau_integrals.cpp
       	ovps_set.h
-      	ovps_set.cpp
         MCGF/gf3_core_c.h
         MCGF/gf3_core_m_1.h
         MCGF/gf3_core_m_12.h
@@ -58,9 +57,6 @@ set(source
         MCF12/mp2_f12.h
         MCF12/gf2_f12.cpp
         MCF12/gf2_f12.h
-)
-
-set(CPU_EXTRA_SOURCES
         MCGF/qc_gfFullStatistics.cpp
         MCGF/qc_mcgf.h
         MCGF/qc_mcgf2.h
@@ -77,8 +73,8 @@ set(CPU_EXTRA_SOURCES
         MCMP/qc_mcmp4_il.h MCMP/qc_mcmp4_il_j.h MCMP/qc_mcmp4_il_k.h
         )
 
-
-# include_directories(${ARMADILLO_INCLUDE_DIRS})
+set(CPU_EXTRA_SOURCES
+	ovps_set.cpp)
 
 add_executable(MC_MPn_Direct ${source} ${CPU_EXTRA_SOURCES})
 
@@ -95,17 +91,23 @@ IF(${MPI_CXX_FOUND})
     target_include_directories(MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
 endif()
 
-#set(GPU_EXTRA_SOURCES
-#    cublasStatus_t_getErrorString.cu cublasStatus_t_getErrorString.h
-#    MCGF/gpu_gfFullStatistics.cu MCGF/gpu_mcgf2.cu MCGF/gpu_mcgf3.cu gpu_ovps.cu basis/gpu_psi.cu gpu_qc_monte.cpp)
-#cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_EXTRA_SOURCES})
-#target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
-#target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
-#cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
-#IF(${MPI_CXX_FOUND})
-#    message("Adding MPI compile options to GPU_MC_MPn_Direct")
-#    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
-#    target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
-#    target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
-#endif()
+set(GPU_EXTRA_SOURCES
+	ovps_set_device.cu)
+cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_EXTRA_SOURCES})
+target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+
+target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
+
+target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
+
+cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
+target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
+IF(${MPI_CXX_FOUND})
+    message("Adding MPI compile options to GPU_MC_MPn_Direct")
+    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
+    target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
+    target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
+endif()
 
