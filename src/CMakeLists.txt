@@ -39,6 +39,8 @@ set(source
         MCGF/gf_stats.cpp
         MCGF/qc_gfFullStatisticsHost.cpp
         MCGF/qc_mcgf.cpp
+	MCGF/gf_full_arrays.h
+	MCGF/gf_full_arrays.cpp
         MCMP/qc_mcmp.cpp
         MCMP/mcmp.h
         MCMP/qc_mcmp2.h

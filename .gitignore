@@ -6,3 +6,4 @@ __pycache__/
 *.swp
 *.bash
 *.py
+.vscode

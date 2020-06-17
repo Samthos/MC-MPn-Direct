@@ -105,13 +105,13 @@ void GF2::mc_local_energy(const int& step) {
     }
   }
   if (step > 0 && (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL)) {
-    mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_statistics(step, d_ovps.enBlock, d_ovps.enEx1, d_ovps.enCov);
   }
 }
 
 int GF2::full_print(int& step, int checkNum) {
   for (auto band = 0; band < numBand; band++) {
-    mc_gf_full_print(band, step, checkNum % 2, 0, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_full_print(band, step, checkNum % 2, 0, d_ovps.enEx1, d_ovps.enCov);
   }
   checkNum += 1;
   return checkNum;
@@ -150,13 +150,13 @@ void GF3::mc_local_energy(const int& step) {
   }
 
   if (step > 0 && (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL)) {
-    mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_statistics(step, d_ovps.enBlock, d_ovps.enEx1, d_ovps.enCov);
   }
 }
 
 int GF3::full_print(int& step, int checkNum) {
   for (auto band = 0; band < numBand; band++) {
-    mc_gf_full_print(band, step, checkNum % 2, 0, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_full_print(band, step, checkNum % 2, 0, d_ovps.enEx1, d_ovps.enCov);
   }
   checkNum += 1;
   return checkNum;
