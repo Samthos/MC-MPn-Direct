@@ -73,10 +73,10 @@ set(source
         MCMP/qc_mcmp4_il.h MCMP/qc_mcmp4_il_j.h MCMP/qc_mcmp4_il_k.h
         )
 
-set(CPU_EXTRA_SOURCES
+set(CPU_SPECIFIC_SOURCES
 	ovps_set.cpp)
 
-add_executable(MC_MPn_Direct ${source} ${CPU_EXTRA_SOURCES})
+add_executable(MC_MPn_Direct ${source} ${CPU_SPECIFIC_SOURCES})
 
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
@@ -91,23 +91,26 @@ IF(${MPI_CXX_FOUND})
     target_include_directories(MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
 endif()
 
-set(GPU_EXTRA_SOURCES
-	ovps_set_device.cu)
-cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_EXTRA_SOURCES})
-target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 
-target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
-target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
+if(${CUDA_FOUND})
+	set(GPU_SPECIFIC_SOURCES
+		ovps_set_device.cu)
+	cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
+	target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 
-target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
-target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
+	target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+	target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
 
-cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
-target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
-IF(${MPI_CXX_FOUND})
-    message("Adding MPI compile options to GPU_MC_MPn_Direct")
-    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
-    target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
-    target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
+	target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+	target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
+
+	cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
+	target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
+	IF(${MPI_CXX_FOUND})
+	    message("Adding MPI compile options to GPU_MC_MPn_Direct")
+	    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
+	    target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
+	    target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
+	endif()
 endif()
 
