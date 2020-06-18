@@ -20,8 +20,7 @@ void OVPS_SET_BASE<Container>::resize(int mc_pair_num_) {
 
 template <class Container>
 void OVPS_SET_BASE<Container>::update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
-
-  std::cerr << "OVPS SET DEFAULT DEFINIONTAL REQUIRED BY LAW\n";
+  std::cerr << "Default OVPS_SET_BASE<Container>.update not implemented";
   exit(0);
 }
 

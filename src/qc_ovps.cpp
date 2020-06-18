@@ -23,6 +23,7 @@ void OVPs::init(const int dimm, const int mc_pair_num_) {
     }
   }
 }
+
 void OVPs::update_ovps(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
   // update green's function trace objects
 
@@ -44,10 +45,10 @@ void OVPs::update_ovps(Wavefunction& electron_pair_psi1, Wavefunction& electron_
 
 #ifdef HAVE_CUDA
       temp.update(electron_pair_psi1.occTau(), electron_pair_psi2.occTau(), electron_pair_psi2.iocc2 - electron_pair_psi2.iocc1, electron_pair_psi2.lda);
-      copy_OVPS_DEVICE_TO_HOST(temp, o_set[stop][start]);
+      copy_OVPS_SET_BASE(temp, o_set[stop][start]);
 
       temp.update(electron_pair_psi1.virTau(), electron_pair_psi2.virTau(), electron_pair_psi2.ivir2 - electron_pair_psi2.ivir1, electron_pair_psi2.lda);
-      copy_OVPS_DEVICE_TO_HOST(temp, v_set[stop][start]);
+      copy_OVPS_SET_BASE(temp, v_set[stop][start]);
 #else
       o_set[stop][start].update(electron_pair_psi1.occTau(), electron_pair_psi2.occTau(), electron_pair_psi2.iocc2 - electron_pair_psi2.iocc1, electron_pair_psi2.lda);
       v_set[stop][start].update(electron_pair_psi1.virTau(), electron_pair_psi2.virTau(), electron_pair_psi2.ivir2 - electron_pair_psi2.ivir1, electron_pair_psi2.lda);

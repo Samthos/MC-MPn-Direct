@@ -25,8 +25,13 @@ typedef OVPS_SET_BASE<std::vector<double>> OVPS_SET;
 template class OVPS_SET_BASE<thrust::device_vector<double>>;
 typedef OVPS_SET_BASE<thrust::device_vector<double>> OVPS_SET_DEVICE;
 
-void copy_OVPS_HOST_TO_DEVICE(OVPS_SET& src, OVPS_SET_DEVICE& dest);
-void copy_OVPS_DEVICE_TO_HOST(OVPS_SET_DEVICE& src, OVPS_SET& dest);
+template <class T, class S>
+void copy_OVPS_SET_BASE(OVPS_SET_BASE<T>& src, OVPS_SET_BASE<S>& dest) {
+  thrust::copy(src.s_11.begin(), src.s_11.end(), dest.s_11.begin());
+  thrust::copy(src.s_12.begin(), src.s_12.end(), dest.s_12.begin());
+  thrust::copy(src.s_21.begin(), src.s_21.end(), dest.s_21.begin());
+  thrust::copy(src.s_22.begin(), src.s_22.end(), dest.s_22.begin());
+}
 #endif  // HAVE_CUDA
 
 #endif  // OVPS_SET_H_

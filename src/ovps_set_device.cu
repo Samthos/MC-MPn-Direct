@@ -1,15 +1,7 @@
-
 #include "ovps_set.h"
 #include "cublas_v2.h"
 
 #include "ovps_set.cpp"
-
-//__global__ void printit(double* v, int lda) {
-//  for (int i = 0; i < lda; i++) {
-//    printf("DEBUGING: psi %2i %12.4f %12.4f\n", i, v[i], v[i + lda]);
-//  }
-//  printf("DEBUGING\n");
-//}
 
 template <>
 void OVPS_SET_BASE<thrust::device_vector<double>>::update(double *h_psi1Tau, double *h_psi2Tau, size_t inner, size_t lda) {
@@ -103,16 +95,3 @@ void OVPS_SET_BASE<thrust::device_vector<double>>::update(double *h_psi1Tau, dou
   cudaFree(psi2Tau);
 }
 
-void copy_OVPS_HOST_TO_DEVICE(OVPS_SET& src, OVPS_SET_DEVICE& dest) {
-  thrust::copy(src.s_11.begin(), src.s_11.end(), dest.s_11.begin());
-  thrust::copy(src.s_12.begin(), src.s_12.end(), dest.s_12.begin());
-  thrust::copy(src.s_21.begin(), src.s_21.end(), dest.s_21.begin());
-  thrust::copy(src.s_22.begin(), src.s_22.end(), dest.s_22.begin());
-}
-
-void copy_OVPS_DEVICE_TO_HOST(OVPS_SET_DEVICE& src, OVPS_SET& dest) {
-  thrust::copy(src.s_11.begin(), src.s_11.end(), dest.s_11.begin());
-  thrust::copy(src.s_12.begin(), src.s_12.end(), dest.s_12.begin());
-  thrust::copy(src.s_21.begin(), src.s_21.end(), dest.s_21.begin());
-  thrust::copy(src.s_22.begin(), src.s_22.end(), dest.s_22.begin());
-}
