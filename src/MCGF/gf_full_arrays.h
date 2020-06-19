@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "../qc_input.h"
-#include "../basis/nw_vectors.h"
+#include "../basis/nwchem_movec_parser.h"
 
 class OVPS_ARRAY {
  public:

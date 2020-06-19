@@ -3,7 +3,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include "nw_vectors.h"
+#include "nwchem_movec_parser.h"
 #include "qc_basis.h"
 
 NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source) {

@@ -1,6 +1,6 @@
 
 #include "qc_input.h"
-#include "basis/nw_vectors.h"
+#include "basis/nwchem_movec_parser.h"
 #include "tau_integrals.h"
 
 Tau* create_tau_sampler(const IOPs& iops, const NWChem_Movec_Parser& basis) {

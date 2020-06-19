@@ -8,9 +8,16 @@ set(source
         main.cpp
         weight_function.cpp
         weight_function.h
-        basis/nw_vectors.cpp
+        basis/movec_parser.h
+        basis/movec_parser.cpp
+        basis/nwchem_movec_parser.h
+        basis/nwchem_movec_parser.cpp
         basis/qc_basis.cpp
         basis/qc_basis.h
+        basis/qc_psi.cpp 
+        basis/qc_psi_der.cpp
+        basis/wavefunction.cpp 
+        basis/wavefunction.h
         atom_tag_parser.h
         atom_tag_parser.cpp
         qc_geom.cpp
@@ -28,7 +35,7 @@ set(source
         timer.h
         tau_integrals.h
         tau_integrals.cpp
-      	ovps_set.h
+        ovps_set.h
         MCGF/gf3_core_c.h
         MCGF/gf3_core_m_1.h
         MCGF/gf3_core_m_12.h
@@ -39,8 +46,8 @@ set(source
         MCGF/gf_stats.cpp
         MCGF/qc_gfFullStatisticsHost.cpp
         MCGF/qc_mcgf.cpp
-	MCGF/gf_full_arrays.h
-	MCGF/gf_full_arrays.cpp
+        MCGF/gf_full_arrays.h
+        MCGF/gf_full_arrays.cpp
         MCMP/qc_mcmp.cpp
         MCMP/mcmp.h
         MCMP/qc_mcmp2.h
@@ -65,8 +72,6 @@ set(source
         MCGF/qc_mcgf3.h
         MCGF/qc_mcgf2.cpp
         MCGF/qc_mcgf3.cpp 
-        basis/qc_psi.cpp basis/qc_psi_der.cpp
-        basis/wavefunction.cpp basis/wavefunction.h
         cpu_qc_monte.cpp
         MCMP/qc_mcmp4_ijk.h MCMP/qc_mcmp4_ijkl.h
         MCMP/qc_mcmp4_ij.h MCMP/qc_mcmp4_ij_k.h MCMP/qc_mcmp4_ij_l.h
@@ -75,7 +80,7 @@ set(source
         )
 
 set(CPU_SPECIFIC_SOURCES
-	ovps_set.cpp
+  ovps_set.cpp
         qc_ovps.cpp 
 )
 
@@ -96,25 +101,25 @@ endif()
 
 
 if(${CUDA_FOUND})
-	set(GPU_SPECIFIC_SOURCES
-		ovps_set.cu
-		qc_ovps.cu)
-	cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
-	target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+  set(GPU_SPECIFIC_SOURCES
+  	ovps_set.cu
+  	qc_ovps.cu)
+  cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
+  target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 
-	target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
-	target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
+  target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
+  target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
 
-	target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
-	target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
 
-	cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
-	target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
-	IF(${MPI_CXX_FOUND})
-	    message("Adding MPI compile options to GPU_MC_MPn_Direct")
-	    target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
-	    target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
-	    target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
-	endif()
+  cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
+  target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
+  IF(${MPI_CXX_FOUND})
+      message("Adding MPI compile options to GPU_MC_MPn_Direct")
+      target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)
+      target_link_libraries(GPU_MC_MPn_Direct ${MPI_CXX_LIBRARIES})
+      target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
+  endif()
 endif()
 

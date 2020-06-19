@@ -9,7 +9,7 @@
 #include <iostream>
 #include <vector>
 
-#include "basis/nw_vectors.h"
+#include "basis/nwchem_movec_parser.h"
 #include "qc_random.h"
 
 class Tau {

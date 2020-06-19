@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <array>
-#include "nw_vectors.h"
+#include "nwchem_movec_parser.h"
 
 namespace WS {
   enum Wavefunction_Sources {
