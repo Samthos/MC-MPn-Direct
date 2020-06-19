@@ -65,7 +65,6 @@ set(source
         MCGF/qc_mcgf3.h
         MCGF/qc_mcgf2.cpp
         MCGF/qc_mcgf3.cpp 
-        qc_ovps.cpp 
         basis/qc_psi.cpp basis/qc_psi_der.cpp
         basis/wavefunction.cpp basis/wavefunction.h
         cpu_qc_monte.cpp
@@ -76,7 +75,9 @@ set(source
         )
 
 set(CPU_SPECIFIC_SOURCES
-	ovps_set.cpp)
+	ovps_set.cpp
+        qc_ovps.cpp 
+)
 
 add_executable(MC_MPn_Direct ${source} ${CPU_SPECIFIC_SOURCES})
 
@@ -96,7 +97,8 @@ endif()
 
 if(${CUDA_FOUND})
 	set(GPU_SPECIFIC_SOURCES
-		ovps_set_device.cu)
+		ovps_set.cu
+		qc_ovps.cu)
 	cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
 	target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 

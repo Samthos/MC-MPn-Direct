@@ -1,7 +1,7 @@
 #include <vector>
 #include "wavefunction.h"
 
-Wavefunction::Wavefunction(std::vector<std::array<double, 3>>* p, NWChem_Movec_Parser& movecs_in) :
+Wavefunction::Wavefunction(std::vector<std::array<double, 3>>* p, const NWChem_Movec_Parser& movecs_in) :
   iocc1(movecs_in.iocc1),
   iocc2(movecs_in.iocc2),
   ivir1(movecs_in.ivir1),

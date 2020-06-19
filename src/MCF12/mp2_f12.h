@@ -16,7 +16,7 @@ class MP2_F12_V : public MCMP {
  public:
   explicit MP2_F12_V(const IOPs& iops, const Basis& basis, std::string extension="f12_V");
   ~MP2_F12_V();
-  void energy(double& emp, std::vector<double>& control, OVPs& ovps, Electron_Pair_List* epl, Tau* tau) override {}
+  void energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* epl, Tau* tau) override {}
   void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
  protected:
   double calculate_v_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);

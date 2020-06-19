@@ -2,7 +2,7 @@ message("ovps test " ${gtest_SOURCE_DIR}/)
 
 cuda_add_executable(ovps_set_test.x 
 	ovps_set_test.cu
- 	../../src/ovps_set_device.cu
+ 	../../src/ovps_set.cu
 	../../src/ovps_set.h
 	../../src/blas_calls.h
 	../../src/blas_calls.cpp

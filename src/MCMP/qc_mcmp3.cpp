@@ -260,7 +260,7 @@ void MCMP3<CVMP3>::mcmp3_helper(
 }
 
 template <int CVMP3>
-void MCMP3<CVMP3>::energy(double& emp, std::vector<double>& control, OVPs& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void MCMP3<CVMP3>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
   double en3 = 0;
   std::vector<double> ctrl(control.size(), 0.0);
 

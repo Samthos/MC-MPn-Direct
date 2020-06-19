@@ -87,7 +87,7 @@ void gf3_helper(
       Tk, mc_pair_num);
   m_m_add_mul(c, Tk, Tk_a, en, mc_pair_num);
 }
-void gf3_core_1(OVPs& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+void gf3_core_1(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
   std::fill(d_ovps.en3_1mCore.begin(), d_ovps.en3_1mCore.end(), 0.0);
   std::fill(d_ovps.en3_1pCore.begin(), d_ovps.en3_1pCore.end(), 0.0);
 
@@ -120,7 +120,7 @@ void gf3_core_1(OVPs& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std
   vector_multiply(rv, d_ovps.en3_1mCore.data(), mc_pair_num);
   vector_multiply(rv, d_ovps.en3_1pCore.data(), mc_pair_num);
 }
-void gf3_core_2(OVPs& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+void gf3_core_2(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
   std::fill(d_ovps.en3_2mCore.begin(), d_ovps.en3_2mCore.end(), 0.0);
   std::fill(d_ovps.en3_2pCore.begin(), d_ovps.en3_2pCore.end(), 0.0);
 
@@ -153,7 +153,7 @@ void gf3_core_2(OVPs& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std
   vector_multiply(rv, d_ovps.en3_2mCore.data(), mc_pair_num);
   vector_multiply(rv, d_ovps.en3_2pCore.data(), mc_pair_num);
 }
-void gf3_core_12(OVPs& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+void gf3_core_12(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
   std::fill(d_ovps.en3_12mCore.begin(), d_ovps.en3_12mCore.end(), 0.0);
   std::fill(d_ovps.en3_12pCore.begin(), d_ovps.en3_12pCore.end(), 0.0);
 
@@ -209,7 +209,7 @@ void gf3_helper_c(
   m_m_add_mul(c12, Tk, Tk_a, en_12, mc_pair_num);
   m_m_add_mul(c22, Tk, Tk_b, en_22, mc_pair_num);
 }
-void gf3_core_c(OVPs& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+void gf3_core_c(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
   std::fill(d_ovps.en3_12cCore.begin(), d_ovps.en3_12cCore.end(), 0.0);
   std::fill(d_ovps.en3_22cCore.begin(), d_ovps.en3_22cCore.end(), 0.0);
 
@@ -799,7 +799,7 @@ GF3_Functional::GF3_Functional(IOPs& iops, Basis& basis) :
   }
 }
 
-void GF3_Functional::gf3_core_1(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_1(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {
   std::fill(en3_1mCore.begin(), en3_1mCore.end(), 0.0);
   std::fill(en3_1pCore.begin(), en3_1pCore.end(), 0.0);
 
@@ -832,7 +832,7 @@ void GF3_Functional::gf3_core_1(OVPs& ovps, Electron_Pair_List* electron_pair_li
   vector_multiply(electron_pair_list->rv.data(), en3_1mCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_1pCore.data(), n_electron_pairs);
 }
-void GF3_Functional::gf3_core_2(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_2(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {
   std::fill(en3_2mCore.begin(), en3_2mCore.end(), 0.0);
   std::fill(en3_2pCore.begin(), en3_2pCore.end(), 0.0);
 
@@ -865,7 +865,7 @@ void GF3_Functional::gf3_core_2(OVPs& ovps, Electron_Pair_List* electron_pair_li
   vector_multiply(electron_pair_list->rv.data(), en3_2mCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_2pCore.data(), n_electron_pairs);
 }
-void GF3_Functional::gf3_core_12(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_12(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {
   std::fill(en3_12mCore.begin(), en3_12mCore.end(), 0.0);
   std::fill(en3_12pCore.begin(), en3_12pCore.end(), 0.0);
 
@@ -898,7 +898,7 @@ void GF3_Functional::gf3_core_12(OVPs& ovps, Electron_Pair_List* electron_pair_l
   vector_multiply(electron_pair_list->rv.data(), en3_12mCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_12pCore.data(), n_electron_pairs);
 }
-void GF3_Functional::gf3_core_c(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_c(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {
   std::fill(en3_12cCore.begin(), en3_12cCore.end(), 0.0);
   std::fill(en3_22cCore.begin(), en3_22cCore.end(), 0.0);
 
@@ -920,7 +920,7 @@ void GF3_Functional::gf3_core_c(OVPs& ovps, Electron_Pair_List* electron_pair_li
   vector_multiply(electron_pair_list->rv.data(), en3_12cCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_22cCore.data(), n_electron_pairs);
 }
-void GF3_Functional::core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {
   rv = electron_pair_list->rv.data();
 
   gf3_core_c(ovps, electron_pair_list);

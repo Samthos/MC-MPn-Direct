@@ -3,7 +3,7 @@
 #include "../qc_monte.h"
 #include "qc_mcgf2.h"
 
-void gf2_core(OVPs& ovps, OVPS_ARRAY& d_ovps, Electron_Pair_List* electron_pair_list) {
+void gf2_core(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, Electron_Pair_List* electron_pair_list) {
   int tidx, tidy;
   int mc_pair_num = electron_pair_list->size();
 #define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
@@ -140,7 +140,7 @@ GF2_Functional::GF2_Functional(IOPs& iops, Basis& basis) :
   }
 }
 
-void GF2_Functional::core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF2_Functional::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {
   int tidx, tidy;
   for (tidx = 0; tidx < n_electron_pairs; tidx++) {
     for (tidy = 0; tidy < n_electron_pairs; tidy++) {

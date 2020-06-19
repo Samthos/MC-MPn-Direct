@@ -18,7 +18,7 @@ class GF2_Functional : public MCGF {
        Electron_Pair_List*, Electron_List*);
 
   private:
-   void core(OVPs& ovps, Electron_Pair_List* electron_pair_list);
+   void core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list);
    void energy_no_diff(std::vector<std::vector<double>>&, 
        std::unordered_map<int, Wavefunction>&,
        Electron_Pair_List*, Tau*);

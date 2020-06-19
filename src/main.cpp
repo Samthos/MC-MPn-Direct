@@ -34,9 +34,13 @@ int main(int argc, char* argv[]) {
 
   Basis basis(iops, mpi_info, molec);
 
-  QC_monte* qc_monte;
+  QC_monte<std::vector<double>>* qc_monte;
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
-    qc_monte = new Energy(mpi_info, iops, molec, basis);
+#ifdef HAVE_CUDA
+    qc_monte = new GPU_Energy(mpi_info, iops, molec, basis);
+#else
+    qc_monte = new Energy<std::vector<double>>(mpi_info, iops, molec, basis);
+#endif
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::DIMER) {
     qc_monte = new Dimer(mpi_info, iops, molec, basis);
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {

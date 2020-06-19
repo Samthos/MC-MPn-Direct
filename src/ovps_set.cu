@@ -1,29 +1,13 @@
-#include "ovps_set.h"
 #include "cublas_v2.h"
-
 #include "ovps_set.cpp"
 
 template <>
-void OVPS_SET_BASE<thrust::device_vector<double>>::update(double *h_psi1Tau, double *h_psi2Tau, size_t inner, size_t lda) {
+void OVPS_Set<thrust::device_vector<double>>::update(thrust::device_vector<double>& psi1Tau, int psi1_offset, thrust::device_vector<double>& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
   double alpha = 1.0;
   double beta = 0.0;
 
   cublasHandle_t handle;
   cublasCreate(&handle);
-
-  double *psi1Tau = nullptr;
-  double *psi2Tau = nullptr;
-  cudaMalloc((void**) &psi1Tau, sizeof(double) * (mc_pair_num)*lda);
-  cudaMalloc((void**) &psi2Tau, sizeof(double) * (mc_pair_num)*lda);
-  cudaMemset(psi1Tau, 0, sizeof(double) * mc_pair_num * lda);
-  cudaMemset(psi2Tau, 0, sizeof(double) * mc_pair_num * lda);
-  cudaMemcpy(psi1Tau, h_psi1Tau, sizeof(double) * (inner + (mc_pair_num - 1) * lda), cudaMemcpyHostToDevice);
-  cudaMemcpy(psi2Tau, h_psi2Tau, sizeof(double) * (inner + (mc_pair_num - 1) * lda), cudaMemcpyHostToDevice);
-
-
-// printit<<<1,1>>>(psi1Tau, lda);
-// cudaThreadSynchronize();
-// printf("DEBUGING: inner = %i; lda = %i\n", inner, lda);
 
   // fill s_12 so upper triangle is zero
   thrust::fill(s_12.begin(), s_12.end(), 0.0);
@@ -32,7 +16,7 @@ void OVPS_SET_BASE<thrust::device_vector<double>>::update(double *h_psi1Tau, dou
   cublasDsyrk(handle, CUBLAS_FILL_MODE_LOWER, CUBLAS_OP_T,
       mc_pair_num, inner, 
       &alpha,
-      psi1Tau, lda,
+      psi1Tau.data().get() + psi1_offset, lda,
       &beta,
       s_12.data().get(), mc_pair_num);
 
@@ -52,7 +36,7 @@ void OVPS_SET_BASE<thrust::device_vector<double>>::update(double *h_psi1Tau, dou
   cublasDsyrk(handle, CUBLAS_FILL_MODE_LOWER, CUBLAS_OP_T,
       mc_pair_num, inner,
       &alpha,
-      psi2Tau, lda,
+      psi2Tau.data().get() + psi2_offset, lda,
       &beta,
       s_12.data().get(), mc_pair_num);
 
@@ -72,8 +56,8 @@ void OVPS_SET_BASE<thrust::device_vector<double>>::update(double *h_psi1Tau, dou
   cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
       mc_pair_num, mc_pair_num, inner,
       &alpha,
-      psi1Tau, lda,
-      psi2Tau, lda,
+      psi1Tau.data().get() + psi1_offset, lda,
+      psi2Tau.data().get() + psi2_offset, lda,
       &beta,
       s_21.data().get(), mc_pair_num);
 
@@ -91,7 +75,5 @@ void OVPS_SET_BASE<thrust::device_vector<double>>::update(double *h_psi1Tau, dou
 
   // destroy handle
   cublasDestroy(handle);
-  cudaFree(psi1Tau);
-  cudaFree(psi2Tau);
 }
 

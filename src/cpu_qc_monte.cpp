@@ -1,6 +1,7 @@
 #include "qc_monte.h"
 
-void QC_monte::update_wavefunction() {
+template <class Container>
+void QC_monte<Container>::update_wavefunction() {
   for (auto &it : wavefunction_groups) {
     if (it.second.size() == 1) {
       basis.build_contractions(*wavefunctions[it.second.front()].pos);

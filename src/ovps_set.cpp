@@ -5,12 +5,12 @@
 #include "blas_calls.h"
 
 template <class Container>
-OVPS_SET_BASE<Container>::OVPS_SET_BASE(int mc_pair_num_) {
+OVPS_Set<Container>::OVPS_Set(int mc_pair_num_) {
   resize(mc_pair_num_);
 }
 
 template <class Container>
-void OVPS_SET_BASE<Container>::resize(int mc_pair_num_) {
+void OVPS_Set<Container>::resize(int mc_pair_num_) {
   mc_pair_num = mc_pair_num_;
   s_11.resize(mc_pair_num * mc_pair_num);
   s_12.resize(mc_pair_num * mc_pair_num);
@@ -19,13 +19,11 @@ void OVPS_SET_BASE<Container>::resize(int mc_pair_num_) {
 }
 
 template <class Container>
-void OVPS_SET_BASE<Container>::update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
-  std::cerr << "Default OVPS_SET_BASE<Container>.update not implemented";
-  exit(0);
+void OVPS_Set<Container>::update(Container& psi1Tau, int psi1_offset, Container& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
 }
 
 template <>
-void OVPS_SET_BASE<std::vector<double>>::update(double *psi1Tau, double *psi2Tau, size_t inner, size_t lda) {
+void OVPS_Set<std::vector<double>>::update(std::vector<double>& psi1Tau, int psi1_offset, std::vector<double>& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
   double alpha = 1.0;
   double beta = 0.0;
 
@@ -38,7 +36,7 @@ void OVPS_SET_BASE<std::vector<double>>::update(double *psi1Tau, double *psi2Tau
   cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
       mc_pair_num, inner,
       alpha,
-      psi1Tau, lda,
+      psi1Tau.data() + psi1_offset, lda,
       beta,
       s_11.data(), mc_pair_num);
   set_Upper_from_Lower(s_11.data(), mc_pair_num);
@@ -47,7 +45,7 @@ void OVPS_SET_BASE<std::vector<double>>::update(double *psi1Tau, double *psi2Tau
   cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
       mc_pair_num, inner,
       alpha,
-      psi2Tau, lda,
+      psi2Tau.data() + psi2_offset, lda,
       beta,
       s_22.data(), mc_pair_num);
   set_Upper_from_Lower(s_22.data(), mc_pair_num);
@@ -56,8 +54,8 @@ void OVPS_SET_BASE<std::vector<double>>::update(double *psi1Tau, double *psi2Tau
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
       mc_pair_num, mc_pair_num, inner,
       alpha,
-      psi1Tau, lda,
-      psi2Tau, lda,
+      psi1Tau.data() + psi1_offset, lda,
+      psi2Tau.data() + psi2_offset, lda,
       beta,
       s_21.data(), mc_pair_num);
   cblas_dscal(mc_pair_num, 0.0, s_21.data(), mc_pair_num+1);

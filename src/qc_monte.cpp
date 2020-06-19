@@ -10,7 +10,8 @@
 #include "qc_monte.h"
 
 
-QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
+template <class Container>
+QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
     mpi_info(p0),
     iops(p1),
     molec(p2),
@@ -61,32 +62,38 @@ QC_monte::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
   tau = create_tau_sampler(iops, movecs);
 }
 
-QC_monte::~QC_monte() {
+template <class Container>
+QC_monte<Container>::~QC_monte() {
   basis.gpu_free();
   delete tau;
   delete electron_pair_list;
 }
 
-void QC_monte::move_walkers() {
+template <class Container>
+void QC_monte<Container>::move_walkers() {
   electron_pair_list->move(random, electron_pair_weight);
   if (electron_list != nullptr) {
     electron_list->move(random, electron_weight);
   }
 }
 
-void QC_monte::print_mc_head(std::chrono::system_clock::time_point mc_start) {
+template <class Container>
+void QC_monte<Container>::print_mc_head(std::chrono::system_clock::time_point mc_start) {
   std::time_t tt = std::chrono::system_clock::to_time_t(mc_start);
   std::cout << "Begining MC run at: " << ctime(&tt);
   std::cout.flush();
 }
 
-void QC_monte::print_mc_tail(double time_span, std::chrono::system_clock::time_point mc_end) {
+template <class Container>
+void QC_monte<Container>::print_mc_tail(double time_span, std::chrono::system_clock::time_point mc_end) {
   std::time_t tt = std::chrono::system_clock::to_time_t(mc_end);
   std::cout << "Finished MC run at: " << ctime(&tt);
   std::cout << "Spent " << time_span << " second preforming MC integration" << std::endl;
 }
 
-Energy::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
+
+template <class Container>
+Energy<Container>::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
   int max_tau_coordinates = 0;
   int total_control_variates = 0;
 
@@ -122,7 +129,8 @@ Energy::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, 
   cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
 }
 
-Energy::~Energy() {
+template <class Container>
+Energy<Container>::~Energy() {
   for (auto &item : cv) {
     delete item;
   }
@@ -130,6 +138,13 @@ Energy::~Energy() {
     delete item;
   }
 }
+
+#ifdef HAVE_CUDA
+GPU_Energy::GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : Energy(p1, p2, p3, p4) {
+  ovps_device.init(ovps.o_set.size(), iops.iopns[KEYS::ELECTRON_PAIRS]);
+}
+#endif
+
 
 Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4) : Energy(p1, p2, p3, p4),
                                                          l_emp(emp),

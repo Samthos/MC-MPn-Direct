@@ -173,7 +173,7 @@ MCGF::MCGF(IOPs& iops, Basis& basis, int ntc, std::string ext, bool f) :
 
 void MCGF::energy(std::vector<std::vector<double>>& egf,
        std::unordered_map<int, Wavefunction>& wavefunctions,
-       OVPs& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+       OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
   core(ovps, electron_pair_list);
   if (numDiff == 0) {
     energy_no_diff(egf, wavefunctions, electron_pair_list, tau);

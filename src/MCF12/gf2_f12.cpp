@@ -123,7 +123,7 @@ void GF2_F12_V::calculate_v(std::vector<std::vector<double>>& egf, std::unordere
   calculate_v_4e(electron_pair_list, electron_list);
 }
 
-void GF2_F12_V::core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {}
+void GF2_F12_V::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {}
 
 void GF2_F12_V::energy_no_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction>&, Electron_Pair_List*, Tau*) {}
 

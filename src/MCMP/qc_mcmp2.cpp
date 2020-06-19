@@ -131,7 +131,7 @@ MCMP* create_MCMP2(int cv_level) {
 }
 
 template <int CVMP2>
-void MCMP2<CVMP2>::energy(double& emp, std::vector<double>& control, OVPs& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void MCMP2<CVMP2>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
   double en2 = 0.0;
   std::vector<double> ctrl(control.size(), 0.0);
 

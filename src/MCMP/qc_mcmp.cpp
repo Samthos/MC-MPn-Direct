@@ -12,14 +12,16 @@
 #include "../control_variate.h"
 #include "../timer.h"
 
-void Energy::zero_energies() {
+template <class Container>
+void Energy<Container>::zero_energies() {
   std::fill(emp.begin(), emp.end(), 0.0);
   for (auto &c : control) {
     std::fill(c.begin(), c.end(), 0.0);
   }
 }
 
-void Energy::monte_energy() {
+template <class Container>
+void Energy<Container>::monte_energy() {
   Timer mcTimer, stepTimer;
   std::vector<std::ofstream> output(emp.size()+1);
 
@@ -137,7 +139,8 @@ void Energy::monte_energy() {
   }
 }
 
-void Energy::energy() {
+template <class Container>
+void Energy<Container>::energy() {
   ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   for (int i = 0; i < energy_functions.size(); i++) {
     if (!energy_functions[i]->is_f12) {
@@ -151,6 +154,24 @@ void Energy::energy() {
     }
   }
 }
+
+#ifdef HAVE_CUDA
+void GPU_Energy::energy() {
+  ovps_device.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  copy_OVPS(ovps_device, ovps);
+  for (int i = 0; i < energy_functions.size(); i++) {
+    if (!energy_functions[i]->is_f12) {
+      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy(emp[i], control[i], ovps, electron_pair_list, tau);
+      }
+    } else {
+      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+        energy_functions[i]->energy_f12(emp[i], control[i], wavefunctions, electron_pair_list, electron_list);
+      }
+    }
+  }
+}
+#endif
 
 template <class Binary_Op>
 void Dimer::local_energy(std::unordered_map<int, Wavefunction>& l_wavefunctions, Tau* l_tau, Binary_Op op) {

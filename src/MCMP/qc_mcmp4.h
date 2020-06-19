@@ -34,7 +34,7 @@ class MCMP4 : public MCMP {
       T_r(mpn * mpn),
       T_w(mpn * mpn),
       Av(mpn * mpn) {}
-  void energy(double& emp, std::vector<double>& control, OVPs&, Electron_Pair_List*, Tau*) override;
+  void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) override;
   void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list){}
 
  private:
@@ -61,8 +61,8 @@ class MCMP4 : public MCMP {
       const std::vector<double>& jk_1, const std::vector<double>& jk_2, const std::vector<double>& jk_3,
       const std::vector<double>& il_1, const std::vector<double>& il_2, const std::vector<double>& il_3,
       const std::vector<double>& jl);
-  void mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPs& ovps);
-  void mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPs& ovps);
+  void mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps);
+  void mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps);
 
   void mcmp4_il_helper(double constant,
       double& emp4, std::vector<double>& control, int offset,
@@ -86,7 +86,7 @@ class MCMP4 : public MCMP {
       const std::vector<double>& jl_1, const std::vector<double>& jl_2, const std::vector<double>& jl_3,
       const std::vector<double>& ik_1, const std::vector<double>& ik_2, const std::vector<double>& ik_3,
       const std::vector<double>& kl);
-  void mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPs& ovps);
+  void mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps);
 
   std::array<double, 4> contract_jk(int walker,
       const std::vector<double>& T,
@@ -123,7 +123,7 @@ class MCMP4 : public MCMP {
       const std::vector<const std::vector<double>*> jk,
       const std::vector<double>& jl,
       const std::vector<double>& kl_1, const std::vector<double>& kl_2);
-  void mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPs& ovps);
+  void mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps);
 
   int mpn;
   std::vector<double> rv;

@@ -7,6 +7,9 @@
 #include <vector>
 
 #include <unordered_map>
+#ifdef HAVE_CUDA
+#include <thrust/device_vector.h>
+#endif
 
 #include "qc_mpi.h"
 #include "qc_input.h"
@@ -55,6 +58,7 @@ class GFStats {
   double tasks;
 };
 
+template <class Container>
 class QC_monte {
  public:
   QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3);
@@ -73,7 +77,7 @@ class QC_monte {
   std::unordered_map<int, std::vector<int>> wavefunction_groups;
 
   Random random;
-  OVPs ovps;
+  OVPS_Host ovps;
   
   Electron_Pair_List* electron_pair_list;
   Electron_List* electron_list;
@@ -88,8 +92,10 @@ class QC_monte {
   static void print_mc_head(std::chrono::system_clock::time_point);
   static void print_mc_tail(double, std::chrono::system_clock::time_point);
 };
+template class QC_monte<std::vector<double>>;
 
-class Energy : public QC_monte {
+template <class Container>
+class Energy : public QC_monte<std::vector<double>> {
  public:
   Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
   ~Energy();
@@ -106,8 +112,22 @@ class Energy : public QC_monte {
   void zero_energies();
   virtual void energy();
 };
+template class Energy<std::vector<double>>;
 
-class Dimer : public Energy {
+#ifdef HAVE_CUDA
+class GPU_Energy : public Energy<std::vector<double>> {
+ public:
+  GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+
+ protected:
+  OVPS_Device ovps_device;
+  void energy() override;
+};
+template class Energy<thrust::device_vector<double>>;
+#endif
+
+
+class Dimer : public Energy<std::vector<double>> {
  public:
   Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4);
   ~Dimer();
@@ -127,7 +147,7 @@ class Dimer : public Energy {
   std::vector<std::vector<double>> l_control;
 };
 
-class GF : public QC_monte {
+class GF : public QC_monte<std::vector<double>> {
  public:
   void monte_energy() override;
 
