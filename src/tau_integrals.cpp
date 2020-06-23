@@ -3,7 +3,7 @@
 #include "basis/nwchem_movec_parser.h"
 #include "tau_integrals.h"
 
-Tau* create_tau_sampler(const IOPs& iops, const NWChem_Movec_Parser& basis) {
+Tau* create_tau_sampler(const IOPs& iops, const std::shared_ptr<Movec_Parser> basis) {
   Tau* tau;
   switch (iops.iopns[KEYS::TAU_INTEGRATION]) {
     case TAU_INTEGRATION::STOCHASTIC:  tau = new Stochastic_Tau(basis); break;
@@ -14,11 +14,11 @@ Tau* create_tau_sampler(const IOPs& iops, const NWChem_Movec_Parser& basis) {
 }
 
 
-Tau::Tau(const NWChem_Movec_Parser& basis) : evals(basis.orbital_energies) {
-  iocc1 = basis.iocc1;
-  iocc2 = basis.iocc2;
-  ivir1 = basis.ivir1;
-  ivir2 = basis.ivir2;
+Tau::Tau(const std::shared_ptr<Movec_Parser> basis) : evals(basis->orbital_energies) {
+  iocc1 = basis->iocc1;
+  iocc2 = basis->iocc2;
+  ivir1 = basis->ivir1;
+  ivir2 = basis->ivir2;
   scratch.resize(ivir2);
 }
 void Tau::copy_p(Tau* other) {
@@ -26,7 +26,7 @@ void Tau::copy_p(Tau* other) {
 }
 
 
-Stochastic_Tau::Stochastic_Tau(const NWChem_Movec_Parser& basis) : Tau(basis) {
+Stochastic_Tau::Stochastic_Tau(const std::shared_ptr<Movec_Parser> basis) : Tau(basis) {
   lambda = 2.0 * (evals[ivir1] - evals[iocc2 - 1]);
 }
 void Stochastic_Tau::resize(int dimm) {
@@ -108,7 +108,7 @@ void Stochastic_Tau::set_from_other(Tau* other) {
 }
 
 
-Super_Stochastic_Tau::Super_Stochastic_Tau(const NWChem_Movec_Parser& basis) : Tau(basis) {
+Super_Stochastic_Tau::Super_Stochastic_Tau(const std::shared_ptr<Movec_Parser> basis) : Tau(basis) {
   set_pdf_cdf(hole_pdf, hole_cdf, iocc1, iocc2);
   set_pdf_cdf(particle_pdf, particle_cdf, ivir1, ivir2);
 }
@@ -230,7 +230,7 @@ void Super_Stochastic_Tau::set_weight(int index) {
 }
 
 
-Quadrature_Tau::Quadrature_Tau(const NWChem_Movec_Parser& basis) : Tau(basis) {
+Quadrature_Tau::Quadrature_Tau(const std::shared_ptr<Movec_Parser> basis) : Tau(basis) {
   tau = {
       459.528454529921248195023509,
       0.002176143805986910199912,

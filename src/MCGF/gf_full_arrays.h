@@ -10,7 +10,7 @@ class OVPS_ARRAY {
   OVPS_ARRAY() = default;
   OVPS_ARRAY(const OVPS_ARRAY& other);
   OVPS_ARRAY& operator = (const OVPS_ARRAY& other);
-  void resize(const IOPs& iops, const NWChem_Movec_Parser& basis, const std::vector<int>& order);
+  void resize(const IOPs& iops, const std::shared_ptr<Movec_Parser> basis, const std::vector<int>& order);
   void zero_energy_arrays();
 
   std::vector<std::vector<std::vector<double>>> enBlock;

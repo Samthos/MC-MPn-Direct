@@ -24,12 +24,12 @@ QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
   offBand = iops.iopns[KEYS::OFF_BAND];
   nDeriv = iops.iopns[KEYS::DIFFS];
 
-  NWChem_Movec_Parser movecs(iops, mpi_info, molec);
+  auto movecs = create_movec_parser(iops, mpi_info, molec);
 
-  iocc1 = movecs.iocc1;
-  iocc2 = movecs.iocc2;
-  ivir1 = movecs.ivir1;
-  ivir2 = movecs.ivir2;
+  iocc1 = movecs->iocc1;
+  iocc2 = movecs->iocc2;
+  ivir1 = movecs->ivir1;
+  ivir2 = movecs->ivir2;
 
   electron_pair_list = create_electron_pair_sampler(iops, molec, electron_pair_weight);
   wavefunctions.emplace(WC::electron_pairs_1, Wavefunction(&electron_pair_list->pos1, movecs));
@@ -157,8 +157,8 @@ Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4) : Energy(p1, p2, p3, p4),
   monomer_a_geometry.read(mpi_info, iops.sopns[KEYS::MONOMER_A_GEOM]);
   monomer_b_geometry.read(mpi_info, iops.sopns[KEYS::MONOMER_B_GEOM]);
 
-  NWChem_Movec_Parser monomer_a_movecs(iops, mpi_info, monomer_a_geometry, KEYS::MONOMER_A_MOVECS);
-  NWChem_Movec_Parser monomer_b_movecs(iops, mpi_info, monomer_b_geometry, KEYS::MONOMER_B_MOVECS);
+  auto monomer_a_movecs = create_movec_parser(iops, mpi_info, monomer_a_geometry, KEYS::MONOMER_A_MOVECS, MOVEC_TYPE::NWCHEM);
+  auto monomer_b_movecs = create_movec_parser(iops, mpi_info, monomer_b_geometry, KEYS::MONOMER_B_MOVECS, MOVEC_TYPE::NWCHEM);
 
   monomer_a_tau = create_tau_sampler(iops, monomer_a_movecs);
   monomer_b_tau = create_tau_sampler(iops, monomer_b_movecs);

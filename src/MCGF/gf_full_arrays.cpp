@@ -3,13 +3,13 @@
 
 #include "gf_full_arrays.h"
 
-void OVPS_ARRAY::resize(const IOPs& iops, const NWChem_Movec_Parser& basis, const std::vector<int>& orders) {
+void OVPS_ARRAY::resize(const IOPs& iops, const std::shared_ptr<Movec_Parser> basis, const std::vector<int>& orders) {
   electron_pairs = iops.iopns[KEYS::ELECTRON_PAIRS];
   numBand = iops.iopns[KEYS::NUM_BAND];
   offBand = iops.iopns[KEYS::OFF_BAND];
   numDiff = iops.iopns[KEYS::DIFFS];
   numBlock = iops.iopns[KEYS::NBLOCK];
-  nmo = basis.ivir2 - basis.iocc1;
+  nmo = basis->ivir2 - basis->iocc1;
 
   enEx1.resize(numBand);
   for (auto &it : enEx1) {
@@ -88,6 +88,7 @@ OVPS_ARRAY& OVPS_ARRAY::operator = (const OVPS_ARRAY& other) {
   std::cerr << "GET FUCKED\n";
   exit(0);
 }
+
 void OVPS_ARRAY::zero_energy_arrays() {
   for (auto& it : enBlock) {
     for (auto& jt : it) {

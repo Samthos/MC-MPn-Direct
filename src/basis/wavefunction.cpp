@@ -1,12 +1,12 @@
 #include <vector>
 #include "wavefunction.h"
 
-Wavefunction::Wavefunction(std::vector<std::array<double, 3>>* p, const NWChem_Movec_Parser& movecs_in) :
-  iocc1(movecs_in.iocc1),
-  iocc2(movecs_in.iocc2),
-  ivir1(movecs_in.ivir1),
-  ivir2(movecs_in.ivir2),
-  movecs(movecs_in.movecs),
+Wavefunction::Wavefunction(std::vector<std::array<double, 3>>* p, const std::shared_ptr<Movec_Parser> movecs_in) :
+  iocc1(movecs_in->iocc1),
+  iocc2(movecs_in->iocc2),
+  ivir1(movecs_in->ivir1),
+  ivir2(movecs_in->ivir2),
+  movecs(movecs_in->movecs),
   electrons(p->size()),
   lda(ivir2),
   psi(lda * electrons, 0.0),

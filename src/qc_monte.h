@@ -199,7 +199,7 @@ class Diagonal_GF : public GF {
 class GPU_GF2 : public GF {
  public:
   GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    d_ovps.resize(iops, NWChem_Movec_Parser(iops, mpi_info, molec), {2});
+    d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2});
   }
   ~GPU_GF2() {
   }
@@ -213,7 +213,7 @@ class GF2 : public GF {
  public:
   GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
     ovps.init(1, iops.iopns[KEYS::ELECTRON_PAIRS]);
-    d_ovps.resize(iops, NWChem_Movec_Parser(iops, mpi_info, molec), {2});
+    d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2});
     tau->resize(2);
 
     qeps.reserve(1);
@@ -229,7 +229,7 @@ class GF2 : public GF {
 class GPU_GF3 : public GF {
  public:
   GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
-    d_ovps.resize(iops, NWChem_Movec_Parser(iops, mpi_info, molec), {2, 3});
+    d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2, 3});
   }
   ~GPU_GF3() {
   }
@@ -243,7 +243,7 @@ class GF3 : public GF {
  public:
   GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
     ovps.init(2, iops.iopns[KEYS::ELECTRON_PAIRS]);
-    d_ovps.resize(iops, NWChem_Movec_Parser(iops, mpi_info, molec), {2, 3});
+    d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2, 3});
     tau->resize(2);
 
     qeps.reserve(2);

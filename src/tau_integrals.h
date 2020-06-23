@@ -14,7 +14,7 @@
 
 class Tau {
  public:
-  explicit Tau(const NWChem_Movec_Parser& basis);
+  explicit Tau(const std::shared_ptr<Movec_Parser> basis);
   virtual void resize(int dimm) = 0;
   virtual void new_tau(Random& random) = 0;
   virtual std::vector<double> get_exp_tau(int, int) = 0;
@@ -40,7 +40,7 @@ class Tau {
 
 class Stochastic_Tau : public Tau {
  public:
-  explicit Stochastic_Tau(const NWChem_Movec_Parser& basis);
+  explicit Stochastic_Tau(const std::shared_ptr<Movec_Parser> basis);
   ~Stochastic_Tau() = default;
 
   void resize(int dimm) override;
@@ -61,7 +61,7 @@ class Stochastic_Tau : public Tau {
 
 class Super_Stochastic_Tau : public Tau {
  public:
-  explicit Super_Stochastic_Tau(const NWChem_Movec_Parser& basis);
+  explicit Super_Stochastic_Tau(const std::shared_ptr<Movec_Parser> basis);
   ~Super_Stochastic_Tau() = default;
 
   void resize(int dimm) override;
@@ -88,7 +88,7 @@ class Super_Stochastic_Tau : public Tau {
 
 class Quadrature_Tau : public Tau {
  public:
-  Quadrature_Tau(const NWChem_Movec_Parser& basis);
+  Quadrature_Tau(const std::shared_ptr<Movec_Parser> basis);
 
   void resize(int dimm) override;
   void new_tau(Random& random) override;
@@ -105,5 +105,5 @@ class Quadrature_Tau : public Tau {
   std::vector<int> indices;
 };
 
-Tau* create_tau_sampler(const IOPs& iops, const NWChem_Movec_Parser& basis);
+Tau* create_tau_sampler(const IOPs& iops, const std::shared_ptr<Movec_Parser> basis);
 #endif //MC_MP3_DIRECT_TAU_INTEGRALS_H

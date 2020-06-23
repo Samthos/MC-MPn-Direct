@@ -12,6 +12,8 @@ set(source
         basis/movec_parser.cpp
         basis/nwchem_movec_parser.h
         basis/nwchem_movec_parser.cpp
+        basis/dummy_movec_parser.h
+        basis/dummy_movec_parser.cpp
         basis/qc_basis.cpp
         basis/qc_basis.h
         basis/qc_psi.cpp 

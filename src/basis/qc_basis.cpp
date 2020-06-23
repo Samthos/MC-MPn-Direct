@@ -74,12 +74,7 @@ Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   // read basis set
   read(iops, mpi_info, molec);
 
-  // molecular orbital coefficients and energies
-  // NWChem_Movec_Parser movec_parser(iops, mpi_info);
-  // nw_vectors_read(iops, mpi_info, molec);
-
   // declare memory
-  // mc_pair_num = iops.iopns[KEYS::ELECTRON_PAIRS];
   mc_num = std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]);
   h_basis.ao_amplitudes = new double[qc_nbf * mc_num];
   h_basis.contraction_amplitudes = new double[nShells * mc_num];

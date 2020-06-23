@@ -10,7 +10,10 @@
 
 class Movec_Parser {
  public:
-  int iocc1, iocc2, ivir1, ivir2;
+  int iocc1;
+  int iocc2;
+  int ivir1;
+  int ivir2;
 
   int n_basis_functions;
   int n_molecular_orbitals;
@@ -30,5 +33,16 @@ class Movec_Parser {
   virtual void parse_ascii_movecs(std::string) = 0;
 };
 
-std::shared_ptr<Movec_Parser> create_movec_parser(IOPs& iops, MPI_info& mpi_info, Molec& molec);
+namespace MOVEC_TYPE {
+  enum MOVEC_TYPE {
+    NWCHEM = 0,
+    DUMMY,
+  };
+  const std::vector<std::string> movec_type_strings = {
+    "NWCHEM",
+    "DUMMY"
+  };
+}
+
+std::shared_ptr<Movec_Parser> create_movec_parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source=KEYS::MOVECS, MOVEC_TYPE::MOVEC_TYPE movec_type = MOVEC_TYPE::NWCHEM);
 #endif  // MOVEC_PASER_H_

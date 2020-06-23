@@ -53,7 +53,7 @@ namespace WM {
 class Wavefunction {
  public:
   Wavefunction() {}
-  Wavefunction(std::vector<std::array<double, 3>>* p, const NWChem_Movec_Parser&);
+  Wavefunction(std::vector<std::array<double, 3>>* p, const std::shared_ptr<Movec_Parser>);
 
   const double *data() const;
   const double *occ() const;
