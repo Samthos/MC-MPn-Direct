@@ -22,7 +22,7 @@
 #include "electron_list.h"
 #include "qc_ovps.h"
 #include "qc_random.h"
-#include "tau_integrals.h"
+#include "tau.h"
 
 #include "MCMP/mcmp.h"
 #include "MCMP/qc_mcmp2.h"

@@ -7,7 +7,7 @@
 #endif
 
 #include "basis/wavefunction.h"
-#include "tau_integrals.h"
+#include "tau.h"
 #include "ovps_set.h"
 
 template <class Container>

@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "../qc_ovps.h"
-#include "../tau_integrals.h"
+#include "tau.h"
 #include "../electron_pair_list.h"
 #include "../electron_list.h"
 

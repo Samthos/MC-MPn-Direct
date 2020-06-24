@@ -34,7 +34,6 @@ namespace {
     void call_check(int sign, int, int, T& array, const char* array_name){}
 
     void check(int sign, int start, int stop, std::vector<double>& array, const char* array_name) {
-      std::cout << "checking\n";
       for (int row = 0; row < electron_pairs; row++) {
         for (int col = 0; col < electron_pairs; col++) {
           ASSERT_EQ(array[col * electron_pairs + row], sign * value(row, col, start, stop))

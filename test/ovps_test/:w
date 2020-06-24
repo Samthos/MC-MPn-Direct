@@ -26,7 +26,13 @@ namespace {
       std::shared_ptr<Stochastic_Tau> stochastic_tau(new Stochastic_Tau(movecs));
       stochastic_tau->resize(2);
       stochastic_tau->set({1.0-1.0/exp(2), 1.0-1.0/exp(2)});
-
+      {
+        auto v = stochastic_tau->get_exp_tau(0, 1);
+        for (auto &it : v) {
+        printf("%6.2f ", it);
+        }
+        printf("\n");
+      }
       tau = std::shared_ptr<Tau>(stochastic_tau);
 
       ovps.init(2, electron_pairs);
@@ -42,5 +48,10 @@ namespace {
   TYPED_TEST_SUITE(ovpsTest, Implementations);
 
   TYPED_TEST(ovpsTest, update) {
+    auto v = this->tau->get_exp_tau(0, 1);
+    for (auto &it : v) {
+    printf("%6.2f ", it);
+    }
+    printf("\n");
   }
 }
