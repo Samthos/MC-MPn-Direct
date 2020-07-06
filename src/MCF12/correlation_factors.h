@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "../qc_input.h"
-#include "../electron_list.h"
-#include "../electron_pair_list.h"
+#include "electron_list.h"
+#include "electron_pair_list.h"
 
 namespace CORRELATION_FACTORS {
   enum CORRELATION_FACTORS {

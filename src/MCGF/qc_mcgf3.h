@@ -8,7 +8,7 @@
 #include "../qc_input.h"
 #include "../basis/qc_basis.h"
 #include "tau.h"
-#include "../electron_pair_list.h"
+#include "electron_pair_list.h"
 
 class GF3_Functional : public MCGF {
   public:

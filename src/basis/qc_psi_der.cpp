@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <numeric>
 #include "cblas.h"
 
 #include "qc_basis.h"
 #include "../blas_calls.h"
-#include "../electron_pair_list.h"
 
 void Basis::full_host_psi_get_dx(
     Wavefunction& psi_dx,

@@ -6,7 +6,6 @@
 #include "../qc_geom.h"
 #include "../qc_input.h"
 #include "../qc_mpi.h"
-#include "../electron_pair_list.h"
 
 #include "wavefunction.h"
 

@@ -3,8 +3,8 @@
 #include <unordered_map>
 
 #include "../basis/qc_basis.h"
-#include "../electron_pair_list.h"
-#include "../electron_list.h"
+#include "electron_pair_list.h"
+#include "electron_list.h"
 
 class X_Traces {
   public:

@@ -1,10 +1,15 @@
 set(source
   blas_calls.cpp
   blas_calls.h
-  electron_pair_list.cpp
-  electron_pair_list.h
-  electron_list.cpp
-  electron_list.h
+  electron_generators/create_electron_pair_list.cpp
+  electron_generators/electron_pair_list.cpp
+  electron_generators/electron_pair_list.h
+  electron_generators/direct_electron_pair_list.cpp
+  electron_generators/direct_electron_pair_list.h
+  electron_generators/metropolis_electron_pair_list.cpp
+  electron_generators/metropolis_electron_pair_list.h
+  electron_generators/electron_list.cpp
+  electron_generators/electron_list.h
   main.cpp
   weight_function.cpp
   weight_function.h
@@ -96,6 +101,7 @@ target_link_libraries(MC_MPn_Direct tau)
 target_include_directories(MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
 target_include_directories(MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
 target_include_directories(MC_MPn_Direct PUBLIC ./tau_generators)
+target_include_directories(MC_MPn_Direct PUBLIC ./electron_generators)
 
 IF(${MPI_CXX_FOUND})
   message("Adding MPI compile options to MC_MPn_Direct")
@@ -118,6 +124,7 @@ if(${CUDA_FOUND})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ./tau_generators)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./electron_generators)
 
   cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
   target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)

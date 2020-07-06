@@ -6,8 +6,8 @@
 
 #include "../qc_input.h"
 #include "../basis/qc_basis.h"
-#include "../electron_pair_list.h"
-#include "../electron_list.h"
+#include "electron_pair_list.h"
+#include "electron_list.h"
 #include "../MCMP/mcmp.h"
 #include "F12_Traces.h"
 #include "correlation_factors.h"

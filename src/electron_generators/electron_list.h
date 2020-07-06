@@ -1,16 +1,13 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #ifndef ELECTRON_LIST_H_
 #define ELECTRON_LIST_H_
 
 #include <array>
 #include <vector>
 
-#include "weight_function.h"
-#include "qc_geom.h"
-#include "qc_random.h"
-#include "qc_input.h"
+#include "../weight_function.h"
+#include "../qc_geom.h"
+#include "../qc_random.h"
+#include "../qc_input.h"
 
 struct Electron {
   std::array<double, 3> pos;
