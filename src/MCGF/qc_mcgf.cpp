@@ -91,7 +91,7 @@ void GF2::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   mcgf2_local_energy_core();
 
   for(int band=0;band<numBand;band++) {
@@ -125,7 +125,7 @@ void GF3::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
 
   mcgf2_local_energy_core();
   mcgf3_local_energy_core();
@@ -273,7 +273,7 @@ void Diagonal_GF::monte_energy() {
 }
 
 void Diagonal_GF::mc_local_energy(const int& step) {
-  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   for (int i = 0; i < energy_functions.size(); i++) {
     if (!energy_functions[i]->is_f12) {
       energy_functions[i]->energy(qeps[i].qeps, wavefunctions, ovps, electron_pair_list, tau);

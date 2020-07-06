@@ -14,7 +14,7 @@ template <class Container>
 class OVPS {
  public:
   void init(int dimm, int electron_pairs_);
-  void update_ovps(Wavefunction&, Wavefunction&, Tau*);
+  void update(Wavefunction&, Wavefunction&, Tau*);
 
   std::vector<std::vector<OVPS_Set<Container>>> o_set, v_set;
 
@@ -31,7 +31,6 @@ typedef OVPS<thrust::device_vector<double>> OVPS_Device;
 
 template <class T, class S>
 void copy_OVPS(OVPS<T>& src, OVPS<S>& dest) {
-  std::cout << "wikit\n";
   for (int i = 0; i < src.o_set.size(); i++) {
     for (int j = 0; j < src.o_set[i].size(); j++) {
       copy_OVPS_Set(src.o_set[i][j], dest.o_set[i][j]);

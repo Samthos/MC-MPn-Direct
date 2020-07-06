@@ -113,11 +113,11 @@ if(${CUDA_FOUND})
   cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
   target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
   target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
-  target_link_libraries(MC_MPn_Direct tau)
+  target_link_libraries(GPU_MC_MPn_Direct tau)
 
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
-  target_include_directories(MC_MPn_Direct PUBLIC ./tau_generators)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./tau_generators)
 
   cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
   target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)

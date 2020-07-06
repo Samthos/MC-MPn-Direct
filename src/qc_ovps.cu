@@ -2,7 +2,7 @@
 #include "qc_ovps.cpp"
 
 template <>
-void OVPS<thrust::device_vector<double>>::update_ovps(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
+void OVPS<thrust::device_vector<double>>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
   // update green's function trace objects
 
   auto iocc1 = electron_pair_psi1.iocc1;
@@ -15,9 +15,9 @@ void OVPS<thrust::device_vector<double>>::update_ovps(Wavefunction& electron_pai
   cublasCreate(&handle);
 
   thrust::device_vector<double> psi1 = electron_pair_psi1.psi;
-  thrust::device_vector<double> psi2 = electron_pair_psi1.psi;
+  thrust::device_vector<double> psi2 = electron_pair_psi2.psi;
   thrust::device_vector<double> psi1Tau(psi1.size());
-  thrust::device_vector<double> psi2Tau(psi1.size());
+  thrust::device_vector<double> psi2Tau(psi2.size());
 
   for (auto stop = 0; stop < o_set.size(); stop++) {
     for (auto start = 0; start < o_set[stop].size(); start++) {

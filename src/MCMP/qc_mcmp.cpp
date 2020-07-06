@@ -141,7 +141,7 @@ void Energy<Container>::monte_energy() {
 
 template <class Container>
 void Energy<Container>::energy() {
-  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   for (int i = 0; i < energy_functions.size(); i++) {
     if (!energy_functions[i]->is_f12) {
       if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
@@ -157,7 +157,7 @@ void Energy<Container>::energy() {
 
 #ifdef HAVE_CUDA
 void GPU_Energy::energy() {
-  ovps_device.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps_device.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   copy_OVPS(ovps_device, ovps);
   for (int i = 0; i < energy_functions.size(); i++) {
     if (!energy_functions[i]->is_f12) {
@@ -180,7 +180,7 @@ void Dimer::local_energy(std::unordered_map<int, Wavefunction>& l_wavefunctions,
     std::fill(c.begin(), c.end(), 0.0);
   }
 
-  ovps.update_ovps(l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], l_tau);
+  ovps.update(l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], l_tau);
   for (int i = 0; i < energy_functions.size(); i++) {
     if (!energy_functions[i]->is_f12) {
       if (l_tau->is_new(energy_functions[i]->n_tau_coordinates)) {
