@@ -1,0 +1,31 @@
+Basis:
+  rename to atomic_basis
+  shouldn't know that wavefunction exist.
+  doesn't load data.
+
+  owns contraction information
+  contraction amplitudes
+  ao amplitudes
+
+SHELL
+  refactor into angular momentum class
+  refactor into files
+
+basis_parser
+  more normalization cose to atom basis
+  
+atom_basis
+  move normalization code to here
+
+basismetadata
+  rename to atomic orbital
+  refactor compuation of contraction into this class
+  refactor compuation of atomic orbitals into the class
+
+Basis data 
+  remove basismetadata
+  don't alloc
+  
+
+
+

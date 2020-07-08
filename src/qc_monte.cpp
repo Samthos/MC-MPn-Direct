@@ -58,13 +58,11 @@ QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
   }
 
   //initialize walkers
-  basis.gpu_alloc(iops.iopns[KEYS::ELECTRON_PAIRS], molec);
   tau = create_tau_sampler(iops, movecs);
 }
 
 template <class Container>
 QC_monte<Container>::~QC_monte() {
-  basis.gpu_free();
   delete tau;
   delete electron_pair_list;
 }

@@ -7,28 +7,7 @@
 #include "qc_basis.h"
 #include "../blas_calls.h"
 
-void Basis::full_host_psi_get_dx(
-    Wavefunction& psi_dx,
-    std::vector<std::array<double, 3>>& pos) {
-  build_contractions_with_derivatives(pos);
-  host_psi_get_dx(psi_dx, pos);
-}
-void Basis::full_host_psi_get_dy(
-    Wavefunction& psi_dy,
-    std::vector<std::array<double, 3>>& pos) {
-  build_contractions_with_derivatives(pos);
-  host_psi_get_dy(psi_dy, pos);
-}
-void Basis::full_host_psi_get_dz(
-    Wavefunction& psi_dz,
-    std::vector<std::array<double, 3>>& pos) {
-  build_contractions_with_derivatives(pos);
-  host_psi_get_dz(psi_dz, pos);
-}
-
-void Basis::host_psi_get_dx(
-    Wavefunction& psi_dx,
-    std::vector<std::array<double, 3>>& pos) {
+void Basis::host_psi_get_dx( Wavefunction& psi_dx, std::vector<std::array<double, 3>>& pos) {
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -39,9 +18,7 @@ void Basis::host_psi_get_dx(
       0.0,
       psi_dx.psi.data(), psi_dx.lda);
 }
-void Basis::host_psi_get_dy(
-    Wavefunction& psi_dy,
-    std::vector<std::array<double, 3>>& pos) {
+void Basis::host_psi_get_dy( Wavefunction& psi_dy, std::vector<std::array<double, 3>>& pos) {
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -52,9 +29,7 @@ void Basis::host_psi_get_dy(
       0.0,
       psi_dy.psi.data(), psi_dy.lda);
 }
-void Basis::host_psi_get_dz(
-    Wavefunction& psi_dz,
-    std::vector<std::array<double, 3>>& pos) {
+void Basis::host_psi_get_dz( Wavefunction& psi_dz, std::vector<std::array<double, 3>>& pos) {
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -64,6 +39,120 @@ void Basis::host_psi_get_dz(
       psi_dz.movecs.data(), qc_nbf,
       0.0,
       psi_dz.psi.data(), psi_dz.lda);
+}
+
+void Basis::build_contractions_with_derivatives(const std::vector<std::array<double, 3>>& pos) {
+  std::array<double, 3> dr{};
+  std::fill(h_basis.contraction_amplitudes, h_basis.contraction_amplitudes + nShells * pos.size(), 0.0);
+  std::fill(h_basis.contraction_amplitudes_derivative, h_basis.contraction_amplitudes_derivative + nShells * pos.size(), 0.0);
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+      double r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
+      for (auto i = h_basis.meta_data[shell].contraction_begin; i < h_basis.meta_data[shell].contraction_end; i++) {
+        double alpha = h_basis.contraction_exp[i];
+        double exponential = exp(-alpha * r2) * h_basis.contraction_coef[i];
+        h_basis.contraction_amplitudes[index] += exponential;
+        h_basis.contraction_amplitudes_derivative[index] -= 2.0 * alpha * exponential;
+      }
+    }
+  }
+}
+
+void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos){
+  std::array<double, 3> dr;
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
+      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
+      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
+      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
+      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+
+      if (lspherical) {
+        switch (angular_momentum) {
+          case 0: evaluate_s_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_spherical_d_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_spherical_f_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_spherical_g_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+        }
+      } else {
+        switch (angular_momentum) {
+          case 0: evaluate_s_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_cartesian_d_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_cartesian_f_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_cartesian_g_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+        }
+      }
+    }
+  }
+}
+void Basis::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos){
+  std::array<double, 3> dr;
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+
+      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
+      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
+      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
+      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
+      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+
+      if (lspherical) {
+        switch (angular_momentum) {
+          case 0: evaluate_s_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_spherical_d_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_spherical_f_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_spherical_g_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+        }
+      } else {
+        switch (angular_momentum) {
+          case 0: evaluate_s_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_cartesian_d_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_cartesian_f_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_cartesian_g_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+        }
+      }
+    }
+  }
+}
+void Basis::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos){
+  std::array<double, 3> dr;
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+
+      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
+      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
+      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
+      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
+      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+
+      if (lspherical) {
+        switch (angular_momentum) {
+          case 0: evaluate_s_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_spherical_d_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_spherical_f_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_spherical_g_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+        }
+      } else {
+        switch (angular_momentum) {
+          case 0: evaluate_s_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_cartesian_d_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_cartesian_f_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_cartesian_g_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
+        }
+      }
+    }
+  }
 }
 
 void Basis::evaluate_s_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
@@ -330,118 +419,4 @@ void Basis::evaluate_spherical_g_dz(double* ao_amplitudes, const double &rad, co
   double ang[15];
   evaluate_cartesian_g_dz(&ang[0], rad, rad_derivative, x, y, z);
   evaluate_spherical_g_shell(ao_amplitudes, &ang[0]);
-}
-
-void Basis::build_contractions_with_derivatives(const std::vector<std::array<double, 3>>& pos) {
-  std::array<double, 3> dr{};
-  std::fill(h_basis.contraction_amplitudes, h_basis.contraction_amplitudes + nShells * pos.size(), 0.0);
-  std::fill(h_basis.contraction_amplitudes_derivative, h_basis.contraction_amplitudes_derivative + nShells * pos.size(), 0.0);
-  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
-    for (int shell = 0; shell < nShells; shell++, index++) {
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
-      double r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-      for (auto i = h_basis.meta_data[shell].contraction_begin; i < h_basis.meta_data[shell].contraction_end; i++) {
-        double alpha = h_basis.contraction_exp[i];
-        double exponential = exp(-alpha * r2) * h_basis.contraction_coef[i];
-        h_basis.contraction_amplitudes[index] += exponential;
-        h_basis.contraction_amplitudes_derivative[index] -= 2.0 * alpha * exponential;
-      }
-    }
-  }
-}
-
-void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos){
-  std::array<double, 3> dr;
-  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
-    for (int shell = 0; shell < nShells; shell++, index++) {
-      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
-      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
-      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
-      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
-
-      if (lspherical) {
-        switch (angular_momentum) {
-          case 0: evaluate_s_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_spherical_d_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_spherical_f_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_spherical_g_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-        }
-      } else {
-        switch (angular_momentum) {
-          case 0: evaluate_s_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_cartesian_d_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_cartesian_f_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_cartesian_g_dx(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-        }
-      }
-    }
-  }
-}
-void Basis::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos){
-  std::array<double, 3> dr;
-  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
-    for (int shell = 0; shell < nShells; shell++, index++) {
-
-      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
-      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
-      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
-      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
-
-      if (lspherical) {
-        switch (angular_momentum) {
-          case 0: evaluate_s_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_spherical_d_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_spherical_f_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_spherical_g_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-        }
-      } else {
-        switch (angular_momentum) {
-          case 0: evaluate_s_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_cartesian_d_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_cartesian_f_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_cartesian_g_dy(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-        }
-      }
-    }
-  }
-}
-void Basis::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos){
-  std::array<double, 3> dr;
-  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
-    for (int shell = 0; shell < nShells; shell++, index++) {
-
-      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
-      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
-      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
-      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
-
-      if (lspherical) {
-        switch (angular_momentum) {
-          case 0: evaluate_s_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_spherical_d_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_spherical_f_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_spherical_g_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-        }
-      } else {
-        switch (angular_momentum) {
-          case 0: evaluate_s_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_cartesian_d_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_cartesian_f_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_cartesian_g_dz(ao_amplitude, contraction_amplitude, contraction_amplitude_derivative, dr[0], dr[1], dr[2]); break;
-        }
-      }
-    }
-  }
 }

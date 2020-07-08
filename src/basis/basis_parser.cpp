@@ -1,109 +1,17 @@
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
 #include <iostream>
-#include <fstream>
 #include <sstream>
-#include <string>
+#include <fstream>
+#include <cmath>
 
-#include "../qc_mpi.h"
 #include "../atom_tag_parser.h"
-#include "qc_basis.h"
 
+#include "basis_parser.h"
 
-/*
-Basis::Basis(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
-
-  // read basis set
+Basis_Parser::Basis_Parser(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
   read(iops, mpi_info, molec);
-
-  // declare memory
-  mc_num = std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]);
-  h_basis.ao_amplitudes = new double[qc_nbf * mc_num];
-  h_basis.contraction_amplitudes = new double[nShells * mc_num];
-  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_num];
-}
-*/
-Basis::Basis(IOPs &iops, const Basis_Parser& basis_parser) {
-  nPrimatives = basis_parser.n_primatives;
-  qc_nbf = basis_parser.n_atomic_orbitals;
-  nShells = basis_parser.n_shells;
-  lspherical = basis_parser.is_spherical;
-
-  h_basis.meta_data = new BasisMetaData[nShells];
-  std::copy(basis_parser.atomic_orbitals.begin(), basis_parser.atomic_orbitals.end(), h_basis.meta_data);
-
-  h_basis.contraction_exp = new double[nPrimatives];
-  std::copy(basis_parser.contraction_exponents.begin(), basis_parser.contraction_exponents.end(), h_basis.contraction_exp);
-
-  h_basis.contraction_coef = new double[nPrimatives];
-  std::copy(basis_parser.contraction_coeficients.begin(), basis_parser.contraction_coeficients.end(), h_basis.contraction_coef);
-
-
-
-  mc_num = std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]);
-  h_basis.ao_amplitudes = new double[qc_nbf * mc_num];
-  h_basis.contraction_amplitudes = new double[nShells * mc_num];
-  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_num];
-}
-Basis::~Basis() {
-  /*
-   * Basis destructor
-   */
-  delete[] h_basis.ao_amplitudes;
-  delete[] h_basis.contraction_amplitudes;
-  delete[] h_basis.contraction_amplitudes_derivative;
-  delete[] h_basis.contraction_exp;
-  delete[] h_basis.contraction_coef;
-}
-Basis::Basis(const Basis& param) {
-  /*
-   * Copy constructor
-   */
-  nPrimatives = param.nPrimatives;
-  qc_nbf = param.qc_nbf;
-  nShells = param.nShells;
-  lspherical = param.lspherical;
-  mc_num = param.mc_num;
-
-  h_basis.meta_data = new BasisMetaData[nShells];
-  std::copy(param.h_basis.meta_data, param.h_basis.meta_data + nShells, h_basis.meta_data);
-
-  h_basis.ao_amplitudes = new double[qc_nbf * mc_num];
-
-  h_basis.contraction_amplitudes = new double[nShells * mc_num];
-  h_basis.contraction_amplitudes_derivative = new double[nShells * mc_num];
-  h_basis.contraction_exp = new double[nPrimatives];
-  h_basis.contraction_coef = new double[nPrimatives];
-  std::copy(param.h_basis.contraction_exp, param.h_basis.contraction_exp + nPrimatives, h_basis.contraction_exp);
-  std::copy(param.h_basis.contraction_coef, param.h_basis.contraction_coef + nPrimatives, h_basis.contraction_coef);
-}
-Basis& Basis::operator=(Basis param) {
-  /*
-   * copy assignment operator
-   */
-  std::swap(*this, param);
-  return *this;
-}
-void swap(Basis& a, Basis& b) {
-  /*
-   * swap operator
-   */
-  std::swap(a.nPrimatives, b.nPrimatives);
-  std::swap(a.qc_nbf, b.qc_nbf);
-  std::swap(a.nShells, b.nShells);
-  std::swap(a.lspherical, b.lspherical);
-  std::swap(a.mc_num, b.mc_num);
-  std::swap(a.h_basis.meta_data, b.h_basis.meta_data);
-
-  std::swap(a.h_basis.ao_amplitudes, b.h_basis.ao_amplitudes);
-  std::swap(a.h_basis.contraction_amplitudes, b.h_basis.contraction_amplitudes);
-  std::swap(a.h_basis.contraction_amplitudes_derivative, b.h_basis.contraction_amplitudes_derivative);
-  std::swap(a.h_basis.contraction_exp, b.h_basis.contraction_exp);
-  std::swap(a.h_basis.contraction_coef, b.h_basis.contraction_coef);
 }
 
-void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
+void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   std::ifstream input;
   std::string str;
   std::string atomName, basisName, basisType, shell_type;
@@ -113,7 +21,7 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   int currentBasis = -1;
   std::vector<AtomBasis> atomBasis(100);
 
-  lspherical = iops.bopns[KEYS::SPHERICAL];
+  is_spherical = iops.bopns[KEYS::SPHERICAL];
 
   if (mpi_info.sys_master) {
     // input.open(iops.sopns[KEYS::BASIS].c_str());
@@ -172,30 +80,30 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
     normalize_atom_basis(atomBasis);
 
     // count number of primatives is basis set
-    qc_nbf = 0;
-    nShells = 0;
-    nPrimatives = 0;
+    n_atomic_orbitals = 0;
+    n_shells = 0;
+    n_primatives = 0;
     for (auto& it : molec.atoms) {
       for (auto& jt : atomBasis[it.znum].shell) {
-        nShells += jt.contracted_gaussian.front().second.size();
-        nPrimatives += jt.contracted_gaussian.size() * jt.contracted_gaussian.front().second.size();
+        n_shells += jt.contracted_gaussian.front().second.size();
+        n_primatives += jt.contracted_gaussian.size() * jt.contracted_gaussian.front().second.size();
         if (jt.shell_type == SHELL::SP) {
-          qc_nbf += number_of_polynomials(jt.shell_type, lspherical);
+          n_atomic_orbitals += number_of_polynomials(jt.shell_type, is_spherical);
         } else {
-          qc_nbf += number_of_polynomials(jt.shell_type, lspherical) * jt.contracted_gaussian.front().second.size();
+          n_atomic_orbitals += number_of_polynomials(jt.shell_type, is_spherical) * jt.contracted_gaussian.front().second.size();
         }
       }
     }
   }
 
   MPI_info::barrier();
-  MPI_info::broadcast_int(&nShells, 1);
-  MPI_info::broadcast_int(&nPrimatives, 1);
-  MPI_info::broadcast_int(&qc_nbf, 1);
+  MPI_info::broadcast_int(&n_shells, 1);
+  MPI_info::broadcast_int(&n_primatives, 1);
+  MPI_info::broadcast_int(&n_atomic_orbitals, 1);
 
-  h_basis.contraction_exp = new double[nPrimatives];
-  h_basis.contraction_coef = new double[nPrimatives];
-  h_basis.meta_data = new BasisMetaData[nShells];
+  contraction_coeficients.resize(n_primatives);
+  contraction_exponents.resize(n_primatives);
+  atomic_orbitals.resize(n_shells);
 
   if (mpi_info.sys_master) {
     uint contraction= 0;
@@ -204,39 +112,39 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
         for (uint shell_contraction = 0; shell_contraction < shell.n_contractions(); shell_contraction++) {
           // set start and stop
           if (contraction == 0) {
-            h_basis.meta_data[contraction].contraction_begin = 0;
+            atomic_orbitals[contraction].contraction_begin = 0;
           } else {
-            h_basis.meta_data[contraction].contraction_begin = h_basis.meta_data[contraction - 1].contraction_end;
+            atomic_orbitals[contraction].contraction_begin = atomic_orbitals[contraction - 1].contraction_end;
           }
-          h_basis.meta_data[contraction].contraction_end = h_basis.meta_data[contraction].contraction_begin + shell.contracted_gaussian.size();
+          atomic_orbitals[contraction].contraction_end = atomic_orbitals[contraction].contraction_begin + shell.contracted_gaussian.size();
 
           // set atom
-          std::copy(atom.pos, atom.pos + 3, h_basis.meta_data[contraction].pos);
+          std::copy(atom.pos, atom.pos + 3, atomic_orbitals[contraction].pos);
 
           // set angular momentum
           if (shell.shell_type == SHELL::SP) {
             if (shell_contraction == 0) {
-              h_basis.meta_data[contraction].angular_momentum = 0;
+              atomic_orbitals[contraction].angular_momentum = 0;
             } else {
-              h_basis.meta_data[contraction].angular_momentum = 1;
+              atomic_orbitals[contraction].angular_momentum = 1;
             }
           } else {
-            h_basis.meta_data[contraction].angular_momentum = shell.shell_type;
+            atomic_orbitals[contraction].angular_momentum = shell.shell_type;
           }
 
           // set isgs
           if (contraction == 0) {
-            h_basis.meta_data[contraction].ao_begin = 0;
+            atomic_orbitals[contraction].ao_begin = 0;
           } else {
-            h_basis.meta_data[contraction].ao_begin = h_basis.meta_data[contraction - 1].ao_begin
-                + SHELL::number_of_polynomials(h_basis.meta_data[contraction - 1].angular_momentum, lspherical);
+            atomic_orbitals[contraction].ao_begin = atomic_orbitals[contraction - 1].ao_begin
+                + SHELL::number_of_polynomials(atomic_orbitals[contraction - 1].angular_momentum, is_spherical);
           }
 
           // copy alpha and norm
           for (auto kt = shell.contracted_gaussian.begin(); kt != shell.contracted_gaussian.end(); kt++) {
-            auto k = std::distance(shell.contracted_gaussian.begin(), kt) + h_basis.meta_data[contraction].contraction_begin;
-            h_basis.contraction_exp[k] = kt->first;
-            h_basis.contraction_coef[k] = kt->second[shell_contraction];
+            auto k = std::distance(shell.contracted_gaussian.begin(), kt) + atomic_orbitals[contraction].contraction_begin;
+            contraction_exponents[k] = kt->first;
+            contraction_coeficients[k] = kt->second[shell_contraction];
           }
           contraction++;
         }
@@ -245,12 +153,11 @@ void Basis::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   }
 
   MPI_info::barrier();
-  MPI_info::broadcast_double(h_basis.contraction_exp, nPrimatives);
-  MPI_info::broadcast_double(h_basis.contraction_coef, nPrimatives);
-  MPI_info::broadcast_char((char*) h_basis.meta_data, nShells * sizeof(BasisMetaData));
+  MPI_info::broadcast_vector_double(contraction_exponents);
+  MPI_info::broadcast_vector_double(contraction_coeficients);
+  MPI_info::broadcast_char((char*) atomic_orbitals.data(), n_shells * sizeof(BasisMetaData));
 }
-
-void Basis::normalize_atom_basis(std::vector<AtomBasis>& atomBasis) {
+void Basis_Parser::normalize_atom_basis(std::vector<AtomBasis>& atomBasis) {
   // loop of atomic basis sets
   for (auto& it : atomBasis) {
     // if basis set was read
@@ -269,7 +176,7 @@ void Basis::normalize_atom_basis(std::vector<AtomBasis>& atomBasis) {
     }
   }
 }
-void Basis::normalize_sp(SHELL::Shell& shell) {
+void Basis_Parser::normalize_sp(SHELL::Shell& shell) {
   for (int j = 0; j < 2; ++j) {
     SHELL::Shell temp_shell;
     temp_shell.contracted_gaussian.resize(shell.contracted_gaussian.size());
@@ -290,7 +197,7 @@ void Basis::normalize_sp(SHELL::Shell& shell) {
     }
   }
 }
-void Basis::normalize_s(SHELL::Shell& shell) {
+void Basis_Parser::normalize_s(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
   constexpr double pi32 = 5.56832799683170;
 
@@ -327,7 +234,7 @@ void Basis::normalize_s(SHELL::Shell& shell) {
     }
   }
 }
-void Basis::normalize_p(SHELL::Shell& shell) {
+void Basis_Parser::normalize_p(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
   constexpr double pi32 = 5.56832799683170;
 
@@ -362,7 +269,7 @@ void Basis::normalize_p(SHELL::Shell& shell) {
     }
   }
 }
-void Basis::normalize_d(SHELL::Shell& shell) {
+void Basis_Parser::normalize_d(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
 
   for (auto & kt : shell.contracted_gaussian) {
@@ -372,7 +279,7 @@ void Basis::normalize_d(SHELL::Shell& shell) {
     }
   }
 }
-void Basis::normalize_f(SHELL::Shell& shell) {
+void Basis_Parser::normalize_f(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
 
   for (auto & kt : shell.contracted_gaussian) {
@@ -382,7 +289,7 @@ void Basis::normalize_f(SHELL::Shell& shell) {
     }
   }
 }
-void Basis::normalize_g(SHELL::Shell& shell) {
+void Basis_Parser::normalize_g(SHELL::Shell& shell) {
   constexpr double pi = 3.141592653589793;
 
   for (auto & kt : shell.contracted_gaussian) {
@@ -391,26 +298,4 @@ void Basis::normalize_g(SHELL::Shell& shell) {
       lt *= cnorm;
     }
   }
-}
-
-void Basis::dump(const std::string& fname) {
-  std::ofstream os(fname);
-  os << "\n-----------------------------------------------------------------------------------------------------------\nBasis Dump\n";
-  os << "qc_nbf: " << qc_nbf << "\n";       // number basis functions
-  os << "nShells: " << nShells << "\n";      // number of shells
-  os << "nPrimatives: " << nPrimatives << "\n";  // number of primitives
-  os << "lspherical: " << lspherical << "\n";  // true if spherical
-  for (int i = 0; i < nPrimatives; ++i) {
-    os << h_basis.contraction_coef[i] << "\t" << h_basis.contraction_exp[i] << "\n";
-  }
-  for (int i = 0; i < nShells; ++i) {
-    os << h_basis.meta_data[i].ao_begin << "\t";
-    os << h_basis.meta_data[i].contraction_begin << "\t";
-    os << h_basis.meta_data[i].contraction_end << "\t";
-    os << h_basis.meta_data[i].angular_momentum << "\t";
-    os << h_basis.meta_data[i].pos[0] << "\t";
-    os << h_basis.meta_data[i].pos[1] << "\t";
-    os << h_basis.meta_data[i].pos[2] << "\n";
-  }
-  os << "-----------------------------------------------------------------------------------------------------------\n\n";
 }

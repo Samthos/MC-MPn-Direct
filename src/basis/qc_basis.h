@@ -7,7 +7,11 @@
 #include "../qc_input.h"
 #include "../qc_mpi.h"
 
+#include "atomic_orbital.h"
 #include "wavefunction.h"
+#include "shell.h"
+#include "atom_basis.h"
+#include "basis_parser.h"
 
 namespace Cartesian_Poly {
   enum Cartesian_P {
@@ -77,48 +81,12 @@ namespace Cartesian_Poly {
   };
 }
 
-namespace SHELL {
-  enum Shell_Type {
-    SP=-1, S, P, D, F, G, H
-  };
-  Shell_Type string_to_shell_type(const std::string& str);
-  int number_of_polynomials(Shell_Type, bool spherical);
-  int number_of_polynomials(int, bool spherical);
-  int number_of_spherical_polynomials(Shell_Type st);
-  int number_of_cartesian_polynomials(Shell_Type st);
-  struct Shell {
-    Shell_Type shell_type;
-    std::vector<std::pair<double, std::vector<double>>> contracted_gaussian;
-    size_t n_contractions() const {
-      return contracted_gaussian.front().second.size();
-    }
-  };
-}
-
-struct AtomBasis {
-  AtomBasis() { atomCharge = -1; }
-  std::string basisName;
-  std::string basisType;
-  std::string atomName;
-  std::vector<SHELL::Shell> shell;
-  int atomCharge;
-};
-
-struct BasisMetaData{
-  int angular_momentum;
-  int contraction_begin;
-  int contraction_end;
-  int ao_begin;
-  double pos[3];
-};
-
 struct BasisData {
-  double *contraction_exp;
-  double *contraction_coef;
-  double *ao_amplitudes;  // stores AO amplidutes
-  double *contraction_amplitudes;  // stores contraction amplidutes
-  double *contraction_amplitudes_derivative;  // stores contraction amplidutes
-//  double *nw_co;          // obital coefs from nwchem
+  double *contraction_exp;                    // dense vector of contraction exponents. Size if total number of primatives
+  double *contraction_coef;                   // dense vector of contraction coeficients. Size if total number of primatives
+  double *ao_amplitudes;                      // stores AO amplidutes
+  double *contraction_amplitudes;             // stores contraction amplitudes
+  double *contraction_amplitudes_derivative;  // stores contraction amplitudes
   BasisMetaData *meta_data;
 };
 
@@ -132,17 +100,13 @@ class Basis {
    *  -specialize for GPU/CPU usage
    */
  public:
-  Basis(IOPs &, MPI_info &, Molec &);
+  Basis(IOPs&, const Basis_Parser&);
   ~Basis();
   Basis(const Basis&);
   Basis &operator=(Basis);
   friend void swap(Basis&, Basis&);
 
   // get psi vals
-  void full_host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
-  void full_host_psi_get_dx(Wavefunction&, std::vector<std::array<double, 3>>&);
-  void full_host_psi_get_dy(Wavefunction&, std::vector<std::array<double, 3>>&);
-  void full_host_psi_get_dz(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dx(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dy(Wavefunction&, std::vector<std::array<double, 3>>&);
@@ -150,27 +114,13 @@ class Basis {
 
   void build_contractions(const std::vector<std::array<double, 3>>&);
   void build_contractions_with_derivatives(const std::vector<std::array<double, 3>>&);
-  void device_psi_get(double *, double *, double *, double *, double *, double *, double *, int);
-
-  // read write
-  void gpu_alloc(int, Molec &);
-  void gpu_free();
 
   // basis set info
   int mc_num;
-  // int iocc1;        // index first occupied orbital to be used
-  // int iocc2;        // index of HOMO+1
-  // int ivir1;        // index of LUMO
-  // int ivir2;        // index of last virtual to be used + 1
   int qc_nbf;       // number basis functions
   int nShells;      // number of shells
   int nPrimatives;  // number of primitives
   bool lspherical;  // true if spherical
-
-  // from nwchem
-  // int nw_nbf;  // number of basis functions
-  // int nw_nmo;  // number of basis molecular orbital in basis set i
-  // double *nw_en;  // orbital energies from nwchem
 
   BasisData h_basis, d_basis;
 

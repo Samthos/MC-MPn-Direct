@@ -20,6 +20,11 @@ set(source
   basis/nwchem_movec_parser.cpp
   basis/dummy_movec_parser.h
   basis/dummy_movec_parser.cpp
+  basis/shell.cpp
+  basis/shell.h
+  basis/atomic_orbital.h
+  basis/basis_parser.cpp
+  basis/basis_parser.h
   basis/qc_basis.cpp
   basis/qc_basis.h
   basis/qc_psi.cpp 
