@@ -1,6 +1,7 @@
 #ifndef ATOMIC_ORBITAL_H_
 #define ATOMIC_ORBITAL_H_
-struct BasisMetaData{
+class BasisMetaData {
+ public:
   int angular_momentum;
   int contraction_begin;
   int contraction_end;

@@ -24,12 +24,5 @@ class Basis_Parser {
 
  protected:
   void read(IOPs &, MPI_info &, Molec &);
-  static void normalize_atom_basis(std::vector<AtomBasis>&);
-  static void normalize_sp(SHELL::Shell& shell);
-  static void normalize_s(SHELL::Shell& shell);
-  static void normalize_p(SHELL::Shell& shell);
-  static void normalize_d(SHELL::Shell& shell);
-  static void normalize_f(SHELL::Shell& shell);
-  static void normalize_g(SHELL::Shell& shell);
 };
 #endif  // BASIS_PARSER_H_
