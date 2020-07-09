@@ -87,7 +87,6 @@ struct BasisData {
   double *ao_amplitudes;                      // stores AO amplidutes
   double *contraction_amplitudes;             // stores contraction amplitudes
   double *contraction_amplitudes_derivative;  // stores contraction amplitudes
-  BasisMetaData *meta_data;
 };
 
 class Basis {
@@ -120,7 +119,7 @@ class Basis {
 
   std::vector<double> contraction_exp;                    // dense vector of contraction exponents. Size if total number of primatives
   std::vector<double> contraction_coef;                   // dense vector of contraction coeficients. Size if total number of primatives
-  std::vector<BasisMetaData> meta_data;
+  std::vector<Atomic_Orbital> atomic_orbitals;
 
   std::vector<double> contraction_amplitudes;             // stores contraction amplitudes
   std::vector<double> contraction_amplitudes_derivative;  // stores contraction amplitudes

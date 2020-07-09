@@ -20,7 +20,7 @@ class Basis_Parser {
 
   std::vector<double> contraction_coeficients;
   std::vector<double> contraction_exponents;
-  std::vector<BasisMetaData> atomic_orbitals;
+  std::vector<Atomic_Orbital> atomic_orbitals;
 
  protected:
   void read(IOPs &, MPI_info &, Molec &);

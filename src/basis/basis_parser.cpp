@@ -121,8 +121,10 @@ void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
           // set start and stop
           if (contraction == 0) {
             atomic_orbitals[contraction].contraction_begin = 0;
+            atomic_orbitals[contraction].contraction_index = 0;
           } else {
             atomic_orbitals[contraction].contraction_begin = atomic_orbitals[contraction - 1].contraction_end;
+            atomic_orbitals[contraction].contraction_index = atomic_orbitals[contraction - 1].contraction_index + 1;
           }
           atomic_orbitals[contraction].contraction_end = atomic_orbitals[contraction].contraction_begin + shell.contracted_gaussian.size();
 
@@ -142,9 +144,9 @@ void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
           // set isgs
           if (contraction == 0) {
-            atomic_orbitals[contraction].ao_begin = 0;
+            atomic_orbitals[contraction].ao_index = 0;
           } else {
-            atomic_orbitals[contraction].ao_begin = atomic_orbitals[contraction - 1].ao_begin
+            atomic_orbitals[contraction].ao_index = atomic_orbitals[contraction - 1].ao_index
                 + SHELL::number_of_polynomials(atomic_orbitals[contraction - 1].angular_momentum, is_spherical);
           }
 
@@ -163,5 +165,5 @@ void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
   MPI_info::barrier();
   MPI_info::broadcast_vector_double(contraction_exponents);
   MPI_info::broadcast_vector_double(contraction_coeficients);
-  MPI_info::broadcast_char((char*) atomic_orbitals.data(), n_shells * sizeof(BasisMetaData));
+  MPI_info::broadcast_char((char*) atomic_orbitals.data(), n_shells * sizeof(Atomic_Orbital));
 }

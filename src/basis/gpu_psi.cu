@@ -14,12 +14,12 @@ void Basis::gpu_alloc(int mc_pair_num, Molec &molec) {
   cudaError_t_Assert(cudaMalloc((void **)&d_basis.contraction_exp, sizeof(double) * nPrimatives), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMalloc((void **)&d_basis.contraction_coef, sizeof(double) * nPrimatives), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMalloc((void **)&d_basis.nw_co, sizeof(double) * nw_nbf * nw_nmo[0]), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMalloc((void **)&d_basis.meta_data, sizeof(BasisMetaData) * nShells), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMalloc((void **)&d_basis.meta_data, sizeof(Atomic_Orbital) * nShells), __FILE__, __LINE__);
 
   cudaError_t_Assert(cudaMemcpy(d_basis.contraction_exp, h_basis.contraction_exp, sizeof(double) * nPrimatives, cudaMemcpyHostToDevice), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMemcpy(d_basis.contraction_coef, h_basis.contraction_coef, sizeof(double) * nPrimatives, cudaMemcpyHostToDevice), __FILE__, __LINE__);
   cudaError_t_Assert(cudaMemcpy(d_basis.nw_co, h_basis.nw_co, sizeof(double) * nw_nbf * nw_nmo[0], cudaMemcpyHostToDevice), __FILE__, __LINE__);
-  cudaError_t_Assert(cudaMemcpy(d_basis.meta_data, h_basis.meta_data, sizeof(BasisMetaData) * nShells, cudaMemcpyHostToDevice), __FILE__, __LINE__);
+  cudaError_t_Assert(cudaMemcpy(d_basis.meta_data, h_basis.meta_data, sizeof(Atomic_Orbital) * nShells, cudaMemcpyHostToDevice), __FILE__, __LINE__);
 }
 void Basis::gpu_free() {
   cudaError_t_Assert(cudaFree(d_basis.ao_amplitudes), __FILE__, __LINE__);

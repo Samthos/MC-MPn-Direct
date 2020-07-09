@@ -19,7 +19,7 @@ Basis::Basis(IOPs &iops, const Basis_Parser& basis_parser) :
   lspherical(basis_parser.is_spherical),
   contraction_exp(basis_parser.contraction_exponents),
   contraction_coef(basis_parser.contraction_coeficients),
-  meta_data(basis_parser.atomic_orbitals),
+  atomic_orbitals(basis_parser.atomic_orbitals),
   contraction_amplitudes(nShells * mc_num),
   contraction_amplitudes_derivative(nShells * mc_num),
   ao_amplitudes(qc_nbf * mc_num) 
@@ -37,13 +37,13 @@ void Basis::dump(const std::string& fname) {
     os << contraction_coef[i] << "\t" << contraction_exp[i] << "\n";
   }
   for (int i = 0; i < nShells; ++i) {
-    os << meta_data[i].ao_begin << "\t";
-    os << meta_data[i].contraction_begin << "\t";
-    os << meta_data[i].contraction_end << "\t";
-    os << meta_data[i].angular_momentum << "\t";
-    os << meta_data[i].pos[0] << "\t";
-    os << meta_data[i].pos[1] << "\t";
-    os << meta_data[i].pos[2] << "\n";
+    os << atomic_orbitals[i].ao_index << "\t";
+    os << atomic_orbitals[i].contraction_begin << "\t";
+    os << atomic_orbitals[i].contraction_end << "\t";
+    os << atomic_orbitals[i].angular_momentum << "\t";
+    os << atomic_orbitals[i].pos[0] << "\t";
+    os << atomic_orbitals[i].pos[1] << "\t";
+    os << atomic_orbitals[i].pos[2] << "\n";
   }
   os << "-----------------------------------------------------------------------------------------------------------\n\n";
 }

@@ -19,15 +19,14 @@ void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& 
 }
 
 void Basis::build_contractions(const std::vector<std::array<double, 3>> &pos) {
-  std::array<double, 3> dr{};
   std::fill(contraction_amplitudes.begin(), contraction_amplitudes.end(), 0.0);
-  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
-    for (int shell = 0; shell < nShells; shell++, index++) {
-      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
-      double r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-      for (auto i = meta_data[shell].contraction_begin; i < meta_data[shell].contraction_end; i++) {
-        contraction_amplitudes[index] += exp(-contraction_exp[i] * r2) * contraction_coef[i];
-      }
+  for (int walker = 0; walker < pos.size(); walker++) {
+    for (auto &atomic_orbital : atomic_orbitals) {
+      atomic_orbital.evaluate_contraction(
+          pos[walker],
+          contraction_amplitudes.data() + atomic_orbitals.size() * walker,
+          contraction_exp.data(),
+          contraction_coef.data());
     }
   }
 }
@@ -37,10 +36,10 @@ void Basis::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
 
-      auto angular_momentum = meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + meta_data[shell].ao_begin;
+      auto angular_momentum = atomic_orbitals[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + atomic_orbitals[shell].ao_index;
       auto ao_amplitude = &ao_amplitudes[ao_offset];
-      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
+      std::transform(pos[walker].begin(), pos[walker].end(), atomic_orbitals[shell].pos, dr.begin(), std::minus<>());
 
       if (lspherical) {
         switch (angular_momentum) {

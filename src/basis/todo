@@ -6,16 +6,6 @@ Basis:
   contraction_coef -> contraction_coeficien
   ...rest of arrays
 
-SHELL
-  refactor into angular momentum class
-  refactor into files
-
-basis_parser
-  more normalization cose to atom basis
-  
-atom_basis
-  move normalization code to here
-
 basismetadata
   rename to atomic orbital
   refactor compuation of contraction into this class

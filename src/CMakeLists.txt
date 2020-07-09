@@ -22,6 +22,7 @@ set(source
   basis/dummy_movec_parser.cpp
   basis/shell.cpp
   basis/shell.h
+  basis/atomic_orbital.cpp
   basis/atomic_orbital.h
   basis/basis_parser.cpp
   basis/basis_parser.h
