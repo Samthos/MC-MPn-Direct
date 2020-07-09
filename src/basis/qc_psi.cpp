@@ -12,7 +12,7 @@ void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& 
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, qc_nbf,
+      ao_amplitudes.data(), qc_nbf,
       psi.movecs.data(), qc_nbf,
       0.0,
       psi.psi.data(), psi.lda);
@@ -20,13 +20,13 @@ void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& 
 
 void Basis::build_contractions(const std::vector<std::array<double, 3>> &pos) {
   std::array<double, 3> dr{};
-  std::fill(h_basis.contraction_amplitudes, h_basis.contraction_amplitudes + nShells * pos.size(), 0.0);
+  std::fill(contraction_amplitudes.begin(), contraction_amplitudes.end(), 0.0);
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
       double r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-      for (auto i = h_basis.meta_data[shell].contraction_begin; i < h_basis.meta_data[shell].contraction_end; i++) {
-        h_basis.contraction_amplitudes[index] += exp(-h_basis.contraction_exp[i] * r2) * h_basis.contraction_coef[i];
+      for (auto i = meta_data[shell].contraction_begin; i < meta_data[shell].contraction_end; i++) {
+        contraction_amplitudes[index] += exp(-contraction_exp[i] * r2) * contraction_coef[i];
       }
     }
   }
@@ -37,26 +37,26 @@ void Basis::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
 
-      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
-      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+      auto angular_momentum = meta_data[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + meta_data[shell].ao_begin;
+      auto ao_amplitude = &ao_amplitudes[ao_offset];
+      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
 
       if (lspherical) {
         switch (angular_momentum) {
-          case 0: evaluate_s(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_spherical_d(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_spherical_f(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_spherical_g(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 0: evaluate_s(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_spherical_d(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_spherical_f(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_spherical_g(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
         }
       } else {
         switch (angular_momentum) {
-          case 0: evaluate_s(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_cartesian_d(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_cartesian_f(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_cartesian_g(ao_amplitude, h_basis.contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 0: evaluate_s(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1] ,dr[2]); break;
+          case 1: evaluate_p(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 2: evaluate_cartesian_d(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 3: evaluate_cartesian_f(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
+          case 4: evaluate_cartesian_g(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
         }
       }
     }

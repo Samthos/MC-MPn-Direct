@@ -101,10 +101,6 @@ class Basis {
    */
  public:
   Basis(IOPs&, const Basis_Parser&);
-  ~Basis();
-  Basis(const Basis&);
-  Basis &operator=(Basis);
-  friend void swap(Basis&, Basis&);
 
   // get psi vals
   void host_psi_get(Wavefunction&, std::vector<std::array<double, 3>>&);
@@ -122,7 +118,13 @@ class Basis {
   int nPrimatives;  // number of primitives
   bool lspherical;  // true if spherical
 
-  BasisData h_basis, d_basis;
+  std::vector<double> contraction_exp;                    // dense vector of contraction exponents. Size if total number of primatives
+  std::vector<double> contraction_coef;                   // dense vector of contraction coeficients. Size if total number of primatives
+  std::vector<BasisMetaData> meta_data;
+
+  std::vector<double> contraction_amplitudes;             // stores contraction amplitudes
+  std::vector<double> contraction_amplitudes_derivative;  // stores contraction amplitudes
+  std::vector<double> ao_amplitudes;                      // stores AO amplidutes
 
  private:
   void read(IOPs &, MPI_info &, Molec &);

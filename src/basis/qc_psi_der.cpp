@@ -7,35 +7,35 @@
 #include "qc_basis.h"
 #include "../blas_calls.h"
 
-void Basis::host_psi_get_dx( Wavefunction& psi_dx, std::vector<std::array<double, 3>>& pos) {
+void Basis::host_psi_get_dx(Wavefunction& psi_dx, std::vector<std::array<double, 3>>& pos) {
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi_dx.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, qc_nbf,
+      ao_amplitudes.data(), qc_nbf,
       psi_dx.movecs.data(), qc_nbf,
       0.0,
       psi_dx.psi.data(), psi_dx.lda);
 }
-void Basis::host_psi_get_dy( Wavefunction& psi_dy, std::vector<std::array<double, 3>>& pos) {
+void Basis::host_psi_get_dy(Wavefunction& psi_dy, std::vector<std::array<double, 3>>& pos) {
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi_dy.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, qc_nbf,
+      ao_amplitudes.data(), qc_nbf,
       psi_dy.movecs.data(), qc_nbf,
       0.0,
       psi_dy.psi.data(), psi_dy.lda);
 }
-void Basis::host_psi_get_dz( Wavefunction& psi_dz, std::vector<std::array<double, 3>>& pos) {
+void Basis::host_psi_get_dz(Wavefunction& psi_dz, std::vector<std::array<double, 3>>& pos) {
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi_dz.lda, qc_nbf,
       1.0,
-      h_basis.ao_amplitudes, qc_nbf,
+      ao_amplitudes.data(), qc_nbf,
       psi_dz.movecs.data(), qc_nbf,
       0.0,
       psi_dz.psi.data(), psi_dz.lda);
@@ -43,17 +43,17 @@ void Basis::host_psi_get_dz( Wavefunction& psi_dz, std::vector<std::array<double
 
 void Basis::build_contractions_with_derivatives(const std::vector<std::array<double, 3>>& pos) {
   std::array<double, 3> dr{};
-  std::fill(h_basis.contraction_amplitudes, h_basis.contraction_amplitudes + nShells * pos.size(), 0.0);
-  std::fill(h_basis.contraction_amplitudes_derivative, h_basis.contraction_amplitudes_derivative + nShells * pos.size(), 0.0);
+  std::fill(contraction_amplitudes.begin(), contraction_amplitudes.end(), 0.0);
+  std::fill(contraction_amplitudes_derivative.begin(), contraction_amplitudes_derivative.end(), 0.0);
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
       double r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-      for (auto i = h_basis.meta_data[shell].contraction_begin; i < h_basis.meta_data[shell].contraction_end; i++) {
-        double alpha = h_basis.contraction_exp[i];
-        double exponential = exp(-alpha * r2) * h_basis.contraction_coef[i];
-        h_basis.contraction_amplitudes[index] += exponential;
-        h_basis.contraction_amplitudes_derivative[index] -= 2.0 * alpha * exponential;
+      for (auto i = meta_data[shell].contraction_begin; i < meta_data[shell].contraction_end; i++) {
+        double alpha = contraction_exp[i];
+        double exponential = exp(-alpha * r2) * contraction_coef[i];
+        contraction_amplitudes[index] += exponential;
+        contraction_amplitudes_derivative[index] -= 2.0 * alpha * exponential;
       }
     }
   }
@@ -63,12 +63,12 @@ void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos
   std::array<double, 3> dr;
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
-      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
-      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
-      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
-      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+      auto angular_momentum = meta_data[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + meta_data[shell].ao_begin;
+      auto ao_amplitude = &ao_amplitudes[ao_offset];
+      auto contraction_amplitude = contraction_amplitudes[index];
+      auto contraction_amplitude_derivative = contraction_amplitudes_derivative[index];
+      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
 
       if (lspherical) {
         switch (angular_momentum) {
@@ -95,12 +95,12 @@ void Basis::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
 
-      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
-      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
-      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
-      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+      auto angular_momentum = meta_data[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + meta_data[shell].ao_begin;
+      auto ao_amplitude = &ao_amplitudes[ao_offset];
+      auto contraction_amplitude = contraction_amplitudes[index];
+      auto contraction_amplitude_derivative = contraction_amplitudes_derivative[index];
+      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
 
       if (lspherical) {
         switch (angular_momentum) {
@@ -127,12 +127,12 @@ void Basis::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
 
-      auto angular_momentum = h_basis.meta_data[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + h_basis.meta_data[shell].ao_begin;
-      auto ao_amplitude = &h_basis.ao_amplitudes[ao_offset];
-      auto contraction_amplitude = h_basis.contraction_amplitudes[index];
-      auto contraction_amplitude_derivative = h_basis.contraction_amplitudes_derivative[index];
-      std::transform(pos[walker].begin(), pos[walker].end(), h_basis.meta_data[shell].pos, dr.begin(), std::minus<>());
+      auto angular_momentum = meta_data[shell].angular_momentum;
+      auto ao_offset = walker * qc_nbf + meta_data[shell].ao_begin;
+      auto ao_amplitude = &ao_amplitudes[ao_offset];
+      auto contraction_amplitude = contraction_amplitudes[index];
+      auto contraction_amplitude_derivative = contraction_amplitudes_derivative[index];
+      std::transform(pos[walker].begin(), pos[walker].end(), meta_data[shell].pos, dr.begin(), std::minus<>());
 
       if (lspherical) {
         switch (angular_momentum) {
