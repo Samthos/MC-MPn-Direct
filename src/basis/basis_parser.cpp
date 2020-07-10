@@ -111,56 +111,56 @@ void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
 
   contraction_coeficients.resize(n_primatives);
   contraction_exponents.resize(n_primatives);
-  atomic_orbitals.resize(n_shells);
 
   if (mpi_info.sys_master) {
     uint contraction= 0;
+    int contraction_begin = 0;
+    int contraction_end = 0;
+    int contraction_index = 0;
+    int ao_index = 0;
+
     for (auto& atom : molec.atoms) {
       for (auto& shell : atomBasis[atom.znum].shell) {
         for (uint shell_contraction = 0; shell_contraction < shell.n_contractions(); shell_contraction++) {
-          // set start and stop
-          if (contraction == 0) {
-            atomic_orbitals[contraction].contraction_begin = 0;
-            atomic_orbitals[contraction].contraction_index = 0;
-          } else {
-            atomic_orbitals[contraction].contraction_begin = atomic_orbitals[contraction - 1].contraction_end;
-            atomic_orbitals[contraction].contraction_index = atomic_orbitals[contraction - 1].contraction_index + 1;
-          }
-          atomic_orbitals[contraction].contraction_end = atomic_orbitals[contraction].contraction_begin + shell.contracted_gaussian.size();
-
-          // set atom
-          std::copy(atom.pos, atom.pos + 3, atomic_orbitals[contraction].pos);
+          // update contraction end
+          contraction_end = contraction_begin + shell.contracted_gaussian.size();
 
           // set angular momentum
           if (shell.shell_type == SHELL::SP) {
             if (shell_contraction == 0) {
-              atomic_orbitals[contraction].angular_momentum = 0;
+              shell_type = SHELL::S;
             } else {
-              atomic_orbitals[contraction].angular_momentum = 1;
+              shell_type = SHELL::P;
             }
           } else {
-            atomic_orbitals[contraction].angular_momentum = shell.shell_type;
-          }
-
-          // set isgs
-          if (contraction == 0) {
-            atomic_orbitals[contraction].ao_index = 0;
-          } else {
-            atomic_orbitals[contraction].ao_index = atomic_orbitals[contraction - 1].ao_index
-                + SHELL::number_of_polynomials(atomic_orbitals[contraction - 1].angular_momentum, is_spherical);
+            shell_type = shell.shell_type;
           }
 
           // copy alpha and norm
           for (auto kt = shell.contracted_gaussian.begin(); kt != shell.contracted_gaussian.end(); kt++) {
-            auto k = std::distance(shell.contracted_gaussian.begin(), kt) + atomic_orbitals[contraction].contraction_begin;
+            auto k = std::distance(shell.contracted_gaussian.begin(), kt) + contraction_begin;
             contraction_exponents[k] = kt->first;
             contraction_coeficients[k] = kt->second[shell_contraction];
           }
+
+          atomic_orbitals.emplace_back(
+            contraction_begin,
+            contraction_end,
+            contraction_index,
+            ao_index,
+            static_cast<int>(shell_type),
+            is_spherical,
+            atom.pos);
+
+          contraction_begin = contraction_end;
+          contraction_index++;
+          ao_index += SHELL::number_of_polynomials(shell_type, is_spherical);
           contraction++;
         }
       }
     }
   }
+  atomic_orbitals.resize(n_shells);
 
   MPI_info::barrier();
   MPI_info::broadcast_vector_double(contraction_exponents);

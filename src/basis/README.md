@@ -30,9 +30,19 @@ There are currently two movec parser implements.
 Stores the set of molecular orbitals, molecular orbital coefficient and some meta relevant meta data. Its honestly a pretty light weight class.
 
 # TODO
+## General
+ - Finish gpu implementation
+ - NO MORE qc_blag file names
+ - Turn into a library
+ - style guide
+ - import optimization
+ - Unify variable names
+ - Less terrible names for classes like shell, atomBasis
+
 ## Basis
  - rename to atomic_basis
  - shouldn't know that wavefunction exist.
  - contraction_exp -> contraction_exponent
  - contraction_coef -> contraction_coeficien
  - ...rest of arrays
+
