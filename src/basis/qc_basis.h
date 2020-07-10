@@ -81,14 +81,6 @@ namespace Cartesian_Poly {
   };
 }
 
-struct BasisData {
-  double *contraction_exp;                    // dense vector of contraction exponents. Size if total number of primatives
-  double *contraction_coef;                   // dense vector of contraction coeficients. Size if total number of primatives
-  double *ao_amplitudes;                      // stores AO amplidutes
-  double *contraction_amplitudes;             // stores contraction amplitudes
-  double *contraction_amplitudes_derivative;  // stores contraction amplitudes
-};
-
 class Basis {
   /*
    * Engine to compute molecular orbitals assuming
@@ -126,21 +118,10 @@ class Basis {
   std::vector<double> ao_amplitudes;                      // stores AO amplidutes
 
  private:
-  void read(IOPs &, MPI_info &, Molec &);
-  void nw_vectors_read(IOPs &, MPI_info &, Molec &);
-
   void build_ao_amplitudes(const std::vector<std::array<double, 3>>&);
   void build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>&);
   void build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>&);
   void build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>&);
-
-  static void normalize_atom_basis(std::vector<AtomBasis>&);
-  static void normalize_sp(SHELL::Shell& shell);
-  static void normalize_s(SHELL::Shell& shell);
-  static void normalize_p(SHELL::Shell& shell);
-  static void normalize_d(SHELL::Shell& shell);
-  static void normalize_f(SHELL::Shell& shell);
-  static void normalize_g(SHELL::Shell& shell);
 
   static void evaluate_spherical_d_shell(double*, double*);
   static void evaluate_spherical_f_shell(double*, double*);
