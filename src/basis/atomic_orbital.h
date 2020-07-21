@@ -32,7 +32,11 @@ class Atomic_Orbital {
 
   HOSTDEVICE void evaluate_contraction(const std::array<double, 3>&, double*, double*, double*);
   HOSTDEVICE void evaluate_contraction_with_derivative(const std::array<double, 3>&, double*, double*, double*, double*);
+
   HOSTDEVICE void evaluate_ao(double*, double*, const std::array<double, 3>&);
+  HOSTDEVICE void evaluate_ao_dx(double*, double*, double*, const std::array<double, 3>&);
+  HOSTDEVICE void evaluate_ao_dy(double*, double*, double*, const std::array<double, 3>&);
+  HOSTDEVICE void evaluate_ao_dz(double*, double*, double*, const std::array<double, 3>&);
 
  private:
 

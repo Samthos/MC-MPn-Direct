@@ -6,6 +6,9 @@
 #include <sstream>
 #include <string>
 
+#include "cblas.h"
+#include "../blas_calls.h"
+
 #include "../qc_mpi.h"
 #include "../atom_tag_parser.h"
 #include "qc_basis.h"
@@ -25,6 +28,127 @@ Basis::Basis(IOPs &iops, const Basis_Parser& basis_parser) :
   ao_amplitudes(qc_nbf * mc_num) 
 { }
 
+void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& pos) {
+  build_ao_amplitudes(pos);
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+      pos.size(), psi.lda, qc_nbf,
+      1.0,
+      ao_amplitudes.data(), qc_nbf,
+      psi.movecs.data(), qc_nbf,
+      0.0,
+      psi.psi.data(), psi.lda);
+}
+
+void Basis::host_psi_get_dx(Wavefunction& psi_dx, std::vector<std::array<double, 3>>& pos) {
+  // d/dx of wavefunction 
+  build_ao_amplitudes_dx(pos);
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+      pos.size(), psi_dx.lda, qc_nbf,
+      1.0,
+      ao_amplitudes.data(), qc_nbf,
+      psi_dx.movecs.data(), qc_nbf,
+      0.0,
+      psi_dx.psi.data(), psi_dx.lda);
+}
+
+void Basis::host_psi_get_dy(Wavefunction& psi_dy, std::vector<std::array<double, 3>>& pos) {
+  // d/dy of wavefunction 
+  build_ao_amplitudes_dy(pos);
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+      pos.size(), psi_dy.lda, qc_nbf,
+      1.0,
+      ao_amplitudes.data(), qc_nbf,
+      psi_dy.movecs.data(), qc_nbf,
+      0.0,
+      psi_dy.psi.data(), psi_dy.lda);
+}
+
+void Basis::host_psi_get_dz(Wavefunction& psi_dz, std::vector<std::array<double, 3>>& pos) {
+  // d/dz of wavefunction 
+  build_ao_amplitudes_dz(pos);
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+      pos.size(), psi_dz.lda, qc_nbf,
+      1.0,
+      ao_amplitudes.data(), qc_nbf,
+      psi_dz.movecs.data(), qc_nbf,
+      0.0,
+      psi_dz.psi.data(), psi_dz.lda);
+}
+
+void Basis::build_contractions(const std::vector<std::array<double, 3>> &pos) {
+  std::fill(contraction_amplitudes.begin(), contraction_amplitudes.end(), 0.0);
+  for (int walker = 0; walker < pos.size(); walker++) {
+    for (auto &atomic_orbital : atomic_orbitals) {
+      atomic_orbital.evaluate_contraction(
+          pos[walker],
+          contraction_amplitudes.data() + atomic_orbitals.size() * walker,
+          contraction_exp.data(),
+          contraction_coef.data());
+    }
+  }
+}
+
+void Basis::build_contractions_with_derivatives(const std::vector<std::array<double, 3>>& pos) {
+  std::fill(contraction_amplitudes.begin(), contraction_amplitudes.end(), 0.0);
+  std::fill(contraction_amplitudes_derivative.begin(), contraction_amplitudes_derivative.end(), 0.0);
+  for (int walker = 0; walker < pos.size(); walker++) {
+    for (auto &atomic_orbital : atomic_orbitals) {
+      atomic_orbital.evaluate_contraction_with_derivative(
+          pos[walker],
+          contraction_amplitudes.data() + atomic_orbitals.size() * walker,
+          contraction_amplitudes_derivative.data() + atomic_orbitals.size() * walker,
+          contraction_exp.data(),
+          contraction_coef.data());
+    }
+  }
+}
+
+void Basis::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+        atomic_orbitals[shell].evaluate_ao(
+            ao_amplitudes.data() + walker * qc_nbf,
+            contraction_amplitudes.data() + walker * nShells,
+            pos[walker]);
+    }
+  }
+}
+
+void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos){
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+        atomic_orbitals[shell].evaluate_ao_dx(
+            ao_amplitudes.data() + walker * qc_nbf,
+            contraction_amplitudes.data() + walker * nShells,
+            contraction_amplitudes_derivative.data() + walker * nShells,
+            pos[walker]);
+    }
+  }
+}
+
+void Basis::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos){
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+        atomic_orbitals[shell].evaluate_ao_dy(
+            ao_amplitudes.data() + walker * qc_nbf,
+            contraction_amplitudes.data() + walker * nShells,
+            contraction_amplitudes_derivative.data() + walker * nShells,
+            pos[walker]);
+    }
+  }
+}
+
+void Basis::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos){
+  for (int walker = 0, index = 0; walker < pos.size(); walker++) {
+    for (int shell = 0; shell < nShells; shell++, index++) {
+        atomic_orbitals[shell].evaluate_ao_dz(
+            ao_amplitudes.data() + walker * qc_nbf,
+            contraction_amplitudes.data() + walker * nShells,
+            contraction_amplitudes_derivative.data() + walker * nShells,
+            pos[walker]);
+    }
+  }
+}
 
 void Basis::dump(const std::string& fname) {
   std::ofstream os(fname);
