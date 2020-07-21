@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../qc_input.h"
-#include "../basis/qc_basis.h"
+#include "../basis/basis.h"
 #include "tau.h"
 #include "electron_pair_list.h"
 #include "electron_list.h"

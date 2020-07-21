@@ -14,7 +14,7 @@
 #include "qc_mpi.h"
 #include "qc_input.h"
 #include "qc_geom.h"
-#include "basis/qc_basis.h"
+#include "basis/basis.h"
 #include "weight_function.h"
 
 #include "control_variate.h"

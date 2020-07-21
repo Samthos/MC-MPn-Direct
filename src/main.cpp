@@ -3,7 +3,7 @@
 #endif
 
 #include "weight_function.h"
-#include "basis/qc_basis.h"
+#include "basis/basis.h"
 #include "qc_monte.h"
 
 int main(int argc, char* argv[]) {

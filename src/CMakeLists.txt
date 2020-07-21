@@ -41,10 +41,8 @@ set(source
   basis/movec_parser.h
   basis/nwchem_movec_parser.cpp
   basis/nwchem_movec_parser.h
-  basis/qc_basis.cpp
-  basis/qc_basis.h
-  basis/qc_psi.cpp 
-  basis/qc_psi_der.cpp
+  basis/basis.cpp
+  basis/basis.h
   basis/shell.cpp
   basis/shell.h
   basis/wavefunction.cpp 

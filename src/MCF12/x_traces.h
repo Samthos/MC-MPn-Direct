@@ -2,7 +2,7 @@
 #define X_TRACES_H_
 #include <unordered_map>
 
-#include "../basis/qc_basis.h"
+#include "../basis/basis.h"
 #include "electron_pair_list.h"
 #include "electron_list.h"
 

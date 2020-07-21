@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "nwchem_movec_parser.h"
-#include "qc_basis.h"
+#include "basis.h"
 
 NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source) {
   if (mpi_info.sys_master) {

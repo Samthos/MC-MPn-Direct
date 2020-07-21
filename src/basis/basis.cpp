@@ -11,7 +11,7 @@
 
 #include "../qc_mpi.h"
 #include "../atom_tag_parser.h"
-#include "qc_basis.h"
+#include "basis.h"
 
 
 Basis::Basis(IOPs &iops, const Basis_Parser& basis_parser) :

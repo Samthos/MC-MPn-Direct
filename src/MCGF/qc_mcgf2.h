@@ -6,7 +6,7 @@
 
 #include "qc_mcgf.h"
 #include "../qc_input.h"
-#include "../basis/qc_basis.h"
+#include "../basis/basis.h"
 #include "electron_pair_list.h"
 #include "tau.h"
 

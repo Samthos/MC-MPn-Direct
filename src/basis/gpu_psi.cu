@@ -6,7 +6,7 @@
 #include "cublas_v2.h"
 
 #include "../cublasStatus_t_getErrorString.h"
-#include "qc_basis.h"
+#include "basis.h"
 
 void Basis::gpu_alloc(int mc_pair_num, Molec &molec) {
   cudaError_t_Assert(cudaMalloc((void **)&d_basis.ao_amplitudes, sizeof(double) * nw_nbf * mc_pair_num * 2), __FILE__, __LINE__);
