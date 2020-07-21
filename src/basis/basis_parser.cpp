@@ -64,7 +64,15 @@ void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
         } else if (currentBasis > 0) {
           if (str.at(0) >= 65 && str.at(0) <= 90)  { // start of a new shell
             if (shell_type != SHELL::NA) {
-              atomBasis[currentBasis].shell.emplace_back(shell_type, contracted_gaussian);
+              try {
+                atomBasis[currentBasis].shell.emplace_back(shell_type, contracted_gaussian);
+              } catch (SHELL::Shell_Exception &e) {
+                std::cerr << e.what() << "\n";
+                std::cerr << currentBasis << "\n";
+                std::cerr << atomName << "\n";
+                std::cerr.flush();
+                throw e;
+              }
             }
             ss >> atomName >> shell_type_string;
 

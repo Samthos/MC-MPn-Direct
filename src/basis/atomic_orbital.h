@@ -1,9 +1,11 @@
 #ifndef ATOMIC_ORBITAL_H_
 #define ATOMIC_ORBITAL_H_
 
+
 #include <array>
 
 #ifdef HAVE_CUDA
+#include "cuda_runtime.h"
 #define HOSTDEVICE __host__ __device__
 #else 
 #define HOSTDEVICE
@@ -30,7 +32,7 @@ class Atomic_Orbital {
 
   HOSTDEVICE void evaluate_contraction(const std::array<double, 3>&, double*, double*, double*);
   HOSTDEVICE void evaluate_contraction_with_derivative(const std::array<double, 3>&, double*, double*, double*, double*);
-  HOSTDEVICE void evaulate_ao(double*, double*, const std::array<double, 3>&);
+  HOSTDEVICE void evaluate_ao(double*, double*, const std::array<double, 3>&);
 
  private:
 

@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "cartesian_poly.h"
+
 #ifdef HAVE_CUDA
 #define HOSTDEVICE __host__ __device__
 #else 
@@ -29,7 +31,7 @@ Atomic_Orbital::Atomic_Orbital(int contraction_begin_in,
 }
 
 // 
-// Functions to evaulation contractions
+// Functions to evaluation contractions
 //
 HOSTDEVICE 
 void Atomic_Orbital::evaluate_contraction(const std::array<double, 3>& walker_pos,
@@ -67,8 +69,7 @@ double Atomic_Orbital::calculate_r2(const std::array<double, 3>& walker_pos) {
 }
 
 HOSTDEVICE
-void Atomic_Orbital::evaulate_ao(double* ao_amplitudes, double* contraction_amplitudes, const std::array<double, 3>& walker_pos) {
-  contraction_amplitudes += contraction_index;
+void Atomic_Orbital::evaluate_ao(double* ao_amplitudes, double* contraction_amplitudes, const std::array<double, 3>& walker_pos) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -77,18 +78,18 @@ void Atomic_Orbital::evaulate_ao(double* ao_amplitudes, double* contraction_ampl
   if (is_spherical) {
     switch (angular_momentum) {
       case 0: evaluate_s(ao_amplitudes, contraction_amplitudes[contraction_index], x, y ,z); break;
-//     case 1: evaluate_p(ao_amplitude, contraction_amplitudes, x, y, z); break;
-//     case 2: evaluate_spherical_d(ao_amplitude, contraction_amplitudes, x, y, z); break;
-//     case 3: evaluate_spherical_f(ao_amplitude, contraction_amplitudes, x, y, z); break;
-//     case 4: evaluate_spherical_g(ao_amplitude, contraction_amplitudes, x, y, z); break;
+      case 1: evaluate_p(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
+      case 2: evaluate_spherical_d(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
+      case 3: evaluate_spherical_f(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
+      case 4: evaluate_spherical_g(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
     }
   } else {
     switch (angular_momentum) {
       case 0: evaluate_s(ao_amplitudes, contraction_amplitudes[contraction_index], x, y ,z); break;
-//     case 1: evaluate_p(ao_amplitude, contraction_amplitudes, x, y, z); break;
-//     case 2: evaluate_cartesian_d(ao_amplitude, contraction_amplitudes, x, y, z); break;
-//     case 3: evaluate_cartesian_f(ao_amplitude, contraction_amplitudes, x, y, z); break;
-//     case 4: evaluate_cartesian_g(ao_amplitude, contraction_amplitudes, x, y, z); break;
+      case 1: evaluate_p(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
+      case 2: evaluate_cartesian_d(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
+      case 3: evaluate_cartesian_f(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
+      case 4: evaluate_cartesian_g(ao_amplitudes, contraction_amplitudes[contraction_index], x, y, z); break;
     }
   }
 }
@@ -101,7 +102,6 @@ void Atomic_Orbital::evaluate_s(double *ao_amplitudes, const double& rad, const 
   ao_amplitudes[0] = rad;
 }
 
-/*
 HOSTDEVICE
 void Atomic_Orbital::evaluate_p(double *ao_amplitudes, const double& rad, const double& x, const double& y, const double& z) {
   using namespace Cartesian_Poly;
@@ -273,5 +273,4 @@ void Atomic_Orbital::evaluate_spherical_g(double *ao_amplitudes, const double& r
   evaluate_cartesian_g(&ang[0], rad, x, y, z);
   evaluate_spherical_g_shell(ao_amplitudes, &ang[0]);
 }
-*/
 #undef HOSTDEVICE

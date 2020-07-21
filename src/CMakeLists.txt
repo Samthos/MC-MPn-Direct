@@ -1,39 +1,13 @@
 set(source
+  atom_tag_parser.cpp
+  atom_tag_parser.h
   blas_calls.cpp
   blas_calls.h
-  electron_generators/create_electron_pair_list.cpp
-  electron_generators/electron_pair_list.cpp
-  electron_generators/electron_pair_list.h
-  electron_generators/direct_electron_pair_list.cpp
-  electron_generators/direct_electron_pair_list.h
-  electron_generators/metropolis_electron_pair_list.cpp
-  electron_generators/metropolis_electron_pair_list.h
-  electron_generators/electron_list.cpp
-  electron_generators/electron_list.h
+  control_variate.cpp
+  control_variate.h
+  cpu_qc_monte.cpp
   main.cpp
-  weight_function.cpp
-  weight_function.h
-  basis/movec_parser.h
-  basis/movec_parser.cpp
-  basis/create_movec_parser.cpp
-  basis/nwchem_movec_parser.h
-  basis/nwchem_movec_parser.cpp
-  basis/dummy_movec_parser.h
-  basis/dummy_movec_parser.cpp
-  basis/shell.cpp
-  basis/shell.h
-  basis/atomic_orbital.cpp
-  basis/atomic_orbital.h
-  basis/basis_parser.cpp
-  basis/basis_parser.h
-  basis/qc_basis.cpp
-  basis/qc_basis.h
-  basis/qc_psi.cpp 
-  basis/qc_psi_der.cpp
-  basis/wavefunction.cpp 
-  basis/wavefunction.h
-  atom_tag_parser.h
-  atom_tag_parser.cpp
+  ovps_set.h
   qc_geom.cpp
   qc_geom.h
   qc_input.cpp
@@ -44,10 +18,47 @@ set(source
   qc_ovps.h
   qc_random.cpp
   qc_random.h
-  control_variate.h
-  control_variate.cpp
   timer.h
-  ovps_set.h
+  weight_function.cpp
+  weight_function.h
+  electron_generators/create_electron_pair_list.cpp
+  electron_generators/direct_electron_pair_list.cpp
+  electron_generators/direct_electron_pair_list.h
+  electron_generators/electron_list.cpp
+  electron_generators/electron_list.h
+  electron_generators/electron_pair_list.cpp
+  electron_generators/electron_pair_list.h
+  electron_generators/metropolis_electron_pair_list.cpp
+  electron_generators/metropolis_electron_pair_list.h
+  basis/atomic_orbital.h
+  basis/basis_parser.cpp
+  basis/basis_parser.h
+  basis/cartesian_poly.h
+  basis/create_movec_parser.cpp
+  basis/dummy_movec_parser.cpp
+  basis/dummy_movec_parser.h
+  basis/movec_parser.cpp
+  basis/movec_parser.h
+  basis/nwchem_movec_parser.cpp
+  basis/nwchem_movec_parser.h
+  basis/qc_basis.cpp
+  basis/qc_basis.h
+  basis/qc_psi.cpp 
+  basis/qc_psi_der.cpp
+  basis/shell.cpp
+  basis/shell.h
+  basis/wavefunction.cpp 
+  basis/wavefunction.h
+  MCF12/F12_Traces.cpp
+  MCF12/F12_Traces.h
+  MCF12/correlation_factors.cpp
+  MCF12/correlation_factors.h
+  MCF12/gf2_f12.cpp
+  MCF12/gf2_f12.h
+  MCF12/mp2_f12.cpp
+  MCF12/mp2_f12.h
+  MCF12/x_traces.cpp
+  MCF12/x_traces.h
   MCGF/gf3_core_c.h
   MCGF/gf3_core_m_1.h
   MCGF/gf3_core_m_12.h
@@ -55,45 +66,42 @@ set(source
   MCGF/gf3_core_p_1.h
   MCGF/gf3_core_p_12.h
   MCGF/gf3_core_p_2.h
+  MCGF/gf_full_arrays.cpp
+  MCGF/gf_full_arrays.h
   MCGF/gf_stats.cpp
   MCGF/qc_gfFullStatisticsHost.cpp
   MCGF/qc_mcgf.cpp
-  MCGF/gf_full_arrays.h
-  MCGF/gf_full_arrays.cpp
-  MCMP/qc_mcmp.cpp
-  MCMP/mcmp.h
-  MCMP/qc_mcmp2.h
-  MCMP/qc_mcmp2.cpp
-  MCMP/qc_mcmp3.h
-  MCMP/qc_mcmp3.cpp
-  MCMP/qc_mcmp4.h
-  MCMP/qc_mcmp4.cpp
-  MCF12/x_traces.cpp
-  MCF12/x_traces.h
-  MCF12/F12_Traces.cpp
-  MCF12/F12_Traces.h
-  MCF12/correlation_factors.cpp
-  MCF12/correlation_factors.h
-  MCF12/mp2_f12.cpp
-  MCF12/mp2_f12.h
-  MCF12/gf2_f12.cpp
-  MCF12/gf2_f12.h
   MCGF/qc_gfFullStatistics.cpp
   MCGF/qc_mcgf.h
-  MCGF/qc_mcgf2.h
-  MCGF/qc_mcgf3.h
   MCGF/qc_mcgf2.cpp
+  MCGF/qc_mcgf2.h
   MCGF/qc_mcgf3.cpp 
-  cpu_qc_monte.cpp
-  MCMP/qc_mcmp4_ijk.h MCMP/qc_mcmp4_ijkl.h
-  MCMP/qc_mcmp4_ij.h MCMP/qc_mcmp4_ij_k.h MCMP/qc_mcmp4_ij_l.h
-  MCMP/qc_mcmp4_ik.h MCMP/qc_mcmp4_ik_j.h MCMP/qc_mcmp4_ik_l.h
-  MCMP/qc_mcmp4_il.h MCMP/qc_mcmp4_il_j.h MCMP/qc_mcmp4_il_k.h
+  MCGF/qc_mcgf3.h
+  MCMP/mcmp.h
+  MCMP/qc_mcmp.cpp
+  MCMP/qc_mcmp2.cpp
+  MCMP/qc_mcmp2.h
+  MCMP/qc_mcmp3.cpp
+  MCMP/qc_mcmp3.h
+  MCMP/qc_mcmp4.cpp
+  MCMP/qc_mcmp4.h
+  MCMP/qc_mcmp4_ij.h
+  MCMP/qc_mcmp4_ij_k.h
+  MCMP/qc_mcmp4_ij_l.h
+  MCMP/qc_mcmp4_ijk.h
+  MCMP/qc_mcmp4_ijkl.h
+  MCMP/qc_mcmp4_ik.h
+  MCMP/qc_mcmp4_ik_j.h
+  MCMP/qc_mcmp4_ik_l.h
+  MCMP/qc_mcmp4_il.h
+  MCMP/qc_mcmp4_il_j.h
+  MCMP/qc_mcmp4_il_k.h
 )
 
 add_subdirectory(tau_generators)
 
 set(CPU_SPECIFIC_SOURCES
+  basis/atomic_orbital.cpp
   ovps_set.cpp
   qc_ovps.cpp 
 )
@@ -118,6 +126,7 @@ endif()
 
 if(${CUDA_FOUND})
   set(GPU_SPECIFIC_SOURCES
+    basis/atomic_orbital.cu
     ovps_set.cu
     qc_ovps.cu
   )

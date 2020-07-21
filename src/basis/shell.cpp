@@ -18,9 +18,10 @@ SHELL::Shell_Type SHELL::string_to_shell_type(const std::string& str) {
     return SHELL::G;
   } else if (str == "H") {
     return SHELL::H;
+  } else if (str == "I") {
+    return SHELL::I;
   } else {
-    std::cerr << "When trying to read basis encountered usuported angular momentum of " << str << std::endl;
-    std::exit(EXIT_FAILURE);
+    throw Shell_Exception("When trying to read basis encountered usuported angular momentum of " + str);
   }
 }
 int SHELL::number_of_polynomials(SHELL::Shell_Type shell_type, bool spherical) {
@@ -36,9 +37,9 @@ int SHELL::number_of_polynomials(int shell_type, bool spherical) {
 int SHELL::number_of_spherical_polynomials(SHELL::Shell_Type shell_type) {
   int nbf = 0;
   if (shell_type == SHELL::SP) {
-    nbf += 4;
+    nbf = 4;
   } else {
-    nbf += 2 * shell_type + 1;
+    nbf = 2 * shell_type + 1;
   }
   return nbf;
 }
@@ -47,8 +48,7 @@ int SHELL::number_of_cartesian_polynomials(SHELL::Shell_Type shell_type) {
   if (shell_type == SHELL::SP) {
     nbf = 4;
   } else {
-    int l = shell_type;
-    nbf = (l+1) * (l+2) / 2;
+    nbf = (shell_type+1) * (shell_type+2) / 2;
   }
   return nbf;
 }
@@ -57,13 +57,10 @@ SHELL::Shell::Shell(Shell_Type st, const Contracted_Gaussian& cg) :
   shell_type(st),
   contracted_gaussian(cg)
 {
-  switch (shell_type) {
-    case SP: normalize_sp(); break;
-    case S: normalize_s(); break;
-    case P: normalize_p(); break;
-    case D: normalize_d(); break;
-    case F: normalize_f(); break;
-    case G: normalize_g(); break;
+  if (shell_type != SP) {
+    normalize();
+  } else {
+    normalize_sp();
   }
 }
 
@@ -91,13 +88,56 @@ void SHELL::Shell::normalize_sp() {
     }
   }
 }
-void SHELL::Shell::normalize_s() {
+
+double SHELL::Shell::overlap_s(double a, double b) {
+  constexpr double pi32 = 5.56832799683170;
+  return pi32 / pow(a + b, 1.5);
+}
+double SHELL::Shell::overlap_p(double a, double b) {
+  constexpr double pi32 = 5.56832799683170;
+  return pi32 / (2.0*pow(a + b,2.5));
+}
+double SHELL::Shell::overlap_d(double a, double b) {
+  constexpr double pi32 = 5.56832799683170;
+  return (3.0*pi32)/(4.0*pow(a + b,3.5));
+}
+double SHELL::Shell::overlap_f(double a, double b) {
+  constexpr double pi32 = 5.56832799683170;
+  return (15.0*pi32)/(8.0*pow(a + b,4.5));
+}
+double SHELL::Shell::overlap_g(double a, double b) {
+  constexpr double pi32 = 5.56832799683170;
+  return (105.0*pi32)/(16.0*pow(a + b,5.5));
+}
+double SHELL::Shell::overlap_general(double a, double b) {
+  constexpr double pi32 = 5.56832799683170;
+  int k = shell_type;
+  double x = pow(a + b,-1.5 - k) * pow(2, -2 * k) * pi32;
+  for (int i = k + 1; i <= 2 * k; i++) {
+    x *= i;
+  }
+  return x;
+}
+
+double SHELL::Shell::overlap(double a, double b) {
+  double norm = 0;
+  switch (shell_type) {
+    case S: norm = overlap_s(a, b); break;
+    case P: norm = overlap_p(a, b); break;
+    case D: norm = overlap_d(a, b); break;
+    case F: norm = overlap_f(a, b); break;
+    case G: norm = overlap_g(a, b); break;
+    default: norm = overlap_general(a, b); break;
+  }
+  return norm;
+}
+void SHELL::Shell::normalize() {
   constexpr double pi = 3.141592653589793;
   constexpr double pi32 = 5.56832799683170;
 
   // normalize each gaussion in contraction
   for (auto & kt : contracted_gaussian) {
-    double cnorm = pow(2.0 * kt.first / pi, 0.75);
+    double cnorm = 1 / sqrt(overlap(kt.first, kt.first));
     for (double & lt : kt.second) {
       lt *= cnorm;
     }
@@ -108,7 +148,7 @@ void SHELL::Shell::normalize_s() {
   for (auto first_guassian = contracted_gaussian.begin(); first_guassian != contracted_gaussian.end(); first_guassian++) {
     for (auto second_guassian = first_guassian; second_guassian != contracted_gaussian.end(); second_guassian++) {
       for (auto m = 0; m < norm.size(); m++) {
-        double fac = pow(first_guassian->first + second_guassian->first, 1.5);
+        double fac = 1 / overlap(first_guassian->first, second_guassian->first);
         double dum = first_guassian->second[m] * second_guassian->second[m] / fac;
         if (first_guassian != second_guassian) {
           dum = dum + dum;
@@ -118,78 +158,13 @@ void SHELL::Shell::normalize_s() {
     }
   }
   for (auto& kt : norm) {
-    kt = 1.0 / sqrt(kt * pi32);
+    kt = 1.0 / sqrt(kt);
   }
 
   // apply normalization to each contraction
   for (auto & kt : contracted_gaussian) {
     for (auto l = 0; l < kt.second.size(); l++) {
       kt.second[l] *= norm[l];
-    }
-  }
-}
-void SHELL::Shell::normalize_p() {
-  constexpr double pi = 3.141592653589793;
-  constexpr double pi32 = 5.56832799683170;
-
-  // normalize each guassian
-  for (auto & kt : contracted_gaussian) {
-    double cnorm = sqrt(4.0 * kt.first) * pow(2.0 * kt.first / pi, 0.75);
-    for (double & lt : kt.second) {
-      lt *= cnorm;
-    }
-  }
-
-  std::vector<double> norm(n_contractions(), 0.00);
-  for (auto first_guassian = contracted_gaussian.begin(); first_guassian != contracted_gaussian.end(); first_guassian++) {
-    for (auto second_guassian = first_guassian; second_guassian != contracted_gaussian.end(); second_guassian++) {
-      for (auto m = 0; m < norm.size(); m++) {
-        double fac = pow(first_guassian->first + second_guassian->first, 2.5);
-        double dum = 0.5 * first_guassian->second[m] * second_guassian->second[m] / fac;
-        if (first_guassian != second_guassian) {
-          dum = dum + dum;
-        }
-        norm[m] += dum;
-      }
-    }
-  }
-  for (auto& kt : norm) {
-    kt = 1.0 / sqrt(kt * pi32);
-  }
-
-  for (auto & kt : contracted_gaussian) {
-    for (auto l = 0; l < kt.second.size(); l++) {
-      kt.second[l] *= norm[l];
-    }
-  }
-}
-void SHELL::Shell::normalize_d() {
-  constexpr double pi = 3.141592653589793;
-
-  for (auto & kt : contracted_gaussian) {
-    double cnorm = pow(2.0 * kt.first / pi, 0.75) * 4.0 * kt.first / sqrt(3.0);
-    for (double & lt : kt.second) {
-      lt *= cnorm;
-    }
-  }
-}
-void SHELL::Shell::normalize_f() {
-  constexpr double pi = 3.141592653589793;
-
-  for (auto & kt : contracted_gaussian) {
-    double cnorm = pow(2.0 * kt.first / pi, 0.75) * pow(4.0 * kt.first, 1.5) / sqrt(15.0);
-    for (double & lt : kt.second) {
-      lt *= cnorm;
-    }
-  }
-}
-void SHELL::Shell::normalize_g() {
-  constexpr double pi = 3.141592653589793;
-
-  for (auto & kt : contracted_gaussian) {
-    double cnorm = pow(2.0 * kt.first / pi, 0.75) * pow(4.0 * kt.first,2.0) / sqrt(105.0);
-    for (double &lt : kt.second) {
-      lt *= cnorm;
     }
   }
 }

@@ -35,29 +35,10 @@ void Basis::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
   std::array<double, 3> dr;
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
-
-      auto angular_momentum = atomic_orbitals[shell].angular_momentum;
-      auto ao_offset = walker * qc_nbf + atomic_orbitals[shell].ao_index;
-      auto ao_amplitude = &ao_amplitudes[ao_offset];
-      std::transform(pos[walker].begin(), pos[walker].end(), atomic_orbitals[shell].pos, dr.begin(), std::minus<>());
-
-      if (lspherical) {
-        switch (angular_momentum) {
-          case 0: evaluate_s(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_spherical_d(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_spherical_f(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_spherical_g(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-        }
-      } else {
-        switch (angular_momentum) {
-          case 0: evaluate_s(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1] ,dr[2]); break;
-          case 1: evaluate_p(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 2: evaluate_cartesian_d(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 3: evaluate_cartesian_f(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-          case 4: evaluate_cartesian_g(ao_amplitude, contraction_amplitudes[index], dr[0], dr[1], dr[2]); break;
-        }
-      }
+        atomic_orbitals[shell].evaluate_ao(
+            ao_amplitudes.data() + walker * qc_nbf,
+            contraction_amplitudes.data() + walker * nShells,
+            pos[walker]);
     }
   }
 }
