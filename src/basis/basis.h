@@ -15,16 +15,11 @@
 
 #include "cartesian_poly.h"
 
-template <class Container>
+template <template <class, class> class Container, template <class> class Allocator>
 class Basis {
-  /*
-   * Engine to compute molecular orbitals assuming
-   * WARNING: Be extremely careful with this class. It manages memory explicitly.
-   *
-   * TODO
-   *  -split of implement cartesian orbitals
-   *  -specialize for GPU/CPU usage
-   */
+  typedef Container<double, Allocator<double>> vector_double;
+  typedef Container<Atomic_Orbital, Allocator<Atomic_Orbital>> vector_atomic_orbital;
+
  public:
   Basis(IOPs&, const Basis_Parser&);
 
@@ -44,13 +39,13 @@ class Basis {
   int nPrimatives;  // number of primitives
   bool lspherical;  // true if spherical
 
-  Container contraction_exp;                    // dense vector of contraction exponents. Size if total number of primatives
-  Container contraction_coef;                   // dense vector of contraction coeficients. Size if total number of primatives
-  std::vector<Atomic_Orbital> atomic_orbitals;
+  vector_double contraction_exp;
+  vector_double contraction_coef;
+  vector_double contraction_amplitudes;             // stores contraction amplitudes
+  vector_double contraction_amplitudes_derivative;  // stores contraction amplitudes
+  vector_double ao_amplitudes;                      // stores AO amplidutes
 
-  Container contraction_amplitudes;             // stores contraction amplitudes
-  Container contraction_amplitudes_derivative;  // stores contraction amplitudes
-  Container ao_amplitudes;                      // stores AO amplidutes
+  vector_atomic_orbital atomic_orbitals;
 
  private:
   void build_ao_amplitudes(const std::vector<std::array<double, 3>>&);
@@ -61,5 +56,6 @@ class Basis {
   void dump(const std::string&);
 };
 
-template class Basis<std::vector<double>>;
+template class Basis<std::vector, std::allocator>;
+typedef Basis<std::vector, std::allocator> Basis_Host;
 #endif  // QC_BASIS_H_

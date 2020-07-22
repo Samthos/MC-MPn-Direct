@@ -182,7 +182,7 @@ void MCGF::energy(std::vector<std::vector<double>>& egf,
   }
 }
 
-Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4)
+Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis_Host p4)
   : GF(p1, p2, p3, p4)
 {
   int max_tau_coordinates = 0;

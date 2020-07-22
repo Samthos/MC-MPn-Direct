@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   Molec molec;
   molec.read(mpi_info, iops.sopns[KEYS::GEOM]);
 
-  Basis<std::vector<double>> basis(iops, Basis_Parser(iops, mpi_info, molec));
+  Basis_Host basis(iops, Basis_Parser(iops, mpi_info, molec));
 
   QC_monte<std::vector<double>>* qc_monte;
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
