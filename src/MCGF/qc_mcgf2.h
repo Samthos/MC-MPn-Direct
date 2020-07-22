@@ -12,7 +12,7 @@
 
 class GF2_Functional : public MCGF {
   public:
-   GF2_Functional(IOPs&, Basis&);
+   GF2_Functional(IOPs&);
    void energy_f12(std::vector<std::vector<double>>&, 
        std::unordered_map<int, Wavefunction>&,
        Electron_Pair_List*, Electron_List*);

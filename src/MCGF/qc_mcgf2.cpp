@@ -122,8 +122,8 @@ void GF::mcgf2_local_energy_full_diff(int band) {
               d_ovps.en2m, ivir2 - iocc1);
 }
 
-GF2_Functional::GF2_Functional(IOPs& iops, Basis& basis) :
-  MCGF(iops, basis, 1, "22", false),
+GF2_Functional::GF2_Functional(IOPs& iops) :
+  MCGF(iops, 1, "22", false),
   en2mCore(n_electron_pairs * n_electron_pairs),
   en2pCore(n_electron_pairs * n_electron_pairs)
 {

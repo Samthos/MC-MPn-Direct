@@ -5,8 +5,8 @@
 
 #include "gf2_f12.h"
 
-GF2_F12_V::GF2_F12_V(IOPs& iops, Basis& basis, std::string extension) :
-    MCGF(iops, basis, 0, extension, true),
+GF2_F12_V::GF2_F12_V(IOPs& iops, std::string extension) :
+    MCGF(iops, 0, extension, true),
     traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     x_traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     core_11p(iops.iopns[KEYS::ELECTRON_PAIRS]),
@@ -129,7 +129,7 @@ void GF2_F12_V::energy_no_diff(std::vector<std::vector<double>>&, std::unordered
 
 void GF2_F12_V::energy_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction>&, Electron_Pair_List*, Tau*) {}
 
-GF2_F12_VBX::GF2_F12_VBX(IOPs& iops, Basis& basis) : GF2_F12_V(iops, basis, "f12_VBX"),
+GF2_F12_VBX::GF2_F12_VBX(IOPs& iops) : GF2_F12_V(iops, "f12_VBX"),
     core_11o(iops.iopns[KEYS::ELECTRONS]),
     core_12o(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
     core_d11p(iops.iopns[KEYS::ELECTRON_PAIRS]),

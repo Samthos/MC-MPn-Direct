@@ -162,7 +162,7 @@ int GF3::full_print(int& step, int checkNum) {
   return checkNum;
 }
 
-MCGF::MCGF(IOPs& iops, Basis& basis, int ntc, std::string ext, bool f) :
+MCGF::MCGF(IOPs& iops, int ntc, std::string ext, bool f) :
   n_tau_coordinates(ntc),
   extension(ext),
   is_f12(f),
@@ -182,22 +182,22 @@ void MCGF::energy(std::vector<std::vector<double>>& egf,
   }
 }
 
-Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4)
+Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4)
   : GF(p1, p2, p3, p4)
 {
   int max_tau_coordinates = 0;
 
   if (iops.iopns[KEYS::TASK] & TASK::GF2) {
-    energy_functions.push_back(new GF2_Functional(p2, p4));
+    energy_functions.push_back(new GF2_Functional(p2));
   }
   if (iops.iopns[KEYS::TASK] & TASK::GF3) {
-    energy_functions.push_back(new GF3_Functional(p2, p4));
+    energy_functions.push_back(new GF3_Functional(p2));
   }
   if (iops.iopns[KEYS::TASK] & TASK::GF2_F12_V) {
-    energy_functions.push_back(new GF2_F12_V(p2, p4));
+    energy_functions.push_back(new GF2_F12_V(p2));
   }
   if (iops.iopns[KEYS::TASK] & TASK::GF2_F12_VBX) {
-    energy_functions.push_back(new GF2_F12_VBX(p2, p4));
+    energy_functions.push_back(new GF2_F12_VBX(p2));
   }
 
 

@@ -61,7 +61,7 @@ class GFStats {
 template <class Container>
 class QC_monte {
  public:
-  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3);
+  QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis<Container> p3);
   virtual ~QC_monte();
   virtual void monte_energy() = 0;
 
@@ -69,7 +69,7 @@ class QC_monte {
   MPI_info mpi_info;
   IOPs iops;
   Molec molec;
-  Basis basis;
+  Basis<Container> basis;
   Electron_Pair_GTO_Weight electron_pair_weight;
   Electron_GTO_Weight electron_weight;
 
@@ -97,7 +97,7 @@ template class QC_monte<std::vector<double>>;
 template <class Container>
 class Energy : public QC_monte<std::vector<double>> {
  public:
-  Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  Energy(MPI_info p1, IOPs p2, Molec p3, Basis<Container> p4);
   ~Energy();
 
   void monte_energy() override;
@@ -117,7 +117,7 @@ template class Energy<std::vector<double>>;
 #ifdef HAVE_CUDA
 class GPU_Energy : public Energy<std::vector<double>> {
  public:
-  GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4);
 
  protected:
   OVPS_Device ovps_device;
@@ -126,10 +126,9 @@ class GPU_Energy : public Energy<std::vector<double>> {
 template class Energy<thrust::device_vector<double>>;
 #endif
 
-
 class Dimer : public Energy<std::vector<double>> {
  public:
-  Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  Dimer(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4);
   ~Dimer();
 
  protected:
@@ -152,7 +151,7 @@ class GF : public QC_monte<std::vector<double>> {
   void monte_energy() override;
 
  protected:
-  GF(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {}
+  GF(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4) : QC_monte(p1, p2, p3, p4) {}
 
   std::vector<GFStats> qeps;
   virtual void mc_local_energy(const int& step) = 0;
@@ -185,7 +184,7 @@ class GF : public QC_monte<std::vector<double>> {
 
 class Diagonal_GF : public GF {
  public:
-  Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4);
+  Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4);
   void monte_energy() override;
 
  protected:
@@ -198,7 +197,7 @@ class Diagonal_GF : public GF {
 
 class GPU_GF2 : public GF {
  public:
-  GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
+  GPU_GF2(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4) : GF(p1, p2, p3, p4) {
     d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2});
   }
   ~GPU_GF2() {
@@ -211,7 +210,7 @@ class GPU_GF2 : public GF {
 
 class GF2 : public GF {
  public:
-  GF2(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
+  GF2(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4) : GF(p1, p2, p3, p4) {
     ovps.init(1, iops.iopns[KEYS::ELECTRON_PAIRS]);
     d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2});
     tau->resize(2);
@@ -228,7 +227,7 @@ class GF2 : public GF {
 
 class GPU_GF3 : public GF {
  public:
-  GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
+  GPU_GF3(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4) : GF(p1, p2, p3, p4) {
     d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2, 3});
   }
   ~GPU_GF3() {
@@ -241,7 +240,7 @@ class GPU_GF3 : public GF {
 
 class GF3 : public GF {
  public:
-  GF3(MPI_info p1, IOPs p2, Molec p3, Basis p4) : GF(p1, p2, p3, p4) {
+  GF3(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4) : GF(p1, p2, p3, p4) {
     ovps.init(2, iops.iopns[KEYS::ELECTRON_PAIRS]);
     d_ovps.resize(iops, create_movec_parser(iops, mpi_info, molec), {2, 3});
     tau->resize(2);

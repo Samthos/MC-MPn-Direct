@@ -16,7 +16,7 @@
 
 class GF2_F12_V : public MCGF {
  public:
-  explicit GF2_F12_V(IOPs& iops, Basis& basis, std::string extension="f12_V");
+  explicit GF2_F12_V(IOPs& iops, std::string extension="f12_V");
   ~GF2_F12_V();
   void energy_f12(std::vector<std::vector<double>>&, 
      std::unordered_map<int, Wavefunction>&,
@@ -67,7 +67,7 @@ class GF2_F12_V : public MCGF {
 
 class GF2_F12_VBX : public GF2_F12_V {
  public:
-  explicit GF2_F12_VBX(IOPs& iops, Basis& basis);
+  explicit GF2_F12_VBX(IOPs& iops);
   void energy_f12(std::vector<std::vector<double>>&, 
      std::unordered_map<int, Wavefunction>&,
      Electron_Pair_List*, Electron_List*);

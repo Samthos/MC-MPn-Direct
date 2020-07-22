@@ -14,7 +14,8 @@
 #include "basis.h"
 
 
-Basis::Basis(IOPs &iops, const Basis_Parser& basis_parser) :
+template <class Container>
+Basis<Container>::Basis(IOPs &iops, const Basis_Parser& basis_parser) :
   mc_num(std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS])),
   qc_nbf(basis_parser.n_atomic_orbitals),
   nShells(basis_parser.n_shells),
@@ -28,7 +29,8 @@ Basis::Basis(IOPs &iops, const Basis_Parser& basis_parser) :
   ao_amplitudes(qc_nbf * mc_num) 
 { }
 
-void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& pos) {
+template <class Container>
+void Basis<Container>::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& pos) {
   build_ao_amplitudes(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi.lda, qc_nbf,
@@ -39,7 +41,8 @@ void Basis::host_psi_get(Wavefunction& psi, std::vector<std::array<double, 3>>& 
       psi.psi.data(), psi.lda);
 }
 
-void Basis::host_psi_get_dx(Wavefunction& psi_dx, std::vector<std::array<double, 3>>& pos) {
+template <class Container>
+void Basis<Container>::host_psi_get_dx(Wavefunction& psi_dx, std::vector<std::array<double, 3>>& pos) {
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -51,7 +54,8 @@ void Basis::host_psi_get_dx(Wavefunction& psi_dx, std::vector<std::array<double,
       psi_dx.psi.data(), psi_dx.lda);
 }
 
-void Basis::host_psi_get_dy(Wavefunction& psi_dy, std::vector<std::array<double, 3>>& pos) {
+template <class Container>
+void Basis<Container>::host_psi_get_dy(Wavefunction& psi_dy, std::vector<std::array<double, 3>>& pos) {
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -63,7 +67,8 @@ void Basis::host_psi_get_dy(Wavefunction& psi_dy, std::vector<std::array<double,
       psi_dy.psi.data(), psi_dy.lda);
 }
 
-void Basis::host_psi_get_dz(Wavefunction& psi_dz, std::vector<std::array<double, 3>>& pos) {
+template <class Container>
+void Basis<Container>::host_psi_get_dz(Wavefunction& psi_dz, std::vector<std::array<double, 3>>& pos) {
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -75,7 +80,8 @@ void Basis::host_psi_get_dz(Wavefunction& psi_dz, std::vector<std::array<double,
       psi_dz.psi.data(), psi_dz.lda);
 }
 
-void Basis::build_contractions(const std::vector<std::array<double, 3>> &pos) {
+template <class Container>
+void Basis<Container>::build_contractions(const std::vector<std::array<double, 3>> &pos) {
   std::fill(contraction_amplitudes.begin(), contraction_amplitudes.end(), 0.0);
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
@@ -88,7 +94,8 @@ void Basis::build_contractions(const std::vector<std::array<double, 3>> &pos) {
   }
 }
 
-void Basis::build_contractions_with_derivatives(const std::vector<std::array<double, 3>>& pos) {
+template <class Container>
+void Basis<Container>::build_contractions_with_derivatives(const std::vector<std::array<double, 3>>& pos) {
   std::fill(contraction_amplitudes.begin(), contraction_amplitudes.end(), 0.0);
   std::fill(contraction_amplitudes_derivative.begin(), contraction_amplitudes_derivative.end(), 0.0);
   for (int walker = 0; walker < pos.size(); walker++) {
@@ -103,7 +110,8 @@ void Basis::build_contractions_with_derivatives(const std::vector<std::array<dou
   }
 }
 
-void Basis::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
+template <class Container>
+void Basis<Container>::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
         atomic_orbitals[shell].evaluate_ao(
@@ -114,7 +122,8 @@ void Basis::build_ao_amplitudes(const std::vector<std::array<double, 3>> &pos) {
   }
 }
 
-void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos){
+template <class Container>
+void Basis<Container>::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
         atomic_orbitals[shell].evaluate_ao_dx(
@@ -126,7 +135,8 @@ void Basis::build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>& pos
   }
 }
 
-void Basis::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos){
+template <class Container>
+void Basis<Container>::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
         atomic_orbitals[shell].evaluate_ao_dy(
@@ -138,7 +148,8 @@ void Basis::build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>& pos
   }
 }
 
-void Basis::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos){
+template <class Container>
+void Basis<Container>::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
         atomic_orbitals[shell].evaluate_ao_dz(
@@ -150,7 +161,8 @@ void Basis::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>& pos
   }
 }
 
-void Basis::dump(const std::string& fname) {
+template <class Container>
+void Basis<Container>::dump(const std::string& fname) {
   std::ofstream os(fname);
   os << "\n-----------------------------------------------------------------------------------------------------------\nBasis Dump\n";
   os << "qc_nbf: " << qc_nbf << "\n";       // number basis functions

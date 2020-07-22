@@ -768,8 +768,8 @@ void GF::mcgf3_local_energy_full_diff(int band) {
 
 
 
-GF3_Functional::GF3_Functional(IOPs& iops, Basis& basis) :
-  MCGF(iops, basis, 2, "23", false),
+GF3_Functional::GF3_Functional(IOPs& iops) :
+  MCGF(iops, 2, "23", false),
   one(n_electron_pairs, 1.0),
   en3c12(n_electron_pairs),
   en3c22(n_electron_pairs),

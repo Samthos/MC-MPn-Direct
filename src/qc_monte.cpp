@@ -11,7 +11,7 @@
 
 
 template <class Container>
-QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis p3) :
+QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis<Container> p3) :
     mpi_info(p0),
     iops(p1),
     molec(p2),
@@ -89,9 +89,8 @@ void QC_monte<Container>::print_mc_tail(double time_span, std::chrono::system_cl
   std::cout << "Spent " << time_span << " second preforming MC integration" << std::endl;
 }
 
-
 template <class Container>
-Energy<Container>::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
+Energy<Container>::Energy(MPI_info p1, IOPs p2, Molec p3, Basis<Container> p4) : QC_monte(p1, p2, p3, p4) {
   int max_tau_coordinates = 0;
   int total_control_variates = 0;
 
@@ -105,10 +104,10 @@ Energy<Container>::Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p
     energy_functions.push_back(create_MCMP4(iops.iopns[KEYS::MP4CV_LEVEL], electron_pair_list));
   }
   if (iops.iopns[KEYS::TASK] & TASK::MP2_F12_V) {
-    energy_functions.push_back(new MP2_F12_V(iops, basis));
+    energy_functions.push_back(new MP2_F12_V(iops));
   }
   if (iops.iopns[KEYS::TASK] & TASK::MP2_F12_VBX) {
-    energy_functions.push_back(new MP2_F12_VBX(iops, basis));
+    energy_functions.push_back(new MP2_F12_VBX(iops));
   }
 
   emp.resize(energy_functions.size());
@@ -144,10 +143,9 @@ GPU_Energy::GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : Energy(p1, p2
 #endif
 
 
-Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4) : Energy(p1, p2, p3, p4),
+Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis<std::vector<double>> p4) : Energy(p1, p2, p3, p4),
                                                          l_emp(emp),
                                                          l_control(control)
-
 {
   Molec monomer_a_geometry;
   Molec monomer_b_geometry;

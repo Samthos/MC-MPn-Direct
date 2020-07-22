@@ -15,6 +15,7 @@
 
 #include "cartesian_poly.h"
 
+template <class Container>
 class Basis {
   /*
    * Engine to compute molecular orbitals assuming
@@ -43,13 +44,13 @@ class Basis {
   int nPrimatives;  // number of primitives
   bool lspherical;  // true if spherical
 
-  std::vector<double> contraction_exp;                    // dense vector of contraction exponents. Size if total number of primatives
-  std::vector<double> contraction_coef;                   // dense vector of contraction coeficients. Size if total number of primatives
+  Container contraction_exp;                    // dense vector of contraction exponents. Size if total number of primatives
+  Container contraction_coef;                   // dense vector of contraction coeficients. Size if total number of primatives
   std::vector<Atomic_Orbital> atomic_orbitals;
 
-  std::vector<double> contraction_amplitudes;             // stores contraction amplitudes
-  std::vector<double> contraction_amplitudes_derivative;  // stores contraction amplitudes
-  std::vector<double> ao_amplitudes;                      // stores AO amplidutes
+  Container contraction_amplitudes;             // stores contraction amplitudes
+  Container contraction_amplitudes_derivative;  // stores contraction amplitudes
+  Container ao_amplitudes;                      // stores AO amplidutes
 
  private:
   void build_ao_amplitudes(const std::vector<std::array<double, 3>>&);
@@ -59,4 +60,6 @@ class Basis {
 
   void dump(const std::string&);
 };
+
+template class Basis<std::vector<double>>;
 #endif  // QC_BASIS_H_

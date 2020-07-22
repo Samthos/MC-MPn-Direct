@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "../qc_input.h"
-#include "../basis/basis.h"
 #include "tau.h"
 #include "electron_pair_list.h"
 #include "electron_list.h"
@@ -13,7 +12,7 @@
 
 class MCGF {
   public:
-   MCGF(IOPs&, Basis&, int ntc, std::string ext, bool f);
+   MCGF(IOPs&, int ntc, std::string ext, bool f);
    void energy(std::vector<std::vector<double>>&, 
        std::unordered_map<int, Wavefunction>&,
        OVPS_Host&, Electron_Pair_List*, Tau*);

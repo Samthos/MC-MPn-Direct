@@ -29,7 +29,7 @@ double calculate_v_4e_help(
   return en;
 }
 
-MP2_F12_V::MP2_F12_V(const IOPs& iops, const Basis& basis, std::string extension) :
+MP2_F12_V::MP2_F12_V(const IOPs& iops, std::string extension) :
     MCMP(0, 0, extension, true),
     traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS], 0.0),
@@ -100,7 +100,7 @@ void MP2_F12_V::calculate_v(double& emp, std::vector<double>& control, std::unor
   emp += calculate_v_4e(electron_pair_list, electron_list);
 }
 
-MP2_F12_VBX::MP2_F12_VBX(const IOPs& iops, const Basis& basis) : MP2_F12_V(iops, basis, "f12_VBX"),
+MP2_F12_VBX::MP2_F12_VBX(const IOPs& iops) : MP2_F12_V(iops, "f12_VBX"),
   T_ip(iops.iopns[KEYS::ELECTRON_PAIRS], 0.0),
   T_jo_ko(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS], 0.0),
   T_io_ko(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS], 0.0)
