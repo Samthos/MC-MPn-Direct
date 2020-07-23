@@ -1,6 +1,5 @@
 Basis:
-  rename to atomic_basis
-  shouldn't know that wavefunction exist.
+  shouldn't know that wavefunction exist
 
   contraction_exp -> contraction_exponent
   contraction_coef -> contraction_coeficien
@@ -14,7 +13,3 @@ basismetadata
 Basis data 
   refactor into struct for gpu usage
   don't alloc
-  
-
-
-

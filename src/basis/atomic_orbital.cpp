@@ -33,7 +33,6 @@ Atomic_Orbital::Atomic_Orbital(int contraction_begin_in,
 // 
 // Functions to evaluation contractions
 //
-HOSTDEVICE 
 void Atomic_Orbital::evaluate_contraction(const std::array<double, 3>& walker_pos,
     double* contraction_amplitudes,
     double* contraction_exponent,
@@ -44,7 +43,6 @@ void Atomic_Orbital::evaluate_contraction(const std::array<double, 3>& walker_po
   }
 }
 
-HOSTDEVICE 
 void Atomic_Orbital::evaluate_contraction_with_derivative(const std::array<double, 3>& walker_pos,
     double* contraction_amplitudes,
     double* contraction_amplitudes_derivative,
@@ -59,7 +57,6 @@ void Atomic_Orbital::evaluate_contraction_with_derivative(const std::array<doubl
   }
 }
 
-HOSTDEVICE
 double Atomic_Orbital::calculate_r2(const std::array<double, 3>& walker_pos) {
   double r2 = 0.0;
   r2 += (pos[0] - walker_pos[0]) * (pos[0] - walker_pos[0]);
@@ -69,7 +66,7 @@ double Atomic_Orbital::calculate_r2(const std::array<double, 3>& walker_pos) {
 }
 
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao(double* ao_amplitudes, double* contraction_amplitudes, const std::array<double, 3>& walker_pos) {
+void Atomic_Orbital::evaluate_ao(double* ao_amplitudes, double* contraction_amplitudes, const double walker_pos[3]) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -95,7 +92,7 @@ void Atomic_Orbital::evaluate_ao(double* ao_amplitudes, double* contraction_ampl
 }
 
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao_dx(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const std::array<double, 3>& walker_pos) {
+void Atomic_Orbital::evaluate_ao_dx(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const double walker_pos[3]) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -121,7 +118,7 @@ void Atomic_Orbital::evaluate_ao_dx(double* ao_amplitudes, double* contraction_a
 }
 
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao_dy(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const std::array<double, 3>& walker_pos) {
+void Atomic_Orbital::evaluate_ao_dy(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const double walker_pos[3]) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -147,7 +144,7 @@ void Atomic_Orbital::evaluate_ao_dy(double* ao_amplitudes, double* contraction_a
 }
 
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao_dz(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const std::array<double, 3>& walker_pos) {
+void Atomic_Orbital::evaluate_ao_dz(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const double walker_pos[3]) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -271,7 +268,7 @@ void Atomic_Orbital::evaluate_cartesian_h(double *ao_amplitudes, const double& r
 //
 // Function to evaluate shell for spherical basis
 //
-HOSTDEVICE
+// HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_d_shell(double* ao_amplitudes, double* ang) {
   using namespace Cartesian_Poly;
   constexpr double cd[] = {1.732050807568877, // sqrt(3)
@@ -283,7 +280,7 @@ void Atomic_Orbital::evaluate_spherical_d_shell(double* ao_amplitudes, double* a
   ao_amplitudes[4] =  cd[1] * (ang[XX] - ang[YY]);
 }
 
-HOSTDEVICE
+// HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_f_shell(double* ao_amplitudes, double* ang) {
   using namespace Cartesian_Poly;
   constexpr double cf[] = {0.7905694150420949,  // sqrt(2.5) * 0.5,
@@ -302,7 +299,7 @@ void Atomic_Orbital::evaluate_spherical_f_shell(double* ao_amplitudes, double* a
   ao_amplitudes[6] = cf[1] * ang[XYY] - cf[0] * ang[XXX];
 }
 
-HOSTDEVICE
+// HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_g_shell(double* ao_amplitudes, double* ang) {
   using namespace Cartesian_Poly;
   static constexpr double cg[] = {2.9580398915498085,
@@ -331,21 +328,21 @@ void Atomic_Orbital::evaluate_spherical_g_shell(double* ao_amplitudes, double* a
 //
 // Function to orchestrate the evaluatation shells for spherical basis
 //
-HOSTDEVICE
+// HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_d(double *ao_amplitudes, const double& rad, const double& x, const double& y, const double& z) {
   double ang[6];
   evaluate_cartesian_d(&ang[0], rad, x, y, z);
   evaluate_spherical_d_shell(ao_amplitudes, &ang[0]);
 }
 
-HOSTDEVICE
+// HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_f(double *ao_amplitudes, const double& rad, const double& x, const double& y, const double& z) {
   double ang[10];
   evaluate_cartesian_f(&ang[0], rad, x, y, z);
   evaluate_spherical_f_shell(ao_amplitudes, &ang[0]);
 }
 
-HOSTDEVICE
+// HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_g(double *ao_amplitudes, const double& rad, const double& x, const double& y, const double& z) {
   double ang[15];
   evaluate_cartesian_g(&ang[0], rad, x, y, z);
@@ -356,9 +353,11 @@ void Atomic_Orbital::evaluate_spherical_g(double *ao_amplitudes, const double& r
 //
 // Function to orchestrate the evaluatation dx atomic orbital derivatives
 //
+HOSTDEVICE
 void Atomic_Orbital::evaluate_s_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
 	ao_amplitudes[0] = x * rad_derivative; 
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_p_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -371,6 +370,7 @@ void Atomic_Orbital::evaluate_p_dx(double* ao_amplitudes, const double &rad, con
   ao_amplitudes[Y] = x * ucgs[Y];
   ao_amplitudes[Z] = x * ucgs[Z];
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_d_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -386,6 +386,7 @@ void Atomic_Orbital::evaluate_cartesian_d_dx(double* ao_amplitudes, const double
   ao_amplitudes[YZ] = x * ucgs[YZ];
   ao_amplitudes[ZZ] = x * ucgs[ZZ];
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_f_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -405,6 +406,7 @@ void Atomic_Orbital::evaluate_cartesian_f_dx(double* ao_amplitudes, const double
   ao_amplitudes[YZZ] = x * ucgs[YZZ];
   ao_amplitudes[ZZZ] = x * ucgs[ZZZ];
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_g_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -429,16 +431,19 @@ void Atomic_Orbital::evaluate_cartesian_g_dx(double* ao_amplitudes, const double
   ao_amplitudes[YZZZ] = x * ucgs[YZZZ];
   ao_amplitudes[ZZZZ] = x * ucgs[ZZZZ];
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_d_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   double ang[6];
   evaluate_cartesian_d_dx(&ang[0], rad, rad_derivative, x, y, z);
   evaluate_spherical_d_shell(ao_amplitudes, &ang[0]);
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_f_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   double ang[10];
   evaluate_cartesian_f_dx(&ang[0], rad, rad_derivative, x, y, z);
   evaluate_spherical_f_shell(ao_amplitudes, &ang[0]);
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_spherical_g_dx(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   double ang[15];
   evaluate_cartesian_g_dx(&ang[0], rad, rad_derivative, x, y, z);
@@ -448,9 +453,11 @@ void Atomic_Orbital::evaluate_spherical_g_dx(double* ao_amplitudes, const double
 //
 // Function to orchestrate the evaluatation dy atomic orbital derivatives
 //
+HOSTDEVICE
 void Atomic_Orbital::evaluate_s_dy(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
 	ao_amplitudes[0] = y * rad_derivative;
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_p_dy(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -463,6 +470,7 @@ void Atomic_Orbital::evaluate_p_dy(double* ao_amplitudes, const double &rad, con
   ao_amplitudes[1] = y * ucgs[Y] + dcgs;
   ao_amplitudes[2] = y * ucgs[Z];
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_d_dy(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -478,6 +486,7 @@ void Atomic_Orbital::evaluate_cartesian_d_dy(double* ao_amplitudes, const double
   ao_amplitudes[YZ] = y *ucgs[YZ] + dcgs[Z];
   ao_amplitudes[ZZ] = y *ucgs[ZZ];
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_f_dy(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -497,6 +506,7 @@ void Atomic_Orbital::evaluate_cartesian_f_dy(double* ao_amplitudes, const double
   ao_amplitudes[YZZ] = y * ucgs[YZZ] + dcgs[ZZ];
   ao_amplitudes[ZZZ] = y * ucgs[ZZZ];
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_g_dy(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -540,9 +550,11 @@ void Atomic_Orbital::evaluate_spherical_g_dy(double* ao_amplitudes, const double
 //
 // Function to orchestrate the evaluatation dz atomic orbital derivatives
 //
+HOSTDEVICE
 void Atomic_Orbital::evaluate_s_dz(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
 	ao_amplitudes[0] = z * rad_derivative;
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_p_dz(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -555,6 +567,7 @@ void Atomic_Orbital::evaluate_p_dz(double* ao_amplitudes, const double &rad, con
   ao_amplitudes[Y] = z * ucgs[Y];
   ao_amplitudes[Z] = z * ucgs[Z] + dcgs;
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_d_dz(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 
@@ -570,6 +583,7 @@ void Atomic_Orbital::evaluate_cartesian_d_dz(double* ao_amplitudes, const double
   ao_amplitudes[YZ] = z * ucgs[YZ] + dcgs[Y];
   ao_amplitudes[ZZ] = z * ucgs[ZZ] + dcgs[Z]*2.0;
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_f_dz(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
   double dcgs[6];
@@ -588,6 +602,7 @@ void Atomic_Orbital::evaluate_cartesian_f_dz(double* ao_amplitudes, const double
   ao_amplitudes[YZZ] = z * ucgs[YZZ] + dcgs[YZ]*2.0;
   ao_amplitudes[ZZZ] = z * ucgs[ZZZ] + dcgs[ZZ]*3.0;
 }
+HOSTDEVICE
 void Atomic_Orbital::evaluate_cartesian_g_dz(double* ao_amplitudes, const double &rad, const double &rad_derivative, const double &x, const double &y, const double &z) {
   using namespace Cartesian_Poly;
 

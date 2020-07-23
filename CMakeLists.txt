@@ -21,6 +21,7 @@ if (Enable_CUDA)
   find_package(CUDA REQUIRED)
   list(APPEND CUDA_NVCC_FLAGS "-std=c++14;-O3;-DVERBOSE")
   set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+  set(CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
 option(Enable_MPI "Enables MPI Sampling" Off)
