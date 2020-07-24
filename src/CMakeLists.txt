@@ -41,7 +41,6 @@ set(source
   basis/movec_parser.h
   basis/nwchem_movec_parser.cpp
   basis/nwchem_movec_parser.h
-  basis/basis.cpp
   basis/basis.h
   basis/shell.cpp
   basis/shell.h
@@ -100,6 +99,7 @@ add_subdirectory(tau_generators)
 
 set(CPU_SPECIFIC_SOURCES
   basis/atomic_orbital.cpp
+  basis/basis.cpp
   ovps_set.cpp
   qc_ovps.cpp 
 )
@@ -125,6 +125,7 @@ endif()
 if(${CUDA_FOUND})
   set(GPU_SPECIFIC_SOURCES
     basis/atomic_orbital.cu
+    basis/basis.cu
     ovps_set.cu
     qc_ovps.cu
   )

@@ -137,7 +137,7 @@ Energy<Container>::~Energy() {
 }
 
 #ifdef HAVE_CUDA
-GPU_Energy::GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis p4) : Energy(p1, p2, p3, p4) {
+GPU_Energy::GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis_Host p4) : Energy(p1, p2, p3, p4) {
   ovps_device.init(ovps.o_set.size(), iops.iopns[KEYS::ELECTRON_PAIRS]);
 }
 #endif
