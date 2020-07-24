@@ -33,22 +33,28 @@ Atomic_Orbital::Atomic_Orbital(int contraction_begin_in,
 // 
 // Functions to evaluation contractions
 //
-void Atomic_Orbital::evaluate_contraction(const std::array<double, 3>& walker_pos,
-    double* contraction_amplitudes,
+HOSTDEVICE
+void Atomic_Orbital::evaluate_contraction(double* contraction_amplitudes,
     double* contraction_exponent,
-    double* contraction_coeficient) {
+    double* contraction_coeficient,
+    const double walker_pos[3]) {
   double r2 = calculate_r2(walker_pos);
+  contraction_amplitudes[contraction_index] = 0.0;
   for (auto i = contraction_begin; i < contraction_end; i++) {
     contraction_amplitudes[contraction_index] += exp(-contraction_exponent[i] * r2) * contraction_coeficient[i];
   }
 }
 
-void Atomic_Orbital::evaluate_contraction_with_derivative(const std::array<double, 3>& walker_pos,
+HOSTDEVICE
+void Atomic_Orbital::evaluate_contraction_with_derivative(
     double* contraction_amplitudes,
     double* contraction_amplitudes_derivative,
     double* contraction_exponent,
-    double* contraction_coeficient) {
+    double* contraction_coeficient,
+    const double walker_pos[3]) {
   double r2 = calculate_r2(walker_pos);
+  contraction_amplitudes[contraction_index] = 0.0;
+  contraction_amplitudes_derivative[contraction_index] = 0.0;
   for (auto i = contraction_begin; i < contraction_end; i++) {
     double alpha = contraction_exponent[i];
     double exponential = exp(-alpha * r2) * contraction_coeficient[i];
@@ -57,7 +63,8 @@ void Atomic_Orbital::evaluate_contraction_with_derivative(const std::array<doubl
   }
 }
 
-double Atomic_Orbital::calculate_r2(const std::array<double, 3>& walker_pos) {
+HOSTDEVICE
+double Atomic_Orbital::calculate_r2(const double walker_pos[3]) {
   double r2 = 0.0;
   r2 += (pos[0] - walker_pos[0]) * (pos[0] - walker_pos[0]);
   r2 += (pos[1] - walker_pos[1]) * (pos[1] - walker_pos[1]);

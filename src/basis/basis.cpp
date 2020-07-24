@@ -86,10 +86,10 @@ void Basis<Container, Allocator>::build_contractions(const std::vector<std::arra
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
       atomic_orbital.evaluate_contraction(
-          pos[walker],
           contraction_amplitudes.data() + atomic_orbitals.size() * walker,
           contraction_exp.data(),
-          contraction_coef.data());
+          contraction_coef.data(),
+          pos[walker].data());
     }
   }
 }
@@ -101,11 +101,11 @@ void Basis<Container, Allocator>::build_contractions_with_derivatives(const std:
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
       atomic_orbital.evaluate_contraction_with_derivative(
-          pos[walker],
           contraction_amplitudes.data() + atomic_orbitals.size() * walker,
           contraction_amplitudes_derivative.data() + atomic_orbitals.size() * walker,
           contraction_exp.data(),
-          contraction_coef.data());
+          contraction_coef.data(),
+          pos[walker].data());
     }
   }
 }

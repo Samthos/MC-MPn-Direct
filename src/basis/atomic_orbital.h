@@ -29,8 +29,8 @@ class Atomic_Orbital {
   int is_spherical;
   double pos[3];
 
-  void evaluate_contraction(const std::array<double, 3>&, double*, double*, double*);
-  void evaluate_contraction_with_derivative(const std::array<double, 3>&, double*, double*, double*, double*);
+  HOSTDEVICE void evaluate_contraction(double*, double*, double*, const double[3]);
+  HOSTDEVICE void evaluate_contraction_with_derivative(double*, double*, double*, double*, const double[3]);
 
   HOSTDEVICE void evaluate_ao(double*, double*, const double[3]);
   HOSTDEVICE void evaluate_ao_dx(double*, double*, double*, const double[3]);
@@ -38,7 +38,7 @@ class Atomic_Orbital {
   HOSTDEVICE void evaluate_ao_dz(double*, double*, double*, const double[3]);
 
  private:
-  double calculate_r2(const std::array<double, 3>&);
+  HOSTDEVICE double calculate_r2(const double[3]);
 
   HOSTDEVICE void evaluate_spherical_d_shell(double*, double*);
   HOSTDEVICE void evaluate_spherical_f_shell(double*, double*);
