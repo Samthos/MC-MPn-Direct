@@ -61,6 +61,6 @@ template class Basis<std::vector, std::allocator>;
 typedef Basis<std::vector, std::allocator> Basis_Host;
 
 #ifdef HAVE_CUDA
-// template class Basis<thrust::device_vector, thrust::device_allocator>;
+template class Basis<thrust::device_vector, thrust::device_allocator>;
 #endif
 #endif  // QC_BASIS_H_

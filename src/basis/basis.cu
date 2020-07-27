@@ -9,8 +9,9 @@ void call_build_contraction(
     double* contraction_exp,
     double* contraction_coef,
     double* pos) {
-  int walker = threadIdx.x;
-  int atomic_orbital = threadIdx.y;
+  int walker = blockIdx.x * blockDim.x + threadIdx.x;
+  int atomic_orbital = blockIdx.y * blockDim.y + threadIdx.y;
+
   if (walker < n_walkers && atomic_orbital < n_atomic_orbitals) {
     atomic_orbitals[atomic_orbital].evaluate_contraction(
         contraction_amplitudes + n_atomic_orbitals * walker,
@@ -22,19 +23,25 @@ void call_build_contraction(
 
 template <>
 void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const std::vector<std::array<double, 3>> &pos) {
-//  dim3 block_size;
-//  dim3 grid_size;
-//  call_build_contraction<<<>>>();
+  dim3 block_size(128, 1, 1);
+  dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
 
-// for (int walker = 0; walker < pos.size(); walker++) {
-//   for (auto &atomic_orbital : atomic_orbitals) {
-//     atomic_orbital.evaluate_contraction(
-//         contraction_amplitudes.data() + atomic_orbitals.size() * walker,
-//         contraction_exp.data(),
-//         contraction_coef.data(),
-//         pos[walker].data());
-//   }
-// }
+  std::vector<double> h_p(pos.size() * 3);
+  for (int i = 0, idx = 0; i < pos.size(); i++) {
+    for (int j = 0; j < 3; j++, idx++) {
+      h_p[idx] = pos[i][j];
+    }
+  }
+  thrust::device_vector<double> d_p(h_p);
+
+  call_build_contraction<<<grid_size, block_size>>>(
+      pos.size(),
+      atomic_orbitals.size(),
+      atomic_orbitals.data().get(),
+      contraction_amplitudes.data().get(),
+      contraction_exp.data().get(),
+      contraction_coef.data().get(),
+      d_p.data().get());
 }
 
 template <>
@@ -63,3 +70,11 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes
 
 template <>
 void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>&) {}
+
+template <>
+std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_contraction_amplitudes(){
+  std::vector<double> v(contraction_amplitudes.size());
+  thrust::copy(contraction_amplitudes.begin(), contraction_amplitudes.end(), v.begin());
+  return v;
+}
+

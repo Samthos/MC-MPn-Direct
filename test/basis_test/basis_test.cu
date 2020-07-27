@@ -54,4 +54,24 @@ namespace {
       }
     }
   }
+
+  class DeviceBasisTest : public testing::Test {
+    public:
+
+    DeviceBasisTest() : basis(5, Dummy_Basis_Parser(true)), pos(create_pos()) { }
+   
+    Basis<thrust::device_vector, thrust::device_allocator> basis;
+    std::vector<std::array<double, 3>> pos;
+  };
+
+  TEST_F(DeviceBasisTest, BuildContractionTest) {
+    basis.build_contractions(pos);
+    auto trial_amp = basis.get_contraction_amplitudes();
+    auto known_amp = create_contraction_amplitudes_result();
+    for (int i = 0, idx = 0; i < 5; i++) {
+      for (int j = 0; j < basis.nShells; j++, idx++) {
+        ASSERT_FLOAT_EQ(trial_amp[idx], known_amp[idx]) << i << " " << j;
+      }
+    }
+  }
 }
