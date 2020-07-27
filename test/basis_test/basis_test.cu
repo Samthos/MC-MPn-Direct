@@ -63,43 +63,26 @@ namespace {
     }
   }
 
+  template <class T>
   class HostBasisTest : public testing::Test {
     public:
-
     HostBasisTest() : basis(NWALKERS, Dummy_Basis_Parser(true)), pos(create_pos()) { }
    
-    Basis<std::vector, std::allocator> basis;
+    T basis;
     std::vector<std::array<double, 3>> pos;
   };
 
-  TEST_F(HostBasisTest, BuildContractionTest) {
-    basis.build_contractions(pos);
-    check_contraction_amplitudes(basis.get_contraction_amplitudes());
+  using Implementations = testing::Types<Basis_Host, Basis_Device>;
+  TYPED_TEST_SUITE(HostBasisTest, Implementations);
+
+  TYPED_TEST(HostBasisTest, BuildContractionTest) {
+    this->basis.build_contractions(this->pos);
+    check_contraction_amplitudes(this->basis.get_contraction_amplitudes());
   }
 
-  TEST_F(HostBasisTest, BuildContractionWithDerivativeTest) {
-    basis.build_contractions_with_derivatives(pos);
-    check_contraction_amplitudes(basis.get_contraction_amplitudes());
-    check_contraction_amplitudes_derivative(basis.get_contraction_amplitudes_derivative());
-  }
-
-  class DeviceBasisTest : public testing::Test {
-    public:
-
-    DeviceBasisTest() : basis(NWALKERS, Dummy_Basis_Parser(true)), pos(create_pos()) { }
-   
-    Basis<thrust::device_vector, thrust::device_allocator> basis;
-    std::vector<std::array<double, 3>> pos;
-  };
-
-  TEST_F(DeviceBasisTest, BuildContractionTest) {
-    basis.build_contractions(pos);
-    check_contraction_amplitudes(basis.get_contraction_amplitudes());
-  }
-
-  TEST_F(DeviceBasisTest, BuildContractionDerivativeTest) {
-    basis.build_contractions_with_derivatives(pos);
-    check_contraction_amplitudes(basis.get_contraction_amplitudes());
-    check_contraction_amplitudes_derivative(basis.get_contraction_amplitudes_derivative());
+  TYPED_TEST(HostBasisTest, BuildContractionWithDerivativeTest) {
+    this->basis.build_contractions_with_derivatives(this->pos);
+    check_contraction_amplitudes(this->basis.get_contraction_amplitudes());
+    check_contraction_amplitudes_derivative(this->basis.get_contraction_amplitudes_derivative());
   }
 }

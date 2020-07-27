@@ -79,5 +79,6 @@ template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allo
 template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_contraction_amplitudes_derivative();
 
 template class Basis<thrust::device_vector, thrust::device_allocator>;
+typedef Basis<thrust::device_vector, thrust::device_allocator> Basis_Device;
 #endif
 #endif  // QC_BASIS_H_
