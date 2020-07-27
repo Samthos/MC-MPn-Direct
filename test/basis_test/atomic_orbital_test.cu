@@ -2,7 +2,6 @@
 #include <thrust/device_vector.h>
 #include "gtest/gtest.h"
 
-#include "../../src/basis/dummy_basis_parser.h"
 #include "../../src/basis/atomic_orbital.h"
 #include "../../src/basis/shell.h"
 

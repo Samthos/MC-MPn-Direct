@@ -15,9 +15,6 @@
 
 #include "cartesian_poly.h"
 
-#ifdef HAVE_CUDA
-#endif
-
 template <template <class, class> class Container, template <class> class Allocator>
 class Basis {
   typedef Container<double, Allocator<double>> vector_double;
@@ -33,6 +30,10 @@ class Basis {
   void host_psi_get_dx(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dy(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dz(Wavefunction&, std::vector<std::array<double, 3>>&);
+
+  void dump(const std::string&);
+
+  std::vector<double> get_contraction_amplitudes();
 
   // basis set info
   int mc_num;
@@ -54,14 +55,12 @@ class Basis {
   vector_double contraction_amplitudes;             // stores contraction amplitudes
   vector_double contraction_amplitudes_derivative;  // stores contraction amplitudes
   vector_atomic_orbital atomic_orbitals;
-
-  void dump(const std::string&);
 };
 
 template class Basis<std::vector, std::allocator>;
 typedef Basis<std::vector, std::allocator> Basis_Host;
 
 #ifdef HAVE_CUDA
-template class Basis<thrust::device_vector, thrust::device_allocator>;
+// template class Basis<thrust::device_vector, thrust::device_allocator>;
 #endif
 #endif  // QC_BASIS_H_

@@ -11,13 +11,13 @@
 #define HOSTDEVICE
 #endif
 
-Atomic_Orbital::Atomic_Orbital(int contraction_begin_in,
-    int contraction_end_in,
-    int contraction_index_in,
-    int ao_index_in,
-    int angular_momentum_in,
-    bool is_spherical_in,
-    double pos_in[3]) : 
+Atomic_Orbital::Atomic_Orbital(const int contraction_begin_in,
+    const int contraction_end_in,
+    const int contraction_index_in,
+    const int ao_index_in,
+    const int angular_momentum_in,
+    const bool is_spherical_in,
+    const double pos_in[3]) : 
     contraction_begin(contraction_begin_in),
   contraction_end(contraction_end_in),
   contraction_index(contraction_index_in),

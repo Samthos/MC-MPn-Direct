@@ -25,7 +25,9 @@ class Basis_Parser {
  protected:
   std::string basis_name;
   std::vector<AtomBasis> atomBasis;
-  void read(MPI_info&);
-  void build_atomic_orbitals(MPI_info& mpi_info, Molecule& molec);
+
+  void read();
+  void build_atomic_orbitals(const Molecule& molecule);
+  void broadcast(MPI_info&);
 };
 #endif  // BASIS_PARSER_H_

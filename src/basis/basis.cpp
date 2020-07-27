@@ -153,6 +153,16 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dz(const std::vector<std::
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
+std::vector<double> Basis<Container, Allocator>::get_contraction_amplitudes(){
+  throw std::exception();
+}
+
+template <>
+std::vector<double> Basis<std::vector, std::allocator>::get_contraction_amplitudes(){
+  return contraction_amplitudes;
+}
+
+template <template <class, class> class Container, template <class> class Allocator>
 void Basis<Container, Allocator>::dump(const std::string& fname) {
   std::ofstream os(fname);
   os << "\n-----------------------------------------------------------------------------------------------------------\nBasis Dump\n";
@@ -163,6 +173,32 @@ void Basis<Container, Allocator>::dump(const std::string& fname) {
 // for (int i = 0; i < nPrimatives; ++i) {
 //   os << contraction_coef[i] << "\t" << contraction_exp[i] << "\n";
 // }
+// for (int i = 0; i < nShells; ++i) {
+//   os << atomic_orbitals[i].ao_index << "\t";
+//   os << atomic_orbitals[i].contraction_begin << "\t";
+//   os << atomic_orbitals[i].contraction_end << "\t";
+//   os << atomic_orbitals[i].angular_momentum << "\t";
+//   os << atomic_orbitals[i].pos[0] << "\t";
+//   os << atomic_orbitals[i].pos[1] << "\t";
+//   os << atomic_orbitals[i].pos[2] << "\n";
+// }
+  os << "-----------------------------------------------------------------------------------------------------------\n\n";
+}
+
+template <>
+void Basis<std::vector, std::allocator>::dump(const std::string& fname) {
+  std::ofstream os(fname);
+  os << "\n-----------------------------------------------------------------------------------------------------------\nBasis Dump\n";
+  os << "qc_nbf: " << qc_nbf << "\n";       // number basis functions
+  os << "nShells: " << nShells << "\n";      // number of shells
+  os << "nPrimatives: " << nPrimatives << "\n";  // number of primitives
+  os << "lspherical: " << lspherical << "\n";  // true if spherical
+  for (auto &atomic_orbital : atomic_orbitals) {
+    for (auto i = atomic_orbital.contraction_begin; i < atomic_orbital.contraction_end; i++) {
+      printf("%16.8f ", contraction_coef[i]);
+    }
+    printf("\n");
+  }
 // for (int i = 0; i < nShells; ++i) {
 //   os << atomic_orbitals[i].ao_index << "\t";
 //   os << atomic_orbitals[i].contraction_begin << "\t";

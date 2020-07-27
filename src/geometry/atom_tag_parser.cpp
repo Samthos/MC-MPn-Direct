@@ -21,6 +21,9 @@ int Atom_Tag_Record::symbol_length() {
 int Atom_Tag_Record::get_charge() {
   return charge;
 }
+std::string Atom_Tag_Record::symbol() {
+  return atom_symbol;
+}
 
 int Atom_Tag_Parser::parse(std::string tag) {
   /*
@@ -57,4 +60,7 @@ int Atom_Tag_Parser::parse(std::string tag) {
     }
   }
   return -1;
+}
+std::string Atom_Tag_Parser::symbol(int znum) {
+  return atom_tag_records[znum - 1].symbol();
 }

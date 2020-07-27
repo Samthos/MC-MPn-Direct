@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "../qc_mpi.h"
-#include "../qc_input.h"
 #include "molecule.h"
 
 #include "movec_parser.h"

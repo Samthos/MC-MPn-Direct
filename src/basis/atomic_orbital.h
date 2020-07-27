@@ -13,13 +13,13 @@
 class Atomic_Orbital {
  public:
   Atomic_Orbital() = default;
-  Atomic_Orbital(int contraction_begin,
-      int contraction_end,
-      int contraction_index,
-      int ao_index,
-      int angular_momentum,
-      bool is_spherical,
-      double pos[3]);
+  Atomic_Orbital(const int contraction_begin,
+      const int contraction_end,
+      const int contraction_index,
+      const int ao_index,
+      const int angular_momentum,
+      const bool is_spherical,
+      const double pos[3]);
 
   int contraction_begin;
   int contraction_end;

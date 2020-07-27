@@ -42,7 +42,6 @@ void Molecule::read_xyz(const MPI_info& mpi_info, const std::string& filename) {
   MPI_info::barrier();
   MPI_info::broadcast_int(&natom, 1);
 
-  atoms.resize(natom);
   if (mpi_info.sys_master) {
     std::cout << "Printing input geometry in angstroms\n";
     std::cout << "-------------------------------------------------------------------------------------------------\n";
@@ -74,19 +73,7 @@ void Molecule::read_xyz(const MPI_info& mpi_info, const std::string& filename) {
     MPI_info::broadcast_int(&znum, 1);
     MPI_info::broadcast_string(atom_tag);
 
-    atoms[i].znum = znum;
-    atoms[i].pos[0] = pos[0];
-    atoms[i].pos[1] = pos[1];
-    atoms[i].pos[2] = pos[2];
-    atoms[i].tag = atom_tag;
-    atoms[i].is_ghost = false;
-
-    if (atoms[i].tag.substr(0, 2) == "bq") {
-      atoms[i].is_ghost = true;
-    } else if (atoms[i].tag[0] == 'x' && atoms[i].tag[1] != 'e') {
-      atoms[i].is_ghost = true;
-    }
-
+    atoms.emplace_back(znum, pos, atom_tag);
   }
 
   if (mpi_info.sys_master) {

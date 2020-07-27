@@ -12,6 +12,8 @@ class Atom_Tag_Record {
   int symbol_length();
   int get_charge();
 
+  std::string symbol();
+
  private:
   std::string atom_name;
   std::string atom_symbol;
@@ -141,6 +143,7 @@ class Atom_Tag_Parser {
     atom_tag_records.emplace_back("oganesson"    , "og", 118);
   }
   int parse(std::string);
+  std::string symbol(int);
  private:
   std::vector<Atom_Tag_Record> atom_tag_records;
 };
