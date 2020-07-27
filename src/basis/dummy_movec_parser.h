@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../qc_mpi.h"
+#include "../qc_geom.h"
 #include "../qc_input.h"
 #include "molecule.h"
 

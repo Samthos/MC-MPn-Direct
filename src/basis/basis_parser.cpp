@@ -7,11 +7,18 @@
 
 #include "basis_parser.h"
 
-Basis_Parser::Basis_Parser(IOPs &iops, MPI_info &mpi_info, Molecule &molec) {
-  read(iops, mpi_info, molec);
+Basis_Parser::Basis_Parser() :  atomBasis(100) { }
+
+Basis_Parser::Basis_Parser(const std::string& basis_name_in, bool is_spherical_in,  MPI_info &mpi_info, Molec &molec) :
+  is_spherical(is_spherical_in),
+  basis_name(basis_name_in),
+  atomBasis(100)
+{
+  read(mpi_info);
+  build_atomic_orbitals(mpi_info, molec);
 }
 
-void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molecule& molec) {
+void Basis_Parser::read(MPI_info& mpi_info, Molec& molec) {
   std::ifstream input;
   std::string str;
   std::string atomName;
@@ -22,17 +29,13 @@ void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molecule& molec) {
   Atom_Tag_Parser atom_tag_parser;
 
   int currentBasis = -1;
-  std::vector<AtomBasis> atomBasis(100);
 
   SHELL::Shell_Type shell_type = SHELL::NA;
   SHELL::Contracted_Gaussian contracted_gaussian;
 
-  is_spherical = iops.bopns[KEYS::SPHERICAL];
-
   if (mpi_info.sys_master) {
-    // input.open(iops.sopns[KEYS::BASIS].c_str());
-    std::cout << "Basis set: " << iops.sopns[KEYS::BASIS] << std::endl;
-    input.open(iops.sopns[KEYS::BASIS].c_str());
+    std::cout << "Basis set: " << basis_name << std::endl;
+    input.open(basis_name);
     if (input.good() && input.is_open()) {
       while (getline(input, str)) {
         std::stringstream ss;
@@ -91,10 +94,14 @@ void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molecule& molec) {
         }
       }
     } else {
-      std::cerr << "Basis set " << iops.sopns[KEYS::BASIS] << " not found" << std::endl;
+      std::cerr << "Basis set " << basis_name << " not found" << std::endl;
       std::exit(EXIT_FAILURE);
     }
+  }
+}
 
+void build_atomic_orbitals(MPI_Info& mpi_info, Molec& molec) {
+  if (mpi_info.sys_master) {
     // count number of primatives is basis set
     n_atomic_orbitals = 0;
     n_shells = 0;

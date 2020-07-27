@@ -5,7 +5,6 @@
 #include <thrust/device_vector.h>
 #endif // HAVE_CUDA
 
-#include "../qc_input.h"
 #include "../qc_mpi.h"
 
 #include "atomic_orbital.h"
