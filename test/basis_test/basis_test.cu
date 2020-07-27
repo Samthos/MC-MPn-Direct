@@ -4,10 +4,12 @@
 #include "../../src/basis/dummy_basis_parser.h"
 #include "../../src/basis/basis.h"
 
+#define NWALKERS 5 
+
 namespace {
   std::vector<std::array<double, 3>> create_pos() {
-    std::vector<std::array<double, 3>> pos(5);
-    for (int i = 0; i < 5; i++) {
+    std::vector<std::array<double, 3>> pos(NWALKERS);
+    for (int i = 0; i < NWALKERS; i++) {
       pos[i][0] = i - 2;
       pos[i][1] = i - 2;
       pos[i][2] = i - 2;
@@ -15,8 +17,8 @@ namespace {
     return pos;
   }
 
-  std::vector<double> create_contraction_amplitudes_result() {
-    std::vector<double> amp = {
+  void check_contraction_amplitudes(const std::vector<double>& trial_amp) {
+    std::vector<double> known_amp = {
       2.0400914811240242e-14, -3.2300132846920317e-14, 8.3131191032716759e-05, 8.6361291985046149e-03, 3.6157153515072142e-02,
       1.6035067404299949e-12,  6.3630821199921214e-05, 9.4173590343003353e-03, 2.4150463718367900e-02, 1.1277776083265734e-09,
       3.2029654243824013e-04,  8.0272305395771171e-03, 1.3024120378185848e-07, 8.5758954309730960e-04, 6.1750495777277029e-06,
@@ -32,13 +34,39 @@ namespace {
       2.0400914811240242e-14, -3.2300132846920317e-14, 8.3131191032716759e-05, 8.6361291985046149e-03, 3.6157153515072142e-02,
       1.6035067404299949e-12,  6.3630821199921214e-05, 9.4173590343003353e-03, 2.4150463718367900e-02, 1.1277776083265734e-09,
       3.2029654243824013e-04,  8.0272305395771171e-03, 1.3024120378185848e-07, 8.5758954309730960e-04, 6.1750495777277029e-06};
-    return amp;
+
+    for (int i = 0; i < known_amp.size(); i++) {
+      ASSERT_FLOAT_EQ(trial_amp[i], known_amp[i]) << "contraction_amplitudes: " << i/5 << " " << i%5;
+    }
+  }
+
+  void check_contraction_amplitudes_derivative(const std::vector<double>& trial_amp) {
+    std::vector<double> known_amp = {
+      -1.0322862894487562e-13, +1.6343867220541680e-13, -1.2228598200912636e-04, -5.0175910643311811e-03, -8.0341195110490305e-03, 
+      -7.5942079226764559e-12, -1.0348916759955187e-04, -5.4432335218255936e-03, -4.8639033928792952e-03, -4.1682660403750158e-09, 
+      -4.1574491208483573e-04, -3.6604171260471653e-03, -3.6962453633291438e-07, -8.3186185680439028e-04, -1.2485950246165413e-05, 
+      -7.9943791406366488e-04, +1.2656244054294412e-03, -9.1661930228490826e-02, -6.8542223091248938e-02, -2.1836817283636761e-02, 
+      -1.3682535401940915e-02, -1.5610231651787854e-01, -7.3359593126753164e-02, -1.2038878441053768e-02, -6.9685312687258597e-02, 
+      -1.4306750775918325e-01, -2.8490682664899094e-02, -1.3005756573409960e-01, -6.5425435872117660e-02, -1.1170357968543344e-01, 
+      -1.6429816901662598e+04, +1.0094338073230063e+04, -8.3264479730646379e-01, -1.6384976663227629e-01, -3.0474717684524734e-02, 
+      -3.4118285108684086e+02, -1.7902519934176506e+00, -1.7457828779250764e-01, -1.6284948605876582e-02, -1.7818447458964581e+01, 
+      -1.0025646051018786e+00, -5.6462523082097212e-02, -9.1817873562740999e+00, -2.8031419822389975e-01, -2.3189012489352385e+00, 
+      -7.9943791406366488e-04, +1.2656244054294412e-03, -9.1661930228490826e-02, -6.8542223091248938e-02, -2.1836817283636761e-02, 
+      -1.3682535401940915e-02, -1.5610231651787854e-01, -7.3359593126753164e-02, -1.2038878441053768e-02, -6.9685312687258597e-02, 
+      -1.4306750775918325e-01, -2.8490682664899094e-02, -1.3005756573409960e-01, -6.5425435872117660e-02, -1.1170357968543344e-01, 
+      -1.0322862894487562e-13, +1.6343867220541680e-13, -1.2228598200912636e-04, -5.0175910643311811e-03, -8.0341195110490305e-03, 
+      -7.5942079226764559e-12, -1.0348916759955187e-04, -5.4432335218255936e-03, -4.8639033928792952e-03, -4.1682660403750158e-09, 
+      -4.1574491208483573e-04, -3.6604171260471653e-03, -3.6962453633291438e-07, -8.3186185680439028e-04, -1.2485950246165413e-05} ;
+
+    for (int i = 0; i < known_amp.size(); i++) {
+      ASSERT_FLOAT_EQ(trial_amp[i], known_amp[i]) << "contraction_amplitudes_derivative: " << i/5 << " " << i%5;
+    }
   }
 
   class HostBasisTest : public testing::Test {
     public:
 
-    HostBasisTest() : basis(5, Dummy_Basis_Parser(true)), pos(create_pos()) { }
+    HostBasisTest() : basis(NWALKERS, Dummy_Basis_Parser(true)), pos(create_pos()) { }
    
     Basis<std::vector, std::allocator> basis;
     std::vector<std::array<double, 3>> pos;
@@ -46,19 +74,19 @@ namespace {
 
   TEST_F(HostBasisTest, BuildContractionTest) {
     basis.build_contractions(pos);
-    auto trial_amp = basis.get_contraction_amplitudes();
-    auto known_amp = create_contraction_amplitudes_result();
-    for (int i = 0, idx = 0; i < 5; i++) {
-      for (int j = 0; j < basis.nShells; j++, idx++) {
-        ASSERT_FLOAT_EQ(trial_amp[idx], known_amp[idx]) << i << " " << j;
-      }
-    }
+    check_contraction_amplitudes(basis.get_contraction_amplitudes());
+  }
+
+  TEST_F(HostBasisTest, BuildContractionWithDerivativeTest) {
+    basis.build_contractions_with_derivatives(pos);
+    check_contraction_amplitudes(basis.get_contraction_amplitudes());
+    check_contraction_amplitudes_derivative(basis.get_contraction_amplitudes_derivative());
   }
 
   class DeviceBasisTest : public testing::Test {
     public:
 
-    DeviceBasisTest() : basis(5, Dummy_Basis_Parser(true)), pos(create_pos()) { }
+    DeviceBasisTest() : basis(NWALKERS, Dummy_Basis_Parser(true)), pos(create_pos()) { }
    
     Basis<thrust::device_vector, thrust::device_allocator> basis;
     std::vector<std::array<double, 3>> pos;
@@ -66,12 +94,12 @@ namespace {
 
   TEST_F(DeviceBasisTest, BuildContractionTest) {
     basis.build_contractions(pos);
-    auto trial_amp = basis.get_contraction_amplitudes();
-    auto known_amp = create_contraction_amplitudes_result();
-    for (int i = 0, idx = 0; i < 5; i++) {
-      for (int j = 0; j < basis.nShells; j++, idx++) {
-        ASSERT_FLOAT_EQ(trial_amp[idx], known_amp[idx]) << i << " " << j;
-      }
-    }
+    check_contraction_amplitudes(basis.get_contraction_amplitudes());
+  }
+
+  TEST_F(DeviceBasisTest, BuildContractionDerivativeTest) {
+    basis.build_contractions_with_derivatives(pos);
+    check_contraction_amplitudes(basis.get_contraction_amplitudes());
+    check_contraction_amplitudes_derivative(basis.get_contraction_amplitudes_derivative());
   }
 }

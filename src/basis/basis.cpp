@@ -157,11 +157,6 @@ std::vector<double> Basis<Container, Allocator>::get_contraction_amplitudes(){
   throw std::exception();
 }
 
-template <>
-std::vector<double> Basis<std::vector, std::allocator>::get_contraction_amplitudes(){
-  return contraction_amplitudes;
-}
-
 template <template <class, class> class Container, template <class> class Allocator>
 void Basis<Container, Allocator>::dump(const std::string& fname) {
   std::ofstream os(fname);
@@ -183,6 +178,16 @@ void Basis<Container, Allocator>::dump(const std::string& fname) {
 //   os << atomic_orbitals[i].pos[2] << "\n";
 // }
   os << "-----------------------------------------------------------------------------------------------------------\n\n";
+}
+
+template <>
+std::vector<double> Basis<std::vector, std::allocator>::get_contraction_amplitudes() {
+  return contraction_amplitudes;
+}
+
+template <>
+std::vector<double> Basis<std::vector, std::allocator>::get_contraction_amplitudes_derivative() {
+  return contraction_amplitudes_derivative;
 }
 
 template <>

@@ -78,3 +78,10 @@ std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_
   return v;
 }
 
+template <>
+std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_contraction_amplitudes_derivative(){
+  std::vector<double> v(contraction_amplitudes_derivative.size());
+  thrust::copy(contraction_amplitudes_derivative.begin(), contraction_amplitudes_derivative.end(), v.begin());
+  return v;
+}
+
