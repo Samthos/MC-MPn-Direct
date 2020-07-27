@@ -18,10 +18,12 @@ class OVPS_Set {
   Container s_11, s_12, s_21, s_22;
 };
 
+template <> void OVPS_Set<std::vector<double>>::update(std::vector<double>& psi1Tau, int psi1_offset, std::vector<double>& psi2Tau, int psi2_offset, size_t inner, size_t lda);
 template class OVPS_Set<std::vector<double>>;
 typedef OVPS_Set<std::vector<double>> OVPS_Set_Host;
 
 #ifdef HAVE_CUDA
+template <> void OVPS_Set<thrust::device_vector<double>>::update(thrust::device_vector<double>& psi1Tau, int psi1_offset, thrust::device_vector<double>& psi2Tau, int psi2_offset, size_t inner, size_t lda);
 template class OVPS_Set<thrust::device_vector<double>>;
 typedef OVPS_Set<thrust::device_vector<double>> OVPS_Set_Device;
 
