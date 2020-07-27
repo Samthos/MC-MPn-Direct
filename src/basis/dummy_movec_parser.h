@@ -4,11 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "../qc_mpi.h"
-#include "../qc_geom.h"
-#include "../qc_input.h"
-#include "molecule.h"
-
 #include "movec_parser.h"
 
 class Dummy_Movec_Parser : public Movec_Parser {

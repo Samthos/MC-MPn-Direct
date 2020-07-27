@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
   Molecule molec(mpi_info, iops.sopns[KEYS::GEOM]);
 
-  Basis_Host basis(std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]), Basis_Parser(iops, mpi_info, molec));
+  Basis_Host basis(std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]), Basis_Parser(iops.sopns[KEYS::BASIS], iops.bopns[KEYS::SPHERICAL], mpi_info, molec));
 
   QC_monte<std::vector<double>>* qc_monte;
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {

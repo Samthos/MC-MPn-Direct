@@ -10,8 +10,8 @@
 
 class Basis_Parser {
  public:
-  Basis_Parser() = default;
-  Basis_Parser(const std::string&, bool, MPI_info &, Molec &);
+  Basis_Parser();
+  Basis_Parser(const std::string&, bool,  MPI_info &, Molecule &);
 
   bool is_spherical;
   int n_atomic_orbitals;
@@ -23,10 +23,9 @@ class Basis_Parser {
   std::vector<Atomic_Orbital> atomic_orbitals;
 
  protected:
-  void read(MPI_info&);
-  void build_atomic_orbitals(MPI_info&, Molec&);
-
   std::string basis_name;
   std::vector<AtomBasis> atomBasis;
+  void read(MPI_info&);
+  void build_atomic_orbitals(MPI_info& mpi_info, Molecule& molec);
 };
 #endif  // BASIS_PARSER_H_

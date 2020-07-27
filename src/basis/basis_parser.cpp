@@ -9,7 +9,7 @@
 
 Basis_Parser::Basis_Parser() :  atomBasis(100) { }
 
-Basis_Parser::Basis_Parser(const std::string& basis_name_in, bool is_spherical_in,  MPI_info &mpi_info, Molec &molec) :
+Basis_Parser::Basis_Parser(const std::string& basis_name_in, bool is_spherical_in,  MPI_info &mpi_info, Molecule &molec) :
   is_spherical(is_spherical_in),
   basis_name(basis_name_in),
   atomBasis(100)
@@ -18,7 +18,7 @@ Basis_Parser::Basis_Parser(const std::string& basis_name_in, bool is_spherical_i
   build_atomic_orbitals(mpi_info, molec);
 }
 
-void Basis_Parser::read(MPI_info& mpi_info, Molec& molec) {
+void Basis_Parser::read(MPI_info& mpi_info) {
   std::ifstream input;
   std::string str;
   std::string atomName;
@@ -100,7 +100,7 @@ void Basis_Parser::read(MPI_info& mpi_info, Molec& molec) {
   }
 }
 
-void build_atomic_orbitals(MPI_Info& mpi_info, Molec& molec) {
+void Basis_Parser::build_atomic_orbitals(MPI_info& mpi_info, Molecule& molec) {
   if (mpi_info.sys_master) {
     // count number of primatives is basis set
     n_atomic_orbitals = 0;
@@ -129,6 +129,7 @@ void build_atomic_orbitals(MPI_Info& mpi_info, Molec& molec) {
 
   if (mpi_info.sys_master) {
     uint contraction= 0;
+    SHELL::Shell_Type shell_type = SHELL::NA;
     int contraction_begin = 0;
     int contraction_end = 0;
     int contraction_index = 0;
