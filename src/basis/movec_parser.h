@@ -1,12 +1,13 @@
-#ifndef MOVEC_PASER_H_
-#define MOVEC_PASER_H_
+#ifndef MOVEC_PARSER_H_
+#define MOVEC_PARSER_H_
 
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "../qc_mpi.h"
-#include "../qc_input.h"
-#include "../qc_geom.h"
+#include "molecule.h"
+#include "movec_type.h"
 
 class Movec_Parser {
  public:
@@ -28,21 +29,11 @@ class Movec_Parser {
   void resize();
   void broadcast();
   void log_orbital_energies(std::string);
+  void freeze_core(const Molecule&);
 
   virtual void parse_binary_movecs(std::string) = 0;
   virtual void parse_ascii_movecs(std::string) = 0;
 };
 
-namespace MOVEC_TYPE {
-  enum MOVEC_TYPE {
-    NWCHEM = 0,
-    DUMMY,
-  };
-  const std::vector<std::string> movec_type_strings = {
-    "NWCHEM",
-    "DUMMY"
-  };
-}
-
-std::shared_ptr<Movec_Parser> create_movec_parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source=KEYS::MOVECS, MOVEC_TYPE::MOVEC_TYPE movec_type = MOVEC_TYPE::NWCHEM);
-#endif  // MOVEC_PASER_H_
+std::shared_ptr<Movec_Parser> create_movec_parser(MPI_info& mpi_info, Molecule& molec, const MOVEC_TYPE::MOVEC_TYPE&, const std::string& movecs_filename, bool set_frozen_core);
+#endif  // MOVEC_PARSER_H_

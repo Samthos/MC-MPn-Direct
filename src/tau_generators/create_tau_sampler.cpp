@@ -3,12 +3,12 @@
 #include "stochastic_tau.h"
 #include "super_stochastic_tau.h"
 
-Tau* create_tau_sampler(const IOPs& iops, const std::shared_ptr<Movec_Parser> basis) {
+Tau* create_tau_sampler(const TAU_GENERATORS::TAU_GENERATORS& tau_generator, const std::shared_ptr<Movec_Parser> basis) {
   Tau* tau;
-  switch (iops.iopns[KEYS::TAU_INTEGRATION]) {
-    case TAU_INTEGRATION::STOCHASTIC:  tau = new Stochastic_Tau(basis); break;
-    case TAU_INTEGRATION::SUPER_STOCH: tau = new Super_Stochastic_Tau(basis); break;
-    case TAU_INTEGRATION::QUADRATURE:  tau = new Quadrature_Tau(basis); break;
+  switch (tau_generator) {
+    case TAU_GENERATORS::STOCHASTIC:  tau = new Stochastic_Tau(basis); break;
+    case TAU_GENERATORS::SUPER_STOCH: tau = new Super_Stochastic_Tau(basis); break;
+    case TAU_GENERATORS::QUADRATURE:  tau = new Quadrature_Tau(basis); break;
   }
   return tau;
 }

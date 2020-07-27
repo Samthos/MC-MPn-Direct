@@ -1,6 +1,4 @@
 set(source
-  atom_tag_parser.cpp
-  atom_tag_parser.h
   blas_calls.cpp
   blas_calls.h
   control_variate.cpp
@@ -8,8 +6,6 @@ set(source
   cpu_qc_monte.cpp
   main.cpp
   ovps_set.h
-  qc_geom.cpp
-  qc_geom.h
   qc_input.cpp
   qc_monte.cpp
   qc_monte.h
@@ -95,6 +91,7 @@ set(source
   MCMP/qc_mcmp4_il_k.h
 )
 
+add_subdirectory(geometry)
 add_subdirectory(tau_generators)
 
 set(CPU_SPECIFIC_SOURCES
@@ -108,10 +105,12 @@ add_executable(MC_MPn_Direct ${source} ${CPU_SPECIFIC_SOURCES})
 
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
+target_link_libraries(MC_MPn_Direct geometry)
 target_link_libraries(MC_MPn_Direct tau)
 
 target_include_directories(MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
 target_include_directories(MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
+target_include_directories(MC_MPn_Direct PUBLIC ./geometry)
 target_include_directories(MC_MPn_Direct PUBLIC ./tau_generators)
 target_include_directories(MC_MPn_Direct PUBLIC ./electron_generators)
 

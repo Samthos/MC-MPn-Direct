@@ -30,3 +30,11 @@ void Movec_Parser::log_orbital_energies(std::string jobname) {
   }
 }
 
+void Movec_Parser::freeze_core(const Molecule& molecule) {
+  iocc1 = 0;
+  for (auto &atom : molecule.atoms) {
+    if (atom.znum > 3 && atom.znum < 10 && !atom.is_ghost) {
+      iocc1 += 1;
+    }
+  }
+}

@@ -6,7 +6,7 @@
 
 #include "metropolis_electron_pair_list.h"
 
-Metropolis_Electron_Pair_List::Metropolis_Electron_Pair_List(int size, double ml, Random& random, const Molec& molec, const Electron_Pair_GTO_Weight& weight) : Electron_Pair_List(size),
+Metropolis_Electron_Pair_List::Metropolis_Electron_Pair_List(int size, double ml, Random& random, const Molecule& molec, const Electron_Pair_GTO_Weight& weight) : Electron_Pair_List(size),
     move_length(ml),
     moves_since_rescale(0),
     successful_moves(0),
@@ -34,7 +34,7 @@ void Metropolis_Electron_Pair_List::move(Random& random, const Electron_Pair_GTO
   moves_since_rescale++;
   transpose();
 }
-void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Random &random, const Molec &molec, const Electron_Pair_GTO_Weight& weight) {
+void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Random &random, const Molecule &molec, const Electron_Pair_GTO_Weight& weight) {
   int atom;
   double amp1, amp2, theta1, theta2;
   std::array<double, 3> pos;

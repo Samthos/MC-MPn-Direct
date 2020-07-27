@@ -3,10 +3,12 @@
 
 #include <string>
 #include <vector>
-#include "movec_parser.h"
+
 #include "../qc_mpi.h"
 #include "../qc_input.h"
-#include "../qc_geom.h"
+#include "molecule.h"
+
+#include "movec_parser.h"
 
 class Dummy_Movec_Parser : public Movec_Parser {
  public:

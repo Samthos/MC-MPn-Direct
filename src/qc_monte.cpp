@@ -11,7 +11,7 @@
 
 
 template <class Container>
-QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis_Host p3) :
+QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basis_Host p3) :
     mpi_info(p0),
     iops(p1),
     molec(p2),
@@ -24,7 +24,7 @@ QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis_Host p3) :
   offBand = iops.iopns[KEYS::OFF_BAND];
   nDeriv = iops.iopns[KEYS::DIFFS];
 
-  auto movecs = create_movec_parser(iops, mpi_info, molec);
+  auto movecs = create_movec_parser(mpi_info, molec, MOVEC_TYPE::NWCHEM_BINARY, iops.sopns[KEYS::MOVECS], iops.bopns[KEYS::FREEZE_CORE]);
 
   iocc1 = movecs->iocc1;
   iocc2 = movecs->iocc2;
@@ -58,7 +58,7 @@ QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molec p2, Basis_Host p3) :
   }
 
   //initialize walkers
-  tau = create_tau_sampler(iops, movecs);
+  tau = create_tau_sampler(static_cast<TAU_GENERATORS::TAU_GENERATORS>(iops.iopns[KEYS::TAU_GENERATORS]), movecs);
 }
 
 template <class Container>
@@ -90,7 +90,7 @@ void QC_monte<Container>::print_mc_tail(double time_span, std::chrono::system_cl
 }
 
 template <class Container>
-Energy<Container>::Energy(MPI_info p1, IOPs p2, Molec p3, Basis_Host p4) : QC_monte(p1, p2, p3, p4) {
+Energy<Container>::Energy(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : QC_monte(p1, p2, p3, p4) {
   int max_tau_coordinates = 0;
   int total_control_variates = 0;
 
@@ -137,27 +137,23 @@ Energy<Container>::~Energy() {
 }
 
 #ifdef HAVE_CUDA
-GPU_Energy::GPU_Energy(MPI_info p1, IOPs p2, Molec p3, Basis_Host p4) : Energy(p1, p2, p3, p4) {
+GPU_Energy::GPU_Energy(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : Energy(p1, p2, p3, p4) {
   ovps_device.init(ovps.o_set.size(), iops.iopns[KEYS::ELECTRON_PAIRS]);
 }
 #endif
 
-
-Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis_Host p4) : Energy(p1, p2, p3, p4),
+Dimer::Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : Energy(p1, p2, p3, p4),
                                                          l_emp(emp),
                                                          l_control(control)
 {
-  Molec monomer_a_geometry;
-  Molec monomer_b_geometry;
+  Molecule monomer_a_geometry(mpi_info, iops.sopns[KEYS::MONOMER_A_GEOM]);
+  Molecule monomer_b_geometry(mpi_info, iops.sopns[KEYS::MONOMER_B_GEOM]);
 
-  monomer_a_geometry.read(mpi_info, iops.sopns[KEYS::MONOMER_A_GEOM]);
-  monomer_b_geometry.read(mpi_info, iops.sopns[KEYS::MONOMER_B_GEOM]);
+  auto monomer_a_movecs = create_movec_parser(mpi_info, monomer_a_geometry, MOVEC_TYPE::NWCHEM_BINARY, iops.sopns[KEYS::MONOMER_A_MOVECS], iops.bopns[KEYS::FREEZE_CORE]);
+  auto monomer_b_movecs = create_movec_parser(mpi_info, monomer_b_geometry, MOVEC_TYPE::NWCHEM_BINARY, iops.sopns[KEYS::MONOMER_B_MOVECS], iops.bopns[KEYS::FREEZE_CORE]);
 
-  auto monomer_a_movecs = create_movec_parser(iops, mpi_info, monomer_a_geometry, KEYS::MONOMER_A_MOVECS, MOVEC_TYPE::NWCHEM);
-  auto monomer_b_movecs = create_movec_parser(iops, mpi_info, monomer_b_geometry, KEYS::MONOMER_B_MOVECS, MOVEC_TYPE::NWCHEM);
-
-  monomer_a_tau = create_tau_sampler(iops, monomer_a_movecs);
-  monomer_b_tau = create_tau_sampler(iops, monomer_b_movecs);
+  monomer_a_tau = create_tau_sampler(static_cast<TAU_GENERATORS::TAU_GENERATORS>(iops.iopns[KEYS::TAU_GENERATORS]), monomer_a_movecs);
+  monomer_b_tau = create_tau_sampler(static_cast<TAU_GENERATORS::TAU_GENERATORS>(iops.iopns[KEYS::TAU_GENERATORS]), monomer_b_movecs);
 
   monomer_a_tau->resize(tau->get_n_coordinates());
   monomer_b_tau->resize(tau->get_n_coordinates());
@@ -173,7 +169,7 @@ Dimer::~Dimer() {
 }
 
 /*
-Dimer::Dimer(MPI_info p1, IOPs p2, Molec p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
+Dimer::Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
   // build temp list of current wavefunctions keys
 
   // loop over wavefunctions keys.

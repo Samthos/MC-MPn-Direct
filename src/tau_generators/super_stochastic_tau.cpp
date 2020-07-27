@@ -1,3 +1,5 @@
+#include <iostream>
+#include <algorithm>
 #include "super_stochastic_tau.h"
 
 Super_Stochastic_Tau::Super_Stochastic_Tau(const std::shared_ptr<Movec_Parser> basis) : Tau(basis) {

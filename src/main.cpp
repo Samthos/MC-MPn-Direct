@@ -29,8 +29,7 @@ int main(int argc, char* argv[]) {
   iops.read(mpi_info, argv[1]);
   iops.print(mpi_info, argv[1]);
 
-  Molec molec;
-  molec.read(mpi_info, iops.sopns[KEYS::GEOM]);
+  Molecule molec(mpi_info, iops.sopns[KEYS::GEOM]);
 
   Basis_Host basis(std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]), Basis_Parser(iops, mpi_info, molec));
 

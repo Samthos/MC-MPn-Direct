@@ -6,13 +6,9 @@
 #include "nwchem_movec_parser.h"
 #include "basis.h"
 
-NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source) {
+NWChem_Movec_Parser::NWChem_Movec_Parser(MPI_info& mpi_info, Molecule& molec, const std::string& movec_filename, bool set_frozen_core) {
   if (mpi_info.sys_master) {
-    if (0 == iops.iopns[source]) {
-      parse_binary_movecs(iops.sopns[source]);
-    } else {
-      parse_binary_movecs(iops.sopns[source]);
-    }
+    parse_binary_movecs(movec_filename);
 
     std::cout << "nw_vectors: nbf " << n_basis_functions << "\n";
     std::cout << "nw_vectors: nmo " << n_molecular_orbitals << "\n";
@@ -23,31 +19,12 @@ NWChem_Movec_Parser::NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& 
 
 
   //orbital_check();
-  iocc1 = 0;
-  if (iops.bopns[KEYS::FREEZE_CORE]) {
-    for (auto &atom : molec.atoms) {
-      if (atom.znum > 3 && atom.znum < 10 && !atom.is_ghost) {
-        iocc1 += 1;
-      }
-    }
+  if (set_frozen_core) {
+    freeze_core(molec);
   }
   iocc2 = n_occupied_orbitals;
   ivir1 = n_occupied_orbitals;
   ivir2 = n_molecular_orbitals;
-
-  std::cout << iocc1 << "\t";
-  std::cout << iocc2 << "\t";
-  std::cout << ivir1 << "\t";
-  std::cout << ivir2 << "\n";
-
-  if (mpi_info.sys_master) {
-    if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF ||
-        iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF ||
-        iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL ||
-        iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF) {
-      log_orbital_energies(iops.sopns[KEYS::JOBNAME]);
-    }
-  }
 }
 
 void NWChem_Movec_Parser::read(std::ifstream& input, char* v, bool set_null=false) {

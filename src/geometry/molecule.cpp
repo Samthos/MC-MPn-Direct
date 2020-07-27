@@ -4,19 +4,20 @@
 #include <string>
 #include <algorithm>
 
-#include "qc_mpi.h"
+#include "../qc_mpi.h"
 
 #include "atom_tag_parser.h"
-#include "qc_geom.h"
+#include "molecule.h"
 
-void Molec::read(const MPI_info& mpi_info, const std::string& filename) {
-  /*
-   * Reads geometry from an XYZ file
-   *
-   * Arguments
-   *  -MPI_info mpi_info: see qc_mpi.h
-   *  -std::string filename: path to xyz file
-   */
+Molecule::Molecule(const std::vector<Atom>& atoms_in) : atoms(atoms_in) {}
+
+Molecule::Molecule(const MPI_info& mpi_info, const std::string& filename) {
+  // should implement code to read multple file types here
+  read_xyz(mpi_info, filename);
+}
+
+void Molecule::read_xyz(const MPI_info& mpi_info, const std::string& filename) {
+  // this funciotn should probably be cut up if functionallity to read other file formats is implemented
   const double ang_to_bohr = 1.8897259860;
 
   int natom;
@@ -58,8 +59,9 @@ void Molec::read(const MPI_info& mpi_info, const std::string& filename) {
 
       znum = atom_tag_parser.parse(atom_tag);
 
+      // VVVVV Should be refactored as ostream& operator << (ostream&, const Atom&)
       std::cout << std::setw(15) << atom_tag;
-      std::cout << std::setw(7) << znum;
+      std::cout << std::setw(7)  << znum;
       std::cout << std::setw(25) << std::setprecision(16) << std::fixed << pos[0];
       std::cout << std::setw(25) << std::setprecision(16) << std::fixed << pos[1];
       std::cout << std::setw(25) << std::setprecision(16) << std::fixed << pos[2] << "\n";
@@ -94,7 +96,7 @@ void Molec::read(const MPI_info& mpi_info, const std::string& filename) {
   }
 }
 
-void Molec::print() {
+void Molecule::print() {
   std::cout << "-------------------------------------------------------------------------------------------------\n";
   std::cout << std::setw(15) << "Atom-Tag";
   std::cout << std::setw(7) << "Charge";

@@ -2,14 +2,16 @@
 #define NWCHEM_MOVEC_PASER_H_
 
 #include <vector>
-#include "movec_parser.h"
+
 #include "../qc_mpi.h"
 #include "../qc_input.h"
-#include "../qc_geom.h"
+#include "molecule.h"
+
+#include "movec_parser.h"
 
 class NWChem_Movec_Parser : public Movec_Parser {
  public:
-  NWChem_Movec_Parser(IOPs& iops, MPI_info& mpi_info, Molec& molec, KEYS::KEYS source=KEYS::MOVECS);
+  NWChem_Movec_Parser(MPI_info& mpi_info, Molecule& molec, const std::string&, bool);
 
  private:
   int nw_nsets;

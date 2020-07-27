@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "../weight_function.h"
-#include "../qc_geom.h"
+#include "molecule.h"
 #include "../qc_random.h"
 #include "../qc_input.h"
 
@@ -46,5 +46,5 @@ class Electron_Pair_List {
 
   std::vector<Electron_Pair> electron_pairs;
 };
-Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molec& molec, Electron_Pair_GTO_Weight& weight);
+Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molecule& molec, Electron_Pair_GTO_Weight& weight);
 #endif  // ELECTRON_PAIR_LIST_H_

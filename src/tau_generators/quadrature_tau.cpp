@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "quadrature_tau.h"
 
 Quadrature_Tau::Quadrature_Tau(const std::shared_ptr<Movec_Parser> basis) : Tau(basis) {

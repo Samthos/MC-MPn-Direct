@@ -35,7 +35,7 @@ void Electron_List::transpose() {
   }
 }
 
-Electron_List* create_electron_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight) {
+Electron_List* create_electron_sampler(IOPs& iops, Molecule& molec, Electron_GTO_Weight& weight) {
   Electron_List* electron_list = nullptr;
   if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
     electron_list = new Direct_Electron_List(iops.iopns[KEYS::ELECTRONS]);
@@ -78,7 +78,7 @@ void Direct_Electron_List::mc_move_scheme(Electron& electron, Random& random, co
   set_weight(electron, weight);
 }
 
-Metropolis_Electron_List::Metropolis_Electron_List(int size, double ml, Random& random, const Molec& molec, const Electron_GTO_Weight& weight) : Electron_List(size),
+Metropolis_Electron_List::Metropolis_Electron_List(int size, double ml, Random& random, const Molecule& molec, const Electron_GTO_Weight& weight) : Electron_List(size),
     move_length(ml),
     moves_since_rescale(0),
     successful_moves(0),
@@ -106,7 +106,7 @@ void Metropolis_Electron_List::move(Random& random, const Electron_GTO_Weight& w
   moves_since_rescale++;
   transpose();
 }
-void Metropolis_Electron_List::initialize(Electron &electron, Random &random, const Molec &molec, const Electron_GTO_Weight& weight) {
+void Metropolis_Electron_List::initialize(Electron &electron, Random &random, const Molecule &molec, const Electron_GTO_Weight& weight) {
   int atom;
   double amp1, amp2, theta1, theta2;
   std::array<double, 3> pos;

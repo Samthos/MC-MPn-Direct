@@ -11,10 +11,10 @@
 #include "atom_tag_parser.h"
 #include "weight_function.h"
 
-Base_Weight::Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) {
+Base_Weight::Base_Weight(const MPI_info& mpi_info, const Molecule& molec, const std::string& filename) {
   read(mpi_info, molec, filename);
 }
-void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::string &filename) {
+void Base_Weight::read(const MPI_info &mpi_info, const Molecule &molec, const std::string &filename) {
   int i, znum, mc_nbas;
   std::map<int, mc_basis_typ> WEIGHT_BASIS_;
   std::vector<double> alpha, coef;
@@ -109,9 +109,9 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molec &molec, const std::
   }
 }
 
-Electron_Pair_Base_Weight::Electron_Pair_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename) {}
+Electron_Pair_Base_Weight::Electron_Pair_Base_Weight(const MPI_info& mpi_info, const Molecule& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename) {}
 
-Electron_Pair_GTO_Weight::Electron_Pair_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Pair_Base_Weight(mpi_info, molec, filename) {
+Electron_Pair_GTO_Weight::Electron_Pair_GTO_Weight(const MPI_info& mpi_info, const Molecule& molec, const std::string& filename) : Electron_Pair_Base_Weight(mpi_info, molec, filename) {
   normalize();
 }
 double Electron_Pair_GTO_Weight::weight(const std::array<double, 3> &pos1, const std::array<double, 3> &pos2) const {
@@ -249,9 +249,9 @@ void Electron_Pair_GTO_Weight::normalize() {
   }
 }
 
-Electron_Base_Weight::Electron_Base_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename) {}
+Electron_Base_Weight::Electron_Base_Weight(const MPI_info& mpi_info, const Molecule& molec, const std::string& filename) : Base_Weight(mpi_info, molec, filename) {}
 
-Electron_GTO_Weight::Electron_GTO_Weight(const MPI_info& mpi_info, const Molec& molec, const std::string& filename) : Electron_Base_Weight(mpi_info, molec, filename) { 
+Electron_GTO_Weight::Electron_GTO_Weight(const MPI_info& mpi_info, const Molecule& molec, const std::string& filename) : Electron_Base_Weight(mpi_info, molec, filename) { 
   normalize();
 }
 double Electron_GTO_Weight::weight(const std::array<double, 3> &pos) const {

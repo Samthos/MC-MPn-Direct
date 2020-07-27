@@ -1,6 +1,7 @@
 //
 // Created by aedoran on 6/5/18.
 #include <thrust/device_vector.h>
+#include <algorithm>
 #include <sstream>
 #include "gtest/gtest.h"
 

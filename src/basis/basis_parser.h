@@ -3,7 +3,7 @@
 
 #include "../qc_input.h"
 #include "../qc_mpi.h"
-#include "../qc_geom.h"
+#include "molecule.h"
 
 #include "atomic_orbital.h"
 #include "shell.h"
@@ -11,7 +11,7 @@
 
 class Basis_Parser {
  public:
-  Basis_Parser(IOPs &, MPI_info &, Molec &);
+  Basis_Parser(IOPs &, MPI_info &, Molecule &);
 
   bool is_spherical;
   int n_atomic_orbitals;
@@ -23,6 +23,6 @@ class Basis_Parser {
   std::vector<Atomic_Orbital> atomic_orbitals;
 
  protected:
-  void read(IOPs &, MPI_info &, Molec &);
+  void read(IOPs &, MPI_info &, Molecule &);
 };
 #endif  // BASIS_PARSER_H_

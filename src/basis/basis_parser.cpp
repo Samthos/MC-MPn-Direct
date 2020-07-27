@@ -3,15 +3,15 @@
 #include <fstream>
 #include <cmath>
 
-#include "../atom_tag_parser.h"
+#include "atom_tag_parser.h"
 
 #include "basis_parser.h"
 
-Basis_Parser::Basis_Parser(IOPs &iops, MPI_info &mpi_info, Molec &molec) {
+Basis_Parser::Basis_Parser(IOPs &iops, MPI_info &mpi_info, Molecule &molec) {
   read(iops, mpi_info, molec);
 }
 
-void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molec& molec) {
+void Basis_Parser::read(IOPs& iops, MPI_info& mpi_info, Molecule& molec) {
   std::ifstream input;
   std::string str;
   std::string atomName;

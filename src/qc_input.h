@@ -7,6 +7,7 @@
 #include <map>
 
 #include "qc_mpi.h"
+#include "tau_generators.h"
 
 namespace KEYS {
   enum KEY_TYPE {
@@ -40,18 +41,6 @@ namespace SAMPLER {
   const std::vector<std::string> sampler_strings = {
     "DIRECT",
     "METROPOLIS"
-  };
-}
-namespace TAU_INTEGRATION {
-  enum TAU_INTEGRATION {
-    STOCHASTIC,
-    QUADRATURE,
-    SUPER_STOCH,
-  };
-  const std::vector<std::string> tau_integration_strings = {
-    "STOCHASTIC",
-    "QUADRATURE",
-    "SUPER_STOCH"
   };
 }
 namespace JOBTYPE {

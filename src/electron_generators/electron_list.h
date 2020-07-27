@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../weight_function.h"
-#include "../qc_geom.h"
+#include "molecule.h"
 #include "../qc_random.h"
 #include "../qc_input.h"
 
@@ -43,7 +43,7 @@ class Electron_List {
 
   std::vector<Electron> electrons;
 };
-Electron_List* create_electron_sampler(IOPs& iops, Molec& molec, Electron_GTO_Weight& weight);
+Electron_List* create_electron_sampler(IOPs& iops, Molecule& molec, Electron_GTO_Weight& weight);
 
 class Direct_Electron_List : public Electron_List {
  public:
@@ -58,13 +58,13 @@ class Direct_Electron_List : public Electron_List {
 
 class Metropolis_Electron_List : public Electron_List {
  public:
-  explicit Metropolis_Electron_List(int size, double ml, Random& random, const Molec& molec, const Electron_GTO_Weight& weight);
+  explicit Metropolis_Electron_List(int size, double ml, Random& random, const Molecule& molec, const Electron_GTO_Weight& weight);
   ~Metropolis_Electron_List() override = default;
   void move(Random& random, const Electron_GTO_Weight& weight) override;
   bool requires_blocking() override;
 
  private:
-  static void initialize(Electron&, Random&, const Molec&, const Electron_GTO_Weight&);
+  static void initialize(Electron&, Random&, const Molecule&, const Electron_GTO_Weight&);
   void mc_move_scheme(Electron&, Random&, const Electron_GTO_Weight&);
   void rescale_move_length();
 

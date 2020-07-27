@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "qc_geom.h"
+#include "molecule.h"
 #include "qc_mpi.h"
 
 struct mc_basis_typ {
@@ -25,7 +25,7 @@ struct mc_basis_typ {
 
 class Base_Weight {
  public:
-  Base_Weight(const MPI_info&, const Molec&, const std::string&);
+  Base_Weight(const MPI_info&, const Molecule&, const std::string&);
 
   std::vector<mc_basis_typ> mcBasisList;
   std::vector<double> cum_sum;
@@ -33,12 +33,12 @@ class Base_Weight {
 
  protected:
   virtual void normalize() = 0;
-  void read(const MPI_info&, const Molec&, const std::string&);
+  void read(const MPI_info&, const Molecule&, const std::string&);
 };
 
 class Electron_Pair_Base_Weight : public Base_Weight {
  public:
-  Electron_Pair_Base_Weight(const MPI_info&, const Molec&, const std::string&);
+  Electron_Pair_Base_Weight(const MPI_info&, const Molecule&, const std::string&);
   std::vector<std::array<long int, 4>> cum_sum_index;
 
   virtual double weight(const std::array<double, 3>&, const std::array<double, 3>&) const = 0;
@@ -48,7 +48,7 @@ class Electron_Pair_Base_Weight : public Base_Weight {
 
 class Electron_Pair_GTO_Weight : public Electron_Pair_Base_Weight {
  public:
-  Electron_Pair_GTO_Weight(const MPI_info&, const Molec&, const std::string&);
+  Electron_Pair_GTO_Weight(const MPI_info&, const Molecule&, const std::string&);
   double weight(const std::array<double, 3>&, const std::array<double, 3>&) const override;
 
  public:
@@ -57,7 +57,7 @@ class Electron_Pair_GTO_Weight : public Electron_Pair_Base_Weight {
 
 class Electron_Base_Weight : public Base_Weight {
  public:
-  Electron_Base_Weight(const MPI_info&, const Molec&, const std::string&);
+  Electron_Base_Weight(const MPI_info&, const Molecule&, const std::string&);
   std::vector<std::array<long int, 2>> cum_sum_index;
 
   virtual double weight(const std::array<double, 3>&) const = 0;
@@ -67,7 +67,7 @@ class Electron_Base_Weight : public Base_Weight {
 
 class Electron_GTO_Weight : public Electron_Base_Weight {
  public:
-  Electron_GTO_Weight(const MPI_info&, const Molec&, const std::string&);
+  Electron_GTO_Weight(const MPI_info&, const Molecule&, const std::string&);
   double weight(const std::array<double, 3>&) const override;
 
  public:

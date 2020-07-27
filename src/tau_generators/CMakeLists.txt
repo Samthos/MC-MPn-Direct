@@ -1,6 +1,7 @@
 set(source
   tau.h
   tau.cpp
+  tau_generators.h
   create_tau_sampler.cpp
   quadrature_tau.h
   quadrature_tau.cpp
@@ -11,3 +12,4 @@ set(source
 )
 
 add_library(tau STATIC ${source})
+target_include_directories(tau PUBLIC ../geometry)

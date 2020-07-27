@@ -38,7 +38,7 @@ IOPs::IOPs() {
   iopns[KEYS::ORDER] = 2;
   iopns[KEYS::JOBTYPE] = JOBTYPE::ENERGY;
   iopns[KEYS::SAMPLER] = SAMPLER::DIRECT;
-  iopns[KEYS::TAU_INTEGRATION] = TAU_INTEGRATION::STOCHASTIC;
+  iopns[KEYS::TAU_GENERATORS] = TAU_GENERATORS::STOCHASTIC;
   iopns[KEYS::F12_CORRELATION_FACTOR] = CORRELATION_FACTORS::Slater;
 
   iopns[KEYS::MP2CV_LEVEL] = 0;
@@ -169,8 +169,12 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
                 iopns[keyval] = string_to_enum<SAMPLER::SAMPLER>(key, SAMPLER::sampler_strings);
                 keySet = false;
                 break;
-              case KEYS::TAU_INTEGRATION:
-                iopns[keyval] = string_to_enum<TAU_INTEGRATION::TAU_INTEGRATION>(key, TAU_INTEGRATION::tau_integration_strings);
+              case KEYS::TAU_INTEGRATION: 
+                std::cout << "TAU_INTEGRATION is depreciated. Please use TAU_GENERATORS\n";
+                std::cerr << "TAU_INTEGRATION is depreciated. Please use TAU_GENERATORS\n";
+                keyval = KEYS::TAU_GENERATORS;
+              case KEYS::TAU_GENERATORS:
+                iopns[keyval] = string_to_enum<TAU_GENERATORS::TAU_GENERATORS>(key, TAU_GENERATORS::tau_integration_strings);
                 keySet = false;
                 break;
               case KEYS::F12_CORRELATION_FACTOR:
@@ -235,7 +239,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
     if (iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
       std::cout << " MC_DELX: " << dopns[KEYS::MC_DELX] << std::endl;
     }
-    std::cout << " TAU_INTEGRATION: " << TAU_INTEGRATION::tau_integration_strings[iopns[KEYS::TAU_INTEGRATION]]  << std::endl;
+    std::cout << " TAU_GENERATOR: " << TAU_GENERATORS::tau_integration_strings[iopns[KEYS::TAU_GENERATORS]]  << std::endl;
     std::cout << " SPHERICAL: " << bopns[KEYS::SPHERICAL] << std::endl;
 
     if (iopns[KEYS::DEBUG] == 1) {

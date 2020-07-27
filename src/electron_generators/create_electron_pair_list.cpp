@@ -2,7 +2,7 @@
 #include "direct_electron_pair_list.h"
 #include "metropolis_electron_pair_list.h"
 
-Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molec& molec, Electron_Pair_GTO_Weight& weight) {
+Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molecule& molec, Electron_Pair_GTO_Weight& weight) {
   Electron_Pair_List* electron_pair_list = nullptr;
   if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
     electron_pair_list = new Direct_Electron_Pair_List(iops.iopns[KEYS::ELECTRON_PAIRS]);

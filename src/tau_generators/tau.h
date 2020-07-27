@@ -5,13 +5,12 @@
 #ifndef TAU_H_
 #define TAU_H_
 
-#include <algorithm>
-#include <iostream>
 #include <vector>
 
-#include "../basis/nwchem_movec_parser.h"
+#include "../basis/movec_parser.h"
 #include "../qc_random.h"
-#include "../qc_input.h"
+
+#include "tau_generators.h"
 
 class Tau {
  public:
@@ -39,5 +38,5 @@ class Tau {
   std::vector<std::vector<double>> exp_tau;
 };
 
-Tau* create_tau_sampler(const IOPs& iops, const std::shared_ptr<Movec_Parser> basis);
+Tau* create_tau_sampler(const TAU_GENERATORS::TAU_GENERATORS&, const std::shared_ptr<Movec_Parser> basis);
 #endif // TAU_H_
