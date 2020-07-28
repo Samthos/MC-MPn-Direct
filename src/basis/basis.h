@@ -31,10 +31,16 @@ class Basis {
   void host_psi_get_dy(Wavefunction&, std::vector<std::array<double, 3>>&);
   void host_psi_get_dz(Wavefunction&, std::vector<std::array<double, 3>>&);
 
+  void build_ao_amplitudes(const std::vector<std::array<double, 3>>&);
+  void build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>&);
+  void build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>&);
+  void build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>&);
+
   void dump(const std::string&);
 
   std::vector<double> get_contraction_amplitudes();
   std::vector<double> get_contraction_amplitudes_derivative();
+  std::vector<double> get_ao_amplitudes();
 
   // basis set info
   int mc_num;
@@ -46,10 +52,6 @@ class Basis {
   vector_double ao_amplitudes;                      // stores AO amplidutes
 
  private:
-  void build_ao_amplitudes(const std::vector<std::array<double, 3>>&);
-  void build_ao_amplitudes_dx(const std::vector<std::array<double, 3>>&);
-  void build_ao_amplitudes_dy(const std::vector<std::array<double, 3>>&);
-  void build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>&);
 
   vector_double contraction_exp;
   vector_double contraction_coef;
@@ -60,6 +62,7 @@ class Basis {
 
 template <> std::vector<double> Basis<std::vector, std::allocator>::get_contraction_amplitudes();
 template <> std::vector<double> Basis<std::vector, std::allocator>::get_contraction_amplitudes_derivative();
+template <> std::vector<double> Basis<std::vector, std::allocator>::get_ao_amplitudes();
 template <> void Basis<std::vector, std::allocator>::dump(const std::string& fname);
 template class Basis<std::vector, std::allocator>;
 typedef Basis<std::vector, std::allocator> Basis_Host;
@@ -77,6 +80,7 @@ template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_a
 template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const std::vector<std::array<double, 3>>&); 
 template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_contraction_amplitudes();
 template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_contraction_amplitudes_derivative();
+template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_ao_amplitudes();
 
 template class Basis<thrust::device_vector, thrust::device_allocator>;
 typedef Basis<thrust::device_vector, thrust::device_allocator> Basis_Device;

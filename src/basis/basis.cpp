@@ -191,6 +191,11 @@ std::vector<double> Basis<std::vector, std::allocator>::get_contraction_amplitud
 }
 
 template <>
+std::vector<double> Basis<std::vector, std::allocator>::get_ao_amplitudes() {
+  return ao_amplitudes;
+}
+
+template <>
 void Basis<std::vector, std::allocator>::dump(const std::string& fname) {
   std::ofstream os(fname);
   os << "\n-----------------------------------------------------------------------------------------------------------\nBasis Dump\n";
