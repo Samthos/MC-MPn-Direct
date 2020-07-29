@@ -1,7 +1,7 @@
 #include <vector>
 #include "wavefunction.h"
 
-Wavefunction::Wavefunction(std::vector<std::array<double, 3>>* p, const std::shared_ptr<Movec_Parser> movecs_in) :
+Wavefunction::Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser> movecs_in) :
   iocc1(movecs_in->iocc1),
   iocc2(movecs_in->iocc2),
   ivir1(movecs_in->ivir1),

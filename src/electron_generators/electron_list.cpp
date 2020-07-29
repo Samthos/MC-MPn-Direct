@@ -109,7 +109,7 @@ void Metropolis_Electron_List::move(Random& random, const Electron_GTO_Weight& w
 void Metropolis_Electron_List::initialize(Electron &electron, Random &random, const Molecule &molec, const Electron_GTO_Weight& weight) {
   int atom;
   double amp1, amp2, theta1, theta2;
-  std::array<double, 3> pos;
+  Point pos;
   constexpr double twopi = 6.283185307179586;
 
   atom = molec.atoms.size() * random.uniform();

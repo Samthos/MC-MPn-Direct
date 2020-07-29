@@ -53,7 +53,7 @@ namespace WM {
 class Wavefunction {
  public:
   Wavefunction() {}
-  Wavefunction(std::vector<std::array<double, 3>>* p, const std::shared_ptr<Movec_Parser>);
+  Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser>);
 
   const double *data() const;
   const double *occ() const;
@@ -78,7 +78,7 @@ class Wavefunction {
   std::vector<double> psi;
   std::vector<double> psiTau;
   std::vector<double> movecs;
-  std::vector<std::array<double, 3>>* pos;
+  std::vector<Point>* pos;
 
  private:
 };

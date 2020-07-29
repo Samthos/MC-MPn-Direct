@@ -138,7 +138,7 @@ void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, co
   for(int io = 0; io < electron_list->size();io++) {
     for(int jo = 0; jo < electron_list->size();jo++) {
       if (jo != io) {
-        auto dr = distance(electron_list->pos[io], electron_list->pos[jo]);
+        auto dr = distance(electron_list->pos[io].data(), electron_list->pos[jo].data());
         f12o[io * electron_list->size() + jo]  = calculate_f12(dr);
         f12o_b[io * electron_list->size() + jo] =  calculate_f12_b(dr);
         f12o_d[io * electron_list->size() + jo] =  calculate_f12_d(dr);
@@ -152,8 +152,8 @@ void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, co
 
   for(int ip = 0; ip < electron_pair_list->size(); ++ip) {
     for(int io = 0; io < electron_list->size(); ++io) {
-      f13[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
-      f23[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
+      f13[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos1[ip].data(), electron_list->pos[io].data()));
+      f23[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos2[ip].data(), electron_list->pos[io].data()));
     }
   }
 }
@@ -211,7 +211,7 @@ void Slater_Correlation_Factor::update(const Electron_Pair_List* electron_pair_l
   for(int io = 0, idx = 0; io < electron_list->size(); io++) {
     for(int jo = 0; jo < electron_list->size(); jo++, idx++) {
       if (jo != io) {
-        f12o[idx] = calculate_f12(distance(electron_list->pos[io], electron_list->pos[jo]));
+        f12o[idx] = calculate_f12(distance(electron_list->pos[io].data(), electron_list->pos[jo].data()));
         f12o_b[idx] =  -gamma * gamma * f12o[idx];
       } else {
         f12o[idx]   = 0.0;
@@ -222,8 +222,8 @@ void Slater_Correlation_Factor::update(const Electron_Pair_List* electron_pair_l
 
   for(int ip = 0; ip < electron_pair_list->size(); ++ip) {
     for(int io = 0; io < electron_list->size(); ++io) {
-      f13[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
-      f23[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
+      f13[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos1[ip].data(), electron_list->pos[io].data()));
+      f23[ip * electron_list->size() + io] = calculate_f12(distance(electron_pair_list->pos2[ip].data(), electron_list->pos[io].data()));
     }
   }
 }

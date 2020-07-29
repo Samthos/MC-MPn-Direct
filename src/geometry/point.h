@@ -30,9 +30,11 @@ class Point {
     std::array<double, 3>::iterator end();
     [[deprecated]]
     std::array<double, 3>::const_iterator end() const;
+    [[deprecated]]
+    std::array<double, 3> data() const;
 
-    std::array<double, 3> p;
   private:
+    std::array<double, 3> p;
 };
 
 Point operator + (Point, const Point&);

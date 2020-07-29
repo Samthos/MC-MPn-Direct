@@ -10,7 +10,7 @@
 #include "../qc_input.h"
 
 struct Electron {
-  std::array<double, 3> pos;
+  Point pos;
   double weight;
   double inverse_weight;
 };
@@ -28,7 +28,7 @@ class Electron_List {
     return electrons.size();
   }
 
-  std::vector<std::array<double, 3>> pos;
+  std::vector<Point> pos;
   std::vector<double> weight;
   std::vector<double> inverse_weight;
  protected:

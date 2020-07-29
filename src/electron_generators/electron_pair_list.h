@@ -28,8 +28,8 @@ class Electron_Pair_List {
     return electron_pairs.size();
   }
 
-  std::vector<std::array<double, 3>> pos1;
-  std::vector<std::array<double, 3>> pos2;
+  std::vector<Point> pos1;
+  std::vector<Point> pos2;
   std::vector<double> wgt;
   std::vector<double> rv;
   std::vector<double> r12;
