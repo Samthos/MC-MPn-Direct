@@ -2,7 +2,7 @@
 #define ATOM_H_
 
 #include <string>
-#include <array>
+#include "point.h"
 
 class Atom {
   public:
@@ -11,7 +11,7 @@ class Atom {
   Atom(int, const double pos[3], const std::string&);
 
   int znum;
-  double pos[3];
+  Point pos;
   bool is_ghost;
   std::string tag;
 };

@@ -1,11 +1,7 @@
 #include "atom.h"
 #include "atom_tag_parser.h"
 
-Atom::Atom(int z, const double p[3], const std::string& t) : znum(z), tag(t) {
-  pos[0] = p[0];
-  pos[1] = p[1];
-  pos[2] = p[2];
-
+Atom::Atom(int z, const double p[3], const std::string& t) : znum(z), pos(p), tag(t) {
   is_ghost = false;
   if (tag.substr(0, 2) == "bq") {
     is_ghost = true;

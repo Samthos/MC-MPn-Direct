@@ -1,4 +1,6 @@
 set(source
+  point.h
+  point.cpp
   atom.h
   atom.cpp
   atom_tag_parser.cpp

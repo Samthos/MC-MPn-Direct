@@ -105,7 +105,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molecule &molec, const st
   }
 
   for (auto &it : molec.atoms) {
-    mcBasisList.push_back({WEIGHT_BASIS_[it.znum], it.pos});
+    mcBasisList.push_back({WEIGHT_BASIS_[it.znum], it.pos.data()});
   }
 }
 

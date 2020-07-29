@@ -159,7 +159,7 @@ void Basis_Parser::build_atomic_orbitals(const Molecule& molecule) {
           ao_index,
           static_cast<int>(shell_type),
           is_spherical,
-          atom.pos);
+          atom.pos.data().data());
 
         contraction_begin = contraction_end;
         contraction_index++;
