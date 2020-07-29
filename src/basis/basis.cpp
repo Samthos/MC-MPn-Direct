@@ -82,7 +82,7 @@ void Basis<Container, Allocator>::build_contractions(const std::vector<Point> &p
           contraction_amplitudes.data() + atomic_orbitals.size() * walker,
           contraction_exp.data(),
           contraction_coef.data(),
-          pos[walker].data().data());
+          pos[walker]);
     }
   }
 }
@@ -96,7 +96,7 @@ void Basis<Container, Allocator>::build_contractions_with_derivatives(const std:
           contraction_amplitudes_derivative.data() + atomic_orbitals.size() * walker,
           contraction_exp.data(),
           contraction_coef.data(),
-          pos[walker].data().data());
+          pos[walker]);
     }
   }
 }
@@ -108,7 +108,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes(const std::vector<Point> &
       atomic_orbitals[shell].evaluate_ao(
           ao_amplitudes.data() + walker * qc_nbf,
           contraction_amplitudes.data() + walker * nShells,
-          pos[walker].data().data());
+          pos[walker]);
     }
   }
 }
@@ -121,7 +121,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dx(const std::vector<Point
           ao_amplitudes.data() + walker * qc_nbf,
           contraction_amplitudes.data() + walker * nShells,
           contraction_amplitudes_derivative.data() + walker * nShells,
-          pos[walker].data().data());
+          pos[walker]);
     }
   }
 }
@@ -134,7 +134,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dy(const std::vector<Point
           ao_amplitudes.data() + walker * qc_nbf,
           contraction_amplitudes.data() + walker * nShells,
           contraction_amplitudes_derivative.data() + walker * nShells,
-          pos[walker].data().data());
+          pos[walker]);
     }
   }
 }
@@ -147,7 +147,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dz(const std::vector<Point
           ao_amplitudes.data() + walker * qc_nbf,
           contraction_amplitudes.data() + walker * nShells,
           contraction_amplitudes_derivative.data() + walker * nShells,
-          pos[walker].data().data());
+          pos[walker]);
     }
   }
 }

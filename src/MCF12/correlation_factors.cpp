@@ -121,13 +121,6 @@ Correlation_Factor::Correlation_Factor(const IOPs& iops, double gamma_, double b
     beta = iops.dopns[KEYS::F12_BETA];
   }
 }
-
-double Correlation_Factor::distance(const std::array<double, 3>& p1, const std::array<double, 3>& p2) {
-  std::array<double, 3> dr{};
-  std::transform(p1.begin(), p1.end(), p2.begin(), dr.begin(), std::minus<>());
-  return sqrt(std::inner_product(dr.begin(), dr.end(), dr.begin(),0.0));
-}
-
 void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     f12p[ip] = calculate_f12(electron_pair_list->r12[ip]);

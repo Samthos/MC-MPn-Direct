@@ -29,13 +29,13 @@ class Atomic_Orbital {
   int is_spherical;
   Point pos;
 
-  HOSTDEVICE void evaluate_contraction(double*, double*, double*, const double[3]);
-  HOSTDEVICE void evaluate_contraction_with_derivative(double*, double*, double*, double*, const double[3]);
+  HOSTDEVICE void evaluate_contraction(double*, double*, double*, const Point&);
+  HOSTDEVICE void evaluate_contraction_with_derivative(double*, double*, double*, double*, const Point&);
 
-  HOSTDEVICE void evaluate_ao(double*, double*, const double[3]);
-  HOSTDEVICE void evaluate_ao_dx(double*, double*, double*, const double[3]);
-  HOSTDEVICE void evaluate_ao_dy(double*, double*, double*, const double[3]);
-  HOSTDEVICE void evaluate_ao_dz(double*, double*, double*, const double[3]);
+  HOSTDEVICE void evaluate_ao(double*, double*, const Point&);
+  HOSTDEVICE void evaluate_ao_dx(double*, double*, double*, const Point&);
+  HOSTDEVICE void evaluate_ao_dy(double*, double*, double*, const Point&);
+  HOSTDEVICE void evaluate_ao_dz(double*, double*, double*, const Point&);
 
  private:
   HOSTDEVICE double calculate_r2(const double[3]);

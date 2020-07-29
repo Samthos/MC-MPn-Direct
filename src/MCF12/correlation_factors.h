@@ -63,7 +63,6 @@ class Correlation_Factor {
 
  protected:
   double gamma, beta;
-  static double distance(const std::array<double, 3>&, const std::array<double, 3>&);
 };
 Correlation_Factor* create_correlation_factor(const IOPs& iops);
 CORRELATION_FACTORS::CORRELATION_FACTORS string_to_correlation_factors(const std::string&);

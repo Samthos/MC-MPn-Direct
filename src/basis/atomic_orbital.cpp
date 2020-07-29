@@ -35,8 +35,8 @@ HOSTDEVICE
 void Atomic_Orbital::evaluate_contraction(double* contraction_amplitudes,
     double* contraction_exponent,
     double* contraction_coeficient,
-    const double walker_pos[3]) {
-  double r2 = calculate_r2(walker_pos);
+    const Point& walker_pos) {
+  double r2 = Point::distance_squared(walker_pos, pos);
   contraction_amplitudes[contraction_index] = 0.0;
   for (auto i = contraction_begin; i < contraction_end; i++) {
     contraction_amplitudes[contraction_index] += exp(-contraction_exponent[i] * r2) * contraction_coeficient[i];
@@ -49,8 +49,8 @@ void Atomic_Orbital::evaluate_contraction_with_derivative(
     double* contraction_amplitudes_derivative,
     double* contraction_exponent,
     double* contraction_coeficient,
-    const double walker_pos[3]) {
-  double r2 = calculate_r2(walker_pos);
+    const Point& walker_pos) {
+  double r2 = Point::distance_squared(walker_pos, pos);
   contraction_amplitudes[contraction_index] = 0.0;
   contraction_amplitudes_derivative[contraction_index] = 0.0;
   for (auto i = contraction_begin; i < contraction_end; i++) {
@@ -71,7 +71,7 @@ double Atomic_Orbital::calculate_r2(const double walker_pos[3]) {
 }
 
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao(double* ao_amplitudes, double* contraction_amplitudes, const double walker_pos[3]) {
+void Atomic_Orbital::evaluate_ao(double* ao_amplitudes, double* contraction_amplitudes, const Point& walker_pos) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -96,7 +96,7 @@ void Atomic_Orbital::evaluate_ao(double* ao_amplitudes, double* contraction_ampl
   }
 }
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao_dx(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const double walker_pos[3]) {
+void Atomic_Orbital::evaluate_ao_dx(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const Point& walker_pos) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -121,7 +121,7 @@ void Atomic_Orbital::evaluate_ao_dx(double* ao_amplitudes, double* contraction_a
   }
 }
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao_dy(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const double walker_pos[3]) {
+void Atomic_Orbital::evaluate_ao_dy(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const Point& walker_pos) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
@@ -146,7 +146,7 @@ void Atomic_Orbital::evaluate_ao_dy(double* ao_amplitudes, double* contraction_a
   }
 }
 HOSTDEVICE
-void Atomic_Orbital::evaluate_ao_dz(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const double walker_pos[3]) {
+void Atomic_Orbital::evaluate_ao_dz(double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, const Point& walker_pos) {
   ao_amplitudes += ao_index;
   double x = walker_pos[0] - pos[0];
   double y = walker_pos[1] - pos[1];
