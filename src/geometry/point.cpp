@@ -87,9 +87,3 @@ std::array<double, 3>::iterator Point::end() {
 std::array<double, 3>::const_iterator Point::end() const {
   return p.end();
 }
-std::array<double, 3>& Point::data() {
-  return p;
-}
-const std::array<double, 3>& Point::data() const {
-  return p;
-}

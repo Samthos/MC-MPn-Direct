@@ -284,4 +284,5 @@ void Diagonal_GF::mc_local_energy(const int& step) {
 }
 
 int Diagonal_GF::full_print(int& step, int checkNum) {
+  return 0;
 }

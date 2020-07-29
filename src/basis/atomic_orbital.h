@@ -1,7 +1,7 @@
 #ifndef ATOMIC_ORBITAL_H_
 #define ATOMIC_ORBITAL_H_
 
-#include <array>
+#include "point.h"
 
 #ifdef HAVE_CUDA
 #include "cuda_runtime.h"
@@ -19,7 +19,7 @@ class Atomic_Orbital {
       const int ao_index,
       const int angular_momentum,
       const bool is_spherical,
-      const double pos[3]);
+      const Point&);
 
   int contraction_begin;
   int contraction_end;
@@ -27,7 +27,7 @@ class Atomic_Orbital {
   int ao_index;
   int angular_momentum;
   int is_spherical;
-  double pos[3];
+  Point pos;
 
   HOSTDEVICE void evaluate_contraction(double*, double*, double*, const double[3]);
   HOSTDEVICE void evaluate_contraction_with_derivative(double*, double*, double*, double*, const double[3]);

@@ -9,7 +9,7 @@
 #include "../qc_input.h"
 
 struct Electron_Pair {
-  std::array<double, 3> pos1, pos2;
+  Point pos1, pos2;
   double wgt;
   double rv;
   double r12;

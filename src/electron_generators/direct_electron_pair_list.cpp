@@ -17,7 +17,7 @@ void Direct_Electron_Pair_List::move(Random& random, const Electron_Pair_GTO_Wei
 }
 void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Electron_Pair_GTO_Weight& weight) {
   constexpr double TWOPI = 6.283185307179586;
-  std::array<double, 3> dr{};
+  Point dr;
 
   // choose function to sample;
   double rnd = random.uniform();
@@ -42,10 +42,8 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Ran
   double z, r, phi;
   if (a1 != a2) {
     // compute distance bewteen the centers
-    std::transform(weight.mcBasisList[a1].center.begin(), weight.mcBasisList[a1].center.end(),
-                   weight.mcBasisList[a2].center.begin(), dr.begin(),
-                   std::minus<>());
-    double rab = sqrt(std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0));
+    dr = weight.mcBasisList[a1].center - weight.mcBasisList[a2].center;
+    double rab = dr.length();
 
     // sample z coordinate
     double mu_z = rab * (alpha - beta) / (2.0*(alpha + beta));
@@ -66,17 +64,13 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Ran
   electron_pair.pos2[2] = z + r * cos(phi) / (2.0 * beta);
 
   // compute center of the two gaussians
-  std::transform(weight.mcBasisList[a1].center.begin(), weight.mcBasisList[a1].center.end(),
-                 weight.mcBasisList[a2].center.begin(), dr.begin(),
-                 std::plus<>());
-  std::for_each(dr.begin(), dr.end(), [](double&x){x/=2;});
+  dr = weight.mcBasisList[a1].center + weight.mcBasisList[a2].center;
+  dr *= 0.5;
 
   // if centers are not then same, then rotate
   if (a1 != a2) {
-    std::array<double, 3> rb(weight.mcBasisList[a1].center);
-
-    std::transform(rb.begin(), rb.end(), dr.begin(), rb.begin(), std::minus<>());
-    double rb_norm = sqrt(std::inner_product(rb.begin(), rb.end(), rb.begin(), 0.0));
+    Point rb = weight.mcBasisList[a1].center - dr;
+    double rb_norm = rb.length();
 
     double r_p = acos(rb[2]/rb_norm);
     double r_t = atan2(rb[1], rb[0]);
@@ -97,8 +91,8 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Ran
   }
 
   // shift result to original center
-  std::transform(electron_pair.pos1.begin(), electron_pair.pos1.end(), dr.begin(), electron_pair.pos1.begin(), std::plus<>());
-  std::transform(electron_pair.pos2.begin(), electron_pair.pos2.end(), dr.begin(), electron_pair.pos2.begin(), std::plus<>());
+  electron_pair.pos1 += dr;
+  electron_pair.pos2 += dr;
 
   set_weight(electron_pair, weight);
 }

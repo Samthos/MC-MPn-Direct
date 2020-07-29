@@ -62,16 +62,12 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molecule &molec, const st
       if (std::any_of(molec.atoms.begin(), molec.atoms.end(),
                       [znum](Atom a) { return a.znum == znum; })) {
         std::cout << "\t " << atname << "\t";
-        std::cout << std::setw(30) << std::setprecision(16) << std::fixed
-                  << alpha[0];
-        std::cout << std::setw(30) << std::setprecision(16) << std::fixed
-                  << coef[0] << std::endl;
+        std::cout << std::setw(30) << std::setprecision(16) << std::fixed << alpha[0];
+        std::cout << std::setw(30) << std::setprecision(16) << std::fixed << coef[0] << std::endl;
         for (int k = 1; k < mc_nprim; k++) {
           std::cout << "\t  \t";
-          std::cout << std::setw(30) << std::setprecision(16) << std::fixed
-                    << alpha[k];
-          std::cout << std::setw(30) << std::setprecision(16) << std::fixed
-                    << coef[k] << std::endl;
+          std::cout << std::setw(30) << std::setprecision(16) << std::fixed << alpha[k];
+          std::cout << std::setw(30) << std::setprecision(16) << std::fixed << coef[k] << std::endl;
         }
         std::cout << std::endl;
       }
@@ -105,7 +101,7 @@ void Base_Weight::read(const MPI_info &mpi_info, const Molecule &molec, const st
   }
 
   for (auto &it : molec.atoms) {
-    mcBasisList.push_back({WEIGHT_BASIS_[it.znum], it.pos.data()});
+    mcBasisList.push_back({WEIGHT_BASIS_[it.znum], it.pos});
   }
 }
 
@@ -114,23 +110,17 @@ Electron_Pair_Base_Weight::Electron_Pair_Base_Weight(const MPI_info& mpi_info, c
 Electron_Pair_GTO_Weight::Electron_Pair_GTO_Weight(const MPI_info& mpi_info, const Molecule& molec, const std::string& filename) : Electron_Pair_Base_Weight(mpi_info, molec, filename) {
   normalize();
 }
-double Electron_Pair_GTO_Weight::weight(const std::array<double, 3> &pos1, const std::array<double, 3> &pos2) const {
-  std::array<double, 3> dr;
+double Electron_Pair_GTO_Weight::weight(const Point &pos1, const Point &pos2) const {
   double r1, r2, r12;
   double gf1, gf2;
 
-  std::transform(pos1.begin(), pos1.end(), pos2.begin(), dr.begin(), std::minus<double>());
-  r12 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-  r12 = sqrt(r12);
+  r12 = Point::distance(pos1, pos2);
 
   gf1 = 0.0;
   gf2 = 0.0;
   for (auto &it : mcBasisList) {
-    std::transform(pos1.begin(), pos1.end(), it.center.begin(), dr.begin(), std::minus<double>());
-    r1 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
-
-    std::transform(pos2.begin(), pos2.end(), it.center.begin(), dr.begin(), std::minus<double>());
-    r2 = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
+    r1 = Point::distance_squared(pos1, it.center);
+    r2 = Point::distance_squared(pos2, it.center);
 
     gf1 = std::inner_product(
         it.alpha.begin(), it.alpha.end(), it.norm.begin(), gf1,
@@ -150,7 +140,6 @@ void Electron_Pair_GTO_Weight::normalize() {
   double azi, azj, comz, gzi, normi, normj;
   double rr, tt, cc, h;
   double dummy;
-  std::array<double,3> dr{};
   double g_wgt;
 
   // constants
@@ -194,10 +183,7 @@ void Electron_Pair_GTO_Weight::normalize() {
   g_wgt = 0.0;
   for (auto &it : mcBasisList) {
     for (auto &jt : mcBasisList) {
-      std::transform(it.center.begin(), it.center.end(),
-                     jt.center.begin(), dr.begin(),
-                     std::minus<double>());
-      rr = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
+      rr = Point::distance_squared(it.center, jt.center);
 
       for (ie = 0; ie < mc_nprim; ie++) {
         azi = it.alpha[ie];
@@ -254,17 +240,14 @@ Electron_Base_Weight::Electron_Base_Weight(const MPI_info& mpi_info, const Molec
 Electron_GTO_Weight::Electron_GTO_Weight(const MPI_info& mpi_info, const Molecule& molec, const std::string& filename) : Electron_Base_Weight(mpi_info, molec, filename) { 
   normalize();
 }
-double Electron_GTO_Weight::weight(const std::array<double, 3> &pos) const {
-  std::array<double, 3> dr;
+double Electron_GTO_Weight::weight(const Point &pos) const {
   double weight = 0.0;
-
   for (auto &it : mcBasisList) {
-    std::transform(pos.begin(), pos.end(), it.center.begin(), dr.begin(), std::minus<double>());
-    auto r = std::inner_product(dr.begin(), dr.end(), dr.begin(), 0.0);
+    auto r2 = Point::distance_squared(pos, it.center);
     weight = std::inner_product(
         it.alpha.begin(), it.alpha.end(), it.norm.begin(), weight,
         std::plus<double>(),
-        [r](double a, double n) { return n * exp(-a * r); });
+        [r2](double a, double n) { return n * exp(-a * r2); });
   }
   return weight;
 }

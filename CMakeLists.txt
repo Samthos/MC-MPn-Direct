@@ -3,6 +3,7 @@ project(MC_MPn LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 
 execute_process(
   COMMAND git log -1 --format=%h

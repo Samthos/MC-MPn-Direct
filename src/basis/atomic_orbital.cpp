@@ -17,17 +17,15 @@ Atomic_Orbital::Atomic_Orbital(const int contraction_begin_in,
     const int ao_index_in,
     const int angular_momentum_in,
     const bool is_spherical_in,
-    const double pos_in[3]) : 
-    contraction_begin(contraction_begin_in),
+    const Point& pos_in) : 
+  contraction_begin(contraction_begin_in),
   contraction_end(contraction_end_in),
   contraction_index(contraction_index_in),
   ao_index(ao_index_in),
   angular_momentum(angular_momentum_in),
-  is_spherical(is_spherical_in)
+  is_spherical(is_spherical_in),
+  pos(pos_in)
 {
-  pos[0] = pos_in[0];
-  pos[1] = pos_in[1];
-  pos[2] = pos_in[2];
 }
 
 // 

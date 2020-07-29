@@ -21,20 +21,21 @@ class Point {
 
     static double distance(const Point&, const Point&);
     static double distance_squared(const Point&, const Point&);
-    std::array<double, 3>::iterator begin();
-    std::array<double, 3>::const_iterator begin() const;
-    std::array<double, 3>::iterator end();
-    std::array<double, 3>::const_iterator end() const;
-    std::array<double, 3>& data();
-    const std::array<double, 3>& data() const;
 
-  private:
+    [[deprecated]]
+    std::array<double, 3>::iterator begin();
+    [[deprecated]]
+    std::array<double, 3>::const_iterator begin() const;
+    [[deprecated]]
+    std::array<double, 3>::iterator end();
+    [[deprecated]]
+    std::array<double, 3>::const_iterator end() const;
+
     std::array<double, 3> p;
+  private:
 };
 
 Point operator + (Point, const Point&);
-Point operator - (Point, const Point&);
-
-// std::array<double, 3> operator = (const Point&);
+Point operator - (Point, const Point&); 
 
 #endif // POINT_H_
