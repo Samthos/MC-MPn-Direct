@@ -55,8 +55,6 @@ void F12_Traces::update_bx(std::unordered_map<int, Wavefunction>& wavefunctions,
 }
 
 void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_List* electron_list) {
-  std::array<double, 3> dr{};
-
   auto lda = wavefunctions[WC::electrons].lda;
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
@@ -69,7 +67,7 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wave
 
   for (int io = 0; io < electrons; ++io) {
     for (int jo = 0; jo < electrons; ++jo) {
-      std::transform(electron_list->pos[io].begin(), electron_list->pos[io].end(), electron_list->pos[jo].begin(), dr.begin(), std::minus<>());
+      auto dr = electron_list->pos[io] - electron_list->pos[jo];
       ds_p11[io][jo] = 0.0;
       ds_p12[io][jo] = 0.0;
       ds_p21[io][jo] = 0.0;
@@ -239,7 +237,6 @@ void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1
 }
 
 void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list) {
-  std::array<double, 3> dr{};
   auto lda = wavefunctions[WC::electron_pairs_1].lda;
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
@@ -258,7 +255,7 @@ void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunct
   const double* psi2_dz = wavefunctions[WC::electron_pairs_2_dz].data();
 
   for (int ip = 0; ip < electron_pairs; ip++) {
-    std::transform(electron_pair_list->pos1[ip].begin(), electron_pair_list->pos1[ip].end(), electron_pair_list->pos2[ip].begin(), dr.begin(), std::minus<>());
+    auto dr = electron_pair_list->pos1[ip] - electron_pair_list->pos2[ip];
     dp11[ip] = 0.0;
     dp12[ip] = 0.0;
     dp21[ip] = 0.0;
@@ -273,8 +270,6 @@ void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunct
 }
 
 void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
-  std::array<double, 3> dr{};
-
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
   auto ivir1 = wavefunctions[WC::electrons].ivir1;
@@ -293,7 +288,7 @@ void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wav
   const double* psi2_dz = wavefunctions[WC::electron_pairs_2_dz].data();
 
   for(int ip = 0, idx=0; ip < electron_pairs; ++ip) {
-    std::transform(electron_pair_list->pos1[ip].begin(), electron_pair_list->pos1[ip].begin() + 3, electron_pair_list->pos2[ip].begin(), dr.begin(), std::minus<>());
+    auto dr = electron_pair_list->pos1[ip] - electron_pair_list->pos2[ip];
     for(int io = 0; io < electrons; ++io, ++idx) {
       dp31[idx] = 0.0;
       dp32[idx] = 0.0;

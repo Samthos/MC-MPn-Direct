@@ -31,8 +31,8 @@ void Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const Electron
 }
 void Electron_Pair_List::transpose() {
   for (size_t i = 0; i < electron_pairs.size(); i++) {
-    pos1[i] = electron_pairs[i].pos1.data();
-    pos2[i] = electron_pairs[i].pos2.data();
+    pos1[i] = electron_pairs[i].pos1;
+    pos2[i] = electron_pairs[i].pos2;
     wgt[i] = electron_pairs[i].wgt;
     rv[i] = electron_pairs[i].rv;
     r12[i] = electron_pairs[i].r12;
