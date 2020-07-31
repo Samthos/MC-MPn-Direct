@@ -7,12 +7,10 @@
 #define NWALKERS 5 
 
 namespace {
-  std::vector<std::array<double, 3>> create_pos() {
-    std::vector<std::array<double, 3>> pos(NWALKERS);
+  std::vector<Point> create_pos() {
+    std::vector<Point> pos;
     for (int i = 0; i < NWALKERS; i++) {
-      pos[i][0] = i - 2;
-      pos[i][1] = i - 2;
-      pos[i][2] = i - 2;
+      pos.emplace_back(i-2, i-2, i-2);
     }
     return pos;
   }
@@ -331,16 +329,11 @@ namespace {
     BasisTest() : basis(NWALKERS, Dummy_Basis_Parser(true)), pos(create_pos()) { }
    
     T basis;
-    std::vector<std::array<double, 3>> pos;
+    std::vector<Point> pos;
   };
 
 
-#define MYVAR
-#ifdef MYVAR
-   using Implementations = testing::Types<Basis_Host, Basis_Device>;
-#else
-  using Implementations = testing::Types<Basis_Host>;
-#endif
+  using Implementations = testing::Types<Basis_Host, Basis_Device>;
   TYPED_TEST_SUITE(BasisTest, Implementations);
 
   TYPED_TEST(BasisTest, BuildContractionTest) {

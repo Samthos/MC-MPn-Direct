@@ -3,7 +3,7 @@ project(MC_MPn LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 14)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 
 execute_process(
   COMMAND git log -1 --format=%h
@@ -17,15 +17,15 @@ find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
 find_path(BLAS_INCLUDE_DIRS cblas.h)
 
+
 option(Enable_CUDA "Enables CUDA Sampling" On)
 if (Enable_CUDA)
-  find_package(CUDA REQUIRED)
-  list(APPEND CUDA_NVCC_FLAGS "-std=c++14;-O3;-DVERBOSE")
-  set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-  set(CUDA_SEPARABLE_COMPILATION ON)
+  enable_language(CUDA)
+  set(CMAKE_CUDA_STANDARD 14)
+  find_library(CUBLAS_LIBRARIES cublas PATHS ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 endif()
 
-option(Enable_MPI "Enables MPI Sampling" Off)
+option(Enable_MPI "Enables MPI Sampling" On)
 if (Enable_MPI)
   find_package(MPI REQUIRED)
 endif()
@@ -42,7 +42,7 @@ endif()
 
 option(ENABLE_TEST "Enables test modules" Off)
 if(${ENABLE_TEST})
-  if(${CUDA_FOUND})
+  if(${Enable_CUDA})
     enable_testing()
     add_subdirectory(googletest)
     add_subdirectory(test)

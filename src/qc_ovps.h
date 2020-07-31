@@ -22,10 +22,12 @@ class OVPS {
   int electron_pairs;
 };
 
+template <> void OVPS<std::vector<double>>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau);
 template class OVPS<std::vector<double>>;
 typedef OVPS<std::vector<double>> OVPS_Host;
 
 #ifdef HAVE_CUDA
+template <> void OVPS<thrust::device_vector<double>>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau);
 template class OVPS<thrust::device_vector<double>>;
 typedef OVPS<thrust::device_vector<double>> OVPS_Device;
 

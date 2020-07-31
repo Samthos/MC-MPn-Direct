@@ -12,4 +12,4 @@ set(source
 )
 
 add_library(tau STATIC ${source})
-target_include_directories(tau PUBLIC ../geometry)
+target_include_directories(tau PRIVATE ../geometry)

@@ -29,9 +29,9 @@ namespace {
   TEST(PointTest, PlusEqualTest) {
     Point p(1.0, 2.0, 3.0);
     p += p;
-    ASSERT_FLOAT_EQ(2.0, p.p[0]);
-    ASSERT_FLOAT_EQ(4.0, p.p[1]);
-    ASSERT_FLOAT_EQ(6.0, p.p[2]);
+    ASSERT_FLOAT_EQ(2.0, p[0]);
+    ASSERT_FLOAT_EQ(4.0, p[1]);
+    ASSERT_FLOAT_EQ(6.0, p[2]);
   }
 
   TEST(PointTest, MinusEqualTest) {
@@ -40,24 +40,24 @@ namespace {
     p -= q;
     p -= q;
     p -= q;
-    ASSERT_FLOAT_EQ(-2.0, p.p[0]);
-    ASSERT_FLOAT_EQ(-4.0, p.p[1]);
-    ASSERT_FLOAT_EQ(-6.0, p.p[2]);
+    ASSERT_FLOAT_EQ(-2.0, p[0]);
+    ASSERT_FLOAT_EQ(-4.0, p[1]);
+    ASSERT_FLOAT_EQ(-6.0, p[2]);
   }
 
   TEST(PointTest, MulEqualTest) {
     Point p(1.0, 2.0, 3.0);
     p *= 5;
-    ASSERT_FLOAT_EQ( 5.0, p.p[0]);
-    ASSERT_FLOAT_EQ(10.0, p.p[1]);
-    ASSERT_FLOAT_EQ(15.0, p.p[2]);
+    ASSERT_FLOAT_EQ( 5.0, p[0]);
+    ASSERT_FLOAT_EQ(10.0, p[1]);
+    ASSERT_FLOAT_EQ(15.0, p[2]);
   }
 
   TEST(PointTest, DivEqualTest) {
     Point p(5.0, 10.0, 15.0);
     p /= 5;
-    ASSERT_FLOAT_EQ(1.0, p.p[0]);
-    ASSERT_FLOAT_EQ(2.0, p.p[1]);
-    ASSERT_FLOAT_EQ(3.0, p.p[2]);
+    ASSERT_FLOAT_EQ(1.0, p[0]);
+    ASSERT_FLOAT_EQ(2.0, p[1]);
+    ASSERT_FLOAT_EQ(3.0, p[2]);
   }
 }

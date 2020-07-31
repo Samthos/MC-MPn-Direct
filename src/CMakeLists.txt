@@ -121,7 +121,7 @@ IF(${MPI_CXX_FOUND})
   target_include_directories(MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
 endif()
 
-if(${CUDA_FOUND})
+if(${Enable_CUDA})
   set(GPU_SPECIFIC_SOURCES
     basis/atomic_orbital.cu
     basis/basis.cu
@@ -129,20 +129,22 @@ if(${CUDA_FOUND})
     qc_ovps.cu
   )
 
-  cuda_add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
+  add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
+  set_target_properties(GPU_MC_MPn_Direct PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  target_compile_definitions(GPU_MC_MPn_Direct PRIVATE -DHAVE_CUDA)
+
   target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
   target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
+  target_link_libraries(GPU_MC_MPn_Direct ${CUBLAS_LIBRARIES})
   target_link_libraries(GPU_MC_MPn_Direct geometry)
   target_link_libraries(GPU_MC_MPn_Direct tau)
 
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
-  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./geometry)
-  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./tau_generators)
-  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./electron_generators)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC geometry)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC tau_generators)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC electron_generators)
 
-  cuda_add_cublas_to_target(GPU_MC_MPn_Direct)
-  target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_CUDA)
   IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to GPU_MC_MPn_Direct")
     target_compile_definitions(GPU_MC_MPn_Direct PUBLIC -DHAVE_MPI)

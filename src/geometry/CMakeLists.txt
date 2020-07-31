@@ -1,6 +1,5 @@
 set(source
   point.h
-  point.cpp
   atom.h
   atom.cpp
   atom_tag_parser.cpp
@@ -9,4 +8,14 @@ set(source
   molecule.h
 )
 
+if(${Enable_CUDA})
+list(APPEND source point.cu)
+else()
+list(APPEND source point.cpp)
+endif()
+
 add_library(geometry STATIC ${source})
+if(${Enable_CUDA})
+  set_target_properties(geometry PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  target_compile_definitions(geometry PRIVATE -DHAVE_CUDA)
+endif()

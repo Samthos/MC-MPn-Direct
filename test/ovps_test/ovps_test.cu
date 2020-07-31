@@ -19,7 +19,7 @@ namespace {
    public:
     void SetUp() override {
       electron_pairs = 10;
-      std::vector<std::array<double, 3>> electron_pair_pos(electron_pairs);
+      std::vector<Point> electron_pair_pos(electron_pairs);
       movecs = std::shared_ptr<Movec_Parser>(new Dummy_Movec_Parser());
 
       lda = movecs->ivir2;

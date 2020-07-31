@@ -110,13 +110,15 @@ namespace ContractionHostTests {
   };
 
   __global__
-  void call_evaluate_contraction(Atomic_Orbital* atomic_orbital, double* contraction_amplitudes, double* contraction_exponents, double* contraction_coeficients, double* s) {
-    atomic_orbital->evaluate_contraction(contraction_amplitudes, contraction_exponents, contraction_coeficients, s);
+  void call_evaluate_contraction(Atomic_Orbital* atomic_orbital, double* contraction_amplitudes, double* contraction_exponents, double* contraction_coeficients, Point* s) {
+    atomic_orbital->evaluate_contraction(contraction_amplitudes, contraction_exponents, contraction_coeficients, s[0]);
   }
 
   TEST_F(DeviceContractionAtomicOrbitalTest, evaluateContractions) {
-    std::vector<double> h_s = {1.0, 1.0, 1.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 1.0, 1.0);
+    thrust::device_vector<Point> d_s(h_s);
+
     call_evaluate_contraction<<<1, 1>>>(atomic_orbital.data().get(), contraction_amplitudes.data().get(), contraction_exponents.data().get(), contraction_coeficients.data().get(), d_s.data().get());
 
     thrust::copy(contraction_amplitudes.begin(), contraction_amplitudes.end(), h_contraction_amplitudes.begin());
@@ -124,13 +126,14 @@ namespace ContractionHostTests {
   }
 
   __global__
-  void call_evaluate_contraction_with_derivative(Atomic_Orbital* atomic_orbital, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double* contraction_exponents, double* contraction_coeficients, double* s) {
-    atomic_orbital->evaluate_contraction_with_derivative(contraction_amplitudes, contraction_amplitude_derivatives, contraction_exponents, contraction_coeficients, s);
+  void call_evaluate_contraction_with_derivative(Atomic_Orbital* atomic_orbital, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double* contraction_exponents, double* contraction_coeficients, Point* s) {
+    atomic_orbital->evaluate_contraction_with_derivative(contraction_amplitudes, contraction_amplitude_derivatives, contraction_exponents, contraction_coeficients, s[0]);
   }
 
   TEST_F(DeviceContractionAtomicOrbitalTest, evaluateContractionsWithDerivatives) {
-    std::vector<double> h_s = {1.0, 1.0, 1.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 1.0, 1.0);
+    thrust::device_vector<Point> d_s(h_s);
 
     call_evaluate_contraction_with_derivative<<<1, 1>>>(atomic_orbital.data().get(), contraction_amplitudes.data().get(), contraction_amplitude_derivatives.data().get(), contraction_exponents.data().get(), contraction_coeficients.data().get(), d_s.data().get());
 
@@ -251,16 +254,17 @@ namespace CartesianDeviceTests {
   };
 
   __global__ 
-  void call_evaluate_ao(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double x[3]) {
-    atomic_orbitals->evaluate_ao(ao_amplitudes, contraction_amplitudes, x);
+  void call_evaluate_ao(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, Point* x) {
+    atomic_orbitals->evaluate_ao(ao_amplitudes, contraction_amplitudes, x[0]);
   }
 
   TEST_P(DeviceCartesianAtomicOrbitalTest, evaluateCartesianAO) {
     std::vector<double> data = {
       1, 2, 3, 4, 6, 9, 8, 12, 18, 27, 16, 24, 36, 54, 81};
 
-    std::vector<double> h_s = {1.0, 2.0, 3.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 2.0, 3.0);
+    thrust::device_vector<Point> d_s(h_s);
     call_evaluate_ao<<<1,1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), d_s.data().get());
 
     thrust::copy(ao_amplitudes.begin(), ao_amplitudes.end(), h_ao_amplitudes.begin());
@@ -270,37 +274,40 @@ namespace CartesianDeviceTests {
   }
 
   __global__ 
-  void call_evaluate_ao_dx(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double x[3]) {
-    atomic_orbitals->evaluate_ao_dx(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x);
+  void call_evaluate_ao_dx(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, Point* x) {
+    atomic_orbitals->evaluate_ao_dx(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x[0]);
   }
 
   TEST_P(DeviceCartesianAtomicOrbitalTest, evaluateCartesianAODX) {
-    std::vector<double> h_s = {2.0, 1.0, 1.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(2.0, 1.0, 1.0);
+    thrust::device_vector<Point> d_s(h_s);
     call_evaluate_ao_dx<<<1, 1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), contraction_amplitude_derivatives.data().get(), d_s.data().get());
     derivative_test(0);
   }
 
   __global__ 
-  void call_evaluate_ao_dy(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double x[3]) {
-    atomic_orbitals->evaluate_ao_dy(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x);
+  void call_evaluate_ao_dy(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, Point* x) {
+    atomic_orbitals->evaluate_ao_dy(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x[0]);
   }
 
   TEST_P(DeviceCartesianAtomicOrbitalTest, evaluateCartesianAODY) {
-    std::vector<double> h_s = {1.0, 2.0, 1.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 2.0, 1.0);
+    thrust::device_vector<Point> d_s(h_s);
     call_evaluate_ao_dy<<<1, 1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), contraction_amplitude_derivatives.data().get(), d_s.data().get());
     derivative_test(1);
   }
 
   __global__ 
-  void call_evaluate_ao_dz(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double x[3]) {
-    atomic_orbitals->evaluate_ao_dz(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x);
+  void call_evaluate_ao_dz(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, Point* x) {
+    atomic_orbitals->evaluate_ao_dz(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x[0]);
   }
 
   TEST_P(DeviceCartesianAtomicOrbitalTest, evaluateCartesianAODZ) {
-    std::vector<double> h_s = {1.0, 1.0, 2.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 1.0, 2.0);
+    thrust::device_vector<Point> d_s(h_s);
     call_evaluate_ao_dz<<<1, 1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), contraction_amplitude_derivatives.data().get(), d_s.data().get());
     derivative_test(2);
   }
@@ -429,8 +436,8 @@ namespace SphericalDeviceTests {
   };
 
   __global__ 
-  void call_evaluate_ao(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double x[3]) {
-    atomic_orbitals->evaluate_ao(ao_amplitudes, contraction_amplitudes, x);
+  void call_evaluate_ao(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, Point* x) {
+    atomic_orbitals->evaluate_ao(ao_amplitudes, contraction_amplitudes, x[0]);
   }
 
   TEST_P(DeviceSphericalAtomicOrbitalTest, evaluateSphericalAO) {
@@ -441,15 +448,17 @@ namespace SphericalDeviceTests {
       {-1.58113883008419, 23.2379000772445, 37.96709101313926, 4.5, -18.98354550656963, -17.42842505793338, 8.696263565463044},
       {-17.74823934929885, -12.54990039801114, 109.5673308974897, 99.61174629530396, -44.625, -49.80587314765198, -82.17549817311728, 69.02445218906124, -5.176569810212166}};
 
-    std::vector<double> h_s = {1.0, 2.0, 3.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 2.0, 3.0);
+    thrust::device_vector<Point> d_s(h_s);
+
     call_evaluate_ao<<<1,1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), d_s.data().get());
     run_asserts(data[shell_type]);
   }
 
   __global__ 
-  void call_evaluate_ao_dx(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double x[3]) {
-    atomic_orbitals->evaluate_ao_dx(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x);
+  void call_evaluate_ao_dx(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, Point* x) {
+    atomic_orbitals->evaluate_ao_dx(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x[0]);
   }
 
   TEST_P(DeviceSphericalAtomicOrbitalTest, evaluateSphericalAODX) {
@@ -461,15 +470,17 @@ namespace SphericalDeviceTests {
       {68.03491750564559, 71.11610225539643, -3.354101966249679, -26.87936011143123, -6.25, 62.45498378832549, -1.118033988749893, -27.19145086235747, -4.437059837324718}
     };
 
-    std::vector<double> h_s = {2.0, 1.0, 1.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(2.0, 1.0, 1.0);
+    thrust::device_vector<Point> d_s(h_s);
+
     call_evaluate_ao_dx<<<1, 1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), contraction_amplitude_derivatives.data().get(), d_s.data().get());
     run_asserts(data[shell_type]);
   }
 
   __global__ 
-  void call_evaluate_ao_dy(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double x[3]) {
-    atomic_orbitals->evaluate_ao_dy(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x);
+  void call_evaluate_ao_dy(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, Point* x) {
+    atomic_orbitals->evaluate_ao_dy(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x[0]);
   }
 
   TEST_P(DeviceSphericalAtomicOrbitalTest, evaluateSphericalAODY) {
@@ -481,15 +492,17 @@ namespace SphericalDeviceTests {
       {-68.03491750564559, -27.19145086235747, -3.354101966249679, -62.45498378832549, -6.25, 26.87936011143122, 1.118033988749893, 71.11610225539643, -4.437059837324718}
     };
 
-    std::vector<double> h_s = {1.0, 2.0, 1.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 2.0, 1.0);
+    thrust::device_vector<Point> d_s(h_s);
+
     call_evaluate_ao_dy<<<1, 1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), contraction_amplitude_derivatives.data().get(), d_s.data().get());
     run_asserts(data[shell_type]);
   }
 
   __global__ 
-  void call_evaluate_ao_dz(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, double x[3]) {
-    atomic_orbitals->evaluate_ao_dz(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x);
+  void call_evaluate_ao_dz(Atomic_Orbital* atomic_orbitals, double* ao_amplitudes, double* contraction_amplitudes, double* contraction_amplitude_derivatives, Point* x) {
+    atomic_orbitals->evaluate_ao_dz(ao_amplitudes, contraction_amplitudes, contraction_amplitude_derivatives, x[0]);
   }
 
   TEST_P(DeviceSphericalAtomicOrbitalTest, evaluateSphericalAODZ) {
@@ -501,8 +514,10 @@ namespace SphericalDeviceTests {
       {0, 20.91650066335189, 76.02631123499285, 64.82669203345178, -5, -64.82669203345179, 0, 20.91650066335189, -5.916079783099618}
     };
 
-    std::vector<double> h_s = {1.0, 1.0, 2.0};
-    thrust::device_vector<double> d_s(h_s);
+    std::vector<Point> h_s;
+    h_s.emplace_back(1.0, 1.0, 2.0);
+    thrust::device_vector<Point> d_s(h_s);
+
     call_evaluate_ao_dz<<<1, 1>>>(atomic_orbital.data().get(), ao_amplitudes.data().get(), contraction_amplitudes.data().get(), contraction_amplitude_derivatives.data().get(), d_s.data().get());
     run_asserts(data[shell_type]);
   }
@@ -511,4 +526,3 @@ namespace SphericalDeviceTests {
       DeviceSphericalAtomicOrbitalTest,
       testing::Values(SHELL::S, SHELL::P, SHELL::D, SHELL::F, SHELL::G));
 }
-
