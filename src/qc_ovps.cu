@@ -2,7 +2,7 @@
 #include "qc_ovps.cpp"
 
 template <>
-void OVPS<thrust::device_vector<double>>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
+void OVPS<thrust::device_vector, thrust::device_allocator>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
   // update green's function trace objects
 
   auto iocc1 = electron_pair_psi1.iocc1;
@@ -43,3 +43,20 @@ void OVPS<thrust::device_vector<double>>::update(Wavefunction& electron_pair_psi
   cublasDestroy(handle);
 }
 
+void copy_OVPS(OVPS_Host& src, OVPS_Device& dest) {
+  for (int i = 0; i < src.o_set.size(); i++) {
+    for (int j = 0; j < src.o_set[i].size(); j++) {
+      copy_OVPS_Set(src.o_set[i][j], dest.o_set[i][j]);
+      copy_OVPS_Set(src.v_set[i][j], dest.v_set[i][j]);
+    }
+  }
+}
+
+void copy_OVPS(OVPS_Device& src, OVPS_Host& dest) {
+  for (int i = 0; i < src.o_set.size(); i++) {
+    for (int j = 0; j < src.o_set[i].size(); j++) {
+      copy_OVPS_Set(src.o_set[i][j], dest.o_set[i][j]);
+      copy_OVPS_Set(src.v_set[i][j], dest.v_set[i][j]);
+    }
+  }
+}

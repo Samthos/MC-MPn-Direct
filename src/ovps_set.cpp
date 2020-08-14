@@ -4,13 +4,13 @@
 #include "cblas.h"
 #include "blas_calls.h"
 
-template <class Container>
-OVPS_Set<Container>::OVPS_Set(int mc_pair_num_) {
+template <template <class, class> class Container, template <class> class Allocator>
+OVPS_Set<Container, Allocator>::OVPS_Set(int mc_pair_num_) {
   resize(mc_pair_num_);
 }
 
-template <class Container>
-void OVPS_Set<Container>::resize(int mc_pair_num_) {
+template <template <class, class> class Container, template <class> class Allocator>
+void OVPS_Set<Container, Allocator>::resize(int mc_pair_num_) {
   mc_pair_num = mc_pair_num_;
   s_11.resize(mc_pair_num * mc_pair_num);
   s_12.resize(mc_pair_num * mc_pair_num);
@@ -18,20 +18,14 @@ void OVPS_Set<Container>::resize(int mc_pair_num_) {
   s_22.resize(mc_pair_num * mc_pair_num);
 }
 
-template <class Container>
-void OVPS_Set<Container>::update(Container& psi1Tau, int psi1_offset, Container& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
+template <template <class, class> class Container, template <class> class Allocator>
+void OVPS_Set<Container, Allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
 }
 
 template <>
-void OVPS_Set<std::vector<double>>::update(std::vector<double>& psi1Tau, int psi1_offset, std::vector<double>& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
+void OVPS_Set<std::vector, std::allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
   double alpha = 1.0;
   double beta = 0.0;
-
-// for (int i = 0; i < lda; i++) {
-//   printf("DEBUGING: psi %2i %12.4f %12.4f\n", i, psi1Tau[i], psi1Tau[i + lda]);
-// }
-// printf("DEBUGING\n");
-// printf("DEBUGING: inner = %i; lda = %i\n", inner, lda);
 
   cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
       mc_pair_num, inner,

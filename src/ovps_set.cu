@@ -2,7 +2,7 @@
 #include "ovps_set.cpp"
 
 template <>
-void OVPS_Set<thrust::device_vector<double>>::update(thrust::device_vector<double>& psi1Tau, int psi1_offset, thrust::device_vector<double>& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
+void OVPS_Set<thrust::device_vector, thrust::device_allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
   double alpha = 1.0;
   double beta = 0.0;
 
@@ -77,3 +77,16 @@ void OVPS_Set<thrust::device_vector<double>>::update(thrust::device_vector<doubl
   cublasDestroy(handle);
 }
 
+void copy_OVPS_Set(OVPS_Set_Host& src, OVPS_Set_Device& dest) {
+  thrust::copy(src.s_11.begin(), src.s_11.end(), dest.s_11.begin());
+  thrust::copy(src.s_12.begin(), src.s_12.end(), dest.s_12.begin());
+  thrust::copy(src.s_21.begin(), src.s_21.end(), dest.s_21.begin());
+  thrust::copy(src.s_22.begin(), src.s_22.end(), dest.s_22.begin());
+}
+
+void copy_OVPS_Set(OVPS_Set_Device& src, OVPS_Set_Host& dest) {
+  thrust::copy(src.s_11.begin(), src.s_11.end(), dest.s_11.begin());
+  thrust::copy(src.s_12.begin(), src.s_12.end(), dest.s_12.begin());
+  thrust::copy(src.s_21.begin(), src.s_21.end(), dest.s_21.begin());
+  thrust::copy(src.s_22.begin(), src.s_22.end(), dest.s_22.begin());
+}

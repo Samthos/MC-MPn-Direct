@@ -12,21 +12,23 @@
 #include "../../src/basis/wavefunction.h"
 #include "../../src/qc_ovps.h"
 
+#include "ovps_test_helper.h"
+
 
 namespace {
-  template <class T>
-  class ovpsTest : public testing::Test {
-   public:
-    void SetUp() override {
-      electron_pairs = 10;
-      std::vector<Point> electron_pair_pos(electron_pairs);
-      movecs = std::shared_ptr<Movec_Parser>(new Dummy_Movec_Parser());
+  template <template <class, class> class Container, template <class> class Allocator>
+  class ovpsFixture {
+    public:
 
-      lda = movecs->ivir2;
-      offset = movecs->orbital_energies[0];
-
-      psi1 = Wavefunction(&electron_pair_pos, movecs);
-      psi2 = Wavefunction(&electron_pair_pos, movecs);
+    ovpsFixture() : 
+      electron_pairs(10),
+      movecs(new Dummy_Movec_Parser()),
+      electron_pair_pos(electron_pairs),
+      lda(movecs->ivir2),
+      offset(movecs->orbital_energies[0]),
+      psi1(&electron_pair_pos, movecs),
+      psi2(&electron_pair_pos, movecs)
+    {
       std::iota(psi1.psi.begin(), psi1.psi.end(), 0.0);
       std::iota(psi2.psi.begin(), psi2.psi.end(), 0.0);
       std::transform(psi2.psi.begin(), psi2.psi.end(), psi2.psi.begin(), std::negate<>());
@@ -34,11 +36,39 @@ namespace {
       std::shared_ptr<Stochastic_Tau> stochastic_tau(new Stochastic_Tau(movecs));
       stochastic_tau->resize(2);
       stochastic_tau->set({1.0-1.0/exp(2), 1.0-1.0/exp(2)});
-
       tau = std::shared_ptr<Tau>(stochastic_tau);
 
       ovps.init(2, electron_pairs);
     }
+
+    int electron_pairs;
+
+    std::shared_ptr<Movec_Parser> movecs;
+    std::vector<Point> electron_pair_pos;
+
+    int lda;
+    double offset;
+
+    std::shared_ptr<Tau> tau;
+
+    Wavefunction psi1;
+    Wavefunction psi2;
+    OVPS<Container, Allocator> ovps;
+  };
+
+  template class ovpsFixture<std::vector, std::allocator>;
+  typedef ovpsFixture<std::vector, std::allocator> ovpsHostFixture;
+
+  template class ovpsFixture<thrust::device_vector, thrust::device_allocator>;
+  typedef ovpsFixture<thrust::device_vector, thrust::device_allocator> ovpsDeviceFixture;
+
+  template <class T>
+  class ovpsTest : public testing::Test {
+   public:
+    ovpsTest() :
+      electron_pairs(ovps_fixture.electron_pairs),
+      lda(ovps_fixture.lda),
+      offset(ovps_fixture.offset) { }
 
     std::string array_name(char set, int stop, int start, int index) {
       std::string str;
@@ -48,9 +78,8 @@ namespace {
       return str;
     }
 
-    void call_check(int sign, int, int, int, T& array, const std::string& array_name){}
-
-    void check(int sign, int start, int stop, int n_tau, std::vector<double>& array, const std::string& array_name) {
+    void check(int sign, int start, int stop, int n_tau, const std::vector<double>& array, const std::string& array_name) {
+      stop -= 1;
       for (int row = 0; row < electron_pairs; row++) {
         for (int col = 0; col < electron_pairs; col++) {
           ASSERT_FLOAT_EQ(array[col * electron_pairs + row], sign * value(row, col, start, stop, n_tau))
@@ -73,46 +102,30 @@ namespace {
        ) / (exp(-n*offset) * pow(exp(n) - 1,3));
     }
 
+    T ovps_fixture;
     int electron_pairs;
-    std::shared_ptr<Movec_Parser> movecs;
     int lda;
     double offset;
-    Wavefunction psi1;
-    Wavefunction psi2;
-    std::shared_ptr<Tau> tau;
-    OVPS<T> ovps;
   };
 
-  template <>
-  void ovpsTest<std::vector<double>>::call_check(int sign, int start, int stop, int n_tau, std::vector<double>& array, const std::string& array_name) {
-    check(sign, start, stop - 1, n_tau, array, array_name);
-  }
-
-  template <>
-  void ovpsTest<thrust::device_vector<double>>::call_check(int sign, int start, int stop, int n_tau, thrust::device_vector<double>& array, const std::string& array_name) {
-    std::vector<double> host_array(array.size());
-    thrust::copy(array.begin(), array.end(), host_array.begin());
-    check(sign, start, stop - 1, n_tau, host_array, array_name);
-  }
-
-  using Implementations = testing::Types<std::vector<double>, thrust::device_vector<double>>;
+  using Implementations = testing::Types<ovpsHostFixture, ovpsDeviceFixture>;
   TYPED_TEST_SUITE(ovpsTest, Implementations);
 
   TYPED_TEST(ovpsTest, update) {
-    this->ovps.update(this->psi1, this->psi2, this->tau.get());
+    this->ovps_fixture.ovps.update(this->ovps_fixture.psi1, this->ovps_fixture.psi2, this->ovps_fixture.tau.get());
 
-    for (auto stop = 0; stop < this->ovps.o_set.size(); stop++) {
-      for (auto start = 0; start < this->ovps.o_set[stop].size(); start++) {
+    for (auto stop = 0; stop < this->ovps_fixture.ovps.o_set.size(); stop++) {
+      for (auto start = 0; start < this->ovps_fixture.ovps.o_set[stop].size(); start++) {
         int n_tau = 1 + stop - start;
-        this->call_check(1, this->movecs->iocc1, this->movecs->iocc2,  n_tau, this->ovps.o_set[stop][start].s_11, this->array_name('o', stop, start, 11));
-        this->call_check(-1, this->movecs->iocc1, this->movecs->iocc2,  n_tau, this->ovps.o_set[stop][start].s_12, this->array_name('o', stop, start, 12));
-        this->call_check(-1, this->movecs->iocc1, this->movecs->iocc2,  n_tau, this->ovps.o_set[stop][start].s_21, this->array_name('o', stop, start, 21));
-        this->call_check(1, this->movecs->iocc1, this->movecs->iocc2,  n_tau, this->ovps.o_set[stop][start].s_22, this->array_name('o', stop, start, 22));
-
-        this->call_check(1, this->movecs->ivir1, this->movecs->ivir2, -n_tau, this->ovps.v_set[stop][start].s_11, this->array_name('v', stop, start, 11));
-        this->call_check(-1, this->movecs->ivir1, this->movecs->ivir2, -n_tau, this->ovps.v_set[stop][start].s_12, this->array_name('v', stop, start, 12));
-        this->call_check(-1, this->movecs->ivir1, this->movecs->ivir2, -n_tau, this->ovps.v_set[stop][start].s_21, this->array_name('v', stop, start, 21));
-        this->call_check(1, this->movecs->ivir1, this->movecs->ivir2, -n_tau, this->ovps.v_set[stop][start].s_22, this->array_name('v', stop, start, 22));
+        this->check( 1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_11), this->array_name('o', stop, start, 11));
+        this->check(-1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_12), this->array_name('o', stop, start, 12));
+        this->check(-1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_21), this->array_name('o', stop, start, 21));
+        this->check( 1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_22), this->array_name('o', stop, start, 22));
+                        
+        this->check( 1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_11), this->array_name('v', stop, start, 11));
+        this->check(-1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_12), this->array_name('v', stop, start, 12));
+        this->check(-1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_21), this->array_name('v', stop, start, 21));
+        this->check( 1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_22), this->array_name('v', stop, start, 22));
       }
     }
   }

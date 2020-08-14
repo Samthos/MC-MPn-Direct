@@ -10,36 +10,29 @@
 #include "tau.h"
 #include "ovps_set.h"
 
-template <class Container>
+template <template <class, class> class Container, template <class> class Allocator>
 class OVPS {
  public:
   void init(int dimm, int electron_pairs_);
   void update(Wavefunction&, Wavefunction&, Tau*);
 
-  std::vector<std::vector<OVPS_Set<Container>>> o_set, v_set;
+  std::vector<std::vector<OVPS_Set<Container, Allocator>>> o_set, v_set;
 
  private:
   int electron_pairs;
 };
 
-template <> void OVPS<std::vector<double>>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau);
-template class OVPS<std::vector<double>>;
-typedef OVPS<std::vector<double>> OVPS_Host;
+template <> void OVPS<std::vector, std::allocator>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau);
+template class OVPS<std::vector, std::allocator>;
+typedef OVPS<std::vector, std::allocator> OVPS_Host;
 
 #ifdef HAVE_CUDA
-template <> void OVPS<thrust::device_vector<double>>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau);
-template class OVPS<thrust::device_vector<double>>;
-typedef OVPS<thrust::device_vector<double>> OVPS_Device;
+template <> void OVPS<thrust::device_vector, thrust::device_allocator>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau);
+template class OVPS<thrust::device_vector, thrust::device_allocator>;
+typedef OVPS<thrust::device_vector, thrust::device_allocator> OVPS_Device;
 
-template <class T, class S>
-void copy_OVPS(OVPS<T>& src, OVPS<S>& dest) {
-  for (int i = 0; i < src.o_set.size(); i++) {
-    for (int j = 0; j < src.o_set[i].size(); j++) {
-      copy_OVPS_Set(src.o_set[i][j], dest.o_set[i][j]);
-      copy_OVPS_Set(src.v_set[i][j], dest.v_set[i][j]);
-    }
-  }
-}
+void copy_OVPS(OVPS_Host& src, OVPS_Device& dest);
+void copy_OVPS(OVPS_Device& src, OVPS_Host& dest);
 #endif
 
 #endif  // QC_OVPS_H_

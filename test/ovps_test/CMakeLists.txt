@@ -2,6 +2,7 @@ message("ovps test " ${gtest_SOURCE_DIR}/)
 
 add_executable(ovps_set_test.x 
   ovps_set_test.cu
+  ovps_test_helper.h
   ../../src/ovps_set.cu
   ../../src/ovps_set.h
   ../../src/blas_calls.h
@@ -18,6 +19,7 @@ add_test(NAME OVPS_SET_TEST COMMAND ovps_set_test.x)
 
 add_executable(ovps_test.x 
   ovps_test.cu
+  ovps_test_helper.h
   ../../src/qc_ovps.h
   ../../src/qc_ovps.cu
   ../../src/ovps_set.h
