@@ -1,7 +1,8 @@
 #include <vector>
 #include "wavefunction.h"
 
-Wavefunction::Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser> movecs_in) :
+template <template <class, class> class Container, template <class> class Allocator>
+Wavefunction<Container, Allocator>::Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser> movecs_in) :
   iocc1(movecs_in->iocc1),
   iocc2(movecs_in->iocc2),
   ivir1(movecs_in->ivir1),
@@ -14,21 +15,85 @@ Wavefunction::Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Pa
   pos(p)
 { }
 
-const double *Wavefunction::data() const {
-  return psi.data();
+template <template <class, class> class Container, template <class> class Allocator>
+const double* Wavefunction<Container, Allocator>::data() const {
+  return get_raw_pointer(psi);
 }
-const double *Wavefunction::occ() const {
-  return psi.data() + iocc1;
+
+template <template <class, class> class Container, template <class> class Allocator>
+const double* Wavefunction<Container, Allocator>::occ() const {
+  return get_raw_pointer(psi) + iocc1;
 }
-const double *Wavefunction::vir() const {
-  return psi.data() + ivir1;
+
+template <template <class, class> class Container, template <class> class Allocator>
+const double* Wavefunction<Container, Allocator>::vir() const {
+  return get_raw_pointer(psi) + ivir1;
 }
-double *Wavefunction::dataTau() {
-  return psiTau.data();
+
+template <template <class, class> class Container, template <class> class Allocator>
+const double* Wavefunction<Container, Allocator>::dataTau() const {
+  return get_raw_pointer(psiTau);
 }
-double *Wavefunction::occTau() {
-  return psiTau.data() + iocc1;
+
+template <template <class, class> class Container, template <class> class Allocator>
+const double* Wavefunction<Container, Allocator>::occTau() const {
+  return get_raw_pointer(psiTau) + iocc1;
 }
-double *Wavefunction::virTau() {
-  return psiTau.data() + ivir1;
+
+template <template <class, class> class Container, template <class> class Allocator>
+const double* Wavefunction<Container, Allocator>::virTau() const {
+  return get_raw_pointer(psiTau) + ivir1;
+}
+
+
+template <template <class, class> class Container, template <class> class Allocator>
+double* Wavefunction<Container, Allocator>::data() {
+  return get_raw_pointer(psi);
+}
+
+template <template <class, class> class Container, template <class> class Allocator>
+double* Wavefunction<Container, Allocator>::occ() {
+  return get_raw_pointer(psi) + iocc1;
+}
+
+template <template <class, class> class Container, template <class> class Allocator>
+double* Wavefunction<Container, Allocator>::vir() {
+  return get_raw_pointer(psi) + ivir1;
+}
+
+template <template <class, class> class Container, template <class> class Allocator>
+double* Wavefunction<Container, Allocator>::dataTau() {
+  return get_raw_pointer(psiTau);
+}
+
+template <template <class, class> class Container, template <class> class Allocator>
+double* Wavefunction<Container, Allocator>::occTau() {
+  return get_raw_pointer(psiTau) + iocc1;
+}
+
+template <template <class, class> class Container, template <class> class Allocator>
+double* Wavefunction<Container, Allocator>::virTau() {
+  return get_raw_pointer(psiTau) + ivir1;
+}
+
+
+template <template <class, class> class Container, template <class> class Allocator>
+double* Wavefunction<Container, Allocator>::get_raw_pointer(Container<double, Allocator<double>>&) {
+  return nullptr;
+}
+
+template <template <class, class> class Container, template <class> class Allocator>
+const double* Wavefunction<Container, Allocator>::get_raw_pointer(const Container<double, Allocator<double>>&) {
+  return nullptr;
+}
+
+
+template <>
+double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(std::vector<double, std::allocator<double>>& v) {
+  return v.data();
+}
+
+template <>
+const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const std::vector<double, std::allocator<double>>& v) {
+  return v.data();
 }

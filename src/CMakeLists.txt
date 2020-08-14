@@ -40,7 +40,6 @@ set(source
   basis/basis.h
   basis/shell.cpp
   basis/shell.h
-  basis/wavefunction.cpp 
   basis/wavefunction.h
   MCF12/F12_Traces.cpp
   MCF12/F12_Traces.h
@@ -97,6 +96,7 @@ add_subdirectory(tau_generators)
 set(CPU_SPECIFIC_SOURCES
   basis/atomic_orbital.cpp
   basis/basis.cpp
+  basis/wavefunction.cpp
   ovps_set.cpp
   qc_ovps.cpp 
 )
@@ -125,6 +125,7 @@ if(${Enable_CUDA})
   set(GPU_SPECIFIC_SOURCES
     basis/atomic_orbital.cu
     basis/basis.cu
+    basis/wavefunction.cu
     ovps_set.cu
     qc_ovps.cu
   )

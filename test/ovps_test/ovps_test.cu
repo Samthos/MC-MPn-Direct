@@ -51,8 +51,8 @@ namespace {
 
     std::shared_ptr<Tau> tau;
 
-    Wavefunction psi1;
-    Wavefunction psi2;
+    Wavefunction<Container, Allocator> psi1;
+    Wavefunction<Container, Allocator> psi2;
     OVPS<Container, Allocator> ovps;
   };
 

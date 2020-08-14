@@ -27,7 +27,7 @@ add_executable(ovps_test.x
   ../../src/qc_mpi.h
   ../../src/qc_mpi.cpp
   ../../src/basis/wavefunction.h
-  ../../src/basis/wavefunction.cpp
+  ../../src/basis/wavefunction.cu
   ../../src/basis/movec_parser.h
   ../../src/basis/movec_parser.cpp
   ../../src/basis/dummy_movec_parser.h

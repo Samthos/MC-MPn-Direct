@@ -2,7 +2,7 @@
 #include "qc_ovps.cpp"
 
 template <>
-void OVPS<thrust::device_vector, thrust::device_allocator>::update(Wavefunction& electron_pair_psi1, Wavefunction& electron_pair_psi2, Tau* tau) {
+void OVPS<thrust::device_vector, thrust::device_allocator>::update(Wavefunction<thrust::device_vector, thrust::device_allocator>& electron_pair_psi1, Wavefunction<thrust::device_vector, thrust::device_allocator>& electron_pair_psi2, Tau* tau) {
   // update green's function trace objects
 
   auto iocc1 = electron_pair_psi1.iocc1;
