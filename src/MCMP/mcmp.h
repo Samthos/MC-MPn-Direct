@@ -9,10 +9,13 @@
 #include "electron_list.h"
 
 class MCMP {
+ protected:
+  typedef Wavefunction_Host Wavefunction_Type;
+
  public:
   MCMP(int ncv, int ntc, const std::string& e, bool f) : n_control_variates(ncv), n_tau_coordinates(ntc), extension(e), is_f12(f) {}
   virtual void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) = 0;
-  virtual void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) = 0;
+  virtual void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) = 0;
 
   int n_control_variates;
   int n_tau_coordinates;

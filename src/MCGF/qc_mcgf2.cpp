@@ -165,7 +165,7 @@ void GF2_Functional::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_lis
 }
 
 void GF2_Functional::energy_no_diff(std::vector<std::vector<double>>& egf2,
-       std::unordered_map<int, Wavefunction>& wavefunctions,
+       std::unordered_map<int, Wavefunction_Type>& wavefunctions,
        Electron_Pair_List* electron_pair_list, Tau* tau) {
   double en2;
   double alpha, beta;
@@ -211,7 +211,7 @@ void GF2_Functional::energy_no_diff(std::vector<std::vector<double>>& egf2,
 }
 
 void GF2_Functional::energy_diff(std::vector<std::vector<double>>& egf2,
-       std::unordered_map<int, Wavefunction>& wavefunctions,
+       std::unordered_map<int, Wavefunction_Type>& wavefunctions,
        Electron_Pair_List* electron_pair_list, Tau* tau
     ) {
   double en2m, en2p;
@@ -272,5 +272,5 @@ void GF2_Functional::energy_diff(std::vector<std::vector<double>>& egf2,
 }
 
 void GF2_Functional::energy_f12(std::vector<std::vector<double>>&, 
-   std::unordered_map<int, Wavefunction>&,
+   std::unordered_map<int, Wavefunction_Type>&,
    Electron_Pair_List*, Electron_List*) {}

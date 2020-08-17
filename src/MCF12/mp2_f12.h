@@ -13,16 +13,19 @@
 #include "correlation_factors.h"
 
 class MP2_F12_V : public MCMP {
+ protected:
+  typedef Wavefunction_Host Wavefunction_Type;
+
  public:
   explicit MP2_F12_V(const IOPs& iops, std::string extension="f12_V");
   ~MP2_F12_V();
   void energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* epl, Tau* tau) override {}
-  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
  protected:
   double calculate_v_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   double calculate_v_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   double calculate_v_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
-  void calculate_v(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_v(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
   //define the amplitudes
   static constexpr double a1 = 3.0/8.0;
@@ -47,11 +50,11 @@ class MP2_F12_V : public MCMP {
 class MP2_F12_VBX : public MP2_F12_V {
  public:
   explicit MP2_F12_VBX(const IOPs& iops);
-  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
  protected:
   void zero();
-  void calculate_bx(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
 
   double calculate_bx_t_fa_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);
   double calculate_bx_t_fa_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* el_one_list);

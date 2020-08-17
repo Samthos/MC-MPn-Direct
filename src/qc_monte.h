@@ -60,6 +60,10 @@ class GFStats {
 
 template <class Container>
 class QC_monte {
+ protected:
+  typedef Wavefunction_Host Wavefunction_Type;
+  typedef Basis_Host Basis_Type;
+
  public:
   QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basis_Host p3);
   virtual ~QC_monte();
@@ -69,11 +73,11 @@ class QC_monte {
   MPI_info mpi_info;
   IOPs iops;
   Molecule molec;
-  Basis_Host basis;
+  Basis_Type basis;
   Electron_Pair_GTO_Weight electron_pair_weight;
   Electron_GTO_Weight electron_weight;
 
-  std::unordered_map<int, Wavefunction> wavefunctions;
+  std::unordered_map<int, Wavefunction_Type> wavefunctions;
   std::unordered_map<int, std::vector<int>> wavefunction_groups;
 
   Random random;
@@ -134,13 +138,13 @@ class Dimer : public Energy<std::vector<double>> {
  protected:
   Tau* monomer_a_tau;
   Tau* monomer_b_tau;
-  std::unordered_map<int, Wavefunction> monomer_a_wavefunctions;
-  std::unordered_map<int, Wavefunction> monomer_b_wavefunctions;
+  std::unordered_map<int, Wavefunction_Type> monomer_a_wavefunctions;
+  std::unordered_map<int, Wavefunction_Type> monomer_b_wavefunctions;
   void update_wavefunction() override;
   void energy() override;
 
   template <class Binary_Op> 
-  void local_energy(std::unordered_map<int, Wavefunction>& l_wavefunction, Tau* l_tau, Binary_Op);
+  void local_energy(std::unordered_map<int, Wavefunction_Type>& l_wavefunction, Tau* l_tau, Binary_Op);
 
   std::vector<double> l_emp;
   std::vector<std::vector<double>> l_control;

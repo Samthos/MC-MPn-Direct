@@ -9,7 +9,7 @@ void QC_monte<Container>::update_wavefunction() {
       basis.build_contractions_with_derivatives(*wavefunctions[it.second.front()].pos);
     }
     for (auto &jt : it.second) {
-      Wavefunction& wavefunction = wavefunctions[jt];
+      Wavefunction_Type& wavefunction = wavefunctions[jt];
       auto code = jt & WT::mask;
       switch (code) {
         case WT::normal: basis.host_psi_get(wavefunction, *wavefunction.pos); break;
@@ -29,9 +29,9 @@ void Dimer::update_wavefunction() {
       basis.build_contractions_with_derivatives(*wavefunctions[it.second.front()].pos);
     }
     for (auto &jt : it.second) {
-      Wavefunction& wavefunction = wavefunctions[jt];
-      Wavefunction& monomer_a_wavefunction = monomer_a_wavefunctions[jt];
-      Wavefunction& monomer_b_wavefunction = monomer_b_wavefunctions[jt];
+      Wavefunction_Type& wavefunction = wavefunctions[jt];
+      Wavefunction_Type& monomer_a_wavefunction = monomer_a_wavefunctions[jt];
+      Wavefunction_Type& monomer_b_wavefunction = monomer_b_wavefunctions[jt];
       auto code = jt & WT::mask;
       switch (code) {
         case WT::normal: 

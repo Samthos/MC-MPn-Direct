@@ -946,7 +946,7 @@ void GF3_Functional::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_lis
 }
 
 void GF3_Functional::energy_no_diff(std::vector<std::vector<double>>& egf3, 
-       std::unordered_map<int, Wavefunction>& wavefunctions,
+       std::unordered_map<int, Wavefunction_Type>& wavefunctions,
        Electron_Pair_List* electron_pair_list, Tau* tau) {
   for (int band = 0; band < numBand; band++) {
     double en3 = 0;
@@ -1036,7 +1036,7 @@ void GF3_Functional::energy_no_diff(std::vector<std::vector<double>>& egf3,
 }
 
 void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3, 
-       std::unordered_map<int, Wavefunction>& wavefunctions,
+       std::unordered_map<int, Wavefunction_Type>& wavefunctions,
        Electron_Pair_List* electron_pair_list, Tau* tau) {
   for (int band = 0; band < numBand; band++) {
     int ip, dp;
@@ -1181,7 +1181,7 @@ void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3,
 }
 
 void GF3_Functional::energy_f12(std::vector<std::vector<double>>&, 
-   std::unordered_map<int, Wavefunction>&,
+   std::unordered_map<int, Wavefunction_Type>&,
    Electron_Pair_List*, Electron_List*) {}
 
 

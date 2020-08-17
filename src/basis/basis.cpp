@@ -24,7 +24,7 @@ Basis<Container, Allocator>::Basis(const int& mc_num_, const Basis_Parser& basis
 { }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::host_psi_get(Wavefunction& psi, std::vector<Point>& pos) {
+void Basis<Container, Allocator>::host_psi_get(Wavefunction_Type& psi, vector_point& pos) {
   build_ao_amplitudes(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
       pos.size(), psi.lda, qc_nbf,
@@ -36,7 +36,7 @@ void Basis<Container, Allocator>::host_psi_get(Wavefunction& psi, std::vector<Po
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::host_psi_get_dx(Wavefunction& psi_dx, std::vector<Point>& pos) {
+void Basis<Container, Allocator>::host_psi_get_dx(Wavefunction_Type& psi_dx, vector_point& pos) {
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -49,7 +49,7 @@ void Basis<Container, Allocator>::host_psi_get_dx(Wavefunction& psi_dx, std::vec
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::host_psi_get_dy(Wavefunction& psi_dy, std::vector<Point>& pos) {
+void Basis<Container, Allocator>::host_psi_get_dy(Wavefunction_Type& psi_dy, vector_point& pos) {
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -62,7 +62,7 @@ void Basis<Container, Allocator>::host_psi_get_dy(Wavefunction& psi_dy, std::vec
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::host_psi_get_dz(Wavefunction& psi_dz, std::vector<Point>& pos) {
+void Basis<Container, Allocator>::host_psi_get_dz(Wavefunction_Type& psi_dz, vector_point& pos) {
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -75,7 +75,7 @@ void Basis<Container, Allocator>::host_psi_get_dz(Wavefunction& psi_dz, std::vec
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::build_contractions(const std::vector<Point> &pos) {
+void Basis<Container, Allocator>::build_contractions(const vector_point &pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
       atomic_orbital.evaluate_contraction(
@@ -88,7 +88,7 @@ void Basis<Container, Allocator>::build_contractions(const std::vector<Point> &p
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::build_contractions_with_derivatives(const std::vector<Point>& pos) {
+void Basis<Container, Allocator>::build_contractions_with_derivatives(const vector_point& pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
       atomic_orbital.evaluate_contraction_with_derivative(
@@ -102,7 +102,7 @@ void Basis<Container, Allocator>::build_contractions_with_derivatives(const std:
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes(const std::vector<Point> &pos) {
+void Basis<Container, Allocator>::build_ao_amplitudes(const vector_point &pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++) {
       atomic_orbitals[shell].evaluate_ao(
@@ -114,7 +114,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes(const std::vector<Point> &
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes_dx(const std::vector<Point>& pos){
+void Basis<Container, Allocator>::build_ao_amplitudes_dx(const vector_point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
       atomic_orbitals[shell].evaluate_ao_dx(
@@ -127,7 +127,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dx(const std::vector<Point
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes_dy(const std::vector<Point>& pos){
+void Basis<Container, Allocator>::build_ao_amplitudes_dy(const vector_point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
       atomic_orbitals[shell].evaluate_ao_dy(
@@ -140,7 +140,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dy(const std::vector<Point
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes_dz(const std::vector<Point>& pos){
+void Basis<Container, Allocator>::build_ao_amplitudes_dz(const vector_point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
       atomic_orbitals[shell].evaluate_ao_dz(

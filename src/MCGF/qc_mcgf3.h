@@ -15,16 +15,16 @@ class GF3_Functional : public MCGF {
    GF3_Functional(IOPs&);
    ~GF3_Functional();
    void energy_f12(std::vector<std::vector<double>>&, 
-       std::unordered_map<int, Wavefunction>&,
+       std::unordered_map<int, Wavefunction_Type>&,
        Electron_Pair_List*, Electron_List*);
 
   private:
    void core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list);
    void energy_no_diff(std::vector<std::vector<double>>&, 
-       std::unordered_map<int, Wavefunction>&,
+       std::unordered_map<int, Wavefunction_Type>&,
        Electron_Pair_List*, Tau*);
    void energy_diff(std::vector<std::vector<double>>&,
-       std::unordered_map<int, Wavefunction>&,
+       std::unordered_map<int, Wavefunction_Type>&,
        Electron_Pair_List*, Tau*);
    void gf3_core_c(OVPS_Host&, Electron_Pair_List*);
    void gf3_core_1(OVPS_Host&, Electron_Pair_List*);

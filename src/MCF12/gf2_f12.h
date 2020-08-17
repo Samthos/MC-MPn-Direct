@@ -15,11 +15,14 @@
 #include "correlation_factors.h"
 
 class GF2_F12_V : public MCGF {
+ protected: 
+  typedef Wavefunction_Host Wavefunction_Type;
+
  public:
   explicit GF2_F12_V(IOPs& iops, std::string extension="f12_V");
   ~GF2_F12_V();
   void energy_f12(std::vector<std::vector<double>>&, 
-     std::unordered_map<int, Wavefunction>&,
+     std::unordered_map<int, Wavefunction_Type>&,
      Electron_Pair_List*, Electron_List*);
 
  protected:
@@ -27,15 +30,15 @@ class GF2_F12_V : public MCGF {
   double calculate_v_3e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list);
   double calculate_v_4e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list);
   void calculate_v(std::vector<std::vector<double>>&, 
-     std::unordered_map<int, Wavefunction>&,
+     std::unordered_map<int, Wavefunction_Type>&,
      Electron_Pair_List*, Electron_List*);
 
   void core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list);
   void energy_no_diff(std::vector<std::vector<double>>&, 
-     std::unordered_map<int, Wavefunction>&,
+     std::unordered_map<int, Wavefunction_Type>&,
      Electron_Pair_List*, Tau*);
   void energy_diff(std::vector<std::vector<double>>&,
-     std::unordered_map<int, Wavefunction>&,
+     std::unordered_map<int, Wavefunction_Type>&,
      Electron_Pair_List*, Tau*);
 
   //define the amplitudes
@@ -69,11 +72,11 @@ class GF2_F12_VBX : public GF2_F12_V {
  public:
   explicit GF2_F12_VBX(IOPs& iops);
   void energy_f12(std::vector<std::vector<double>>&, 
-     std::unordered_map<int, Wavefunction>&,
+     std::unordered_map<int, Wavefunction_Type>&,
      Electron_Pair_List*, Electron_List*);
 
  protected:
-  void calculate_bx(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
+  void calculate_bx(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   double calculate_bx_t_fa_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   double calculate_bx_t_fa_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);
   double calculate_bx_t_fa_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list);

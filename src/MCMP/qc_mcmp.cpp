@@ -174,7 +174,7 @@ void GPU_Energy::energy() {
 #endif
 
 template <class Binary_Op>
-void Dimer::local_energy(std::unordered_map<int, Wavefunction>& l_wavefunctions, Tau* l_tau, Binary_Op op) {
+void Dimer::local_energy(std::unordered_map<int, Wavefunction_Type>& l_wavefunctions, Tau* l_tau, Binary_Op op) {
   std::fill(l_emp.begin(), l_emp.end(), 0.0);
   for (auto &c : l_control) {
     std::fill(c.begin(), c.end(), 0.0);

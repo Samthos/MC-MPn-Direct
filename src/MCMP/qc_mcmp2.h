@@ -8,7 +8,7 @@ class MCMP2 : public MCMP {
  public:
    MCMP2() : MCMP(CVMP2 * (CVMP2+1), 1, "22", false) {}
    void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) override;
-  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list){}
+  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list){}
  private:
 };
 

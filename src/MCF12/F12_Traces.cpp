@@ -43,18 +43,18 @@ F12_Traces::F12_Traces(int electron_pairs_, int electrons_) :
 {
 }
 
-void F12_Traces::update_v(std::unordered_map<int, Wavefunction>& wavefunctions) {
+void F12_Traces::update_v(std::unordered_map<int, Wavefunction_Type>& wavefunctions) {
   build_one_e_one_e_traces(wavefunctions[WC::electrons]);
   build_two_e_traces(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2]);
   build_two_e_one_e_traces(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], wavefunctions[WC::electrons]);
 }
 
-void F12_Traces::update_bx(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void F12_Traces::update_bx(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   build_two_e_derivative_traces(wavefunctions, electron_pair_list);
   build_two_e_one_e_derivative_traces(wavefunctions, electron_pair_list, electron_list);
 }
 
-void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_List* electron_list) {
+void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_List* electron_list) {
   auto lda = wavefunctions[WC::electrons].lda;
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
@@ -109,7 +109,7 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction>& wave
   }
 }
 
-void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
+void F12_Traces::build_one_e_one_e_traces(const Wavefunction_Type& electron_psi) {
   double alpha = 1.0;
   double beta = 0.0;
   auto iocc1 = electron_psi.iocc1;
@@ -151,7 +151,7 @@ void F12_Traces::build_one_e_one_e_traces(const Wavefunction& electron_psi) {
   cblas_dscal(electrons, 0.0, ok12.data(), electrons+1);
 }
 
-void F12_Traces::build_two_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2) {
+void F12_Traces::build_two_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2) {
   auto iocc1 = electron_pair_psi1.iocc1;
   auto iocc2 = electron_pair_psi1.iocc2;
   auto ivir1 = electron_pair_psi1.ivir1;
@@ -176,7 +176,7 @@ void F12_Traces::build_two_e_traces(const Wavefunction& electron_pair_psi1, cons
   }
 }
 
-void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1, const Wavefunction& electron_pair_psi2, const Wavefunction& electron_psi) {
+void F12_Traces::build_two_e_one_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2, const Wavefunction_Type& electron_psi) {
   double alpha = 1.0;
   double beta = 0.0;
   auto iocc1 = electron_psi.iocc1;
@@ -236,7 +236,7 @@ void F12_Traces::build_two_e_one_e_traces(const Wavefunction& electron_pair_psi1
       k23.data(), electrons);
 }
 
-void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list) {
+void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list) {
   auto lda = wavefunctions[WC::electron_pairs_1].lda;
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
@@ -269,7 +269,7 @@ void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunct
   }
 }
 
-void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
   auto ivir1 = wavefunctions[WC::electrons].ivir1;

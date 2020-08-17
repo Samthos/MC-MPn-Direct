@@ -32,25 +32,25 @@ QC_monte<Container>::QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basis_Host p3) 
   ivir2 = movecs->ivir2;
 
   electron_pair_list = create_electron_pair_sampler(iops, molec, electron_pair_weight);
-  wavefunctions.emplace(WC::electron_pairs_1, Wavefunction(&electron_pair_list->pos1, movecs));
-  wavefunctions.emplace(WC::electron_pairs_2, Wavefunction(&electron_pair_list->pos2, movecs));
+  wavefunctions.emplace(WC::electron_pairs_1, Wavefunction_Type(&electron_pair_list->pos1, movecs));
+  wavefunctions.emplace(WC::electron_pairs_2, Wavefunction_Type(&electron_pair_list->pos2, movecs));
 
   electron_list = nullptr;
   if (iops.iopns[KEYS::TASK] & TASK::ANY_F12) {
     electron_list = create_electron_sampler(iops, molec, electron_weight);
-    wavefunctions.emplace(WC::electrons, Wavefunction(&electron_list->pos, movecs));
+    wavefunctions.emplace(WC::electrons, Wavefunction_Type(&electron_list->pos, movecs));
     if (iops.iopns[KEYS::TASK] & TASK::ANY_F12_VBX) {
-      wavefunctions.emplace(WC::electrons_dx, Wavefunction(&electron_list->pos, movecs));
-      wavefunctions.emplace(WC::electrons_dy, Wavefunction(&electron_list->pos, movecs));
-      wavefunctions.emplace(WC::electrons_dz, Wavefunction(&electron_list->pos, movecs));
+      wavefunctions.emplace(WC::electrons_dx, Wavefunction_Type(&electron_list->pos, movecs));
+      wavefunctions.emplace(WC::electrons_dy, Wavefunction_Type(&electron_list->pos, movecs));
+      wavefunctions.emplace(WC::electrons_dz, Wavefunction_Type(&electron_list->pos, movecs));
 
-      wavefunctions.emplace(WC::electron_pairs_1_dx, Wavefunction(&electron_pair_list->pos1, movecs));
-      wavefunctions.emplace(WC::electron_pairs_1_dy, Wavefunction(&electron_pair_list->pos1, movecs));
-      wavefunctions.emplace(WC::electron_pairs_1_dz, Wavefunction(&electron_pair_list->pos1, movecs));
+      wavefunctions.emplace(WC::electron_pairs_1_dx, Wavefunction_Type(&electron_pair_list->pos1, movecs));
+      wavefunctions.emplace(WC::electron_pairs_1_dy, Wavefunction_Type(&electron_pair_list->pos1, movecs));
+      wavefunctions.emplace(WC::electron_pairs_1_dz, Wavefunction_Type(&electron_pair_list->pos1, movecs));
 
-      wavefunctions.emplace(WC::electron_pairs_2_dx, Wavefunction(&electron_pair_list->pos2, movecs));
-      wavefunctions.emplace(WC::electron_pairs_2_dy, Wavefunction(&electron_pair_list->pos2, movecs));
-      wavefunctions.emplace(WC::electron_pairs_2_dz, Wavefunction(&electron_pair_list->pos2, movecs));
+      wavefunctions.emplace(WC::electron_pairs_2_dx, Wavefunction_Type(&electron_pair_list->pos2, movecs));
+      wavefunctions.emplace(WC::electron_pairs_2_dy, Wavefunction_Type(&electron_pair_list->pos2, movecs));
+      wavefunctions.emplace(WC::electron_pairs_2_dz, Wavefunction_Type(&electron_pair_list->pos2, movecs));
     }
   }
   for (auto &it : wavefunctions) {
@@ -160,8 +160,8 @@ Dimer::Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : Energy(p1, p2, 
 
   for (auto &it : wavefunctions) {
     auto pos_source = it.second.pos;
-    monomer_a_wavefunctions.emplace(it.first, Wavefunction(pos_source, monomer_a_movecs));
-    monomer_b_wavefunctions.emplace(it.first, Wavefunction(pos_source, monomer_b_movecs));
+    monomer_a_wavefunctions.emplace(it.first, Wavefunction_Type(pos_source, monomer_a_movecs));
+    monomer_b_wavefunctions.emplace(it.first, Wavefunction_Type(pos_source, monomer_b_movecs));
   }
 }
 

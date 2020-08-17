@@ -28,7 +28,7 @@ GF2_F12_V::~GF2_F12_V() {
   delete correlation_factor;
 }
 
-void GF2_F12_V::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+void GF2_F12_V::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
   calculate_v(egf, wavefunctions, electron_pair_list, electron_list);
   for (int band = 0; band < numBand; band++) {
     x_traces.set(band, offBand, wavefunctions);
@@ -108,7 +108,7 @@ double GF2_F12_V::calculate_v_4e(Electron_Pair_List* electron_pair_list, Electro
   calcualte_v_4e_help(T_ip_jo, traces.p13, traces.v23, T_ip_io, T_io_jo, core_23, traces.v13, electron_pair_list->rv, -c_c2, electron_list->size(), electron_pair_list->size());
   return 0.0;
 }
-void GF2_F12_V::calculate_v(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+void GF2_F12_V::calculate_v(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
   traces.update_v(wavefunctions);
   correlation_factor->update(electron_pair_list, electron_list);
 
@@ -125,9 +125,9 @@ void GF2_F12_V::calculate_v(std::vector<std::vector<double>>& egf, std::unordere
 
 void GF2_F12_V::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {}
 
-void GF2_F12_V::energy_no_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction>&, Electron_Pair_List*, Tau*) {}
+void GF2_F12_V::energy_no_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction_Type>&, Electron_Pair_List*, Tau*) {}
 
-void GF2_F12_V::energy_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction>&, Electron_Pair_List*, Tau*) {}
+void GF2_F12_V::energy_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction_Type>&, Electron_Pair_List*, Tau*) {}
 
 GF2_F12_VBX::GF2_F12_VBX(IOPs& iops) : GF2_F12_V(iops, "f12_VBX"),
     core_11o(iops.iopns[KEYS::ELECTRONS]),
@@ -153,7 +153,7 @@ GF2_F12_VBX::GF2_F12_VBX(IOPs& iops) : GF2_F12_V(iops, "f12_VBX"),
 double multiply_by_two(double x) {
   return 2.0 * x;
 }
-void GF2_F12_VBX::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+void GF2_F12_VBX::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
   std::vector<std::vector<double>> e_v(egf.size(), std::vector<double>(egf[0].size(), 0.0));
 
   calculate_v(e_v, wavefunctions, electron_pair_list, electron_list);
@@ -167,7 +167,7 @@ void GF2_F12_VBX::energy_f12(std::vector<std::vector<double>>& egf, std::unorder
   calculate_bx(egf, wavefunctions, electron_pair_list, electron_list);
 }
 
-void GF2_F12_VBX::calculate_bx(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void GF2_F12_VBX::calculate_bx(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   traces.update_bx(wavefunctions, electron_pair_list, electron_list);
 
   std::fill(core_11o.begin(), core_11o.end(), 0.0);

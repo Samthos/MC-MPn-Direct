@@ -33,7 +33,7 @@ void call_build_contraction(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const std::vector<Point> &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const vector_point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
 
@@ -73,7 +73,7 @@ void call_build_contraction_with_derivative(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_with_derivatives(const std::vector<Point>& pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_with_derivatives(const vector_point& pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
 
@@ -91,16 +91,18 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get(Wavefunction&, std::vector<Point>&) {}
+void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get(Wavefunction_Type&, vector_point&) {
+  std::cerr << "FUck me\n"; exit(0);
+}
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dx(Wavefunction&, std::vector<Point>&) {}
+void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dx(Wavefunction_Type&, vector_point&) {}
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dy(Wavefunction&, std::vector<Point>&) {}
+void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dy(Wavefunction_Type&, vector_point&) {}
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dz(Wavefunction&, std::vector<Point>&) {}
+void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dz(Wavefunction_Type&, vector_point&) {}
 
 __global__ 
 void call_build_ao_amplitudes(
@@ -123,7 +125,7 @@ void call_build_ao_amplitudes(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes(const std::vector<Point>& pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes(const vector_point& pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
 
@@ -162,7 +164,7 @@ void call_build_ao_amplitudes_dx(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dx(const std::vector<Point> &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dx(const vector_point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
 
@@ -202,7 +204,7 @@ void call_build_ao_amplitudes_dy(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dy(const std::vector<Point> &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dy(const vector_point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
 
@@ -242,7 +244,7 @@ void call_build_ao_amplitudes_dz(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const std::vector<Point> &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const vector_point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
 
