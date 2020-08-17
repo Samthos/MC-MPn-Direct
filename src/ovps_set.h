@@ -8,9 +8,9 @@
 
 template <template <class, class> class Container, template <class> class Allocator>
 class OVPS_Set {
- public:
   typedef Container<double, Allocator<double>> vector_double;
 
+ public:
   OVPS_Set() = default;
   OVPS_Set(int mc_pair_num_);
   void resize(int mc_pair_num_);
@@ -22,14 +22,17 @@ class OVPS_Set {
 
 template <> 
 void OVPS_Set<std::vector, std::allocator>::update(
-    std::vector<double, std::allocator<double>>& psi1Tau, int psi1_offset,
-    std::vector<double, std::allocator<double>>& psi2Tau, int psi2_offset, 
+    vector_double& psi1Tau, int psi1_offset,
+    vector_double& psi2Tau, int psi2_offset, 
     size_t inner, size_t lda);
 template class OVPS_Set<std::vector, std::allocator>;
 typedef OVPS_Set<std::vector, std::allocator> OVPS_Set_Host;
 
 #ifdef HAVE_CUDA
-template <> void OVPS_Set<thrust::device_vector, thrust::device_allocator>::update(thrust::device_vector<double>& psi1Tau, int psi1_offset, thrust::device_vector<double>& psi2Tau, int psi2_offset, size_t inner, size_t lda);
+template <> void OVPS_Set<thrust::device_vector, thrust::device_allocator>::update(
+    vector_double& psi1Tau, int psi1_offset,
+    vector_double& psi2Tau, int psi2_offset, 
+    size_t inner, size_t lda);
 template class OVPS_Set<thrust::device_vector, thrust::device_allocator>;
 typedef OVPS_Set<thrust::device_vector, thrust::device_allocator> OVPS_Set_Device;
 

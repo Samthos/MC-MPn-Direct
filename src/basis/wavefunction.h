@@ -80,7 +80,6 @@ class Wavefunction {
   size_t number_of_molecuar_orbitals;
 
   size_t electrons;
-
   size_t lda;
   size_t rows;
   size_t col;

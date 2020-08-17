@@ -26,13 +26,13 @@ void OVPS<Container, Allocator>::init(const int dimm, const int electron_pairs_)
 }
 
 template <template <class, class> class Container, template <class> class Allocator>
-void OVPS<Container, Allocator>::update(Wavefunction<Container, Allocator>& electron_pair_psi1, Wavefunction<Container, Allocator>& electron_pair_psi2, Tau* tau) {
+void OVPS<Container, Allocator>::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau) {
   std::cerr << "Default OVPS update_ovsp not implemented\n";
   exit(0);
 }
 
 template <>
-void OVPS<std::vector, std::allocator>::update(Wavefunction<std::vector, std::allocator>& electron_pair_psi1, Wavefunction<std::vector, std::allocator>& electron_pair_psi2, Tau* tau) {
+void OVPS_Host::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau) {
   auto iocc1 = electron_pair_psi1.iocc1;
   auto iocc2 = electron_pair_psi1.iocc2;
   auto ivir1 = electron_pair_psi1.ivir1;

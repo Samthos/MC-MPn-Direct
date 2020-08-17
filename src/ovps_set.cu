@@ -2,7 +2,7 @@
 #include "ovps_set.cpp"
 
 template <>
-void OVPS_Set<thrust::device_vector, thrust::device_allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
+void OVPS_Set_Device::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
   double alpha = 1.0;
   double beta = 0.0;
 

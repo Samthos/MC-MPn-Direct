@@ -23,7 +23,7 @@ void OVPS_Set<Container, Allocator>::update(vector_double& psi1Tau, int psi1_off
 }
 
 template <>
-void OVPS_Set<std::vector, std::allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
+void OVPS_Set_Host::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
   double alpha = 1.0;
   double beta = 0.0;
 
