@@ -15,8 +15,8 @@ set(source
   qc_random.cpp
   qc_random.h
   timer.h
-  weight_function.cpp
-  weight_function.h
+  electron_generators/weight_function.cpp
+  electron_generators/weight_function.h
   electron_generators/create_electron_pair_list.cpp
   electron_generators/direct_electron_pair_list.cpp
   electron_generators/direct_electron_pair_list.h
@@ -70,24 +70,14 @@ set(source
   MCGF/qc_mcgf3.cpp 
   MCGF/qc_mcgf3.h
   MCMP/mcmp.h
-  MCMP/qc_mcmp.cpp
-  MCMP/qc_mcmp2.cpp
-  MCMP/qc_mcmp2.h
-  MCMP/qc_mcmp3.cpp
-  MCMP/qc_mcmp3.h
-  MCMP/qc_mcmp4.cpp
-  MCMP/qc_mcmp4.h
-  MCMP/qc_mcmp4_ij.h
-  MCMP/qc_mcmp4_ij_k.h
-  MCMP/qc_mcmp4_ij_l.h
-  MCMP/qc_mcmp4_ijk.h
-  MCMP/qc_mcmp4_ijkl.h
-  MCMP/qc_mcmp4_ik.h
-  MCMP/qc_mcmp4_ik_j.h
-  MCMP/qc_mcmp4_ik_l.h
-  MCMP/qc_mcmp4_il.h
-  MCMP/qc_mcmp4_il_j.h
-  MCMP/qc_mcmp4_il_k.h
+  MCMP/mcmp.cpp
+  MCMP/mp_functional.h
+  MCMP/mp2_functional.cpp
+  MCMP/mp2_functional.h
+  MCMP/mp3_functional.cpp
+  MCMP/mp3_functional.h
+  MCMP/mp4_functional.cpp
+  MCMP/mp4_functional.h
 )
 
 add_subdirectory(geometry)

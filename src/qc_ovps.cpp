@@ -9,7 +9,7 @@
 #include "blas_calls.h"
 #include "qc_ovps.h"
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void OVPS<Container, Allocator>::init(const int dimm, const int electron_pairs_) {
   electron_pairs = electron_pairs_;
 
@@ -25,7 +25,7 @@ void OVPS<Container, Allocator>::init(const int dimm, const int electron_pairs_)
   }
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void OVPS<Container, Allocator>::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau) {
   std::cerr << "Default OVPS update_ovsp not implemented\n";
   exit(0);

@@ -15,7 +15,7 @@
 
 #include "cartesian_poly.h"
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class Basis {
   typedef std::vector<Point> vector_point;
 

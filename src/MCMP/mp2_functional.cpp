@@ -9,11 +9,11 @@
 #include <algorithm>
 #include <functional>
 
-#include "qc_mcmp2.h"
+#include "mp2_functional.h"
 #include "../qc_monte.h"
 
 //template <int CVMP2>
-//void MCMP2<CVMP2>::energy_fast(double& emp2, std::vector<double>& control2) {
+//void MP2_Functional<CVMP2>::energy_fast(double& emp2, std::vector<double>& control2) {
 //  /* This functions computes the second-order MP2 energy for a single MC steps
 //   * The traces of the HF greens's functions are computed in-place in this function.
 //   * If higher order corrections are desired, the mcmp2_energy fucntions is more appropriate as it does not compute the HF green's function traces
@@ -113,25 +113,25 @@
 //}
 
 
-MCMP* create_MCMP2(int cv_level) {
-  MCMP* mcmp = nullptr;
+MP_Functional* create_MP2_Functional(int cv_level) {
+  MP_Functional* mcmp = nullptr;
   if (cv_level == 0) {
-    mcmp = new MCMP2<0>;
+    mcmp = new MP2_Functional<0>;
   } else if (cv_level == 1) {
-    mcmp = new MCMP2<1>;
+    mcmp = new MP2_Functional<1>;
   } else if (cv_level == 2) {
-    mcmp = new MCMP2<2>;
+    mcmp = new MP2_Functional<2>;
   }
   
   if (mcmp == nullptr) {
-    std::cerr << "MCMP2 not supported with cv level " << cv_level << "\n";
+    std::cerr << "MP2_Functional not supported with cv level " << cv_level << "\n";
     exit(0);
   }
   return mcmp;
 }
 
 template <int CVMP2>
-void MCMP2<CVMP2>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
   double en2 = 0.0;
   std::vector<double> ctrl(control.size(), 0.0);
 

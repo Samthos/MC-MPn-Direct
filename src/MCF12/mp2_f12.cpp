@@ -30,7 +30,7 @@ double calculate_v_4e_help(
 }
 
 MP2_F12_V::MP2_F12_V(const IOPs& iops, std::string extension) :
-    MCMP(0, 0, extension, true),
+    F12_MP_Functional(0, 0, extension),
     traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS], 0.0),
     T_ip_jo(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS], 0.0),
@@ -46,7 +46,7 @@ MP2_F12_V::~MP2_F12_V() {
   delete correlation_factor;
 }
 
-void MP2_F12_V::energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void MP2_F12_V::energy(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   calculate_v(emp, control, wavefunctions, electron_pair_list, electron_list);
 }
 
@@ -109,7 +109,7 @@ MP2_F12_VBX::MP2_F12_VBX(const IOPs& iops) : MP2_F12_V(iops, "f12_VBX"),
   nsamp_one_4 = nsamp_one_3 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]-3);
 }
 
-void MP2_F12_VBX::energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void MP2_F12_VBX::energy(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
   calculate_bx(emp, control, wavefunctions, electron_pair_list, electron_list);
 }
 

@@ -4,12 +4,12 @@
 #include "cblas.h"
 #include "blas_calls.h"
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 OVPS_Set<Container, Allocator>::OVPS_Set(int mc_pair_num_) {
   resize(mc_pair_num_);
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void OVPS_Set<Container, Allocator>::resize(int mc_pair_num_) {
   mc_pair_num = mc_pair_num_;
   s_11.resize(mc_pair_num * mc_pair_num);
@@ -18,7 +18,7 @@ void OVPS_Set<Container, Allocator>::resize(int mc_pair_num_) {
   s_22.resize(mc_pair_num * mc_pair_num);
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void OVPS_Set<Container, Allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
 }
 

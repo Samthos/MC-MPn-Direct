@@ -10,7 +10,7 @@
 #include "tau.h"
 #include "ovps_set.h"
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class OVPS {
   typedef Wavefunction<Container, Allocator> Wavefunction_Type;
   typedef OVPS_Set<Container, Allocator> OVPS_Set_Type;

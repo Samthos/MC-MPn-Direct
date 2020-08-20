@@ -3,11 +3,11 @@
 //
 #include "../qc_monte.h"
 #include "../blas_calls.h"
-#include "qc_mcmp4.h"
+#include "mp4_functional.h"
 #include "cblas.h"
 
 template <int CVMP4>
-void MCMP4<CVMP4>::contract(std::vector<double>& result,
+void MP4_Functional<CVMP4>::contract(std::vector<double>& result,
     const std::vector<double>& A, CBLAS_TRANSPOSE A_trans, 
     const std::vector<double>& B, const std::vector<double>& v) {
   Ddgmm(DDGMM_SIDE_LEFT,
@@ -25,7 +25,7 @@ void MCMP4<CVMP4>::contract(std::vector<double>& result,
       result.data(), mpn);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_ij_helper(double constant,
+void MP4_Functional<CVMP4>::mcmp4_ij_helper(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ik, const std::vector<double>& jk,
     const std::vector<double>& il, const std::vector<double>& jl) {
@@ -108,7 +108,7 @@ void MCMP4<CVMP4>::mcmp4_ij_helper(double constant,
   }
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_ij_helper_t1(double constant,
+void MP4_Functional<CVMP4>::mcmp4_ij_helper_t1(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ik_1, const std::vector<double>& ik_2, const std::vector<double>& ik_3,
     const std::vector<double>& jk,
@@ -123,7 +123,7 @@ void MCMP4<CVMP4>::mcmp4_ij_helper_t1(double constant,
   mcmp4_ij_helper(constant, emp4, control, offset, ik_, jk, il, jl_);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_ij_helper_t2(double constant,
+void MP4_Functional<CVMP4>::mcmp4_ij_helper_t2(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ik_1, const std::vector<double>& ik_2,
     const std::vector<double>& jk_1, const std::vector<double>& jk_2,
@@ -137,7 +137,7 @@ void MCMP4<CVMP4>::mcmp4_ij_helper_t2(double constant,
   mcmp4_ij_helper(constant, emp4, control, offset, ik_, jk_, il_, jl_);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_ij_helper_t3(double constant,
+void MP4_Functional<CVMP4>::mcmp4_ij_helper_t3(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ik,
     const std::vector<double>& jk_1, const std::vector<double>& jk_2, const std::vector<double>& jk_3,
@@ -152,7 +152,7 @@ void MCMP4<CVMP4>::mcmp4_ij_helper_t3(double constant,
   mcmp4_ij_helper(constant, emp4, control, offset, ik, jk_, il_, jl);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
   constexpr int offset = 0 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_ij_helper_t1(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21,
@@ -266,7 +266,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& contr
       ovps.v_set[2][0].s_11, ovps.o_set[2][0].s_12, ovps.v_set[2][0].s_22, ovps.o_set[2][1].s_11);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
   constexpr int offset = 1 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_ij_helper_t1(  4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
@@ -381,7 +381,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& contr
 }
 
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_il_helper(double constant,
+void MP4_Functional<CVMP4>::mcmp4_il_helper(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ij, const std::vector<double>& jl,
     const std::vector<double>& ik, const std::vector<double>& kl) {
@@ -457,7 +457,7 @@ void MCMP4<CVMP4>::mcmp4_il_helper(double constant,
   }
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_il_helper_t1(double constant,
+void MP4_Functional<CVMP4>::mcmp4_il_helper_t1(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ij_1, const std::vector<double>& ij_2, const std::vector<double>& ij_3,
     const std::vector<double>& jl,
@@ -471,7 +471,7 @@ void MCMP4<CVMP4>::mcmp4_il_helper_t1(double constant,
   mcmp4_il_helper(constant, emp4, control, offset, ij_, jl, ik, kl_);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_il_helper_t2(double constant,
+void MP4_Functional<CVMP4>::mcmp4_il_helper_t2(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ij_1, const std::vector<double>& ij_2,
     const std::vector<double>& jl_1, const std::vector<double>& jl_2,
@@ -485,7 +485,7 @@ void MCMP4<CVMP4>::mcmp4_il_helper_t2(double constant,
   mcmp4_il_helper(constant, emp4, control, offset, ij_, jl_, ik_, kl_);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_il_helper_t3(double constant,
+void MP4_Functional<CVMP4>::mcmp4_il_helper_t3(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ij,
     const std::vector<double>& jl_1, const std::vector<double>& jl_2, const std::vector<double>& jl_3,
@@ -498,7 +498,7 @@ void MCMP4<CVMP4>::mcmp4_il_helper_t3(double constant,
   mcmp4_il_helper(constant, emp4, control, offset, ij, jl_, ik_, kl);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
   constexpr int offset = 2 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_il_helper_t1( 2, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12,
@@ -613,7 +613,7 @@ void MCMP4<CVMP4>::mcmp4_energy_il_fast(double& emp4, std::vector<double>& contr
 }
 
 template <int CVMP4>
-std::array<double, 4> MCMP4<CVMP4>::contract_jk(
+std::array<double, 4> MP4_Functional<CVMP4>::contract_jk(
     int walker,
     const std::vector<double>& T, 
     const std::vector<double>& jk, const std::vector<double>& ik, const std::vector<double>& ij) {
@@ -640,7 +640,7 @@ std::array<double, 4> MCMP4<CVMP4>::contract_jk(
   return out;
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& control, int offset,
+void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& constants,
     const std::vector<const std::vector<double>*>& ij,
     const std::vector<const std::vector<double>*>& ik,
@@ -704,7 +704,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_helper(double& emp4, std::vector<double>& c
   }
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& control,
+void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& control,
     const std::vector<double> constants,
     const std::vector<const std::vector<double>*> ij,
     const std::vector<const std::vector<double>*> ik,
@@ -722,7 +722,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_t1(double& emp4, std::vector<double>& contr
   mcmp4_energy_ijkl_helper(emp4, control, 0, constants, ij, ik, il_, ext_ptr, jl, kl);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& control,
+void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& control,
     const std::vector<double> constants,
     const std::vector<const std::vector<double>*> ij,
     const std::vector<const std::vector<double>*> ik_1, const std::vector<const std::vector<double>*> ik_2,
@@ -741,7 +741,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_t2(double& emp4, std::vector<double>& contr
   mcmp4_energy_ijkl_helper(emp4, control, 1, constants, ij, ext_ptr, il, jk, jl_, kl);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_ijkl_t3(double& emp4, std::vector<double>& control,
+void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_t3(double& emp4, std::vector<double>& control,
     const std::vector<double> constants,
     const std::vector<const std::vector<double>*> ij_1, const std::vector<const std::vector<double>*> ij_2,
     const std::vector<const std::vector<double>*> ik,
@@ -759,7 +759,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_t3(double& emp4, std::vector<double>& contr
   mcmp4_energy_ijkl_helper(emp4, control, 2, constants, ext_ptr, ik, il, jk, jl, jl_);
 }
 template <int CVMP4>
-void MCMP4<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
   mcmp4_energy_ijkl_t1(emp4, control,
       { -2, -2, -2, 4, 4, 4, 4, -8},
       {&ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_21, &ovps.v_set[0][0].s_21},
@@ -1016,7 +1016,7 @@ void MCMP4<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& con
 }
 
 template <int CVMP4>
-void MCMP4<CVMP4>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void MP4_Functional<CVMP4>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
   double en4 = 0.0;
   std::vector<double> ctrl(control.size(), 0.0);
 
@@ -1042,22 +1042,22 @@ void MCMP4<CVMP4>::energy(double& emp, std::vector<double>& control, OVPS_Host& 
   }
 }
 
-MCMP* create_MCMP4(int cv_level, Electron_Pair_List* electron_pair_list) {
-  MCMP* mcmp = nullptr;
+MP_Functional* create_MP4_Functional(int cv_level, Electron_Pair_List* electron_pair_list) {
+  MP_Functional* mcmp = nullptr;
   if (cv_level == 0) {
-    mcmp = new MCMP4<0>(electron_pair_list);
+    mcmp = new MP4_Functional<0>(electron_pair_list);
   } else if (cv_level == 1) {
-    mcmp = new MCMP4<1>(electron_pair_list);
+    mcmp = new MP4_Functional<1>(electron_pair_list);
   } else if (cv_level == 2) {
-    mcmp = new MCMP4<2>(electron_pair_list);
+    mcmp = new MP4_Functional<2>(electron_pair_list);
   } else if (cv_level == 3) {
-    mcmp = new MCMP4<3>(electron_pair_list);
+    mcmp = new MP4_Functional<3>(electron_pair_list);
   } else if (cv_level == 4) {
-    mcmp = new MCMP4<4>(electron_pair_list);
+    mcmp = new MP4_Functional<4>(electron_pair_list);
   }
   
   if (mcmp == nullptr) {
-    std::cerr << "MCMP4 not supported with cv level " << cv_level << "\n";
+    std::cerr << "MP4_Functional not supported with cv level " << cv_level << "\n";
     exit(0);
   }
   return mcmp;

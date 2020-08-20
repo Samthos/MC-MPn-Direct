@@ -9,7 +9,7 @@
 #include "cblas.h"
 #include "../blas_calls.h"
 #include "../qc_monte.h"
-#include "qc_mcmp3.h"
+#include "mp3_functional.h"
 
 void mcmp3_helper(
     double& en3, std::vector<double>& control, const int offset,
@@ -125,27 +125,27 @@ void mcmp3_helper(
 #endif
 }
 
-MCMP* create_MCMP3(int cv_level) {
-  MCMP* mcmp = nullptr;
+MP_Functional* create_MP3_Functional(int cv_level) {
+  MP_Functional* mcmp = nullptr;
   if (cv_level == 0) {
-    mcmp = new MCMP3<0>;
+    mcmp = new MP3_Functional<0>;
   } else if (cv_level == 1) {
-    mcmp = new MCMP3<1>;
+    mcmp = new MP3_Functional<1>;
   } else if (cv_level == 2) {
-    mcmp = new MCMP3<2>;
+    mcmp = new MP3_Functional<2>;
   } else if (cv_level == 3) {
-    mcmp = new MCMP3<3>;
+    mcmp = new MP3_Functional<3>;
   }
   
   if (mcmp == nullptr) {
-    std::cerr << "MCMP3 not supported with cv level " << cv_level << "\n";
+    std::cerr << "MP3_Functional not supported with cv level " << cv_level << "\n";
     exit(0);
   }
   return mcmp;
 }
 
 template <int CVMP3>
-void MCMP3<CVMP3>::mcmp3_helper(
+void MP3_Functional<CVMP3>::mcmp3_helper(
     double& en3, std::vector<double>& control, const int offset,
     unsigned int mc_pair_num, double constant,
     std::vector<double>& A_ij_1, std::vector<double>& A_ij_2,
@@ -260,7 +260,7 @@ void MCMP3<CVMP3>::mcmp3_helper(
 }
 
 template <int CVMP3>
-void MCMP3<CVMP3>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void MP3_Functional<CVMP3>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
   double en3 = 0;
   std::vector<double> ctrl(control.size(), 0.0);
 

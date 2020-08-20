@@ -1,13 +1,13 @@
-#ifndef QC_MCMP4_H_
-#define QC_MCMP4_H_
+#ifndef MP4_Functional_H_
+#define MP4_Functional_H_
 
-#include "mcmp.h"
+#include "mp_functional.h"
 #include "cblas.h"
 
 template <int CVMP4>
-class MCMP4 : public MCMP {
+class MP4_Functional : public Standard_MP_Functional {
  public:
-  MCMP4(Electron_Pair_List* electron_pair_list) : MCMP(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24", false),
+  MP4_Functional(Electron_Pair_List* electron_pair_list) : Standard_MP_Functional(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24"),
       mpn(electron_pair_list->size()),
       rv(mpn),
       wgt(mpn),
@@ -35,7 +35,6 @@ class MCMP4 : public MCMP {
       T_w(mpn * mpn),
       Av(mpn * mpn) {}
   void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) override;
-  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list){}
 
  private:
   void contract(std::vector<double>& result, const std::vector<double>& A, CBLAS_TRANSPOSE A_trans, const std::vector<double>& B, const std::vector<double>& v);
@@ -155,11 +154,11 @@ class MCMP4 : public MCMP {
   std::vector<double> Av;
 };
 
-template class MCMP4<0>;
-template class MCMP4<1>;
-template class MCMP4<2>;
-template class MCMP4<3>;
-template class MCMP4<4>;
+template class MP4_Functional<0>;
+template class MP4_Functional<1>;
+template class MP4_Functional<2>;
+template class MP4_Functional<3>;
+template class MP4_Functional<4>;
 
-MCMP* create_MCMP4(int cv_level, Electron_Pair_List* electron_pair_list);
-#endif  // QC_MCMP4_H_
+MP_Functional* create_MP4_Functional(int cv_level, Electron_Pair_List* electron_pair_list);
+#endif  // MP4_Functional_H_

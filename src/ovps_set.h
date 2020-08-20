@@ -6,7 +6,7 @@
 #include <thrust/device_vector.h>
 #endif // HAVE_CUDA
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class OVPS_Set {
   typedef Container<double, Allocator<double>> vector_double;
 

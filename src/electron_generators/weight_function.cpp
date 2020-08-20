@@ -7,7 +7,7 @@
 #include <iostream>
 #include <map>
 
-#include "qc_mpi.h"
+#include "../qc_mpi.h"
 #include "atom_tag_parser.h"
 #include "weight_function.h"
 

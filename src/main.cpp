@@ -5,6 +5,7 @@
 #include "weight_function.h"
 #include "basis/basis.h"
 #include "qc_monte.h"
+#include "MCMP/mcmp.h"
 
 int main(int argc, char* argv[]) {
 #ifdef HAVE_MPI
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
 #ifdef HAVE_CUDA
     qc_monte = new GPU_Energy(mpi_info, iops, molec, basis);
 #else
-    qc_monte = new Energy<std::vector<double>>(mpi_info, iops, molec, basis);
+    qc_monte = new MCMP<std::vector<double>>(mpi_info, iops, molec, basis);
 #endif
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::DIMER) {
     qc_monte = new Dimer(mpi_info, iops, molec, basis);

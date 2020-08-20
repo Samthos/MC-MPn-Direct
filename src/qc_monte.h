@@ -24,12 +24,6 @@
 #include "qc_random.h"
 #include "tau.h"
 
-#include "MCMP/mcmp.h"
-#include "MCMP/qc_mcmp2.h"
-#include "MCMP/qc_mcmp3.h"
-#include "MCMP/qc_mcmp4.h"
-#include "MCF12/mp2_f12.h"
-
 #include "MCGF/qc_mcgf.h"
 #include "MCGF/qc_mcgf2.h"
 #include "MCGF/qc_mcgf3.h"
@@ -98,58 +92,6 @@ class QC_monte {
 };
 template class QC_monte<std::vector<double>>;
 
-template <class Container>
-class Energy : public QC_monte<std::vector<double>> {
- public:
-  Energy(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
-  ~Energy();
-
-  void monte_energy() override;
-
- protected:
-  std::vector<MCMP*> energy_functions;
-  std::vector<Accumulator*> cv;
-
-  std::vector<double> emp;
-  std::vector<std::vector<double>> control;
-
-  void zero_energies();
-  virtual void energy();
-};
-template class Energy<std::vector<double>>;
-
-#ifdef HAVE_CUDA
-class GPU_Energy : public Energy<std::vector<double>> {
- public:
-  GPU_Energy(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
-
- protected:
-  OVPS_Device ovps_device;
-  void energy() override;
-};
-template class Energy<thrust::device_vector<double>>;
-#endif
-
-class Dimer : public Energy<std::vector<double>> {
- public:
-  Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
-  ~Dimer();
-
- protected:
-  Tau* monomer_a_tau;
-  Tau* monomer_b_tau;
-  std::unordered_map<int, Wavefunction_Type> monomer_a_wavefunctions;
-  std::unordered_map<int, Wavefunction_Type> monomer_b_wavefunctions;
-  void update_wavefunction() override;
-  void energy() override;
-
-  template <class Binary_Op> 
-  void local_energy(std::unordered_map<int, Wavefunction_Type>& l_wavefunction, Tau* l_tau, Binary_Op);
-
-  std::vector<double> l_emp;
-  std::vector<std::vector<double>> l_control;
-};
-
 class GF : public QC_monte<std::vector<double>> {
  public:
   void monte_energy() override;
@@ -199,19 +141,6 @@ class Diagonal_GF : public GF {
   std::string genFileName(int, int, int, int, int, int);
 };
 
-class GPU_GF2 : public GF {
- public:
-  GPU_GF2(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : GF(p1, p2, p3, p4) {
-    d_ovps.resize(iops, create_movec_parser(mpi_info, molec, MOVEC_TYPE::NWCHEM_BINARY, iops.sopns[KEYS::MOVECS], iops.bopns[KEYS::FREEZE_CORE]), {2});
-  }
-  ~GPU_GF2() {
-  }
-  void monte_energy();
-
- protected:
-  void mc_local_energy(std::vector<std::vector<double>>&, int);
-};
-
 class GF2 : public GF {
  public:
   GF2(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : GF(p1, p2, p3, p4) {
@@ -227,19 +156,6 @@ class GF2 : public GF {
  protected:
   void mc_local_energy(const int& step);
   int full_print(int& step, int checkNum);
-};
-
-class GPU_GF3 : public GF {
- public:
-  GPU_GF3(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : GF(p1, p2, p3, p4) {
-    d_ovps.resize(iops, create_movec_parser(mpi_info, molec, MOVEC_TYPE::NWCHEM_BINARY, iops.sopns[KEYS::MOVECS], iops.bopns[KEYS::FREEZE_CORE]), {2, 3});
-  }
-  ~GPU_GF3() {
-  }
-  void monte_energy();
-
- protected:
-  void mc_local_energy(std::vector<std::vector<double>>&, std::vector<std::vector<double>>&, int);
 };
 
 class GF3 : public GF {

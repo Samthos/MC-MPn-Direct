@@ -1,14 +1,13 @@
-#ifndef QC_MCMP3_H_
-#define QC_MCMP3_H_
+#ifndef MP3_Functional_H_
+#define MP3_Functional_H_
 
-#include "mcmp.h"
+#include "mp_functional.h"
 
 template <int CVMP3>
-class MCMP3 : public MCMP {
+class MP3_Functional : public Standard_MP_Functional {
  public:
-  MCMP3() : MCMP(3 * CVMP3 * (1 + CVMP3), 2, "23", false) {}
+  MP3_Functional() : Standard_MP_Functional(3 * CVMP3 * (1 + CVMP3), 2, "23") {}
   void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) override;
-  void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list){}
  private:
   void mcmp3_helper(
     double& en3, std::vector<double>& control, const int offset,
@@ -19,10 +18,10 @@ class MCMP3 : public MCMP {
     std::vector<double>& rv, std::vector<double>& wgt);
 };
 
-template class MCMP3<0>;
-template class MCMP3<1>;
-template class MCMP3<2>;
-template class MCMP3<3>;
+template class MP3_Functional<0>;
+template class MP3_Functional<1>;
+template class MP3_Functional<2>;
+template class MP3_Functional<3>;
 
-MCMP* create_MCMP3(int cv_level);
-#endif  // QC_MCMP3_H_
+MP_Functional* create_MP3_Functional(int cv_level);
+#endif  // MP3_Functional_H_

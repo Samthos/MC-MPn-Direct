@@ -8,7 +8,7 @@
 #include "basis.h"
 
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 Basis<Container, Allocator>::Basis(const int& mc_num_, const Basis_Parser& basis_parser) :
   mc_num(mc_num_),
   qc_nbf(basis_parser.n_atomic_orbitals),
@@ -23,7 +23,7 @@ Basis<Container, Allocator>::Basis(const int& mc_num_, const Basis_Parser& basis
   atomic_orbitals(basis_parser.atomic_orbitals)
 { }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::host_psi_get(Wavefunction_Type& psi, vector_point& pos) {
   build_ao_amplitudes(pos);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
@@ -35,7 +35,7 @@ void Basis<Container, Allocator>::host_psi_get(Wavefunction_Type& psi, vector_po
       psi.psi.data(), psi.lda);
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::host_psi_get_dx(Wavefunction_Type& psi_dx, vector_point& pos) {
   // d/dx of wavefunction 
   build_ao_amplitudes_dx(pos);
@@ -48,7 +48,7 @@ void Basis<Container, Allocator>::host_psi_get_dx(Wavefunction_Type& psi_dx, vec
       psi_dx.psi.data(), psi_dx.lda);
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::host_psi_get_dy(Wavefunction_Type& psi_dy, vector_point& pos) {
   // d/dy of wavefunction 
   build_ao_amplitudes_dy(pos);
@@ -61,7 +61,7 @@ void Basis<Container, Allocator>::host_psi_get_dy(Wavefunction_Type& psi_dy, vec
       psi_dy.psi.data(), psi_dy.lda);
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::host_psi_get_dz(Wavefunction_Type& psi_dz, vector_point& pos) {
   // d/dz of wavefunction 
   build_ao_amplitudes_dz(pos);
@@ -74,7 +74,7 @@ void Basis<Container, Allocator>::host_psi_get_dz(Wavefunction_Type& psi_dz, vec
       psi_dz.psi.data(), psi_dz.lda);
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::build_contractions(const vector_point &pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
@@ -87,7 +87,7 @@ void Basis<Container, Allocator>::build_contractions(const vector_point &pos) {
   }
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::build_contractions_with_derivatives(const vector_point& pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
@@ -101,7 +101,7 @@ void Basis<Container, Allocator>::build_contractions_with_derivatives(const vect
   }
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::build_ao_amplitudes(const vector_point &pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++) {
@@ -113,7 +113,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes(const vector_point &pos) {
   }
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::build_ao_amplitudes_dx(const vector_point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
@@ -126,7 +126,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dx(const vector_point& pos
   }
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::build_ao_amplitudes_dy(const vector_point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
@@ -139,7 +139,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dy(const vector_point& pos
   }
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::build_ao_amplitudes_dz(const vector_point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
@@ -152,12 +152,12 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dz(const vector_point& pos
   }
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 std::vector<double> Basis<Container, Allocator>::get_contraction_amplitudes(){
   throw std::exception();
 }
 
-template <template <class, class> class Container, template <class> class Allocator>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::dump(const std::string& fname) {
   std::ofstream os(fname);
   os << "\n-----------------------------------------------------------------------------------------------------------\nBasis Dump\n";

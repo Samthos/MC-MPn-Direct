@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "../qc_mpi.h"
 #include "molecule.h"
-#include "qc_mpi.h"
 
 struct mc_basis_typ {
   mc_basis_typ() = default;

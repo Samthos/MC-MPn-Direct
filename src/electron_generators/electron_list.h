@@ -4,7 +4,7 @@
 #include <array>
 #include <vector>
 
-#include "../weight_function.h"
+#include "weight_function.h"
 #include "molecule.h"
 #include "../qc_random.h"
 #include "../qc_input.h"
