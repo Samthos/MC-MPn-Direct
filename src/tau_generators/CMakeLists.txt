@@ -7,6 +7,8 @@ set(source
   quadrature_tau.cpp
   stochastic_tau.h
   stochastic_tau.cpp
+  dummy_tau.h
+  dummy_tau.cpp
   super_stochastic_tau.h
   super_stochastic_tau.cpp
 )
