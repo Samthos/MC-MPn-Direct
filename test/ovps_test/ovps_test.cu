@@ -3,7 +3,9 @@
 #include <thrust/device_vector.h>
 #include <algorithm>
 #include <sstream>
+
 #include "gtest/gtest.h"
+#include "../test_helper.h"
 
 #include "dummy_tau.h"
 
@@ -11,9 +13,6 @@
 #include "../../src/basis/dummy_movec_parser.h"
 #include "../../src/basis/wavefunction.h"
 #include "../../src/qc_ovps.h"
-
-#include "../test_helper.h"
-
 
 namespace {
   template <template <class, class> class Container, template <class> class Allocator>

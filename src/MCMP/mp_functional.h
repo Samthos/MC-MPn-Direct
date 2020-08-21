@@ -39,7 +39,7 @@ class Standard_MP_Functional : public MP_Functional {
 class Fast_MP_Functional : public MP_Functional {
  public:
   Fast_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::FAST) {}
-  virtual void energy(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List*, Tau*) = 0;
+  virtual void energy(double& emp, std::vector<double>& control, Wavefunction_Type& psi1, Wavefunction_Type& psi2, Electron_Pair_List*, Tau*) = 0;
 };
 
 class F12_MP_Functional : public MP_Functional {

@@ -6,7 +6,7 @@
 #endif 
 #include <vector>
 #include <array>
-#include "nwchem_movec_parser.h"
+#include "movec_parser.h"
 
 namespace WS {
   enum Wavefunction_Sources {
