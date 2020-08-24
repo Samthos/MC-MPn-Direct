@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 
 #include "mp2_functional.h"
 
@@ -74,14 +75,14 @@ void MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OV
   }
 }
 
-MP_Functional* create_Fast_MP2_Functional(int cv_level) {
+MP_Functional* create_Direct_MP2_Functional(int cv_level) {
   MP_Functional* mcmp = nullptr;
   if (cv_level == 0) {
-    mcmp = new Fast_MP2_Functional<0>;
+    mcmp = new Direct_MP2_Functional<0>;
   } else if (cv_level == 1) {
-    mcmp = new Fast_MP2_Functional<1>;
+    mcmp = new Direct_MP2_Functional<1>;
   } else if (cv_level == 2) {
-    mcmp = new Fast_MP2_Functional<2>;
+    mcmp = new Direct_MP2_Functional<2>;
   }
   
   if (mcmp == nullptr) {
@@ -92,7 +93,7 @@ MP_Functional* create_Fast_MP2_Functional(int cv_level) {
 }
 
 template <int CVMP2>
-void Fast_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void Direct_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Electron_Pair_List* electron_pair_list, Tau* tau) {
   /* This functions computes the second-order MP2 energy for a single MC steps
    * The traces of the HF greens's functions are computed in-place in this function.
    * If higher order corrections are desired, the mcmp2_energy fucntions is more appropriate as it does not compute the HF green's function traces

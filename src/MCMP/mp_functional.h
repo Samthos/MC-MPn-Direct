@@ -11,7 +11,7 @@
 namespace MP_FUNCTIONAL_TYPE {
   enum MP_FUNCTIONAL_TYPE {
     STANDARD,
-    FAST,
+    DIRECT,
     F12,
   };
 }
@@ -36,9 +36,9 @@ class Standard_MP_Functional : public MP_Functional {
   virtual void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) = 0;
 };
 
-class Fast_MP_Functional : public MP_Functional {
+class Direct_MP_Functional : public MP_Functional {
  public:
-  Fast_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::FAST) {}
+  Direct_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::DIRECT) {}
   virtual void energy(double& emp, std::vector<double>& control, Wavefunction_Type& psi1, Wavefunction_Type& psi2, Electron_Pair_List*, Tau*) = 0;
 };
 
