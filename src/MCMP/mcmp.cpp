@@ -179,17 +179,18 @@ void MCMP<Container>::monte_energy() {
       output.back() << *cv.back() << "\t" << stepTimer << "\n";
       output.back().flush();
       stepTimer.Start();
+
+      for (auto i = 0; i < emp.size(); i++) {
+          std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
+          cv[i]->to_json(filename);
+      }
+      {
+        std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
+        cv.back()->to_json(filename);
+      }
     }
   }
 
-  for (auto i = 0; i < emp.size(); i++) {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
-      cv[i]->to_json(filename);
-  }
-  {
-    std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
-    cv.back()->to_json(filename);
-  }
 
   if (mpi_info.sys_master) {
     mcTimer.Stop();
