@@ -52,11 +52,12 @@ class GFStats {
   double tasks;
 };
 
-template <class Container>
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class QC_monte {
  protected:
-  typedef Wavefunction_Host Wavefunction_Type;
-  typedef Basis_Host Basis_Type;
+  typedef Basis<Container, Allocator> Basis_Type;
+  typedef Wavefunction<Container, Allocator> Wavefunction_Type;
+  typedef OVPS<Container, Allocator> OVPS_Type;
 
  public:
   QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basis_Host p3);
@@ -75,7 +76,7 @@ class QC_monte {
   std::unordered_map<int, std::vector<int>> wavefunction_groups;
 
   Random random;
-  OVPS_Host ovps;
+  OVPS_Type ovps;
   
   Electron_Pair_List* electron_pair_list;
   Electron_List* electron_list;
@@ -90,9 +91,12 @@ class QC_monte {
   static void print_mc_head(std::chrono::system_clock::time_point);
   static void print_mc_tail(double, std::chrono::system_clock::time_point);
 };
-template class QC_monte<std::vector<double>>;
+template class QC_monte<std::vector, std::allocator>;
+#ifdef HAVE_CUDA
+template class QC_monte<thrust::device_vector, thrust::device_allocator>;
+#endif 
 
-class GF : public QC_monte<std::vector<double>> {
+class GF : public QC_monte<std::vector, std::allocator> {
  public:
   void monte_energy() override;
 

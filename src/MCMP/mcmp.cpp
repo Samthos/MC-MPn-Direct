@@ -13,41 +13,41 @@
 #include "../control_variate.h"
 #include "../timer.h"
 
-template <typename Container>
-MCMP<Container>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : QC_monte(p1, p2, p3, p4) {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+MCMP<Container, Allocator>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : QC_monte<Container, Allocator>(p1, p2, p3, p4) {
   int max_tau_coordinates = 0;
   int total_control_variates = 0;
 
-  if (iops.iopns[KEYS::TASK] & TASK::MP2) {
-    energy_functions.push_back(create_MP2_Functional(iops.iopns[KEYS::MP2CV_LEVEL]));
+  if (this->iops.iopns[KEYS::TASK] & TASK::MP2) {
+    energy_functions.push_back(create_MP2_Functional(this->iops.iopns[KEYS::MP2CV_LEVEL]));
   }
-  if (iops.iopns[KEYS::TASK] & TASK::DIRECT_MP2) {
-    energy_functions.push_back(create_Direct_MP2_Functional(iops.iopns[KEYS::MP2CV_LEVEL]));
+  if (this->iops.iopns[KEYS::TASK] & TASK::DIRECT_MP2) {
+    energy_functions.push_back(create_Direct_MP2_Functional(this->iops.iopns[KEYS::MP2CV_LEVEL]));
   }
-  if (iops.iopns[KEYS::TASK] & TASK::MP3) {
-    energy_functions.push_back(create_MP3_Functional(iops.iopns[KEYS::MP3CV_LEVEL]));
+  if (this->iops.iopns[KEYS::TASK] & TASK::MP3) {
+    energy_functions.push_back(create_MP3_Functional(this->iops.iopns[KEYS::MP3CV_LEVEL]));
   }
-  if (iops.iopns[KEYS::TASK] & TASK::MP4) {
-    energy_functions.push_back(create_MP4_Functional(iops.iopns[KEYS::MP4CV_LEVEL], electron_pair_list));
+  if (this->iops.iopns[KEYS::TASK] & TASK::MP4) {
+    energy_functions.push_back(create_MP4_Functional(this->iops.iopns[KEYS::MP4CV_LEVEL], this->electron_pair_list));
   }
-  if (iops.iopns[KEYS::TASK] & TASK::MP2_F12_V) {
-    energy_functions.push_back(new MP2_F12_V(iops));
+  if (this->iops.iopns[KEYS::TASK] & TASK::MP2_F12_V) {
+    energy_functions.push_back(new MP2_F12_V(this->iops));
   }
-  if (iops.iopns[KEYS::TASK] & TASK::MP2_F12_VBX) {
-    energy_functions.push_back(new MP2_F12_VBX(iops));
+  if (this->iops.iopns[KEYS::TASK] & TASK::MP2_F12_VBX) {
+    energy_functions.push_back(new MP2_F12_VBX(this->iops));
   }
 
   emp.resize(energy_functions.size());
   for (auto &it : energy_functions) {
     control.emplace_back(it->n_control_variates);
-    cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(it->n_control_variates, 0.0)));
+    cv.push_back(create_accumulator(this->electron_pair_list->requires_blocking(), std::vector<double>(it->n_control_variates, 0.0)));
 
     max_tau_coordinates = std::max(max_tau_coordinates, it->n_tau_coordinates);
     total_control_variates += it->n_control_variates;
   }
 
-  tau->resize(max_tau_coordinates);
-  ovps.init(max_tau_coordinates, iops.iopns[KEYS::ELECTRON_PAIRS]);
+  this->tau->resize(max_tau_coordinates);
+  this->ovps.init(max_tau_coordinates, this->iops.iopns[KEYS::ELECTRON_PAIRS]);
   
  if (energy_functions.size() == 1) {
    Direct_MP2_Functional<0>* functional_0 = dynamic_cast<Direct_MP2_Functional<0>*>(energy_functions[0]);
@@ -55,16 +55,16 @@ MCMP<Container>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : QC_mon
    Direct_MP2_Functional<2>* functional_2 = dynamic_cast<Direct_MP2_Functional<2>*>(energy_functions[0]);
    Direct_MP2_Functional<2>* functional_3 = dynamic_cast<Direct_MP2_Functional<2>*>(energy_functions[0]);
    if (functional_0 || functional_1 || functional_2 || functional_3) {
-     ovps.init(0, iops.iopns[KEYS::ELECTRON_PAIRS]);
+     this->ovps.init(0, this->iops.iopns[KEYS::ELECTRON_PAIRS]);
    }
  } 
   
   control.emplace_back(total_control_variates);
-  cv.push_back(create_accumulator(electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
+  cv.push_back(create_accumulator(this->electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
 }
 
-template <typename Container>
-MCMP<Container>::~MCMP() {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+MCMP<Container, Allocator>::~MCMP() {
   for (auto &item : cv) {
     delete item;
   }
@@ -73,16 +73,16 @@ MCMP<Container>::~MCMP() {
   }
 }
 
-template <class Container>
-void MCMP<Container>::zero_energies() {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void MCMP<Container, Allocator>::zero_energies() {
   std::fill(emp.begin(), emp.end(), 0.0);
   for (auto &c : control) {
     std::fill(c.begin(), c.end(), 0.0);
   }
 }
 
-template <class Container>
-void MCMP<Container>::monte_energy() {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void MCMP<Container, Allocator>::monte_energy() {
   Timer mcTimer, stepTimer;
   std::vector<std::ofstream> output(emp.size()+1);
 
@@ -93,17 +93,17 @@ void MCMP<Container>::monte_energy() {
 #endif // DIMER_PRINT
 
   // open output stream and start clock for calculation
-  if (mpi_info.sys_master) {
+  if (this->mpi_info.sys_master) {
     mcTimer.Start();
     stepTimer.Start();
-    print_mc_head(mcTimer.StartTime());
+    this->print_mc_head(mcTimer.StartTime());
 
     for (auto i = 0; i < energy_functions.size(); i++) {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
+      std::string filename = this->iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
       output[i].open(filename);
     }
     {
-      std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
+      std::string filename = this->iops.sopns[KEYS::JOBNAME] + ".20";
       output.back().open(filename);
     }
   }
@@ -130,21 +130,21 @@ void MCMP<Container>::monte_energy() {
 #endif // DIMER_PRINT
 
   // --- initialize
-  for (int step = 1; step <= iops.iopns[KEYS::MC_TRIAL]; step++) {
+  for (int step = 1; step <= this->iops.iopns[KEYS::MC_TRIAL]; step++) {
     // generate new positions
-    move_walkers();
+    this->move_walkers();
 
     // update wavefunction
-    update_wavefunction();
+    this->update_wavefunction();
 
     // zero energy arrarys
     zero_energies();
 
     // calcaulte energy for step
     do {
-      tau->new_tau(random);
+      this->tau->new_tau(this->random);
       energy();
-    } while (tau->next());
+    } while (this->tau->next());
 
     // accumulate
     auto cv_back = control.back().begin();
@@ -181,40 +181,40 @@ void MCMP<Container>::monte_energy() {
       stepTimer.Start();
 
       for (auto i = 0; i < emp.size(); i++) {
-          std::string filename = iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
+          std::string filename = this->iops.sopns[KEYS::JOBNAME] + "." + energy_functions[i]->extension;
           cv[i]->to_json(filename);
       }
       {
-        std::string filename = iops.sopns[KEYS::JOBNAME] + ".20";
+        std::string filename = this->iops.sopns[KEYS::JOBNAME] + ".20";
         cv.back()->to_json(filename);
       }
     }
   }
 
 
-  if (mpi_info.sys_master) {
+  if (this->mpi_info.sys_master) {
     mcTimer.Stop();
-    print_mc_tail(mcTimer.Span(), mcTimer.EndTime());
+    this->print_mc_tail(mcTimer.Span(), mcTimer.EndTime());
     for (auto i = 0; i < emp.size(); i++) {
       output[i].close();
     }
   }
 }
 
-template <class Container>
-void MCMP<Container>::energy() {
-  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void MCMP<Container, Allocator>::energy() {
+  this->ovps.update(this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->tau);
   for (int i = 0; i < energy_functions.size(); i++) {
-    if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+    if (this->tau->is_new(energy_functions[i]->n_tau_coordinates)) {
       if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
         Standard_MP_Functional* functional = dynamic_cast<Standard_MP_Functional*>(energy_functions[i]);
-        functional->energy(emp[i], control[i], ovps, electron_pair_list, tau);
+        functional->energy(emp[i], control[i], this->ovps, this->electron_pair_list, this->tau);
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
         F12_MP_Functional* functional = dynamic_cast<F12_MP_Functional*>(energy_functions[i]);
-        functional->energy(emp[i], control[i], wavefunctions, electron_pair_list, electron_list); 
+        functional->energy(emp[i], control[i], this->wavefunctions, this->electron_pair_list, this->electron_list); 
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
         Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(energy_functions[i]);
-        functional->energy(emp[i], control[i], wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], electron_pair_list, tau); 
+        functional->energy(emp[i], control[i], this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->electron_pair_list, this->tau); 
       }
     }
   }
@@ -222,21 +222,27 @@ void MCMP<Container>::energy() {
 
 
 #ifdef HAVE_CUDA
+template <> void MCMP<thrust::device_vector, thrust::device_allocator>::energy() {}
+
 GPU_MCMP::GPU_MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : MCMP(p1, p2, p3, p4) {
-  ovps_device.init(ovps.o_set.size(), iops.iopns[KEYS::ELECTRON_PAIRS]);
+  ovps_host.init(ovps.o_set.size(), iops.iopns[KEYS::ELECTRON_PAIRS]);
 }
  
 void GPU_MCMP::energy() {
-  ovps_device.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
-  copy_OVPS(ovps_device, ovps);
+  this->ovps.update(this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->tau);
+  copy_OVPS(ovps, ovps_host);
   for (int i = 0; i < energy_functions.size(); i++) {
-    if (!energy_functions[i]->is_f12) {
-      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
-        energy_functions[i]->energy(emp[i], control[i], ovps, electron_pair_list, tau);
-      }
-    } else {
-      if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
-        energy_functions[i]->energy_f12(emp[i], control[i], wavefunctions, electron_pair_list, electron_list);
+    if (this->tau->is_new(energy_functions[i]->n_tau_coordinates)) {
+      if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
+        Standard_MP_Functional* functional = dynamic_cast<Standard_MP_Functional*>(energy_functions[i]);
+        // functional->energy(emp[i], control[i], this->ovps, this->electron_pair_list, this->tau);
+        functional->energy(emp[i], control[i], ovps_host, this->electron_pair_list, this->tau);
+      } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
+        // F12_MP_Functional* functional = dynamic_cast<F12_MP_Functional*>(energy_functions[i]);
+        // functional->energy(emp[i], control[i], this->wavefunctions, this->electron_pair_list, this->electron_list); 
+      } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
+        // Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(energy_functions[i]);
+        // functional->energy(emp[i], control[i], this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->electron_pair_list, this->tau); 
       }
     }
   }

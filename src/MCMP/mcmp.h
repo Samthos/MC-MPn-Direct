@@ -9,8 +9,8 @@
 #include "mp4_functional.h"
 #include "../MCF12/mp2_f12.h"
 
-template <class Container>
-class MCMP : public QC_monte<std::vector<double>> {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+class MCMP : public QC_monte<Container, Allocator> {
  public:
   MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
   ~MCMP();
@@ -27,21 +27,22 @@ class MCMP : public QC_monte<std::vector<double>> {
   void zero_energies();
   virtual void energy();
 };
-template class MCMP<std::vector<double>>;
+template class MCMP<std::vector, std::allocator>;
 
 #ifdef HAVE_CUDA
-class GPU_MCMP : public MCMP<std::vector<double>> {
+template <> void MCMP<thrust::device_vector, thrust::device_allocator>::energy();
+
+class GPU_MCMP : public MCMP<thrust::device_vector, thrust::device_allocator> {
  public:
   GPU_MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
 
  protected:
-  OVPS_Device ovps_device;
+  OVPS_Host ovps_host;
   void energy() override;
 };
-template class MCMP<thrust::device_vector<double>>;
 #endif
 
-class Dimer : public MCMP<std::vector<double>> {
+class Dimer : public MCMP<std::vector, std::allocator> {
  public:
   Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
   ~Dimer();

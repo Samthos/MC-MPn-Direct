@@ -59,7 +59,7 @@ namespace {
         if (standard) {
           mp_functional = create_MP2_Functional(CV);
         } else {
-          mp_functional = create_Fast_MP2_Functional(CV);
+          mp_functional = create_Direct_MP2_Functional(CV);
         }
         control.resize(mp_functional->n_control_variates);
       }
@@ -70,8 +70,8 @@ namespace {
         if (mp_functional->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
           Standard_MP_Functional* functional = dynamic_cast<Standard_MP_Functional*>(mp_functional);
           functional->energy(emp, control, this->ovps, this->electron_pair_list.get(), this->tau.get());
-        } else if (mp_functional->functional_type == MP_FUNCTIONAL_TYPE::FAST) {
-          Fast_MP_Functional* functional = dynamic_cast<Fast_MP_Functional*>(mp_functional);
+        } else if (mp_functional->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
+          Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(mp_functional);
           functional->energy(emp, control, this->psi1, this->psi2, this->electron_pair_list.get(), this->tau.get());
         }
       }

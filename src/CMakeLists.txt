@@ -3,7 +3,6 @@ set(source
   blas_calls.h
   control_variate.cpp
   control_variate.h
-  cpu_qc_monte.cpp
   main.cpp
   ovps_set.h
   qc_input.cpp
