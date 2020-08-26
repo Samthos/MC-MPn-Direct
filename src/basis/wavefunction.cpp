@@ -1,4 +1,8 @@
 #include <vector>
+
+#include "cblas.h"
+#include "../blas_calls.h"
+
 #include "wavefunction.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
@@ -7,6 +11,7 @@ Wavefunction<Container, Allocator>::Wavefunction(std::vector<Point>* p, const st
   iocc2(movecs_in->iocc2),
   ivir1(movecs_in->ivir1),
   ivir2(movecs_in->ivir2),
+  n_basis_functions(movecs_in->n_basis_functions),
   movecs(movecs_in->movecs),
   electrons(p->size()),
   lda(ivir2),
@@ -45,7 +50,6 @@ const double* Wavefunction<Container, Allocator>::virTau() const {
   return get_raw_pointer(psiTau) + ivir1;
 }
 
-
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 double* Wavefunction<Container, Allocator>::data() {
   return get_raw_pointer(psi);
@@ -76,7 +80,6 @@ double* Wavefunction<Container, Allocator>::virTau() {
   return get_raw_pointer(psiTau) + ivir1;
 }
 
-
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 double* Wavefunction<Container, Allocator>::get_raw_pointer(Container<double, Allocator<double>>&) {
   return nullptr;
@@ -89,11 +92,22 @@ const double* Wavefunction<Container, Allocator>::get_raw_pointer(const Containe
 
 
 template <>
-double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(std::vector<double, std::allocator<double>>& v) {
+void Wavefunction<std::vector, std::allocator>::ao_to_mo(const vector_double& ao_amplitudes) {
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
+      electrons, lda, n_basis_functions,
+      1.0,
+      ao_amplitudes.data(), n_basis_functions,
+      movecs.data(), n_basis_functions,
+      0.0,
+      psi.data(), lda);
+}
+
+template <>
+double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(vector_double& v) {
   return v.data();
 }
 
 template <>
-const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const std::vector<double, std::allocator<double>>& v) {
+const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const vector_double& v) {
   return v.data();
 }

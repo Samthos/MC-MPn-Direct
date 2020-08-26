@@ -28,12 +28,6 @@ class Basis {
 
   void build_contractions(const vector_point&);
   void build_contractions_with_derivatives(const vector_point&);
-
-  void host_psi_get(Wavefunction_Type&, vector_point&);
-  void host_psi_get_dx(Wavefunction_Type&, vector_point&);
-  void host_psi_get_dy(Wavefunction_Type&, vector_point&);
-  void host_psi_get_dz(Wavefunction_Type&, vector_point&);
-
   void build_ao_amplitudes(const vector_point&);
   void build_ao_amplitudes_dx(const vector_point&);
   void build_ao_amplitudes_dy(const vector_point&);
@@ -73,10 +67,6 @@ typedef Basis<std::vector, std::allocator> Basis_Host;
 #ifdef HAVE_CUDA
 template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const vector_point&); 
 template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_with_derivatives(const vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get(Wavefunction_Type&, vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dx(Wavefunction_Type&, vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dy(Wavefunction_Type&, vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dz(Wavefunction_Type&, vector_point&); 
 template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes(const vector_point&); 
 template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dx(const vector_point&); 
 template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dy(const vector_point&); 

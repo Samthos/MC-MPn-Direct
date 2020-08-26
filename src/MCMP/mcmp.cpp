@@ -305,27 +305,14 @@ void Dimer::update_wavefunction() {
       Wavefunction_Type& monomer_b_wavefunction = monomer_b_wavefunctions[jt];
       auto code = jt & WT::mask;
       switch (code) {
-        case WT::normal: 
-          basis.host_psi_get(wavefunction, *wavefunction.pos); 
-          basis.host_psi_get(monomer_a_wavefunction, *monomer_a_wavefunction.pos); 
-          basis.host_psi_get(monomer_b_wavefunction, *monomer_b_wavefunction.pos);
-          break;
-        case WT::dx: 
-          basis.host_psi_get_dx(wavefunction, *wavefunction.pos); 
-          basis.host_psi_get_dx(monomer_a_wavefunction, *monomer_a_wavefunction.pos); 
-          basis.host_psi_get_dx(monomer_b_wavefunction, *monomer_b_wavefunction.pos);
-          break;
-        case WT::dy: 
-          basis.host_psi_get_dy(wavefunction, *wavefunction.pos); 
-          basis.host_psi_get_dy(monomer_a_wavefunction, *monomer_a_wavefunction.pos); 
-          basis.host_psi_get_dy(monomer_b_wavefunction, *monomer_b_wavefunction.pos);
-          break;
-        case WT::dz: 
-          basis.host_psi_get_dz(wavefunction, *wavefunction.pos); 
-          basis.host_psi_get_dz(monomer_a_wavefunction, *monomer_a_wavefunction.pos); 
-          basis.host_psi_get_dz(monomer_b_wavefunction, *monomer_b_wavefunction.pos);
-          break;
+        case WT::normal: basis.build_ao_amplitudes(*wavefunction.pos); break;
+        case WT::dx:     basis.build_ao_amplitudes_dx(*wavefunction.pos); break;
+        case WT::dy:     basis.build_ao_amplitudes_dy(*wavefunction.pos); break;
+        case WT::dz:     basis.build_ao_amplitudes_dz(*wavefunction.pos); break;
       }
+      wavefunction.ao_to_mo(basis.ao_amplitudes);
+      monomer_a_wavefunction.ao_to_mo(basis.ao_amplitudes);
+      monomer_b_wavefunction.ao_to_mo(basis.ao_amplitudes);
     }
   }
 }

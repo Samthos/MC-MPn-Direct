@@ -1,8 +1,6 @@
 #include <fstream>
 #include <string>
 
-#include "cblas.h"
-#include "../blas_calls.h"
 
 #include "../qc_mpi.h"
 #include "basis.h"
@@ -22,57 +20,6 @@ Basis<Container, Allocator>::Basis(const int& mc_num_, const Basis_Parser& basis
   ao_amplitudes(qc_nbf * mc_num),
   atomic_orbitals(basis_parser.atomic_orbitals)
 { }
-
-template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::host_psi_get(Wavefunction_Type& psi, vector_point& pos) {
-  build_ao_amplitudes(pos);
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi.lda, qc_nbf,
-      1.0,
-      ao_amplitudes.data(), qc_nbf,
-      psi.movecs.data(), qc_nbf,
-      0.0,
-      psi.psi.data(), psi.lda);
-}
-
-template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::host_psi_get_dx(Wavefunction_Type& psi_dx, vector_point& pos) {
-  // d/dx of wavefunction 
-  build_ao_amplitudes_dx(pos);
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi_dx.lda, qc_nbf,
-      1.0,
-      ao_amplitudes.data(), qc_nbf,
-      psi_dx.movecs.data(), qc_nbf,
-      0.0,
-      psi_dx.psi.data(), psi_dx.lda);
-}
-
-template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::host_psi_get_dy(Wavefunction_Type& psi_dy, vector_point& pos) {
-  // d/dy of wavefunction 
-  build_ao_amplitudes_dy(pos);
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi_dy.lda, qc_nbf,
-      1.0,
-      ao_amplitudes.data(), qc_nbf,
-      psi_dy.movecs.data(), qc_nbf,
-      0.0,
-      psi_dy.psi.data(), psi_dy.lda);
-}
-
-template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::host_psi_get_dz(Wavefunction_Type& psi_dz, vector_point& pos) {
-  // d/dz of wavefunction 
-  build_ao_amplitudes_dz(pos);
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      pos.size(), psi_dz.lda, qc_nbf,
-      1.0,
-      ao_amplitudes.data(), qc_nbf,
-      psi_dz.movecs.data(), qc_nbf,
-      0.0,
-      psi_dz.psi.data(), psi_dz.lda);
-}
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Basis<Container, Allocator>::build_contractions(const vector_point &pos) {

@@ -90,20 +90,6 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_
       d_p.data().get());
 }
 
-template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get(Wavefunction_Type&, vector_point&) {
-  std::cerr << "FUck me\n"; exit(0);
-}
-
-template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dx(Wavefunction_Type&, vector_point&) {}
-
-template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dy(Wavefunction_Type&, vector_point&) {}
-
-template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::host_psi_get_dz(Wavefunction_Type&, vector_point&) {}
-
 __global__ 
 void call_build_ao_amplitudes(
     int n_walkers,

@@ -86,12 +86,12 @@ void QC_monte<Container, Allocator>::update_wavefunction() {
       Wavefunction_Type& wavefunction = wavefunctions[jt];
       auto code = jt & WT::mask;
       switch (code) {
-        case WT::normal: basis.host_psi_get(wavefunction, *wavefunction.pos); break;
-        case WT::dx: basis.host_psi_get_dx(wavefunction, *wavefunction.pos); break;
-        case WT::dy: basis.host_psi_get_dy(wavefunction, *wavefunction.pos); break;
-        case WT::dz: basis.host_psi_get_dz(wavefunction, *wavefunction.pos); break;
+        case WT::normal: basis.build_ao_amplitudes(*wavefunction.pos); break;
+        case WT::dx:     basis.build_ao_amplitudes_dx(*wavefunction.pos); break;
+        case WT::dy:     basis.build_ao_amplitudes_dy(*wavefunction.pos); break;
+        case WT::dz:     basis.build_ao_amplitudes_dz(*wavefunction.pos); break;
       }
-      wavefunction.ao_to_mo(basis.ao);
+      wavefunction.ao_to_mo(basis.ao_amplitudes);
     }
   }
 }

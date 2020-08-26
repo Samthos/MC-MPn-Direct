@@ -55,9 +55,13 @@ namespace WM {
 
 template <template <class, class> class Container, template <class> class Allocator>
 class Wavefunction {
+  typedef Container<double, Allocator<double>> vector_double;
+
  public:
   Wavefunction() {}
   Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser>);
+
+  void ao_to_mo(const vector_double&);
 
   double *data();
   double *occ();
@@ -77,32 +81,32 @@ class Wavefunction {
   size_t iocc2;
   size_t ivir1;
   size_t ivir2;
-  size_t number_of_molecuar_orbitals;
+  size_t n_basis_functions;
+
 
   size_t electrons;
   size_t lda;
-  size_t rows;
-  size_t col;
-  // type for row/col major
 
-  Container<double, Allocator<double>> psi;
-  Container<double, Allocator<double>> psiTau;
-  Container<double, Allocator<double>> movecs;
+  vector_double psi;
+  vector_double psiTau;
+  vector_double movecs;
   std::vector<Point>* pos;
 
  private:
-  static double* get_raw_pointer(Container<double, Allocator<double>>&);
-  static const double* get_raw_pointer(const Container<double, Allocator<double>>&);
+  static double* get_raw_pointer(vector_double&);
+  static const double* get_raw_pointer(const vector_double&);
 };
 
-template <> double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(std::vector<double, std::allocator<double>>&);
-template <> const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const std::vector<double, std::allocator<double>>&);
+template <> void Wavefunction<std::vector, std::allocator>::ao_to_mo(const vector_double&);
+template <> double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(vector_double&);
+template <> const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const vector_double&);
 template class Wavefunction<std::vector, std::allocator>;
 typedef Wavefunction<std::vector, std::allocator> Wavefunction_Host;
 
 #ifdef HAVE_CUDA
-template <> double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(thrust::device_vector<double, thrust::device_allocator<double>>&);
-template <> const double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(const thrust::device_vector<double, thrust::device_allocator<double>>&);
+template <> void Wavefunction<thrust::device_vector, thrust::device_allocator>::ao_to_mo(const vector_double&);
+template <> double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(vector_double&);
+template <> const double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(const vector_double&);
 template class Wavefunction<thrust::device_vector, thrust::device_allocator>;
 typedef Wavefunction<thrust::device_vector, thrust::device_allocator> Wavefunction_Device;
 #endif  // HAVE_CUDA
