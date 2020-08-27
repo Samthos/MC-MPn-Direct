@@ -93,11 +93,11 @@ const double* Wavefunction<Container, Allocator>::get_raw_pointer(const Containe
 
 template <>
 void Wavefunction<std::vector, std::allocator>::ao_to_mo(const vector_double& ao_amplitudes) {
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans,
-      electrons, lda, n_basis_functions,
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+      lda, electrons, n_basis_functions,
       1.0,
-      ao_amplitudes.data(), n_basis_functions,
       movecs.data(), n_basis_functions,
+      ao_amplitudes.data(), n_basis_functions,
       0.0,
       psi.data(), lda);
 }
