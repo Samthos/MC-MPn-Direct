@@ -1,45 +1,4 @@
 set(source
-  blas_calls.cpp
-  blas_calls.h
-  control_variate.cpp
-  control_variate.h
-  main.cpp
-  ovps_set.h
-  qc_input.cpp
-  qc_monte.cpp
-  qc_monte.h
-  qc_mpi.cpp
-  qc_mpi.h
-  qc_ovps.h
-  qc_random.cpp
-  qc_random.h
-  timer.h
-  electron_generators/weight_function.cpp
-  electron_generators/weight_function.h
-  electron_generators/create_electron_pair_list.cpp
-  electron_generators/direct_electron_pair_list.cpp
-  electron_generators/direct_electron_pair_list.h
-  electron_generators/electron_list.cpp
-  electron_generators/electron_list.h
-  electron_generators/electron_pair_list.cpp
-  electron_generators/electron_pair_list.h
-  electron_generators/metropolis_electron_pair_list.cpp
-  electron_generators/metropolis_electron_pair_list.h
-  basis/atomic_orbital.h
-  basis/basis_parser.cpp
-  basis/basis_parser.h
-  basis/cartesian_poly.h
-  basis/create_movec_parser.cpp
-  basis/dummy_movec_parser.cpp
-  basis/dummy_movec_parser.h
-  basis/movec_parser.cpp
-  basis/movec_parser.h
-  basis/nwchem_movec_parser.cpp
-  basis/nwchem_movec_parser.h
-  basis/basis.h
-  basis/shell.cpp
-  basis/shell.h
-  basis/wavefunction.h
   MCF12/F12_Traces.cpp
   MCF12/F12_Traces.h
   MCF12/correlation_factors.cpp
@@ -60,23 +19,68 @@ set(source
   MCGF/gf_full_arrays.cpp
   MCGF/gf_full_arrays.h
   MCGF/gf_stats.cpp
+  MCGF/qc_gfFullStatistics.cpp
   MCGF/qc_gfFullStatisticsHost.cpp
   MCGF/qc_mcgf.cpp
-  MCGF/qc_gfFullStatistics.cpp
   MCGF/qc_mcgf.h
   MCGF/qc_mcgf2.cpp
   MCGF/qc_mcgf2.h
   MCGF/qc_mcgf3.cpp 
   MCGF/qc_mcgf3.h
-  MCMP/mcmp.h
+  MCMP/create_mp2_functional.cpp
+  MCMP/create_mp2_functional.h
+  MCMP/direct_mp2_functional.cpp
+  MCMP/direct_mp2_functional.h
   MCMP/mcmp.cpp
-  MCMP/mp_functional.h
+  MCMP/mcmp.h
   MCMP/mp2_functional.cpp
   MCMP/mp2_functional.h
   MCMP/mp3_functional.cpp
   MCMP/mp3_functional.h
   MCMP/mp4_functional.cpp
   MCMP/mp4_functional.h
+  MCMP/mp_functional.h
+  basis/atomic_orbital.h
+  basis/basis.h
+  basis/basis_parser.cpp
+  basis/basis_parser.h
+  basis/cartesian_poly.h
+  basis/create_movec_parser.cpp
+  basis/dummy_movec_parser.cpp
+  basis/dummy_movec_parser.h
+  basis/movec_parser.cpp
+  basis/movec_parser.h
+  basis/nwchem_movec_parser.cpp
+  basis/nwchem_movec_parser.h
+  basis/shell.cpp
+  basis/shell.h
+  basis/wavefunction.h
+  blas_calls.cpp
+  blas_calls.h
+  control_variate.cpp
+  control_variate.h
+  electron_generators/create_electron_pair_list.cpp
+  electron_generators/direct_electron_pair_list.cpp
+  electron_generators/direct_electron_pair_list.h
+  electron_generators/electron_list.cpp
+  electron_generators/electron_list.h
+  electron_generators/electron_pair_list.cpp
+  electron_generators/electron_pair_list.h
+  electron_generators/metropolis_electron_pair_list.cpp
+  electron_generators/metropolis_electron_pair_list.h
+  electron_generators/weight_function.cpp
+  electron_generators/weight_function.h
+  main.cpp
+  ovps_set.h
+  qc_input.cpp
+  qc_monte.cpp
+  qc_monte.h
+  qc_mpi.cpp
+  qc_mpi.h
+  qc_ovps.h
+  qc_random.cpp
+  qc_random.h
+  timer.h
 )
 
 add_subdirectory(geometry)
@@ -112,6 +116,8 @@ endif()
 
 if(${Enable_CUDA})
   set(GPU_SPECIFIC_SOURCES
+    MCMP/device_mp2_functional.cu
+    MCMP/device_mp2_functional.h
     basis/atomic_orbital.cu
     basis/basis.cu
     basis/wavefunction.cu

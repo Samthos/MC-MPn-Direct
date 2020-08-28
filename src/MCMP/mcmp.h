@@ -4,13 +4,15 @@
 #include "../qc_monte.h"
 
 #include "mp_functional.h"
-#include "mp2_functional.h"
-#include "mp3_functional.h"
-#include "mp4_functional.h"
-#include "../MCF12/mp2_f12.h"
+
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class MCMP : public QC_monte<Container, Allocator> {
+ protected:
+  typedef Standard_MP_Functional<Container, Allocator> Standard_MP_Functional_Type;
+  typedef Direct_MP_Functional<Container, Allocator> Direct_MP_Functional_Type;
+  typedef F12_MP_Functional<Container, Allocator> F12_MP_Functional_Type;
+
  public:
   MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
   ~MCMP();
@@ -31,13 +33,13 @@ template class MCMP<std::vector, std::allocator>;
 
 #ifdef HAVE_CUDA
 template <> void MCMP<thrust::device_vector, thrust::device_allocator>::energy();
+template class MCMP<thrust::device_vector, thrust::device_allocator>;
 
 class GPU_MCMP : public MCMP<thrust::device_vector, thrust::device_allocator> {
  public:
   GPU_MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
 
  protected:
-  OVPS_Host ovps_host;
   void energy() override;
 };
 #endif

@@ -12,7 +12,7 @@
 #include "F12_Traces.h"
 #include "correlation_factors.h"
 
-class MP2_F12_V : public F12_MP_Functional {
+class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
  protected:
   typedef Wavefunction_Host Wavefunction_Type;
 

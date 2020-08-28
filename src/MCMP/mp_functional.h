@@ -1,5 +1,9 @@
 #ifndef MBPT_H_
 #define MBPT_H_
+
+#ifdef HAVE_CUDA
+#include <thrust/device_vector.h>
+#endif
 #include <vector>
 #include <unordered_map>
 
@@ -17,9 +21,6 @@ namespace MP_FUNCTIONAL_TYPE {
 }
 
 class MP_Functional {
- protected:
-  typedef Wavefunction_Host Wavefunction_Type;
-
  public:
   MP_Functional(int ncv, int ntc, const std::string& e, MP_FUNCTIONAL_TYPE::MP_FUNCTIONAL_TYPE f) : n_control_variates(ncv), n_tau_coordinates(ntc), extension(e), functional_type(f) {}
   virtual ~MP_Functional() = default;
@@ -30,19 +31,31 @@ class MP_Functional {
   MP_FUNCTIONAL_TYPE::MP_FUNCTIONAL_TYPE functional_type;
 };
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Standard_MP_Functional : public MP_Functional {
+ protected:
+  typedef OVPS<Container, Allocator> OVPS_Type;
+
  public:
   Standard_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::STANDARD) {}
-  virtual void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) = 0;
+  virtual void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List*, Tau*) = 0;
 };
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Direct_MP_Functional : public MP_Functional {
+ protected:
+  typedef Wavefunction<Container, Allocator> Wavefunction_Type;
+
  public:
   Direct_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::DIRECT) {}
   virtual void energy(double& emp, std::vector<double>& control, Wavefunction_Type& psi1, Wavefunction_Type& psi2, Electron_Pair_List*, Tau*) = 0;
 };
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class F12_MP_Functional : public MP_Functional {
+ protected:
+  typedef Wavefunction<Container, Allocator> Wavefunction_Type;
+
  public:
   F12_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::F12) {}
   virtual void energy(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) = 0;

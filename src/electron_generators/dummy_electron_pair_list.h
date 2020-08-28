@@ -7,6 +7,7 @@ class Dummy_Electron_Pair_List : public Electron_Pair_List {
  public:
   explicit Dummy_Electron_Pair_List(int size) : Electron_Pair_List(size) {
     std::fill(wgt.begin(), wgt.end(), 1.0);
+    std::fill(inverse_weight.begin(), inverse_weight.end(), 1.0);
     std::fill(rv.begin(), rv.end(), 1.0);
   }
   ~Dummy_Electron_Pair_List() override = default;

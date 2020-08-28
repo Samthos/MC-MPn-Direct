@@ -30,11 +30,6 @@ if (Enable_MPI)
   find_package(MPI REQUIRED)
 endif()
 
-option(NDEBUG "enables NDEBUG macro" Off)
-if(${NDEBUG})
-  add_definitions(-DNDEBUG)
-endif()
-
 option(DIMER_PRINT "enables printing of all integrands for dimer calculation macro" Off)
 if(${DIMER_PRINT})
   add_definitions(-DDIMER_PRINT)

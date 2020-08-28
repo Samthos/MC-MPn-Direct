@@ -31,6 +31,7 @@ class Electron_Pair_List {
   std::vector<Point> pos1;
   std::vector<Point> pos2;
   std::vector<double> wgt;
+  std::vector<double> inverse_weight;
   std::vector<double> rv;
   std::vector<double> r12;
  protected:

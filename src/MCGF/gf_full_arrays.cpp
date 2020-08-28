@@ -73,14 +73,12 @@ void OVPS_ARRAY::resize(const IOPs& iops, const std::shared_ptr<Movec_Parser> ba
       en3_12m = enGrouped.data() + 5 * nmo * nmo;
       en3_c   = enGrouped.data() + 6 * nmo * nmo;
     } else {
-      std::cerr << "OVPS_ARRAY not configures for order != (2, 3)\n";
       exit(0);
     }
   }
 }
 
 OVPS_ARRAY::OVPS_ARRAY(const OVPS_ARRAY& other) {
-  std::cerr << "GET FUCKED\n";
   exit(0);
 }
 

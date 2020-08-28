@@ -8,11 +8,11 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/aedoran/Documents/lab_projects/MC-MPn-Direct/cmake-build-debug/src/MC_MPn_Direct",
+            "program": "/home/aedoran/Documents/lab_projects/MC-MPn-Direct/cmake-build-RelWithDebInfo/src/GPU_MC_MPn_Direct",
             "args": ["mcin/id_3.mcin"],
             "stopAtEntry": false,
             "cwd": "/home/aedoran/Documents/lab_projects/MC-MPn-Direct-db",
-            "environment": [],
+            "environment": [{"name":"OPENBLAS_NUM_THREADS", "value":"1"},],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [

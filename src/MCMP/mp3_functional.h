@@ -4,9 +4,9 @@
 #include "mp_functional.h"
 
 template <int CVMP3>
-class MP3_Functional : public Standard_MP_Functional {
+class MP3_Functional : public Standard_MP_Functional<std::vector, std::allocator> {
  public:
-  MP3_Functional() : Standard_MP_Functional(3 * CVMP3 * (1 + CVMP3), 2, "23") {}
+  MP3_Functional() : Standard_MP_Functional<std::vector, std::allocator>(3 * CVMP3 * (1 + CVMP3), 2, "23") {}
   void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) override;
  private:
   void mcmp3_helper(

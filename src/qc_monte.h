@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <unordered_map>
+
 #ifdef HAVE_CUDA
 #include <thrust/device_vector.h>
 #endif
@@ -59,6 +60,10 @@ class QC_monte {
   typedef Wavefunction<Container, Allocator> Wavefunction_Type;
   typedef OVPS<Container, Allocator> OVPS_Type;
 
+  typedef Electron_Pair_List Electron_Pair_List_Type;
+  typedef Electron_List Electron_List_Type;
+  typedef Tau Tau_Type;
+
  public:
   QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basis_Host p3);
   virtual ~QC_monte();
@@ -78,9 +83,9 @@ class QC_monte {
   Random random;
   OVPS_Type ovps;
   
-  Electron_Pair_List* electron_pair_list;
-  Electron_List* electron_list;
-  Tau* tau;
+  Electron_Pair_List_Type* electron_pair_list;
+  Electron_List_Type* electron_list;
+  Tau_Type* tau;
 
   int nDeriv;
   int numBand, offBand;
@@ -91,6 +96,7 @@ class QC_monte {
   static void print_mc_head(std::chrono::system_clock::time_point);
   static void print_mc_tail(double, std::chrono::system_clock::time_point);
 };
+
 template class QC_monte<std::vector, std::allocator>;
 #ifdef HAVE_CUDA
 template class QC_monte<thrust::device_vector, thrust::device_allocator>;

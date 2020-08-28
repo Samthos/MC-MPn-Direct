@@ -2,6 +2,8 @@
 // Created by aedoran on 6/5/18.
 #include <algorithm>
 
+#include <list>
+
 #include "gtest/gtest.h"
 #include "../test_helper.h"
 
@@ -12,7 +14,8 @@
 #include "../../src/basis/wavefunction.h"
 #include "../../src/electron_generators/dummy_electron_pair_list.h"
 #include "../../src/qc_ovps.h"
-#include "../../src/MCMP/mp2_functional.h"
+
+#include "../../src/MCMP/create_mp2_functional.h"
 
 namespace {
   template <template <typename, typename> typename Container, template <typename> typename Allocator>
@@ -54,10 +57,13 @@ namespace {
 
   template <template <typename, typename> typename Container, template <typename> typename Allocator, bool standard, int CV> 
   class MP2_Functional_Fixture : public MP_Functional_Fixture<Container, Allocator> {
+    typedef Standard_MP_Functional<Container, Allocator> Standard_Functional_Type;
+    typedef Direct_MP_Functional<Container, Allocator> Direct_Functional_Type;
+
     public:
       MP2_Functional_Fixture() : MP_Functional_Fixture<Container, Allocator>(1) {
         if (standard) {
-          mp_functional = create_MP2_Functional(CV);
+          mp_functional = create_MP2_Functional<Container, Allocator>(CV, this->electron_pairs);
         } else {
           mp_functional = create_Direct_MP2_Functional(CV);
         }
@@ -68,10 +74,10 @@ namespace {
         emp = 0;
         std::fill(control.begin(), control.end(), 0);
         if (mp_functional->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
-          Standard_MP_Functional* functional = dynamic_cast<Standard_MP_Functional*>(mp_functional);
+          Standard_Functional_Type* functional = dynamic_cast<Standard_Functional_Type*>(mp_functional);
           functional->energy(emp, control, this->ovps, this->electron_pair_list.get(), this->tau.get());
         } else if (mp_functional->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
-          Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(mp_functional);
+          Direct_Functional_Type* functional = dynamic_cast<Direct_Functional_Type*>(mp_functional);
           functional->energy(emp, control, this->psi1, this->psi2, this->electron_pair_list.get(), this->tau.get());
         }
       }
@@ -89,11 +95,12 @@ namespace {
 
   using Implementations = testing::Types<
     MP2_Functional_Fixture<std::vector, std::allocator, true, 0>,
-    MP2_Functional_Fixture<std::vector, std::allocator, true, 1>,
-    MP2_Functional_Fixture<std::vector, std::allocator, true, 2>,
-    MP2_Functional_Fixture<std::vector, std::allocator, false, 0>,
-    MP2_Functional_Fixture<std::vector, std::allocator, false, 1>,
-    MP2_Functional_Fixture<std::vector, std::allocator, false, 2>
+    MP2_Functional_Fixture<thrust::device_vector, thrust::device_allocator, true, 0>,
+//   MP2_Functional_Fixture<std::vector, std::allocator, true, 1>,
+//   MP2_Functional_Fixture<std::vector, std::allocator, true, 2>,
+//   MP2_Functional_Fixture<std::vector, std::allocator, false, 0>,
+//   MP2_Functional_Fixture<std::vector, std::allocator, false, 1>,
+//   MP2_Functional_Fixture<std::vector, std::allocator, false, 2>
     >;
   TYPED_TEST_SUITE(MP2FunctionalTest, Implementations);
 

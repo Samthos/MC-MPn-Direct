@@ -3,6 +3,12 @@ add_executable(mp2_functional_test.x
   ../../src/MCMP/mp_functional.h
   ../../src/MCMP/mp2_functional.h
   ../../src/MCMP/mp2_functional.cpp
+  ../../src/MCMP/direct_mp2_functional.h
+  ../../src/MCMP/direct_mp2_functional.cpp
+  ../../src/MCMP/device_mp2_functional.h
+  ../../src/MCMP/device_mp2_functional.cu
+  ../../src/MCMP/create_mp2_functional.h
+  ../../src/MCMP/create_mp2_functional.cpp
   ../../src/basis/dummy_movec_parser.cpp
   ../../src/basis/dummy_movec_parser.h
   ../../src/basis/movec_parser.cpp

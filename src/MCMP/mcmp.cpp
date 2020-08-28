@@ -7,11 +7,16 @@
 #include <iomanip>
 #include <iostream>
 
+#include "../MCF12/mp2_f12.h"
+#include "create_mp2_functional.h"
+#include "mp3_functional.h"
+#include "mp4_functional.h"
 
 #include "../qc_monte.h"
-#include "mcmp.h"
 #include "../control_variate.h"
 #include "../timer.h"
+
+#include "mcmp.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 MCMP<Container, Allocator>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : QC_monte<Container, Allocator>(p1, p2, p3, p4) {
@@ -19,7 +24,7 @@ MCMP<Container, Allocator>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p
   int total_control_variates = 0;
 
   if (this->iops.iopns[KEYS::TASK] & TASK::MP2) {
-    energy_functions.push_back(create_MP2_Functional(this->iops.iopns[KEYS::MP2CV_LEVEL]));
+    energy_functions.push_back(create_MP2_Functional<Container, Allocator>(this->iops.iopns[KEYS::MP2CV_LEVEL], this->iops.iopns[KEYS::ELECTRON_PAIRS]));
   }
   if (this->iops.iopns[KEYS::TASK] & TASK::DIRECT_MP2) {
     energy_functions.push_back(create_Direct_MP2_Functional(this->iops.iopns[KEYS::MP2CV_LEVEL]));
@@ -49,15 +54,12 @@ MCMP<Container, Allocator>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p
   this->tau->resize(max_tau_coordinates);
   this->ovps.init(max_tau_coordinates, this->iops.iopns[KEYS::ELECTRON_PAIRS]);
   
- if (energy_functions.size() == 1) {
-   Direct_MP2_Functional<0>* functional_0 = dynamic_cast<Direct_MP2_Functional<0>*>(energy_functions[0]);
-   Direct_MP2_Functional<1>* functional_1 = dynamic_cast<Direct_MP2_Functional<1>*>(energy_functions[0]);
-   Direct_MP2_Functional<2>* functional_2 = dynamic_cast<Direct_MP2_Functional<2>*>(energy_functions[0]);
-   Direct_MP2_Functional<2>* functional_3 = dynamic_cast<Direct_MP2_Functional<2>*>(energy_functions[0]);
-   if (functional_0 || functional_1 || functional_2 || functional_3) {
-     this->ovps.init(0, this->iops.iopns[KEYS::ELECTRON_PAIRS]);
-   }
- } 
+  if (energy_functions.size() == 1) {
+    Direct_MP_Functional_Type* functional = dynamic_cast<Direct_MP_Functional_Type*>(energy_functions[0]);
+    if (functional) {
+      this->ovps.init(0, this->iops.iopns[KEYS::ELECTRON_PAIRS]);
+    }
+  } 
   
   control.emplace_back(total_control_variates);
   cv.push_back(create_accumulator(this->electron_pair_list->requires_blocking(), std::vector<double>(total_control_variates, 0.0)));
@@ -207,13 +209,13 @@ void MCMP<Container, Allocator>::energy() {
   for (int i = 0; i < energy_functions.size(); i++) {
     if (this->tau->is_new(energy_functions[i]->n_tau_coordinates)) {
       if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
-        Standard_MP_Functional* functional = dynamic_cast<Standard_MP_Functional*>(energy_functions[i]);
+        Standard_MP_Functional_Type* functional = dynamic_cast<Standard_MP_Functional_Type*>(energy_functions[i]);
         functional->energy(emp[i], control[i], this->ovps, this->electron_pair_list, this->tau);
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
-        F12_MP_Functional* functional = dynamic_cast<F12_MP_Functional*>(energy_functions[i]);
+        F12_MP_Functional_Type* functional = dynamic_cast<F12_MP_Functional_Type*>(energy_functions[i]);
         functional->energy(emp[i], control[i], this->wavefunctions, this->electron_pair_list, this->electron_list); 
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
-        Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(energy_functions[i]);
+        Direct_MP_Functional_Type* functional = dynamic_cast<Direct_MP_Functional_Type*>(energy_functions[i]);
         functional->energy(emp[i], control[i], this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->electron_pair_list, this->tau); 
       }
     }
@@ -225,18 +227,15 @@ void MCMP<Container, Allocator>::energy() {
 template <> void MCMP<thrust::device_vector, thrust::device_allocator>::energy() {}
 
 GPU_MCMP::GPU_MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : MCMP(p1, p2, p3, p4) {
-  ovps_host.init(ovps.o_set.size(), iops.iopns[KEYS::ELECTRON_PAIRS]);
 }
  
 void GPU_MCMP::energy() {
   this->ovps.update(this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->tau);
-  copy_OVPS(ovps, ovps_host);
   for (int i = 0; i < energy_functions.size(); i++) {
     if (this->tau->is_new(energy_functions[i]->n_tau_coordinates)) {
       if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
-        Standard_MP_Functional* functional = dynamic_cast<Standard_MP_Functional*>(energy_functions[i]);
-        // functional->energy(emp[i], control[i], this->ovps, this->electron_pair_list, this->tau);
-        functional->energy(emp[i], control[i], ovps_host, this->electron_pair_list, this->tau);
+        Standard_MP_Functional_Type* functional = dynamic_cast<Standard_MP_Functional_Type*>(energy_functions[i]);
+        functional->energy(emp[i], control[i], this->ovps, this->electron_pair_list, this->tau);
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
         // F12_MP_Functional* functional = dynamic_cast<F12_MP_Functional*>(energy_functions[i]);
         // functional->energy(emp[i], control[i], this->wavefunctions, this->electron_pair_list, this->electron_list); 
@@ -328,13 +327,13 @@ void Dimer::local_energy(std::unordered_map<int, Wavefunction_Type>& l_wavefunct
   for (int i = 0; i < energy_functions.size(); i++) {
     if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
       if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
-        Standard_MP_Functional* functional = dynamic_cast<Standard_MP_Functional*>(energy_functions[i]);
+        Standard_MP_Functional_Type* functional = dynamic_cast<Standard_MP_Functional_Type*>(energy_functions[i]);
         functional->energy(l_emp[i], l_control[i], ovps, electron_pair_list, l_tau);
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
-        F12_MP_Functional* functional = dynamic_cast<F12_MP_Functional*>(energy_functions[i]);
+        F12_MP_Functional_Type* functional = dynamic_cast<F12_MP_Functional_Type*>(energy_functions[i]);
         functional->energy(l_emp[i], l_control[i], l_wavefunctions, electron_pair_list, electron_list); 
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
-        Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(energy_functions[i]);
+        Direct_MP_Functional_Type* functional = dynamic_cast<Direct_MP_Functional_Type*>(energy_functions[i]);
         functional->energy(l_emp[i], l_control[i], l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], electron_pair_list, l_tau); 
       }
     }

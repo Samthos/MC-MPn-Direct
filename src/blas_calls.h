@@ -24,13 +24,17 @@ void Ddgmm(const enum DDGMM_SIDE Side,
     }
   }
 }
+
 void Ddgmm(const enum DDGMM_SIDE Side,
     int m, int n,
     const double *A, int lda,
     const double *x, int incx,
     double *C, int ldc);
+
 void Transpose(const double*A, int m, double *B);
+
 void set_Upper_from_Lower(double *A, int m);
+
 void dspr(int mode, int uplo, int n,
           double alpha,
           const double* x, int incx,

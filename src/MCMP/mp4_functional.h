@@ -5,9 +5,9 @@
 #include "cblas.h"
 
 template <int CVMP4>
-class MP4_Functional : public Standard_MP_Functional {
+class MP4_Functional : public Standard_MP_Functional<std::vector, std::allocator> {
  public:
-  MP4_Functional(Electron_Pair_List* electron_pair_list) : Standard_MP_Functional(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24"),
+  MP4_Functional(Electron_Pair_List* electron_pair_list) : Standard_MP_Functional<std::vector, std::allocator>(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24"),
       mpn(electron_pair_list->size()),
       rv(mpn),
       wgt(mpn),
