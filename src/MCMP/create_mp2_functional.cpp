@@ -50,9 +50,9 @@ MP_Functional* create_MP2_Functional<thrust::device_vector, thrust::device_alloc
   if (cv_level == 0) {
     mcmp = new Device_MP2_Functional<0>(electron_pairs);
   } else if (cv_level == 1) {
-  //  mcmp = new MP2_Functional<1>;
+    mcmp = new Device_MP2_Functional<1>(electron_pairs);
   } else if (cv_level == 2) {
-  //  mcmp = new MP2_Functional<2>;
+    mcmp = new Device_MP2_Functional<2>(electron_pairs);
   }
   
   if (mcmp == nullptr) {

@@ -96,11 +96,13 @@ namespace {
   using Implementations = testing::Types<
     MP2_Functional_Fixture<std::vector, std::allocator, true, 0>,
     MP2_Functional_Fixture<thrust::device_vector, thrust::device_allocator, true, 0>,
-//   MP2_Functional_Fixture<std::vector, std::allocator, true, 1>,
-//   MP2_Functional_Fixture<std::vector, std::allocator, true, 2>,
-//   MP2_Functional_Fixture<std::vector, std::allocator, false, 0>,
-//   MP2_Functional_Fixture<std::vector, std::allocator, false, 1>,
-//   MP2_Functional_Fixture<std::vector, std::allocator, false, 2>
+    MP2_Functional_Fixture<std::vector, std::allocator, true, 1>,
+    MP2_Functional_Fixture<thrust::device_vector, thrust::device_allocator, true, 1>,
+    MP2_Functional_Fixture<std::vector, std::allocator, true, 2>,
+    MP2_Functional_Fixture<thrust::device_vector, thrust::device_allocator, true, 2>,
+    MP2_Functional_Fixture<std::vector, std::allocator, false, 0>,
+    MP2_Functional_Fixture<std::vector, std::allocator, false, 1>,
+    MP2_Functional_Fixture<std::vector, std::allocator, false, 2>
     >;
   TYPED_TEST_SUITE(MP2FunctionalTest, Implementations);
 
