@@ -2,17 +2,28 @@
 #include "qc_ovps.cpp"
 
 template <>
-void OVPS_Device::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau) {
-  // update green's function trace objects
+OVPS_Device::OVPS() {
+  electron_pairs = 0;
+  v_handle = new cublasHandle_t;
+  auto handle = static_cast<cublasHandle_t*>(v_handle);
+  cublasCreate(handle);
+}
 
+template <>
+OVPS_Device::~OVPS() {
+  auto handle = static_cast<cublasHandle_t*>(v_handle);
+  cublasDestroy(*handle);
+}
+
+template <>
+void OVPS_Device::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau) {
   auto iocc1 = electron_pair_psi1.iocc1;
   auto iocc2 = electron_pair_psi1.iocc2;
   auto ivir1 = electron_pair_psi1.ivir1;
   auto ivir2 = electron_pair_psi1.ivir2;
   auto lda   = electron_pair_psi1.lda;
 
-  cublasHandle_t handle;
-  cublasCreate(&handle);
+  auto handle = static_cast<cublasHandle_t*>(v_handle);
 
   for (auto stop = 0; stop < o_set.size(); stop++) {
     for (auto start = 0; start < o_set[stop].size(); start++) {
@@ -20,22 +31,21 @@ void OVPS_Device::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Typ
       std::transform(t_val.begin(), t_val.end(), t_val.begin(), [](double x){return sqrt(x);});
       thrust::device_vector<double> d_t_val = t_val;
 
-      cublasDdgmm(handle, CUBLAS_SIDE_LEFT,
+      cublasDdgmm(*handle, CUBLAS_SIDE_LEFT,
           ivir2 - iocc1, electron_pairs,
           electron_pair_psi1.data() + iocc1, lda,
           d_t_val.data().get() + iocc1, 1,
           electron_pair_psi1.dataTau() + iocc1, lda);
-      cublasDdgmm(handle, CUBLAS_SIDE_LEFT,
+      cublasDdgmm(*handle, CUBLAS_SIDE_LEFT,
           ivir2 - iocc1, electron_pairs, 
           electron_pair_psi2.data() + iocc1, lda, 
           d_t_val.data().get() + iocc1, 1,
           electron_pair_psi2.dataTau() + iocc1, lda);
 
-      o_set[stop][start].update(electron_pair_psi1.psiTau, iocc1, electron_pair_psi2.psiTau, iocc1, iocc2 - iocc1, lda);
-      v_set[stop][start].update(electron_pair_psi1.psiTau, ivir1, electron_pair_psi2.psiTau, ivir1, ivir2 - ivir1, lda);
+      o_set[stop][start].update(electron_pair_psi1.psiTau, iocc1, electron_pair_psi2.psiTau, iocc1, iocc2 - iocc1, lda, v_handle);
+      v_set[stop][start].update(electron_pair_psi1.psiTau, ivir1, electron_pair_psi2.psiTau, ivir1, ivir2 - ivir1, lda, v_handle);
     }
   }
-  cublasDestroy(handle);
 }
 
 void copy_OVPS(OVPS_Host& src, OVPS_Device& dest) {

@@ -14,7 +14,7 @@ class OVPS_Set {
   OVPS_Set() = default;
   OVPS_Set(int mc_pair_num_);
   void resize(int mc_pair_num_);
-  void update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda);
+  void update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda, void* v_handle);
 
   int mc_pair_num;
   vector_double s_11, s_12, s_21, s_22;
@@ -24,7 +24,7 @@ template <>
 void OVPS_Set<std::vector, std::allocator>::update(
     vector_double& psi1Tau, int psi1_offset,
     vector_double& psi2Tau, int psi2_offset, 
-    size_t inner, size_t lda);
+    size_t inner, size_t lda, void* v_handle);
 template class OVPS_Set<std::vector, std::allocator>;
 typedef OVPS_Set<std::vector, std::allocator> OVPS_Set_Host;
 
@@ -32,7 +32,7 @@ typedef OVPS_Set<std::vector, std::allocator> OVPS_Set_Host;
 template <> void OVPS_Set<thrust::device_vector, thrust::device_allocator>::update(
     vector_double& psi1Tau, int psi1_offset,
     vector_double& psi2Tau, int psi2_offset, 
-    size_t inner, size_t lda);
+    size_t inner, size_t lda, void* v_handle);
 template class OVPS_Set<thrust::device_vector, thrust::device_allocator>;
 typedef OVPS_Set<thrust::device_vector, thrust::device_allocator> OVPS_Set_Device;
 

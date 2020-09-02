@@ -19,11 +19,11 @@ void OVPS_Set<Container, Allocator>::resize(int mc_pair_num_) {
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void OVPS_Set<Container, Allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
+void OVPS_Set<Container, Allocator>::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda, void* v_handle) {
 }
 
 template <>
-void OVPS_Set_Host::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda) {
+void OVPS_Set_Host::update(vector_double& psi1Tau, int psi1_offset, vector_double& psi2Tau, int psi2_offset, size_t inner, size_t lda, void* v_handle) {
   double alpha = 1.0;
   double beta = 0.0;
 

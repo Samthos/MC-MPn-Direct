@@ -10,6 +10,16 @@
 #include "qc_ovps.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
+OVPS<Container, Allocator>::OVPS() {
+  electron_pairs = 0;
+  v_handle = nullptr;
+}
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+OVPS<Container, Allocator>::~OVPS() {
+}
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void OVPS<Container, Allocator>::init(const int dimm, const int electron_pairs_) {
   electron_pairs = electron_pairs_;
 
@@ -45,8 +55,8 @@ void OVPS_Host::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type&
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, electron_pairs, electron_pair_psi1.occ(), electron_pair_psi1.lda, &t_val[iocc1], 1, electron_pair_psi1.occTau(), electron_pair_psi1.lda);
       Ddgmm(DDGMM_SIDE_LEFT, ivir2 - iocc1, electron_pairs, electron_pair_psi2.occ(), electron_pair_psi2.lda, &t_val[iocc1], 1, electron_pair_psi2.occTau(), electron_pair_psi2.lda);
 
-      o_set[stop][start].update(electron_pair_psi1.psiTau, iocc1, electron_pair_psi2.psiTau, iocc1, iocc2 - iocc1, electron_pair_psi2.lda);
-      v_set[stop][start].update(electron_pair_psi1.psiTau, ivir1, electron_pair_psi2.psiTau, ivir1, ivir2 - ivir1, electron_pair_psi2.lda);
+      o_set[stop][start].update(electron_pair_psi1.psiTau, iocc1, electron_pair_psi2.psiTau, iocc1, iocc2 - iocc1, electron_pair_psi2.lda, v_handle);
+      v_set[stop][start].update(electron_pair_psi1.psiTau, ivir1, electron_pair_psi2.psiTau, ivir1, ivir2 - ivir1, electron_pair_psi2.lda, v_handle);
     }
   }
 }

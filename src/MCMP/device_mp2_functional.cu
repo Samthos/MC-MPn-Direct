@@ -22,10 +22,13 @@ Device_MP2_Functional<CVMP2>::Device_MP2_Functional(int electron_pairs) :
       (vector_size + block_size.x - 1) / block_size.x, 
       (vector_size + block_size.y - 1) / block_size.y, 
       1);
-  printf("block size %d %d %d\n", block_size.x, block_size.y, block_size.z);
-  printf("grid size %d %d %d\n", grid_size.x, grid_size.y, grid_size.z);
+  cublasCreate(&handle);
 }
 
+template <int CVMP2>
+Device_MP2_Functional<CVMP2>::~Device_MP2_Functional() {
+  cublasDestroy(handle);
+}
 
 __global__ void m_m_add_mul(double alpha, double* A, double *B, double* C, int size) {
   int tidx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -66,8 +69,6 @@ void Device_MP2_Functional<CVMP2>::prep_arrays(OVPS_Type& ovps, Electron_Pair_Li
 
 template <int CVMP2>
 double Device_MP2_Functional<CVMP2>::cv_energy_helper(int offset) {
-  cublasHandle_t handle;
-  cublasCreate(&handle);
   double alpha = 1.0;
   double beta  = 0.0;
 
@@ -106,7 +107,6 @@ double Device_MP2_Functional<CVMP2>::cv_energy_helper(int offset) {
         inverse_weight.data().get(), 1, 
         &ctrl[4 + offset]);
   }
-  cublasDestroy(handle);
   return en;
 }
 

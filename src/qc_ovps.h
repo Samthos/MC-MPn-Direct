@@ -16,6 +16,8 @@ class OVPS {
   typedef OVPS_Set<Container, Allocator> OVPS_Set_Type;
 
  public:
+  OVPS();
+  ~OVPS();
   void init(int dimm, int electron_pairs_);
   void update(Wavefunction_Type&, Wavefunction_Type&, Tau*);
 
@@ -23,15 +25,16 @@ class OVPS {
 
  private:
   int electron_pairs;
+  void* v_handle;
 };
 
-template <> 
-void OVPS<std::vector, std::allocator>::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau);
-
+template <> void OVPS<std::vector, std::allocator>::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau);
 template class OVPS<std::vector, std::allocator>;
 typedef OVPS<std::vector, std::allocator> OVPS_Host;
 
 #ifdef HAVE_CUDA
+template <> OVPS<thrust::device_vector, thrust::device_allocator>::OVPS();
+template <> OVPS<thrust::device_vector, thrust::device_allocator>::~OVPS();
 template <> void OVPS<thrust::device_vector, thrust::device_allocator>::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Tau* tau);
 template class OVPS<thrust::device_vector, thrust::device_allocator>;
 typedef OVPS<thrust::device_vector, thrust::device_allocator> OVPS_Device;

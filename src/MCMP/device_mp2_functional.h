@@ -2,6 +2,7 @@
 #define DEVICE_MP2_Functional_H_
 
 #include <thrust/device_vector.h>
+#include "cublas_v2.h"
 
 #include "mp_functional.h"
 
@@ -9,6 +10,7 @@ template <int CVMP2>
 class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vector, thrust::device_allocator> {
  public:
    Device_MP2_Functional(int);
+   ~Device_MP2_Functional();
    void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List*, Tau*) override;
 
  private:
@@ -19,6 +21,8 @@ class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vecto
   int matrix_size;
   dim3 block_size;
   dim3 grid_size;
+
+  cublasHandle_t handle;
 
   double en2;
   std::vector<double> ctrl;
