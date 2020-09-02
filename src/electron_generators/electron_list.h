@@ -4,10 +4,10 @@
 #include <array>
 #include <vector>
 
+#include "samplers.h"
 #include "weight_function.h"
 #include "molecule.h"
 #include "../qc_random.h"
-#include "../qc_input.h"
 
 struct Electron {
   Point pos;
@@ -43,7 +43,13 @@ class Electron_List {
 
   std::vector<Electron> electrons;
 };
-Electron_List* create_electron_sampler(IOPs& iops, Molecule& molec, Electron_GTO_Weight& weight);
+Electron_List* create_electron_sampler(Molecule& molec,
+    Electron_GTO_Weight& weight,
+    int sampler_type,
+    size_t electrons,
+    double delx,
+    int debug,
+    std::string seed_file);
 
 class Direct_Electron_List : public Electron_List {
  public:

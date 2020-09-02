@@ -8,6 +8,7 @@
 
 #include "qc_mpi.h"
 #include "tau_generators.h"
+#include "samplers.h"
 
 namespace KEYS {
   enum KEY_TYPE {
@@ -31,16 +32,6 @@ namespace KEYS {
 #define FORMAT(X, Y) #X,
 #include "qc_input_keys.h"
 #undef FORMAT
-  };
-}
-namespace SAMPLER {
-  enum SAMPLER {
-    DIRECT,
-    METROPOLIS,
-  };
-  const std::vector<std::string> sampler_strings = {
-    "DIRECT",
-    "METROPOLIS"
   };
 }
 namespace JOBTYPE {

@@ -3,10 +3,10 @@
 #include <array>
 #include <vector>
 
+#include "samplers.h"
 #include "weight_function.h"
 #include "molecule.h"
 #include "../qc_random.h"
-#include "../qc_input.h"
 
 struct Electron_Pair {
   Point pos1, pos2;
@@ -47,5 +47,12 @@ class Electron_Pair_List {
 
   std::vector<Electron_Pair> electron_pairs;
 };
-Electron_Pair_List* create_electron_pair_sampler(IOPs& iops, Molecule& molec, Electron_Pair_GTO_Weight& weight);
+
+Electron_Pair_List* create_electron_pair_sampler(Molecule& molec,
+    Electron_Pair_GTO_Weight& weight,
+    int sampler_type,
+    size_t electron_pairs,
+    double delx,
+    int debug,
+    std::string seed_file);
 #endif  // ELECTRON_PAIR_LIST_H_

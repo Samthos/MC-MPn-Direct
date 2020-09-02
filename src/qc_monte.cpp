@@ -34,13 +34,13 @@ QC_monte<Container, Allocator>::QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basi
   ivir1 = movecs->ivir1;
   ivir2 = movecs->ivir2;
 
-  electron_pair_list = create_electron_pair_sampler(iops, molec, electron_pair_weight);
+  electron_pair_list = create_electron_pair_sampler(molec, electron_pair_weight, iops.iopns[KEYS::SAMPLER], iops.iopns[KEYS::ELECTRON_PAIRS], iops.dopns[KEYS::MC_DELX], iops.iopns[KEYS::DEBUG], iops.sopns[KEYS::SEED_FILE]);
   wavefunctions.emplace(WC::electron_pairs_1, Wavefunction_Type(&electron_pair_list->pos1, movecs));
   wavefunctions.emplace(WC::electron_pairs_2, Wavefunction_Type(&electron_pair_list->pos2, movecs));
 
   electron_list = nullptr;
   if (iops.iopns[KEYS::TASK] & TASK::ANY_F12) {
-    electron_list = create_electron_sampler(iops, molec, electron_weight);
+    electron_list = create_electron_sampler(molec, electron_weight, iops.iopns[KEYS::SAMPLER], iops.iopns[KEYS::ELECTRONS], iops.dopns[KEYS::MC_DELX], iops.iopns[KEYS::DEBUG], iops.sopns[KEYS::SEED_FILE]);
     wavefunctions.emplace(WC::electrons, Wavefunction_Type(&electron_list->pos, movecs));
     if (iops.iopns[KEYS::TASK] & TASK::ANY_F12_VBX) {
       wavefunctions.emplace(WC::electrons_dx, Wavefunction_Type(&electron_list->pos, movecs));

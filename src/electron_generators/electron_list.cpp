@@ -35,17 +35,22 @@ void Electron_List::transpose() {
   }
 }
 
-Electron_List* create_electron_sampler(IOPs& iops, Molecule& molec, Electron_GTO_Weight& weight) {
+Electron_List* create_electron_sampler(Molecule& molec,
+    Electron_GTO_Weight& weight,
+    int sampler_type,
+    size_t electrons,
+    double delx,
+    int debug,
+    std::string seed_file) {
   Electron_List* electron_list = nullptr;
-  if (iops.iopns[KEYS::SAMPLER] == SAMPLER::DIRECT) {
-    electron_list = new Direct_Electron_List(iops.iopns[KEYS::ELECTRONS]);
-  } else if (iops.iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
-    std::string str = iops.sopns[KEYS::SEED_FILE];
-    if (!str.empty()) {
-      str += ".electron_list_metropolis";
+  if (sampler_type == SAMPLER::DIRECT) {
+    electron_list = new Direct_Electron_List(electrons);
+  } else if (sampler_type == SAMPLER::METROPOLIS) {
+    if (!seed_file.empty()) {
+      seed_file += ".electron_list_metropolis";
     }
-    Random rnd(iops.iopns[KEYS::DEBUG], str);
-    electron_list = new Metropolis_Electron_List(iops.iopns[KEYS::ELECTRONS], iops.dopns[KEYS::MC_DELX], rnd, molec, weight);
+    Random rnd(debug, seed_file);
+    electron_list = new Metropolis_Electron_List(electrons, delx, rnd, molec, weight);
   }
   return electron_list;
 }

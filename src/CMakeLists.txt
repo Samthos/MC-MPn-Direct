@@ -59,17 +59,6 @@ set(source
   blas_calls.h
   control_variate.cpp
   control_variate.h
-  electron_generators/create_electron_pair_list.cpp
-  electron_generators/direct_electron_pair_list.cpp
-  electron_generators/direct_electron_pair_list.h
-  electron_generators/electron_list.cpp
-  electron_generators/electron_list.h
-  electron_generators/electron_pair_list.cpp
-  electron_generators/electron_pair_list.h
-  electron_generators/metropolis_electron_pair_list.cpp
-  electron_generators/metropolis_electron_pair_list.h
-  electron_generators/weight_function.cpp
-  electron_generators/weight_function.h
   main.cpp
   ovps_set.h
   qc_input.cpp
@@ -83,6 +72,7 @@ set(source
 )
 
 add_subdirectory(geometry)
+add_subdirectory(electron_generators)
 add_subdirectory(tau_generators)
 
 set(CPU_SPECIFIC_SOURCES
@@ -99,6 +89,7 @@ add_executable(MC_MPn_Direct ${source} ${CPU_SPECIFIC_SOURCES})
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
 target_link_libraries(MC_MPn_Direct geometry)
+target_link_libraries(MC_MPn_Direct electron_generators)
 target_link_libraries(MC_MPn_Direct tau)
 
 target_include_directories(MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
@@ -134,13 +125,14 @@ if(${Enable_CUDA})
   target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
   target_link_libraries(GPU_MC_MPn_Direct ${CUBLAS_LIBRARIES})
   target_link_libraries(GPU_MC_MPn_Direct geometry)
+  target_link_libraries(GPU_MC_MPn_Direct electron_generators)
   target_link_libraries(GPU_MC_MPn_Direct tau)
 
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC geometry)
-  target_include_directories(GPU_MC_MPn_Direct PUBLIC tau_generators)
   target_include_directories(GPU_MC_MPn_Direct PUBLIC electron_generators)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC tau_generators)
 
   IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to GPU_MC_MPn_Direct")
@@ -149,4 +141,3 @@ if(${Enable_CUDA})
     target_include_directories(GPU_MC_MPn_Direct PRIVATE ${MPI_CXX_INCLUDE_PATH})
   endif()
 endif()
-
