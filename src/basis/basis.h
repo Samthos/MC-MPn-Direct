@@ -8,7 +8,6 @@
 #include "../qc_mpi.h"
 
 #include "atomic_orbital.h"
-#include "wavefunction.h"
 #include "shell.h"
 #include "atom_basis.h"
 #include "basis_parser.h"
@@ -21,7 +20,6 @@ class Basis {
 
   typedef Container<double, Allocator<double>> vector_double;
   typedef Container<Atomic_Orbital, Allocator<Atomic_Orbital>> vector_atomic_orbital;
-  typedef Wavefunction<Container, Allocator> Wavefunction_Type;
 
  public:
   Basis(const int&, const Basis_Parser&);

@@ -2,8 +2,9 @@
 // Created by aedoran on 6/5/18.
 #include <thrust/device_vector.h>
 #include "gtest/gtest.h"
-#include "../../src/ovps_set.h"
 
+#include "cublas_v2.h"
+#include "../../src/ovps_set.h"
 #include "../test_helper.h"
 
 namespace {
@@ -21,6 +22,11 @@ namespace {
           psi2Tau(make_psi(electron_pairs, lda,-1.0))
       {
         ovps_set.resize(electron_pairs);
+        cublasCreate(&handle);
+      }
+
+      ~ovpsSetFixture() {
+        cublasDestroy(handle);
       }
 
       void fill() {
@@ -34,16 +40,17 @@ namespace {
         fill();
         ovps_set.update(psi1Tau, iocc1, 
           psi2Tau, iocc1, 
-          iocc2 - iocc1, lda);
+          iocc2 - iocc1, lda, &handle);
       }
 
       void build_vir() {
         fill();
         ovps_set.update(psi1Tau, ivir1, 
           psi2Tau, ivir1, 
-          ivir2 - ivir1, lda);
+          ivir2 - ivir1, lda, &handle);
       }
 
+      cublasHandle_t handle;
       int iocc1, iocc2, ivir1, ivir2, lda, electron_pairs;
       OVPS_Set<Container, Allocator> ovps_set;
       Container<double, Allocator<double>> psi1Tau;

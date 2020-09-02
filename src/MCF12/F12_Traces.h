@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 #include <vector>
-#include "../basis/basis.h"
+#include "../basis/wavefunction.h"
 #include "electron_pair_list.h"
 #include "electron_list.h"
 
