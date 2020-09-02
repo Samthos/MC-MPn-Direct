@@ -5,6 +5,10 @@
 #include <iostream>
 #include <bitset>
 
+#ifdef HAVE_CUDA
+#include <thrust/device_vector.h>
+#endif 
+
 #include <unordered_map>
 
 #include "qc_monte.h"

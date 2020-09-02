@@ -73,7 +73,6 @@ set(source
   main.cpp
   ovps_set.h
   qc_input.cpp
-  qc_monte.cpp
   qc_monte.h
   qc_mpi.cpp
   qc_mpi.h
@@ -90,6 +89,7 @@ set(CPU_SPECIFIC_SOURCES
   basis/atomic_orbital.cpp
   basis/basis.cpp
   basis/wavefunction.cpp
+  qc_monte.cpp
   ovps_set.cpp
   qc_ovps.cpp 
 )
@@ -118,6 +118,7 @@ if(${Enable_CUDA})
   set(GPU_SPECIFIC_SOURCES
     MCMP/device_mp2_functional.cu
     MCMP/device_mp2_functional.h
+    qc_monte.cu
     basis/atomic_orbital.cu
     basis/basis.cu
     basis/wavefunction.cu

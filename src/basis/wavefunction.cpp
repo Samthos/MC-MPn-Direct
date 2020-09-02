@@ -17,8 +17,10 @@ Wavefunction<Container, Allocator>::Wavefunction(std::vector<Point>* p, const st
   lda(ivir2),
   psi(lda * electrons, 0.0),
   psiTau(lda * electrons, 0.0),
-  pos(p)
-{ }
+  pos(p),
+  v_handle(create_handle())
+{
+}
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 const double* Wavefunction<Container, Allocator>::data() const {
@@ -90,6 +92,15 @@ const double* Wavefunction<Container, Allocator>::get_raw_pointer(const Containe
   return nullptr;
 }
 
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+std::shared_ptr<void> Wavefunction<Container, Allocator>::create_handle() {
+  return std::shared_ptr<void>();
+}
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Wavefunction<Container, Allocator>::destroy_handle() {
+}
 
 template <>
 void Wavefunction<std::vector, std::allocator>::ao_to_mo(const vector_double& ao_amplitudes) {

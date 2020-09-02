@@ -61,6 +61,8 @@ class Wavefunction {
   Wavefunction() {}
   Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser>);
 
+  ~Wavefunction() { destroy_handle(); }
+
   void ao_to_mo(const vector_double&);
 
   double *data();
@@ -95,6 +97,11 @@ class Wavefunction {
  private:
   static double* get_raw_pointer(vector_double&);
   static const double* get_raw_pointer(const vector_double&);
+
+  std::shared_ptr<void> create_handle();
+  void destroy_handle();
+
+  std::shared_ptr<void> v_handle;
 };
 
 template <> void Wavefunction<std::vector, std::allocator>::ao_to_mo(const vector_double&);
@@ -104,6 +111,8 @@ template class Wavefunction<std::vector, std::allocator>;
 typedef Wavefunction<std::vector, std::allocator> Wavefunction_Host;
 
 #ifdef HAVE_CUDA
+template <> std::shared_ptr<void> Wavefunction<thrust::device_vector, thrust::device_allocator>::create_handle();
+template <> void Wavefunction<thrust::device_vector, thrust::device_allocator>::destroy_handle();
 template <> void Wavefunction<thrust::device_vector, thrust::device_allocator>::ao_to_mo(const vector_double&);
 template <> double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(vector_double&);
 template <> const double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(const vector_double&);
