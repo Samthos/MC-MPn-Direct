@@ -17,8 +17,13 @@ Device_MP2_Functional<CVMP2>::Device_MP2_Functional(int electron_pairs) :
   inverse_weight(vector_size),
   rv(vector_size)
 { 
-  block_size = dim3(16, 1, 1);
-  grid_size = dim3((vector_size + block_size.x - 1) / block_size.x, vector_size, 1);
+  block_size = dim3(16, 16, 1);
+  grid_size = dim3(
+      (vector_size + block_size.x - 1) / block_size.x, 
+      (vector_size + block_size.y - 1) / block_size.y, 
+      1);
+  printf("block size %d %d %d\n", block_size.x, block_size.y, block_size.z);
+  printf("grid size %d %d %d\n", grid_size.x, grid_size.y, grid_size.z);
 }
 
 
