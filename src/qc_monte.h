@@ -60,7 +60,7 @@ class QC_monte {
   typedef Wavefunction<Container, Allocator> Wavefunction_Type;
   typedef OVPS<Container, Allocator> OVPS_Type;
 
-  typedef Electron_Pair_List Electron_Pair_List_Type;
+  typedef Electron_Pair_List<Container, Allocator> Electron_Pair_List_Type;
   typedef Electron_List Electron_List_Type;
   typedef Tau Tau_Type;
 

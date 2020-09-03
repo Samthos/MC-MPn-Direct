@@ -7,6 +7,35 @@
 #include "cblas.h"
 
 template <int CVMP4>
+MP4_Functional<CVMP4>::MP4_Functional(int electron_pairs) : Standard_MP_Functional<std::vector, std::allocator>(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24"),
+    mpn(electron_pairs),
+    rv(mpn),
+    wgt(mpn),
+    r_r(mpn),
+    r_w(mpn),
+    w_w(mpn),
+    en_r(mpn),
+    en_w(mpn),
+    ij_(mpn * mpn),
+    ik_(mpn * mpn),
+    il_(mpn * mpn),
+    jk_(mpn * mpn),
+    jl_(mpn * mpn),
+    kl_(mpn * mpn),
+    ext_ptr(8),
+    ext_data(8,
+    std::vector<double>(mpn*mpn)),
+    i_kl(mpn * mpn),
+    j_kl(mpn * mpn),
+    ij_rk(mpn * mpn),
+    ij_wk(mpn * mpn),
+    ij_rl(mpn * mpn),
+    ij_wl(mpn * mpn),
+    T_r(mpn * mpn),
+    T_w(mpn * mpn),
+    Av(mpn * mpn) {}
+
+template <int CVMP4>
 void MP4_Functional<CVMP4>::contract(std::vector<double>& result,
     const std::vector<double>& A, CBLAS_TRANSPOSE A_trans, 
     const std::vector<double>& B, const std::vector<double>& v) {
@@ -1016,7 +1045,7 @@ void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<dou
 }
 
 template <int CVMP4>
-void MP4_Functional<CVMP4>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void MP4_Functional<CVMP4>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   double en4 = 0.0;
   std::vector<double> ctrl(control.size(), 0.0);
 
@@ -1042,18 +1071,18 @@ void MP4_Functional<CVMP4>::energy(double& emp, std::vector<double>& control, OV
   }
 }
 
-MP_Functional* create_MP4_Functional(int cv_level, Electron_Pair_List* electron_pair_list) {
+MP_Functional* create_MP4_Functional(int cv_level, int electron_pairs) {
   MP_Functional* mcmp = nullptr;
   if (cv_level == 0) {
-    mcmp = new MP4_Functional<0>(electron_pair_list);
+    mcmp = new MP4_Functional<0>(electron_pairs);
   } else if (cv_level == 1) {
-    mcmp = new MP4_Functional<1>(electron_pair_list);
+    mcmp = new MP4_Functional<1>(electron_pairs);
   } else if (cv_level == 2) {
-    mcmp = new MP4_Functional<2>(electron_pair_list);
+    mcmp = new MP4_Functional<2>(electron_pairs);
   } else if (cv_level == 3) {
-    mcmp = new MP4_Functional<3>(electron_pair_list);
+    mcmp = new MP4_Functional<3>(electron_pairs);
   } else if (cv_level == 4) {
-    mcmp = new MP4_Functional<4>(electron_pair_list);
+    mcmp = new MP4_Functional<4>(electron_pairs);
   }
   
   if (mcmp == nullptr) {

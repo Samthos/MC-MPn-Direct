@@ -5,9 +5,10 @@
 
 template <int CVMP3>
 class MP3_Functional : public Standard_MP_Functional<std::vector, std::allocator> {
+  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
  public:
   MP3_Functional() : Standard_MP_Functional<std::vector, std::allocator>(3 * CVMP3 * (1 + CVMP3), 2, "23") {}
-  void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) override;
+  void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List_Type*, Tau*) override;
  private:
   void mcmp3_helper(
     double& en3, std::vector<double>& control, const int offset,

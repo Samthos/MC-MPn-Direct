@@ -6,16 +6,24 @@
 
 #include "direct_electron_pair_list.h"
 
-bool Direct_Electron_Pair_List::requires_blocking() {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+Direct_Electron_Pair_List<Container, Allocator>::Direct_Electron_Pair_List(int size) : Electron_Pair_List<Container, Allocator>(size) {}
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+bool Direct_Electron_Pair_List<Container, Allocator>::requires_blocking() {
   return false;
 }
-void Direct_Electron_Pair_List::move(Random& random, const Electron_Pair_GTO_Weight& weight) {
-  for (Electron_Pair &electron_pair : electron_pairs) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Direct_Electron_Pair_List<Container, Allocator>::move(Random& random, const Electron_Pair_GTO_Weight& weight) {
+  for (Electron_Pair &electron_pair : this->electron_pairs) {
     mc_move_scheme(electron_pair, random, weight);
   }
-  transpose();
+  this->transpose();
 }
-void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Electron_Pair_GTO_Weight& weight) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Direct_Electron_Pair_List<Container, Allocator>::mc_move_scheme(Electron_Pair& electron_pair, Random& random, const Electron_Pair_GTO_Weight& weight) {
   constexpr double TWOPI = 6.283185307179586;
   Point dr;
 
@@ -94,12 +102,16 @@ void Direct_Electron_Pair_List::mc_move_scheme(Electron_Pair& electron_pair, Ran
   electron_pair.pos1 += dr;
   electron_pair.pos2 += dr;
 
-  set_weight(electron_pair, weight);
+  Electron_Pair_List<Container, Allocator>::set_weight(electron_pair, weight);
 }
-double Direct_Electron_Pair_List::CDF(const double& rho, const double& c, const double& erf_c) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+double Direct_Electron_Pair_List<Container, Allocator>::CDF(const double& rho, const double& c, const double& erf_c) {
   return (2.0 * erf_c + erf(rho - c) - erf(rho + c)) / (2.0 * erf_c);
 }
-double Direct_Electron_Pair_List::PDF(const double& rho, const double& c, const double& erf_c) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+double Direct_Electron_Pair_List<Container, Allocator>::PDF(const double& rho, const double& c, const double& erf_c) {
   constexpr double sqrt_pi = 1.772453850905516;
   double rhopc = rho + c;
   double rhomc = rho - c;
@@ -107,7 +119,9 @@ double Direct_Electron_Pair_List::PDF(const double& rho, const double& c, const 
   double exp_rhomc = exp(-rhomc * rhomc);
   return (exp_rhomc - exp_rhopc) / (sqrt_pi * erf_c);
 }
-double Direct_Electron_Pair_List::PDF_Prime(const double& rho, const double& c, const double& erf_c) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+double Direct_Electron_Pair_List<Container, Allocator>::PDF_Prime(const double& rho, const double& c, const double& erf_c) {
   constexpr double sqrt_pi = 1.772453850905516;
   double rhopc = rho + c;
   double rhomc = rho - c;
@@ -115,7 +129,9 @@ double Direct_Electron_Pair_List::PDF_Prime(const double& rho, const double& c, 
   double exp_rhomc = exp(-rhomc * rhomc);
   return 2.0 * (rhopc * exp_rhopc - rhomc * exp_rhomc) / (sqrt_pi * erf_c);
 }
-double Direct_Electron_Pair_List::calculate_r(Random& random, double alpha, double beta, double a) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+double Direct_Electron_Pair_List<Container, Allocator>::calculate_r(Random& random, double alpha, double beta, double a) {
   constexpr double sqrt_pi = 1.772453850905516;
   auto gamma = sqrt(alpha * beta / ( alpha + beta));
   auto c = a * gamma;
@@ -152,7 +168,9 @@ double Direct_Electron_Pair_List::calculate_r(Random& random, double alpha, doub
   } while (std::abs(cdf) > 10E-6);
   return rho * 2.0 * gamma;
 }
-double Direct_Electron_Pair_List::calculate_phi(double p, double r, double alpha, double beta, double a) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+double Direct_Electron_Pair_List<Container, Allocator>::calculate_phi(double p, double r, double alpha, double beta, double a) {
   constexpr double sqrt_pi = 1.772453850905516;
   auto gamma = sqrt(alpha * beta / ( alpha + beta));
   auto c = a * gamma;

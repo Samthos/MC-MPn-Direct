@@ -9,16 +9,13 @@
 #include "mp2_functional.h"
 
 template <int CVMP2>
-void MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   double en2 = 0.0;
   std::vector<double> ctrl(control.size(), 0.0);
 
   std::array<double, 2> en{0, 0};
   std::array<double, 2> en_rj{0, 0};
   std::array<double, 2> en_wj{0, 0};
-
-#define LONG_LOOP
-#undef LONG_LOOP
 
   for (auto it = 0; it != electron_pair_list->size(); it++) {
     en_rj.fill(0.0);
@@ -27,11 +24,7 @@ void MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OV
     }
 
     
-#ifdef LONG_LOOP
-    for (auto jt = 0; jt !=  electron_pair_list->size(); jt++) {
-#else
     for (auto jt = it+1; jt !=  electron_pair_list->size(); jt++) {
-#endif
       auto ijIndex = it * electron_pair_list->size() + jt;
       en[0] = (ovps.o_set[0][0].s_11[ijIndex] * ovps.o_set[0][0].s_22[ijIndex] * ovps.v_set[0][0].s_11[ijIndex] * ovps.v_set[0][0].s_22[ijIndex]);
       en[1] = (ovps.o_set[0][0].s_12[ijIndex] * ovps.o_set[0][0].s_21[ijIndex] * ovps.v_set[0][0].s_11[ijIndex] * ovps.v_set[0][0].s_22[ijIndex]);
@@ -56,9 +49,6 @@ void MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OV
   auto tau_wgt = tau->get_wgt(1);
   tau_wgt /= static_cast<double>(electron_pair_list->size());
   tau_wgt /= static_cast<double>(electron_pair_list->size() - 1);
-#ifdef LONG_LOOP
-  tau_wgt /= 2;
-#endif
   emp = emp + en2 * tau_wgt;
   if (CVMP2 >= 1) {
     std::transform(ctrl.begin(), ctrl.end(), control.begin(), control.begin(), [&](double c, double total) { return total + c * tau_wgt; });

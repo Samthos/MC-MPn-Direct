@@ -9,9 +9,10 @@
 
 template <int CVMP2>
 class Direct_MP2_Functional : public Direct_MP_Functional<std::vector, std::allocator> {
+  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
  public:
   Direct_MP2_Functional() : Direct_MP_Functional(CVMP2 * (CVMP2+1), 1, "22") {}
-  void energy(double& emp, std::vector<double>& control, Wavefunction_Type&, Wavefunction_Type&, Electron_Pair_List*, Tau*) override;
+  void energy(double& emp, std::vector<double>& control, Wavefunction_Type&, Wavefunction_Type&, Electron_Pair_List_Type*, Tau*) override;
  private:
 };
 

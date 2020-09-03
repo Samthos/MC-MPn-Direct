@@ -3,7 +3,7 @@
 #include "../qc_monte.h"
 #include "qc_mcgf2.h"
 
-void gf2_core(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, Electron_Pair_List* electron_pair_list) {
+void gf2_core(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, Electron_Pair_List_Host* electron_pair_list) {
   int tidx, tidy;
   int mc_pair_num = electron_pair_list->size();
 #define TIDX_CONTROL for (tidx = 0; tidx < mc_pair_num; tidx++)
@@ -140,7 +140,7 @@ GF2_Functional::GF2_Functional(IOPs& iops) :
   }
 }
 
-void GF2_Functional::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_list) {
+void GF2_Functional::core(OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list) {
   int tidx, tidy;
   for (tidx = 0; tidx < n_electron_pairs; tidx++) {
     for (tidy = 0; tidy < n_electron_pairs; tidy++) {
@@ -166,7 +166,7 @@ void GF2_Functional::core(OVPS_Host& ovps, Electron_Pair_List* electron_pair_lis
 
 void GF2_Functional::energy_no_diff(std::vector<std::vector<double>>& egf2,
        std::unordered_map<int, Wavefunction_Type>& wavefunctions,
-       Electron_Pair_List* electron_pair_list, Tau* tau) {
+       Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   double en2;
   double alpha, beta;
   const double *psi2;
@@ -212,7 +212,7 @@ void GF2_Functional::energy_no_diff(std::vector<std::vector<double>>& egf2,
 
 void GF2_Functional::energy_diff(std::vector<std::vector<double>>& egf2,
        std::unordered_map<int, Wavefunction_Type>& wavefunctions,
-       Electron_Pair_List* electron_pair_list, Tau* tau
+       Electron_Pair_List_Type* electron_pair_list, Tau* tau
     ) {
   double en2m, en2p;
   double alpha, beta;
@@ -273,4 +273,4 @@ void GF2_Functional::energy_diff(std::vector<std::vector<double>>& egf2,
 
 void GF2_Functional::energy_f12(std::vector<std::vector<double>>&, 
    std::unordered_map<int, Wavefunction_Type>&,
-   Electron_Pair_List*, Electron_List*) {}
+   Electron_Pair_List_Type*, Electron_List_Type*) {}

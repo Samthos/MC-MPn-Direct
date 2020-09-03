@@ -6,14 +6,16 @@
 
 #include "metropolis_electron_pair_list.h"
 
-Metropolis_Electron_Pair_List::Metropolis_Electron_Pair_List(int size, double ml, Random& random, const Molecule& molec, const Electron_Pair_GTO_Weight& weight) : Electron_Pair_List(size),
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+Metropolis_Electron_Pair_List<Container, Allocator>::Metropolis_Electron_Pair_List(int size, double ml, Random& random, const Molecule& molec, const Electron_Pair_GTO_Weight& weight) :
+    Electron_Pair_List<Container, Allocator>(size),
     move_length(ml),
     moves_since_rescale(0),
     successful_moves(0),
     failed_moves(0)
 {
   // initilizie pos
-  for (Electron_Pair& electron_pair : electron_pairs) {
+  for (Electron_Pair& electron_pair : this->electron_pairs) {
     initialize(electron_pair, random, molec, weight);
   }
   // burn in
@@ -21,20 +23,26 @@ Metropolis_Electron_Pair_List::Metropolis_Electron_Pair_List(int size, double ml
     move(random, weight);
   }
 }
-bool Metropolis_Electron_Pair_List::requires_blocking() {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+bool Metropolis_Electron_Pair_List<Container, Allocator>::requires_blocking() {
   return true;
 }
-void Metropolis_Electron_Pair_List::move(Random& random, const Electron_Pair_GTO_Weight& weight) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Metropolis_Electron_Pair_List<Container, Allocator>::move(Random& random, const Electron_Pair_GTO_Weight& weight) {
   if (moves_since_rescale == 1'000) {
     rescale_move_length();
   }
-  for (Electron_Pair &electron_pair : electron_pairs) {
+  for (Electron_Pair &electron_pair : this->electron_pairs) {
     mc_move_scheme(electron_pair, random, weight);
   }
   moves_since_rescale++;
-  transpose();
+  this->transpose();
 }
-void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Random &random, const Molecule &molec, const Electron_Pair_GTO_Weight& weight) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Metropolis_Electron_Pair_List<Container, Allocator>::initialize(Electron_Pair &electron_pair, Random &random, const Molecule &molec, const Electron_Pair_GTO_Weight& weight) {
   int atom;
   double amp1, amp2, theta1, theta2;
   std::array<double, 3> pos;
@@ -69,9 +77,11 @@ void Metropolis_Electron_Pair_List::initialize(Electron_Pair &electron_pair, Ran
   electron_pair.pos2[1] = pos[1] + amp1*sin(theta1);
   electron_pair.pos2[2] = pos[2] + amp2*cos(theta2);
 
-  set_weight(electron_pair, weight);
+  Electron_Pair_List<Container, Allocator>::set_weight(electron_pair, weight);
 }
-void Metropolis_Electron_Pair_List::mc_move_scheme(Electron_Pair &electron_pair, Random &random, const Electron_Pair_GTO_Weight &weight) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Metropolis_Electron_Pair_List<Container, Allocator>::mc_move_scheme(Electron_Pair &electron_pair, Random &random, const Electron_Pair_GTO_Weight &weight) {
   Electron_Pair trial_electron_pair = electron_pair;
 
   for (int i = 0; i < 3; i++) {
@@ -79,7 +89,7 @@ void Metropolis_Electron_Pair_List::mc_move_scheme(Electron_Pair &electron_pair,
     trial_electron_pair.pos2[i] += random.uniform(-move_length, move_length);
   }
 
-  set_weight(trial_electron_pair, weight);
+  Electron_Pair_List<Container, Allocator>::set_weight(trial_electron_pair, weight);
 
   auto ratio = trial_electron_pair.wgt / electron_pair.wgt;
 
@@ -95,7 +105,9 @@ void Metropolis_Electron_Pair_List::mc_move_scheme(Electron_Pair &electron_pair,
     failed_moves++;
   }
 }
-void Metropolis_Electron_Pair_List::rescale_move_length() {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Metropolis_Electron_Pair_List<Container, Allocator>::rescale_move_length() {
   double ratio = ((double) failed_moves)/((double) (failed_moves + successful_moves));
   if (ratio < 0.5) {
     ratio = std::min(1.0/(2.0*ratio), 1.1);

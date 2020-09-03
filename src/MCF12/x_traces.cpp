@@ -51,7 +51,7 @@ void X_Traces::set(int band, int offBand, std::unordered_map<int, Wavefunction_T
   }
 }
 
-void X_Traces::set_derivative_traces(int band, int offBand, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void X_Traces::set_derivative_traces(int band, int offBand, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   const double* psi_ep_1 = wavefunctions[WC::electron_pairs_1].vir() + band - offBand;
   const double* psi_ep_2 = wavefunctions[WC::electron_pairs_2].vir() + band - offBand;
   const double* psi = wavefunctions[WC::electrons].vir() + band - offBand;
@@ -83,7 +83,7 @@ void X_Traces::set_derivative_traces(int band, int offBand, std::unordered_map<i
   }
 }
 
-void X_Traces::set_fd_derivative_traces(int band, int offBand, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void X_Traces::set_fd_derivative_traces(int band, int offBand, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   const double* psi = wavefunctions[WC::electrons].vir() + band - offBand;
   const double* psi_dx = wavefunctions[WC::electrons_dx].vir() + band - offBand;
   const double* psi_dy = wavefunctions[WC::electrons_dy].vir() + band - offBand;

@@ -8,10 +8,10 @@
 #ifdef HAVE_CUDA
 #include <thrust/device_vector.h>
 #endif 
-
 #include <unordered_map>
 
 #include "qc_monte.h"
+#include "create_electron_pair_list.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 QC_monte<Container, Allocator>::QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basis_Host p3) :
@@ -34,7 +34,7 @@ QC_monte<Container, Allocator>::QC_monte(MPI_info p0, IOPs p1, Molecule p2, Basi
   ivir1 = movecs->ivir1;
   ivir2 = movecs->ivir2;
 
-  electron_pair_list = create_electron_pair_sampler(molec, electron_pair_weight, iops.iopns[KEYS::SAMPLER], iops.iopns[KEYS::ELECTRON_PAIRS], iops.dopns[KEYS::MC_DELX], iops.iopns[KEYS::DEBUG], iops.sopns[KEYS::SEED_FILE]);
+  electron_pair_list = create_electron_pair_sampler<Container, Allocator>(molec, electron_pair_weight, iops.iopns[KEYS::SAMPLER], iops.iopns[KEYS::ELECTRON_PAIRS], iops.dopns[KEYS::MC_DELX], iops.iopns[KEYS::DEBUG], iops.sopns[KEYS::SEED_FILE]);
   wavefunctions.emplace(WC::electron_pairs_1, Wavefunction_Type(&electron_pair_list->pos1, movecs));
   wavefunctions.emplace(WC::electron_pairs_2, Wavefunction_Type(&electron_pair_list->pos2, movecs));
 

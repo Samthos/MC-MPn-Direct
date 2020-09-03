@@ -13,9 +13,7 @@ Device_MP2_Functional<CVMP2>::Device_MP2_Functional(int electron_pairs) :
   v_direct(matrix_size),
   v_exchange(matrix_size),
   scratch_matrix(matrix_size),
-  scratch_vector(vector_size),
-  inverse_weight(vector_size),
-  rv(vector_size)
+  scratch_vector(vector_size)
 { 
   block_size = dim3(16, 16, 1);
   grid_size = dim3(
@@ -56,11 +54,9 @@ void mp2_functional_kernal(
 }
 
 template <int CVMP2>
-void Device_MP2_Functional<CVMP2>::prep_arrays(OVPS_Type& ovps, Electron_Pair_List* electron_pair_list) {
+void Device_MP2_Functional<CVMP2>::prep_arrays(OVPS_Type& ovps, Electron_Pair_List_Type* electron_pair_list) {
   en2 = 0.0;
   std::fill(ctrl.begin(), ctrl.end(), 0.0);
-  thrust::copy(electron_pair_list->rv.begin(), electron_pair_list->rv.end(), rv.begin());
-  thrust::copy(electron_pair_list->inverse_weight.begin(), electron_pair_list->inverse_weight.end(), inverse_weight.begin());
   thrust::transform(ovps.o_set[0][0].s_11.begin(), ovps.o_set[0][0].s_11.end(), ovps.o_set[0][0].s_22.begin(), o_direct.begin(), thrust::multiplies<double>());
   thrust::transform(ovps.o_set[0][0].s_12.begin(), ovps.o_set[0][0].s_12.end(), ovps.o_set[0][0].s_21.begin(), o_exchange.begin(), thrust::multiplies<double>());
   thrust::transform(ovps.v_set[0][0].s_11.begin(), ovps.v_set[0][0].s_11.end(), ovps.v_set[0][0].s_22.begin(), v_direct.begin(), thrust::multiplies<double>());
@@ -68,7 +64,7 @@ void Device_MP2_Functional<CVMP2>::prep_arrays(OVPS_Type& ovps, Electron_Pair_Li
 }
 
 template <int CVMP2>
-double Device_MP2_Functional<CVMP2>::cv_energy_helper(int offset) {
+double Device_MP2_Functional<CVMP2>::cv_energy_helper(int offset, const vector_double& rv, const vector_double& inverse_weight) {
   double alpha = 1.0;
   double beta  = 0.0;
 
@@ -111,18 +107,18 @@ double Device_MP2_Functional<CVMP2>::cv_energy_helper(int offset) {
 }
 
 template <int CVMP2>
-void Device_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void Device_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   prep_arrays(ovps, electron_pair_list);
 
   thrust::fill(scratch_matrix.begin(), scratch_matrix.end(), 0.0);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_direct.data().get(), v_direct.data().get(), scratch_matrix.data().get(), vector_size);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_exchange.data().get(), v_exchange.data().get(), scratch_matrix.data().get(), vector_size);
-  en2 += -2.0 * cv_energy_helper(0);
+  en2 += -2.0 * cv_energy_helper(0, electron_pair_list->rv, electron_pair_list->inverse_weight);
 
   thrust::fill(scratch_matrix.begin(), scratch_matrix.end(), 0.0);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_direct.data().get(),   v_exchange.data().get(), scratch_matrix.data().get(), vector_size);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_exchange.data().get(), v_direct.data().get(), scratch_matrix.data().get(), vector_size);
-  en2 += cv_energy_helper(1);
+  en2 += cv_energy_helper(1, electron_pair_list->rv, electron_pair_list->inverse_weight);
 
   auto tau_wgt = tau->get_wgt(1);
   tau_wgt /= static_cast<double>(electron_pair_list->size());
@@ -134,12 +130,12 @@ void Device_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& cont
 }
 
 template <>
-void Device_MP2_Functional<0>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void Device_MP2_Functional<0>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   prep_arrays(ovps, electron_pair_list);
   thrust::fill(scratch_matrix.begin(), scratch_matrix.end(), 0.0);
   mp2_functional_kernal<<<grid_size, block_size>>>(o_direct.data().get(), o_exchange.data().get(), v_direct.data().get(), scratch_matrix.data().get(), vector_size);
   mp2_functional_kernal<<<grid_size, block_size>>>(o_exchange.data().get(), o_direct.data().get(), v_exchange.data().get(), scratch_matrix.data().get(), vector_size);
-  en2 += cv_energy_helper(0);
+  en2 += cv_energy_helper(0, electron_pair_list->rv, electron_pair_list->inverse_weight);
 
   auto tau_wgt = tau->get_wgt(1);
   tau_wgt /= static_cast<double>(electron_pair_list->size());

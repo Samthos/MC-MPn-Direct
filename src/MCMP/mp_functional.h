@@ -34,31 +34,35 @@ class MP_Functional {
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Standard_MP_Functional : public MP_Functional {
  protected:
+  typedef Electron_Pair_List<Container, Allocator> Electron_Pair_List_Type;
   typedef OVPS<Container, Allocator> OVPS_Type;
 
  public:
   Standard_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::STANDARD) {}
-  virtual void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List*, Tau*) = 0;
+  virtual void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List_Type*, Tau*) = 0;
 };
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Direct_MP_Functional : public MP_Functional {
  protected:
+  typedef Electron_Pair_List<Container, Allocator> Electron_Pair_List_Type;
   typedef Wavefunction<Container, Allocator> Wavefunction_Type;
 
  public:
   Direct_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::DIRECT) {}
-  virtual void energy(double& emp, std::vector<double>& control, Wavefunction_Type& psi1, Wavefunction_Type& psi2, Electron_Pair_List*, Tau*) = 0;
+  virtual void energy(double& emp, std::vector<double>& control, Wavefunction_Type& psi1, Wavefunction_Type& psi2, Electron_Pair_List_Type*, Tau*) = 0;
 };
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class F12_MP_Functional : public MP_Functional {
  protected:
+  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
+  typedef Electron_List Electron_List_Type;
   typedef Wavefunction<Container, Allocator> Wavefunction_Type;
 
  public:
   F12_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::F12) {}
-  virtual void energy(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) = 0;
+  virtual void energy(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) = 0;
 };
 
 #endif  // MBPT_H_

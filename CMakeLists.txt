@@ -23,6 +23,7 @@ if (Enable_CUDA)
   enable_language(CUDA)
   set(CMAKE_CUDA_STANDARD 14)
   find_library(CUBLAS_LIBRARIES cublas PATHS ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+  find_package(CUDAToolkit REQUIRED)
 endif()
 
 option(Enable_MPI "Enables MPI Sampling" On)

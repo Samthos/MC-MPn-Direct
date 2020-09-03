@@ -15,9 +15,6 @@ add_executable(mp2_functional_test.x
   ../../src/basis/movec_parser.h
   ../../src/basis/wavefunction.cu
   ../../src/basis/wavefunction.h
-  ../../src/electron_generators/dummy_electron_pair_list.h
-  ../../src/electron_generators/electron_pair_list.cpp
-  ../../src/electron_generators/electron_pair_list.h
   ../../src/blas_calls.cpp
   ../../src/blas_calls.h
   ../../src/ovps_set.cu
@@ -32,6 +29,7 @@ add_executable(mp2_functional_test.x
 set_target_properties(mp2_functional_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(mp2_functional_test.x gtest_main)
 target_link_libraries(mp2_functional_test.x geometry)
+target_link_libraries(mp2_functional_test.x electron_generators)
 target_link_libraries(mp2_functional_test.x tau)
 target_link_libraries(mp2_functional_test.x ${BLAS_LIBRARIES})
 target_link_libraries(mp2_functional_test.x ${CUBLAS_LIBRARIES})

@@ -17,7 +17,8 @@ std::ostream& operator << (std::ostream& os, const Electron_Pair& electron_pair)
   return os;
 }
 
-Electron_Pair_List::Electron_Pair_List(int size) :
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+Electron_Pair_List<Container, Allocator>::Electron_Pair_List(int size) :
     electron_pairs(size),
     pos1(size),
     pos2(size),
@@ -25,13 +26,16 @@ Electron_Pair_List::Electron_Pair_List(int size) :
     inverse_weight(size),
     rv(size),
     r12(size) {}
-void Electron_Pair_List::set_weight(Electron_Pair& electron_pair, const Electron_Pair_GTO_Weight& weight) {
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Electron_Pair_List<Container, Allocator>::set_weight(Electron_Pair& electron_pair, const Electron_Pair_GTO_Weight& weight) {
   electron_pair.wgt = weight.weight(electron_pair.pos1, electron_pair.pos2);
   electron_pair.r12 = Point::distance(electron_pair.pos1, electron_pair.pos2);
   electron_pair.rv = 1.0 / (electron_pair.r12 * electron_pair.wgt);
 }
 
-void Electron_Pair_List::transpose() {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Electron_Pair_List<Container, Allocator>::transpose() {
   for (size_t i = 0; i < electron_pairs.size(); i++) {
     pos1[i] = electron_pairs[i].pos1;
     pos2[i] = electron_pairs[i].pos2;

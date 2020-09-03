@@ -5,7 +5,7 @@
 #include "direct_mp2_functional.h"
 
 template <int CVMP2>
-void Direct_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Electron_Pair_List* electron_pair_list, Tau* tau) {
+void Direct_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& control, Wavefunction_Type& electron_pair_psi1, Wavefunction_Type& electron_pair_psi2, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   /* This functions computes the second-order MP2 energy for a single MC steps
    * The traces of the HF greens's functions are computed in-place in this function.
    * If higher order corrections are desired, the mcmp2_energy fucntions is more appropriate as it does not compute the HF green's function traces

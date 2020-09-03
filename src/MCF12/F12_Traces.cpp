@@ -49,12 +49,12 @@ void F12_Traces::update_v(std::unordered_map<int, Wavefunction_Type>& wavefuncti
   build_two_e_one_e_traces(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], wavefunctions[WC::electrons]);
 }
 
-void F12_Traces::update_bx(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void F12_Traces::update_bx(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   build_two_e_derivative_traces(wavefunctions, electron_pair_list);
   build_two_e_one_e_derivative_traces(wavefunctions, electron_pair_list, electron_list);
 }
 
-void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_List* electron_list) {
+void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_List_Type* electron_list) {
   auto lda = wavefunctions[WC::electrons].lda;
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
@@ -236,7 +236,7 @@ void F12_Traces::build_two_e_one_e_traces(const Wavefunction_Type& electron_pair
       k23.data(), electrons);
 }
 
-void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list) {
+void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list) {
   auto lda = wavefunctions[WC::electron_pairs_1].lda;
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
@@ -269,7 +269,7 @@ void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunct
   }
 }
 
-void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
   auto ivir1 = wavefunctions[WC::electrons].ivir1;

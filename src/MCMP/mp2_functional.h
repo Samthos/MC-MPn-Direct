@@ -5,9 +5,10 @@
 
 template <int CVMP2> 
 class MP2_Functional : public Standard_MP_Functional<std::vector, std::allocator> {
+  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
  public:
    MP2_Functional() : Standard_MP_Functional<std::vector, std::allocator>(CVMP2 * (CVMP2+1), 1, "22") {}
-   void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List*, Tau*) override;
+   void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List_Type*, Tau*) override;
 };
 
 template class MP2_Functional<0>;

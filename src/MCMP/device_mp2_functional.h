@@ -8,14 +8,17 @@
 
 template <int CVMP2> 
 class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vector, thrust::device_allocator> {
+  typedef Electron_Pair_List_Device Electron_Pair_List_Type;
+  typedef thrust::device_vector<double> vector_double;
+
  public:
    Device_MP2_Functional(int);
    ~Device_MP2_Functional();
-   void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List*, Tau*) override;
+   void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List_Type*, Tau*) override;
 
  private:
-  void prep_arrays(OVPS_Type&, Electron_Pair_List*);
-  double cv_energy_helper(int);
+  void prep_arrays(OVPS_Type&, Electron_Pair_List_Type*);
+  double cv_energy_helper(int, const vector_double&, const vector_double&);
 
   int vector_size;
   int matrix_size;
@@ -26,17 +29,15 @@ class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vecto
 
   double en2;
   std::vector<double> ctrl;
-  thrust::device_vector<double> o_direct;
-  thrust::device_vector<double> o_exchange;
-  thrust::device_vector<double> v_direct;
-  thrust::device_vector<double> v_exchange;
-  thrust::device_vector<double> scratch_matrix;
-  thrust::device_vector<double> scratch_vector;
-  thrust::device_vector<double> inverse_weight;
-  thrust::device_vector<double> rv;
+  vector_double o_direct;
+  vector_double o_exchange;
+  vector_double v_direct;
+  vector_double v_exchange;
+  vector_double scratch_matrix;
+  vector_double scratch_vector;
 };
 
-template <> void Device_MP2_Functional<0>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List* electron_pair_list, Tau* tau);
+template <> void Device_MP2_Functional<0>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau);
 
 template class Device_MP2_Functional<0>;
 template class Device_MP2_Functional<1>;

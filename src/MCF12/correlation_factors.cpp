@@ -121,7 +121,7 @@ Correlation_Factor::Correlation_Factor(const IOPs& iops, double gamma_, double b
     beta = iops.dopns[KEYS::F12_BETA];
   }
 }
-void Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void Correlation_Factor::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     f12p[ip] = calculate_f12(electron_pair_list->r12[ip]);
     f12p_a[ip] = calculate_f12_a(electron_pair_list->r12[ip]);
@@ -194,7 +194,7 @@ bool Rational_Correlation_Factor::f12_d_is_zero() {
 }
 
 
-void Slater_Correlation_Factor::update(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void Slater_Correlation_Factor::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     f12p[ip] = calculate_f12(electron_pair_list->r12[ip]);
     f12p_a[ip] = 2.0 * gamma * f12p[ip];

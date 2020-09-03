@@ -6,35 +6,10 @@
 
 template <int CVMP4>
 class MP4_Functional : public Standard_MP_Functional<std::vector, std::allocator> {
+  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
  public:
-  MP4_Functional(Electron_Pair_List* electron_pair_list) : Standard_MP_Functional<std::vector, std::allocator>(CVMP4*(100 + CVMP4*(-135 + CVMP4*(68 - 9*CVMP4))) / 4, 3, "24"),
-      mpn(electron_pair_list->size()),
-      rv(mpn),
-      wgt(mpn),
-      r_r(mpn),
-      r_w(mpn),
-      w_w(mpn),
-      en_r(mpn),
-      en_w(mpn),
-      ij_(mpn * mpn),
-      ik_(mpn * mpn),
-      il_(mpn * mpn),
-      jk_(mpn * mpn),
-      jl_(mpn * mpn),
-      kl_(mpn * mpn),
-      ext_ptr(8),
-      ext_data(8,
-      std::vector<double>(mpn*mpn)),
-      i_kl(mpn * mpn),
-      j_kl(mpn * mpn),
-      ij_rk(mpn * mpn),
-      ij_wk(mpn * mpn),
-      ij_rl(mpn * mpn),
-      ij_wl(mpn * mpn),
-      T_r(mpn * mpn),
-      T_w(mpn * mpn),
-      Av(mpn * mpn) {}
-  void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List*, Tau*) override;
+  MP4_Functional(int electron_pairs);
+  void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List_Type*, Tau*) override;
 
  private:
   void contract(std::vector<double>& result, const std::vector<double>& A, CBLAS_TRANSPOSE A_trans, const std::vector<double>& B, const std::vector<double>& v);
@@ -160,5 +135,5 @@ template class MP4_Functional<2>;
 template class MP4_Functional<3>;
 template class MP4_Functional<4>;
 
-MP_Functional* create_MP4_Functional(int cv_level, Electron_Pair_List* electron_pair_list);
+MP_Functional* create_MP4_Functional(int cv_level, int electron_pairs);
 #endif  // MP4_Functional_H_

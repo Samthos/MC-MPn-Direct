@@ -1,6 +1,10 @@
 #ifndef ELECTRON_PAIR_LIST_H_
 #define ELECTRON_PAIR_LIST_H_
-#include <array>
+#ifdef HAVE_CUDA
+#include "cuda_runtime.h"
+#include <thrust/device_vector.h>
+#endif
+
 #include <vector>
 
 #include "samplers.h"
@@ -16,7 +20,10 @@ struct Electron_Pair {
 };
 std::ostream& operator << (std::ostream& os, const Electron_Pair& electron_pair);
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class Electron_Pair_List {
+  typedef Container<double, Allocator<double>> vector_double;
+
  public:
   explicit Electron_Pair_List(int size);
   virtual ~Electron_Pair_List() = default;
@@ -30,10 +37,11 @@ class Electron_Pair_List {
 
   std::vector<Point> pos1;
   std::vector<Point> pos2;
-  std::vector<double> wgt;
-  std::vector<double> inverse_weight;
-  std::vector<double> rv;
-  std::vector<double> r12;
+  vector_double wgt;
+  vector_double inverse_weight;
+  vector_double rv;
+  vector_double r12;
+
  protected:
   static double calculate_r12(const Electron_Pair &electron_pair);
   static void set_weight(Electron_Pair&, const Electron_Pair_GTO_Weight&);
@@ -48,11 +56,11 @@ class Electron_Pair_List {
   std::vector<Electron_Pair> electron_pairs;
 };
 
-Electron_Pair_List* create_electron_pair_sampler(Molecule& molec,
-    Electron_Pair_GTO_Weight& weight,
-    int sampler_type,
-    size_t electron_pairs,
-    double delx,
-    int debug,
-    std::string seed_file);
+template class Electron_Pair_List<std::vector, std::allocator>;
+typedef Electron_Pair_List<std::vector, std::allocator> Electron_Pair_List_Host;
+
+#ifdef HAVE_CUDA
+template class Electron_Pair_List<thrust::device_vector, thrust::device_allocator>;
+typedef Electron_Pair_List<thrust::device_vector, thrust::device_allocator> Electron_Pair_List_Device;
+#endif
 #endif  // ELECTRON_PAIR_LIST_H_

@@ -26,7 +26,7 @@ namespace {
         movecs(new Dummy_Movec_Parser()),
         lda(movecs->ivir2),
         offset(movecs->orbital_energies[0]),
-        electron_pair_list(new Dummy_Electron_Pair_List(electron_pairs)),
+        electron_pair_list(new Dummy_Electron_Pair_List<Container, Allocator>(electron_pairs)),
         psi1(&electron_pair_list->pos1, movecs),
         psi2(&electron_pair_list->pos2, movecs)
       {
@@ -44,7 +44,7 @@ namespace {
       int electron_pairs;
 
       std::shared_ptr<Movec_Parser> movecs;
-      std::shared_ptr<Electron_Pair_List> electron_pair_list;
+      std::shared_ptr<Electron_Pair_List<Container, Allocator>> electron_pair_list;
 
       int lda;
       double offset;

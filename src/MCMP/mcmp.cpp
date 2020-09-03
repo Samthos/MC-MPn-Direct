@@ -33,7 +33,7 @@ MCMP<Container, Allocator>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p
     energy_functions.push_back(create_MP3_Functional(this->iops.iopns[KEYS::MP3CV_LEVEL]));
   }
   if (this->iops.iopns[KEYS::TASK] & TASK::MP4) {
-    energy_functions.push_back(create_MP4_Functional(this->iops.iopns[KEYS::MP4CV_LEVEL], this->electron_pair_list));
+    energy_functions.push_back(create_MP4_Functional(this->iops.iopns[KEYS::MP4CV_LEVEL], this->electron_pair_list->size()));
   }
   if (this->iops.iopns[KEYS::TASK] & TASK::MP2_F12_V) {
     energy_functions.push_back(new MP2_F12_V(this->iops));
