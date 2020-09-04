@@ -13,7 +13,9 @@ Device_MP2_Functional<CVMP2>::Device_MP2_Functional(int electron_pairs) :
   v_direct(matrix_size),
   v_exchange(matrix_size),
   scratch_matrix(matrix_size),
-  scratch_vector(vector_size)
+  scratch_vector(2 * vector_size),
+  d_en_ctrl(8),
+  h_en_ctrl(8)
 { 
   block_size = dim3(16, 16, 1);
   grid_size = dim3(
@@ -64,46 +66,24 @@ void Device_MP2_Functional<CVMP2>::prep_arrays(OVPS_Type& ovps, Electron_Pair_Li
 }
 
 template <int CVMP2>
-double Device_MP2_Functional<CVMP2>::cv_energy_helper(int offset, const vector_double& rv, const vector_double& inverse_weight) {
+void Device_MP2_Functional<CVMP2>::cv_energy_helper(int offset, const vector_double& rv, const vector_double& inverse_weight) {
   double alpha = 1.0;
   double beta  = 0.0;
-
-  double en;
-  cublasDgemv(handle, CUBLAS_OP_N,
-      vector_size, vector_size,
+  cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+      vector_size, 2, vector_size,
       &alpha,
       scratch_matrix.data().get(), vector_size,
-      rv.data().get(), 1,
+      rv.data().get(), vector_size,
       &beta,
-      scratch_vector.data().get(), 1);
-  cublasDdot(handle, vector_size,
-      scratch_vector.data().get(), 1,
-      rv.data().get(), 1, 
-      &en);
-  if (CVMP2 >= 1) {
-    cublasDdot(handle, vector_size,
-        scratch_vector.data().get(), 1,
-        inverse_weight.data().get(), 1, 
-        &ctrl[0 + offset]);
-  }
-  if (CVMP2 >= 2) {
-    cublasDgemv(handle, CUBLAS_OP_N,
-        vector_size, vector_size,
-        &alpha,
-        scratch_matrix.data().get(), vector_size,
-        inverse_weight.data().get(), 1,
-        &beta,
-        scratch_vector.data().get(), 1);
-    cublasDdot(handle, vector_size,
-        scratch_vector.data().get(), 1,
-        rv.data().get(), 1, 
-        &ctrl[2 + offset]);
-    cublasDdot(handle, vector_size,
-        scratch_vector.data().get(), 1,
-        inverse_weight.data().get(), 1, 
-        &ctrl[4 + offset]);
-  }
-  return en;
+      scratch_vector.data().get(), vector_size);
+
+  cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+      2, 2, vector_size,
+      &alpha,
+      scratch_vector.data().get(), vector_size,
+      rv.data().get(), vector_size,
+      &beta,
+      d_en_ctrl.data().get() + offset * 2, 4);
 }
 
 template <int CVMP2>
@@ -113,12 +93,23 @@ void Device_MP2_Functional<CVMP2>::energy(double& emp, std::vector<double>& cont
   thrust::fill(scratch_matrix.begin(), scratch_matrix.end(), 0.0);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_direct.data().get(), v_direct.data().get(), scratch_matrix.data().get(), vector_size);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_exchange.data().get(), v_exchange.data().get(), scratch_matrix.data().get(), vector_size);
-  en2 += -2.0 * cv_energy_helper(0, electron_pair_list->rv, electron_pair_list->inverse_weight);
+  cv_energy_helper(0, electron_pair_list->rv, electron_pair_list->inverse_weight);
 
   thrust::fill(scratch_matrix.begin(), scratch_matrix.end(), 0.0);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_direct.data().get(),   v_exchange.data().get(), scratch_matrix.data().get(), vector_size);
   m_m_add_mul<<<grid_size, block_size>>>(1.0, o_exchange.data().get(), v_direct.data().get(), scratch_matrix.data().get(), vector_size);
-  en2 += cv_energy_helper(1, electron_pair_list->rv, electron_pair_list->inverse_weight);
+  cv_energy_helper(1, electron_pair_list->rv, electron_pair_list->inverse_weight);
+
+  thrust::copy(d_en_ctrl.begin(), d_en_ctrl.end(), h_en_ctrl.begin());
+  en2 = h_en_ctrl[2] - 2.0 * h_en_ctrl[0];
+  ctrl[0] = h_en_ctrl[1]; 
+  ctrl[1] = h_en_ctrl[3];
+  if (CVMP2 >= 2) {
+    ctrl[2] = h_en_ctrl[4];
+    ctrl[3] = h_en_ctrl[6];
+    ctrl[4] = h_en_ctrl[5];
+    ctrl[5] = h_en_ctrl[7];
+  }
 
   auto tau_wgt = tau->get_wgt(1);
   tau_wgt /= static_cast<double>(electron_pair_list->size());
@@ -135,7 +126,9 @@ void Device_MP2_Functional<0>::energy(double& emp, std::vector<double>& control,
   thrust::fill(scratch_matrix.begin(), scratch_matrix.end(), 0.0);
   mp2_functional_kernal<<<grid_size, block_size>>>(o_direct.data().get(), o_exchange.data().get(), v_direct.data().get(), scratch_matrix.data().get(), vector_size);
   mp2_functional_kernal<<<grid_size, block_size>>>(o_exchange.data().get(), o_direct.data().get(), v_exchange.data().get(), scratch_matrix.data().get(), vector_size);
-  en2 += cv_energy_helper(0, electron_pair_list->rv, electron_pair_list->inverse_weight);
+  cv_energy_helper(0, electron_pair_list->rv, electron_pair_list->inverse_weight);
+  thrust::copy(d_en_ctrl.begin(), d_en_ctrl.end(), h_en_ctrl.begin());
+  en2 = h_en_ctrl[0];
 
   auto tau_wgt = tau->get_wgt(1);
   tau_wgt /= static_cast<double>(electron_pair_list->size());

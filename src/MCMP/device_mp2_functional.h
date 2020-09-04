@@ -18,7 +18,7 @@ class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vecto
 
  private:
   void prep_arrays(OVPS_Type&, Electron_Pair_List_Type*);
-  double cv_energy_helper(int, const vector_double&, const vector_double&);
+  void cv_energy_helper(int, const vector_double&, const vector_double&);
 
   int vector_size;
   int matrix_size;
@@ -35,6 +35,8 @@ class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vecto
   vector_double v_exchange;
   vector_double scratch_matrix;
   vector_double scratch_vector;
+  vector_double d_en_ctrl;
+  std::vector<double> h_en_ctrl;
 };
 
 template <> void Device_MP2_Functional<0>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau);
