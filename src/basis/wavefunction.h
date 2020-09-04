@@ -56,10 +56,11 @@ namespace WM {
 template <template <class, class> class Container, template <class> class Allocator>
 class Wavefunction {
   typedef Container<double, Allocator<double>> vector_double;
+  typedef Container<Point, Allocator<Point>> vector_Point;
 
  public:
   Wavefunction() {}
-  Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser>);
+  Wavefunction(vector_Point* p, const std::shared_ptr<Movec_Parser>);
 
   ~Wavefunction() { destroy_handle(); }
 
@@ -92,7 +93,7 @@ class Wavefunction {
   vector_double psi;
   vector_double psiTau;
   vector_double movecs;
-  std::vector<Point>* pos;
+  vector_Point* pos;
 
  private:
   static double* get_raw_pointer(vector_double&);

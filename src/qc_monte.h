@@ -61,7 +61,7 @@ class QC_monte {
   typedef OVPS<Container, Allocator> OVPS_Type;
 
   typedef Electron_Pair_List<Container, Allocator> Electron_Pair_List_Type;
-  typedef Electron_List Electron_List_Type;
+  typedef Electron_List<Container, Allocator> Electron_List_Type;
   typedef Tau Tau_Type;
 
  public:

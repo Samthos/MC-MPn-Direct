@@ -19,7 +19,7 @@ void call_build_contraction(
     double* contraction_amplitudes,
     double* contraction_exp,
     double* contraction_coef,
-    Point* pos) {
+    const Point* pos) {
   int walker = blockIdx.x * blockDim.x + threadIdx.x;
   int atomic_orbital = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -33,11 +33,9 @@ void call_build_contraction(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const vector_point &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const vector_Point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
-
-  thrust::device_vector<Point> d_p(pos);
 
   call_build_contraction<<<grid_size, block_size>>>(
       pos.size(),
@@ -46,7 +44,7 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(
       contraction_amplitudes.data().get(),
       contraction_exp.data().get(),
       contraction_coef.data().get(),
-      d_p.data().get());
+      pos.data().get());
 }
 
 __global__ 
@@ -58,7 +56,7 @@ void call_build_contraction_with_derivative(
     double* contraction_amplitudes_derivative,
     double* contraction_exp,
     double* contraction_coef,
-    Point* pos) {
+    const Point* pos) {
   int walker = blockIdx.x * blockDim.x + threadIdx.x;
   int atomic_orbital = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -73,11 +71,9 @@ void call_build_contraction_with_derivative(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_with_derivatives(const vector_point& pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_with_derivatives(const vector_Point& pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
-
-  thrust::device_vector<Point> d_p(pos);
 
   call_build_contraction_with_derivative<<<grid_size, block_size>>>(
       pos.size(),
@@ -87,7 +83,7 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_
       contraction_amplitudes_derivative.data().get(),
       contraction_exp.data().get(),
       contraction_coef.data().get(),
-      d_p.data().get());
+      pos.data().get());
 }
 
 __global__ 
@@ -98,7 +94,7 @@ void call_build_ao_amplitudes(
     Atomic_Orbital* atomic_orbitals,
     double* ao_amplitudes,
     double* contraction_amplitudes,
-    Point* pos) {
+    const Point* pos) {
   int walker = blockIdx.x * blockDim.x + threadIdx.x;
   int atomic_orbital = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -111,11 +107,9 @@ void call_build_ao_amplitudes(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes(const vector_point& pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes(const vector_Point& pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
-
-  thrust::device_vector<Point> d_p(pos);
 
   call_build_ao_amplitudes<<<grid_size, block_size>>>(
       pos.size(),
@@ -124,7 +118,7 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes
       atomic_orbitals.data().get(),
       ao_amplitudes.data().get(),
       contraction_amplitudes.data().get(),
-      d_p.data().get());
+      pos.data().get());
 }
 
 __global__ 
@@ -136,7 +130,7 @@ void call_build_ao_amplitudes_dx(
     double* ao_amplitudes,
     double* contraction_amplitudes,
     double* contraction_amplitudes_derivative,
-    Point* pos) {
+    const Point* pos) {
   int walker = blockIdx.x * blockDim.x + threadIdx.x;
   int atomic_orbital = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -150,11 +144,9 @@ void call_build_ao_amplitudes_dx(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dx(const vector_point &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dx(const vector_Point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
-
-  thrust::device_vector<Point> d_p(pos);
 
   call_build_ao_amplitudes_dx<<<grid_size, block_size>>>(
       pos.size(),
@@ -164,7 +156,7 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes
       ao_amplitudes.data().get(),
       contraction_amplitudes.data().get(),
       contraction_amplitudes_derivative.data().get(),
-      d_p.data().get());
+      pos.data().get());
 }
 
 __global__ 
@@ -176,7 +168,7 @@ void call_build_ao_amplitudes_dy(
     double* ao_amplitudes,
     double* contraction_amplitudes,
     double* contraction_amplitudes_derivative,
-    Point* pos) {
+    const Point* pos) {
   int walker = blockIdx.x * blockDim.x + threadIdx.x;
   int atomic_orbital = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -190,11 +182,9 @@ void call_build_ao_amplitudes_dy(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dy(const vector_point &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dy(const vector_Point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
-
-  thrust::device_vector<Point> d_p(pos);
 
   call_build_ao_amplitudes_dy<<<grid_size, block_size>>>(
       pos.size(),
@@ -204,7 +194,7 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes
       ao_amplitudes.data().get(),
       contraction_amplitudes.data().get(),
       contraction_amplitudes_derivative.data().get(),
-      d_p.data().get());
+      pos.data().get());
 }
 
 __global__ 
@@ -216,7 +206,7 @@ void call_build_ao_amplitudes_dz(
     double* ao_amplitudes,
     double* contraction_amplitudes,
     double* contraction_amplitudes_derivative,
-    Point* pos) {
+    const Point* pos) {
   int walker = blockIdx.x * blockDim.x + threadIdx.x;
   int atomic_orbital = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -230,11 +220,9 @@ void call_build_ao_amplitudes_dz(
 }
 
 template <>
-void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const vector_point &pos) {
+void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const vector_Point &pos) {
   dim3 block_size(128, 1, 1);
   dim3 grid_size((pos.size() + 127) / 128, atomic_orbitals.size(), 1);
-
-  thrust::device_vector<Point> d_p(pos);
 
   call_build_ao_amplitudes_dz<<<grid_size, block_size>>>(
       pos.size(),
@@ -244,7 +232,7 @@ void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes
       ao_amplitudes.data().get(),
       contraction_amplitudes.data().get(),
       contraction_amplitudes_derivative.data().get(),
-      d_p.data().get());
+      pos.data().get());
 }
 
 template <>

@@ -12,7 +12,7 @@
 
 class GF3_Functional : public MCGF {
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List Electron_List_Type;
+  typedef Electron_List_Host Electron_List_Type;
   public:
    GF3_Functional(IOPs&);
    ~GF3_Functional();

@@ -16,20 +16,19 @@
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class Basis {
-  typedef std::vector<Point> vector_point;
-
+  typedef Container<Point, Allocator<Point>> vector_Point;
   typedef Container<double, Allocator<double>> vector_double;
   typedef Container<Atomic_Orbital, Allocator<Atomic_Orbital>> vector_atomic_orbital;
 
  public:
   Basis(const int&, const Basis_Parser&);
 
-  void build_contractions(const vector_point&);
-  void build_contractions_with_derivatives(const vector_point&);
-  void build_ao_amplitudes(const vector_point&);
-  void build_ao_amplitudes_dx(const vector_point&);
-  void build_ao_amplitudes_dy(const vector_point&);
-  void build_ao_amplitudes_dz(const vector_point&);
+  void build_contractions(const vector_Point&);
+  void build_contractions_with_derivatives(const vector_Point&);
+  void build_ao_amplitudes(const vector_Point&);
+  void build_ao_amplitudes_dx(const vector_Point&);
+  void build_ao_amplitudes_dy(const vector_Point&);
+  void build_ao_amplitudes_dz(const vector_Point&);
 
   void dump(const std::string&);
 
@@ -63,12 +62,12 @@ template class Basis<std::vector, std::allocator>;
 typedef Basis<std::vector, std::allocator> Basis_Host;
 
 #ifdef HAVE_CUDA
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_with_derivatives(const vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes(const vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dx(const vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dy(const vector_point&); 
-template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const vector_point&); 
+template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions(const vector_Point&); 
+template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_contractions_with_derivatives(const vector_Point&); 
+template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes(const vector_Point&); 
+template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dx(const vector_Point&); 
+template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dy(const vector_Point&); 
+template <> void Basis<thrust::device_vector, thrust::device_allocator>::build_ao_amplitudes_dz(const vector_Point&); 
 template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_contraction_amplitudes();
 template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_contraction_amplitudes_derivative();
 template <> std::vector<double> Basis<thrust::device_vector, thrust::device_allocator>::get_ao_amplitudes();

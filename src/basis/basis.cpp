@@ -22,7 +22,7 @@ Basis<Container, Allocator>::Basis(const int& mc_num_, const Basis_Parser& basis
 { }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::build_contractions(const vector_point &pos) {
+void Basis<Container, Allocator>::build_contractions(const vector_Point &pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
       atomic_orbital.evaluate_contraction(
@@ -35,7 +35,7 @@ void Basis<Container, Allocator>::build_contractions(const vector_point &pos) {
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::build_contractions_with_derivatives(const vector_point& pos) {
+void Basis<Container, Allocator>::build_contractions_with_derivatives(const vector_Point& pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (auto &atomic_orbital : atomic_orbitals) {
       atomic_orbital.evaluate_contraction_with_derivative(
@@ -49,7 +49,7 @@ void Basis<Container, Allocator>::build_contractions_with_derivatives(const vect
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes(const vector_point &pos) {
+void Basis<Container, Allocator>::build_ao_amplitudes(const vector_Point &pos) {
   for (int walker = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++) {
       atomic_orbitals[shell].evaluate_ao(
@@ -61,7 +61,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes(const vector_point &pos) {
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes_dx(const vector_point& pos){
+void Basis<Container, Allocator>::build_ao_amplitudes_dx(const vector_Point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
       atomic_orbitals[shell].evaluate_ao_dx(
@@ -74,7 +74,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dx(const vector_point& pos
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes_dy(const vector_point& pos){
+void Basis<Container, Allocator>::build_ao_amplitudes_dy(const vector_Point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
       atomic_orbitals[shell].evaluate_ao_dy(
@@ -87,7 +87,7 @@ void Basis<Container, Allocator>::build_ao_amplitudes_dy(const vector_point& pos
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Basis<Container, Allocator>::build_ao_amplitudes_dz(const vector_point& pos){
+void Basis<Container, Allocator>::build_ao_amplitudes_dz(const vector_Point& pos){
   for (int walker = 0, index = 0; walker < pos.size(); walker++) {
     for (int shell = 0; shell < nShells; shell++, index++) {
       atomic_orbitals[shell].evaluate_ao_dz(

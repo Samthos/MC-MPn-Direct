@@ -22,6 +22,7 @@ namespace {
   class WavefunctionFixture {
     typedef Wavefunction<Container, Allocator> Wavefunction_Type;
     typedef Container<double, Allocator<double>> vector_double;
+    typedef Container<Point, Allocator<Point>> vector_Point;
 
     public:
       WavefunctionFixture() :
@@ -32,7 +33,7 @@ namespace {
       {
       }
 
-      std::vector<Point> pos;
+      vector_Point pos;
       std::shared_ptr<Movec_Parser> movecs;
       Wavefunction_Type wavefunction;
       vector_double ao_amplitudes;

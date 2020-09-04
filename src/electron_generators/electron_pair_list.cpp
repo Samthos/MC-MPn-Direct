@@ -46,3 +46,39 @@ void Electron_Pair_List<Container, Allocator>::transpose() {
   }
 }
 
+#ifdef HAVE_CUDA
+template <>
+Electron_Pair_List<thrust::device_vector, thrust::device_allocator>::Electron_Pair_List(int size) :
+    electron_pairs(size),
+    pos1(size),
+    pos2(size),
+    wgt(size),
+    inverse_weight(size),
+    rv(size * 2),
+    r12(size),
+    m_pos1(size),
+    m_pos2(size),
+    m_wgt(size),
+    m_inverse_weight(size),
+    m_rv(size),
+    m_r12(size) {}
+
+template <>
+void Electron_Pair_List<thrust::device_vector, thrust::device_allocator>::transpose() {
+  for (size_t i = 0; i < electron_pairs.size(); i++) {
+    m_pos1[i] = electron_pairs[i].pos1;
+    m_pos2[i] = electron_pairs[i].pos2;
+    m_wgt[i] = electron_pairs[i].wgt;
+    m_inverse_weight[i] = 1.0 / electron_pairs[i].wgt;
+    m_rv[i] = electron_pairs[i].rv;
+    m_r12[i] = electron_pairs[i].r12;
+  }
+  thrust::copy(m_pos1.begin(), m_pos1.end(), pos1.begin());
+  thrust::copy(m_pos2.begin(), m_pos2.end(), pos2.begin());
+  thrust::copy(m_wgt.begin(), m_wgt.end(), wgt.begin());
+  thrust::copy(m_inverse_weight.begin(), m_inverse_weight.end(), inverse_weight.begin());
+  thrust::copy(m_rv.begin(), m_rv.end(), rv.begin());
+  thrust::copy(m_r12.begin(), m_r12.end(), r12.begin());
+  thrust::copy(m_inverse_weight.begin(), m_inverse_weight.end(), rv.begin() + inverse_weight.size());
+}
+#endif

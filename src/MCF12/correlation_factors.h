@@ -37,7 +37,7 @@ namespace CORRELATION_FACTORS {
 class Correlation_Factor {
  protected:
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List Electron_List_Type;
+  typedef Electron_List_Host Electron_List_Type;
 
  public:
   Correlation_Factor(const IOPs& iops, double gamma_, double beta_);

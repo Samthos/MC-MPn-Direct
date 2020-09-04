@@ -17,7 +17,7 @@
 class GF2_F12_V : public MCGF {
  protected: 
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List Electron_List_Type;
+  typedef Electron_List_Host Electron_List_Type;
   typedef Wavefunction_Host Wavefunction_Type;
 
  public:

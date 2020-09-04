@@ -41,7 +41,7 @@ namespace {
     int electron_pairs;
 
     std::shared_ptr<Movec_Parser> movecs;
-    std::vector<Point> electron_pair_pos;
+    Container<Point, Allocator<Point>> electron_pair_pos;
 
     int lda;
     double offset;

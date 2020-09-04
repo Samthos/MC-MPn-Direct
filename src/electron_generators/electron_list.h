@@ -1,7 +1,10 @@
 #ifndef ELECTRON_LIST_H_
 #define ELECTRON_LIST_H_
+#ifdef HAVE_CUDA
+#include "cuda_runtime.h"
+#include <thrust/device_vector.h>
+#endif
 
-#include <array>
 #include <vector>
 
 #include "samplers.h"
@@ -16,7 +19,11 @@ struct Electron {
 };
 std::ostream& operator << (std::ostream& os, const Electron& electron);
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class Electron_List {
+  typedef Container<double, Allocator<double>> vector_double;
+  typedef Container<Point, Allocator<Point>> vector_Point;
+
  public:
   explicit Electron_List(int size);
   virtual ~Electron_List() = default;
@@ -28,9 +35,10 @@ class Electron_List {
     return electrons.size();
   }
 
-  std::vector<Point> pos;
-  std::vector<double> weight;
-  std::vector<double> inverse_weight;
+  vector_Point pos;
+  vector_double weight;
+  vector_double inverse_weight;
+
  protected:
   static void set_weight(Electron&, const Electron_GTO_Weight&);
   void transpose();
@@ -43,40 +51,12 @@ class Electron_List {
 
   std::vector<Electron> electrons;
 };
-Electron_List* create_electron_sampler(Molecule& molec,
-    Electron_GTO_Weight& weight,
-    int sampler_type,
-    size_t electrons,
-    double delx,
-    int debug,
-    std::string seed_file);
 
-class Direct_Electron_List : public Electron_List {
- public:
-  explicit Direct_Electron_List(int size) : Electron_List(size) {}
-  ~Direct_Electron_List() override = default;
-  void move(Random& random, const Electron_GTO_Weight& weight) override;
-  bool requires_blocking() override;
+template class Electron_List<std::vector, std::allocator>;
+typedef Electron_List<std::vector, std::allocator> Electron_List_Host;
 
- private:
-  static void mc_move_scheme(Electron&, Random&, const Electron_GTO_Weight&);
-};
-
-class Metropolis_Electron_List : public Electron_List {
- public:
-  explicit Metropolis_Electron_List(int size, double ml, Random& random, const Molecule& molec, const Electron_GTO_Weight& weight);
-  ~Metropolis_Electron_List() override = default;
-  void move(Random& random, const Electron_GTO_Weight& weight) override;
-  bool requires_blocking() override;
-
- private:
-  static void initialize(Electron&, Random&, const Molecule&, const Electron_GTO_Weight&);
-  void mc_move_scheme(Electron&, Random&, const Electron_GTO_Weight&);
-  void rescale_move_length();
-
-  double move_length;
-  int moves_since_rescale;
-  int successful_moves;
-  int failed_moves;
-};
+#ifdef HAVE_CUDA
+template class Electron_List<thrust::device_vector, thrust::device_allocator>;
+typedef Electron_List<thrust::device_vector, thrust::device_allocator> Electron_List_Device;
+#endif
 #endif  // ELECTRON_LIST_H_

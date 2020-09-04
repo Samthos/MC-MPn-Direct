@@ -57,7 +57,7 @@ template <template <typename, typename> typename Container, template <typename> 
 class F12_MP_Functional : public MP_Functional {
  protected:
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List Electron_List_Type;
+  typedef Electron_List_Host Electron_List_Type;
   typedef Wavefunction<Container, Allocator> Wavefunction_Type;
 
  public:

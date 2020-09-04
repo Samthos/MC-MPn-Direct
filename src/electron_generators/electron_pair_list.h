@@ -23,6 +23,7 @@ std::ostream& operator << (std::ostream& os, const Electron_Pair& electron_pair)
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class Electron_Pair_List {
   typedef Container<double, Allocator<double>> vector_double;
+  typedef Container<Point, Allocator<Point>> vector_Point;
 
  public:
   explicit Electron_Pair_List(int size);
@@ -35,8 +36,8 @@ class Electron_Pair_List {
     return electron_pairs.size();
   }
 
-  std::vector<Point> pos1;
-  std::vector<Point> pos2;
+  vector_Point pos1;
+  vector_Point pos2;
   vector_double wgt;
   vector_double inverse_weight;
   vector_double rv;
@@ -53,6 +54,12 @@ class Electron_Pair_List {
     return electron_pairs.end();
   }
 
+  std::vector<Point> m_pos1;
+  std::vector<Point> m_pos2;
+  std::vector<double> m_wgt;
+  std::vector<double> m_inverse_weight;
+  std::vector<double> m_rv;
+  std::vector<double> m_r12;
   std::vector<Electron_Pair> electron_pairs;
 };
 
@@ -60,6 +67,8 @@ template class Electron_Pair_List<std::vector, std::allocator>;
 typedef Electron_Pair_List<std::vector, std::allocator> Electron_Pair_List_Host;
 
 #ifdef HAVE_CUDA
+template <> Electron_Pair_List<thrust::device_vector, thrust::device_allocator>::Electron_Pair_List(int size);
+template <> void Electron_Pair_List<thrust::device_vector, thrust::device_allocator>::transpose();
 template class Electron_Pair_List<thrust::device_vector, thrust::device_allocator>;
 typedef Electron_Pair_List<thrust::device_vector, thrust::device_allocator> Electron_Pair_List_Device;
 #endif

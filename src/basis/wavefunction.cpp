@@ -6,7 +6,7 @@
 #include "wavefunction.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-Wavefunction<Container, Allocator>::Wavefunction(std::vector<Point>* p, const std::shared_ptr<Movec_Parser> movecs_in) :
+Wavefunction<Container, Allocator>::Wavefunction(vector_Point* p, const std::shared_ptr<Movec_Parser> movecs_in) :
   iocc1(movecs_in->iocc1),
   iocc2(movecs_in->iocc2),
   ivir1(movecs_in->ivir1),

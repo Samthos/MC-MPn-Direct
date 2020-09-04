@@ -12,7 +12,7 @@
 
 class GF2_Functional : public MCGF {
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List Electron_List_Type;
+  typedef Electron_List_Host Electron_List_Type;
   public:
    GF2_Functional(IOPs&);
    void energy_f12(std::vector<std::vector<double>>&, 
