@@ -7,134 +7,19 @@
 #include <array>
 
 #include "cblas.h"
-#include "../blas_calls.h"
 #include "../qc_monte.h"
 #include "mp3_functional.h"
 
-void mcmp3_helper(
-    double& en3, std::vector<double>& control, const int offset,
-    unsigned int mc_pair_num, double constant,
-    std::vector<double>& A_ij_1, std::vector<double>& A_ij_2,
-    std::vector<double>& A_ik_1, std::vector<double>& A_ik_2,
-    std::vector<double>& A_jk_1, std::vector<double>& A_jk_2,
-    std::vector<double>& rv, std::vector<double>& wgt) {
-  std::vector<double> A_ij(mc_pair_num * mc_pair_num);
-  std::vector<double> A_ik(mc_pair_num * mc_pair_num);
-  std::vector<double> A_jk(mc_pair_num * mc_pair_num);
-
-  // build ij jk intermetiates
-  std::transform(A_ij_1.begin(), A_ij_1.end(), A_ij_2.begin(), A_ij.begin(), std::multiplies<>());
-  std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
-
-  // rescale jk with rv
-  Ddgmm(DDGMM_SIDE_RIGHT,
-      mc_pair_num, mc_pair_num,
-      A_jk.data(), mc_pair_num,
-      rv.data(), 1,
-      A_jk.data(), mc_pair_num);
-
-  // A_ik = A_jk . A_ij
-  cblas_dgemm(CblasColMajor,
-      CblasNoTrans, CblasNoTrans,
-      mc_pair_num, mc_pair_num, mc_pair_num,
-      1.0,
-      A_jk.data(), mc_pair_num,
-      A_ij.data(), mc_pair_num,
-      0.0,
-      A_ik.data(), mc_pair_num);
-
-  // scale A_ik by ik_1 and ik_2
-  std::transform(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin(), std::multiplies<>());
-  std::transform(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin(), std::multiplies<>());
-
-  // A_ik . rv
-  cblas_dgemv(CblasColMajor,
-      CblasTrans,
-      mc_pair_num, mc_pair_num,
-      1.0,
-      A_ik.data(), mc_pair_num,
-      rv.data(), 1,
-      0.0,
-      A_jk.data(), 1);
-  en3 += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * r
-#if MP3CV >= 1
-  control[offset + 0] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * r
-#endif
-
-#if MP3CV >= 2
-  // A_ik . wgt
-  cblas_dgemv(CblasColMajor,
-      CblasTrans,
-      mc_pair_num, mc_pair_num,
-      1.0,
-      A_ik.data(), mc_pair_num,
-      wgt.data(), 1,
-      0.0,
-      A_jk.data(), 1);
-  control[offset + 1] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * w
-  control[offset + 2] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * w
-#endif
-
-#if MP3CV >= 3
-  // recompute A_jk
-  std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
-
-  // scale A_jk by wgt
-  Ddgmm(DDGMM_SIDE_RIGHT,
-      mc_pair_num, mc_pair_num,
-      A_jk.data(), mc_pair_num,
-      wgt.data(), 1,
-      A_jk.data(), mc_pair_num);
-
-  // A_ik = A_jk . A_ij
-  cblas_dgemm(CblasColMajor,
-      CblasNoTrans, CblasNoTrans,
-      mc_pair_num, mc_pair_num, mc_pair_num,
-      1.0,
-      A_jk.data(), mc_pair_num,
-      A_ij.data(), mc_pair_num,
-      0.0,
-      A_ik.data(), mc_pair_num);
-
-  // scale A_ik by ik_1 and ik_2
-  std::transform(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin(), std::multiplies<>());
-  std::transform(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin(), std::multiplies<>());
-
-  // A_ik . rv
-  cblas_dgemv(CblasColMajor,
-      CblasTrans,
-      mc_pair_num, mc_pair_num,
-      1.0,
-      A_ik.data(), mc_pair_num,
-      rv.data(), 1,
-      0.0,
-      A_jk.data(), 1);
-  control[offset + 3] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * w * r
-
-  // A_ik . wgt
-  cblas_dgemv(CblasColMajor,
-      CblasTrans,
-      mc_pair_num, mc_pair_num,
-      1.0,
-      A_ik.data(), mc_pair_num,
-      wgt.data(), 1,
-      0.0,
-      A_jk.data(), 1);
-  control[offset + 4] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // r * w * w
-  control[offset + 5] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // w * w * w
-#endif
-}
-
-MP_Functional* create_MP3_Functional(int cv_level) {
+MP_Functional* create_MP3_Functional(int cv_level, int electron_pairs) {
   MP_Functional* mcmp = nullptr;
   if (cv_level == 0) {
-    mcmp = new MP3_Functional<0>;
+    mcmp = new MP3_Functional<0>(electron_pairs);
   } else if (cv_level == 1) {
-    mcmp = new MP3_Functional<1>;
+    mcmp = new MP3_Functional<1>(electron_pairs);
   } else if (cv_level == 2) {
-    mcmp = new MP3_Functional<2>;
+    mcmp = new MP3_Functional<2>(electron_pairs);
   } else if (cv_level == 3) {
-    mcmp = new MP3_Functional<3>;
+    mcmp = new MP3_Functional<3>(electron_pairs);
   }
   
   if (mcmp == nullptr) {
@@ -145,117 +30,124 @@ MP_Functional* create_MP3_Functional(int cv_level) {
 }
 
 template <int CVMP3>
+MP3_Functional<CVMP3>::MP3_Functional(int electron_pairs) : 
+    Standard_MP_Functional<std::vector, std::allocator>(3 * CVMP3 * (1 + CVMP3), 2, "23"),
+    A_ij(electron_pairs * electron_pairs),
+    A_ik(electron_pairs * electron_pairs),
+    A_jk(electron_pairs * electron_pairs) {
+}
+
+template <int CVMP3>
 void MP3_Functional<CVMP3>::mcmp3_helper(
     double& en3, std::vector<double>& control, const int offset,
-    unsigned int mc_pair_num, double constant,
-    std::vector<double>& A_ij_1, std::vector<double>& A_ij_2,
-    std::vector<double>& A_ik_1, std::vector<double>& A_ik_2,
-    std::vector<double>& A_jk_1, std::vector<double>& A_jk_2,
-    std::vector<double>& rv, std::vector<double>& wgt) {
-  std::vector<double> A_ij(mc_pair_num * mc_pair_num);
-  std::vector<double> A_ik(mc_pair_num * mc_pair_num);
-  std::vector<double> A_jk(mc_pair_num * mc_pair_num);
+    unsigned int electron_pairs, double constant,
+    vector_double& A_ij_1, vector_double& A_ij_2,
+    vector_double& A_ik_1, vector_double& A_ik_2,
+    vector_double& A_jk_1, vector_double& A_jk_2,
+    vector_double& rv, vector_double& wgt) {
+  double ddot_result;
 
   // build ij jk intermetiates
-  std::transform(A_ij_1.begin(), A_ij_1.end(), A_ij_2.begin(), A_ij.begin(), std::multiplies<>());
-  std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
+  this->blas_wrapper.transform_multiplies(A_ij_1, A_ij_2, A_ij);
+  this->blas_wrapper.transform_multiplies(A_jk_1, A_jk_2, A_jk);
 
   // rescale jk with rv
-  Ddgmm(DDGMM_SIDE_RIGHT,
-      mc_pair_num, mc_pair_num,
-      A_jk.data(), mc_pair_num,
-      rv.data(), 1,
-      A_jk.data(), mc_pair_num);
+  this->blas_wrapper.Ddgmm(true,
+      electron_pairs, electron_pairs,
+      A_jk, electron_pairs,
+      rv, 1,
+      A_jk, electron_pairs);
 
   // A_ik = A_jk . A_ij
-  cblas_dgemm(CblasColMajor,
-      CblasNoTrans, CblasNoTrans,
-      mc_pair_num, mc_pair_num, mc_pair_num,
+  this->blas_wrapper.dgemm(false, false,
+      electron_pairs, electron_pairs, electron_pairs,
       1.0,
-      A_jk.data(), mc_pair_num,
-      A_ij.data(), mc_pair_num,
+      A_jk, electron_pairs,
+      A_ij, electron_pairs,
       0.0,
-      A_ik.data(), mc_pair_num);
+      A_ik, electron_pairs);
 
   // scale A_ik by ik_1 and ik_2
-  std::transform(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin(), std::multiplies<>());
-  std::transform(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin(), std::multiplies<>());
+  this->blas_wrapper.transform_multiplies(A_ik, A_ik_1, A_ik);
+  this->blas_wrapper.transform_multiplies(A_ik, A_ik_2, A_ik);
 
   // A_ik . rv
-  cblas_dgemv(CblasColMajor,
-      CblasTrans,
-      mc_pair_num, mc_pair_num,
+  this->blas_wrapper.dgemv(true,
+      electron_pairs, electron_pairs,
       1.0,
-      A_ik.data(), mc_pair_num,
-      rv.data(), 1,
+      A_ik, electron_pairs,
+      rv, 1,
       0.0,
-      A_jk.data(), 1);
-  en3 += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * r
+      A_jk, 1);
+  this->blas_wrapper.ddot(rv.size(), rv, 1, A_jk, 1, &ddot_result);
+  en3 += constant * ddot_result;
   if (CVMP3 >= 1) {
-    control[offset + 0] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * r
+    this->blas_wrapper.ddot(rv.size(), wgt, 1, A_jk, 1, &ddot_result);
+    control[offset + 0] += constant * ddot_result;
   }
 
   if (CVMP3 >= 2) {
     // A_ik . wgt
-    cblas_dgemv(CblasColMajor,
-        CblasTrans,
-        mc_pair_num, mc_pair_num,
+    this->blas_wrapper.dgemv(true,
+        electron_pairs, electron_pairs,
         1.0,
-        A_ik.data(), mc_pair_num,
-        wgt.data(), 1,
+        A_ik, electron_pairs,
+        wgt, 1,
         0.0,
-        A_jk.data(), 1);
-    control[offset + 6] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // r * r * w
-    control[offset + 12] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * r * w
+        A_jk, 1);
+    this->blas_wrapper.ddot(rv.size(), rv, 1, A_jk, 1, &ddot_result); // r * r * w
+    control[offset + 6] += constant * ddot_result;
+    this->blas_wrapper.ddot(wgt.size(), wgt, 1, A_jk, 1, &ddot_result); // w * r * w
+    control[offset + 12] += constant * ddot_result;
   }
 
   if (CVMP3 >= 3) {
     // recompute A_jk
-    std::transform(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin(), std::multiplies<>());
+    this->blas_wrapper.transform_multiplies(A_jk_1, A_jk_2, A_jk);
 
     // scale A_jk by wgt
-    Ddgmm(DDGMM_SIDE_RIGHT,
-        mc_pair_num, mc_pair_num,
-        A_jk.data(), mc_pair_num,
-        wgt.data(), 1,
-        A_jk.data(), mc_pair_num);
+    this->blas_wrapper.Ddgmm(true,
+        electron_pairs, electron_pairs,
+        A_jk, electron_pairs,
+        wgt, 1,
+        A_jk, electron_pairs);
 
     // A_ik = A_jk . A_ij
-    cblas_dgemm(CblasColMajor,
-        CblasNoTrans, CblasNoTrans,
-        mc_pair_num, mc_pair_num, mc_pair_num,
+    this->blas_wrapper.dgemm(false, false,
+        electron_pairs, electron_pairs, electron_pairs,
         1.0,
-        A_jk.data(), mc_pair_num,
-        A_ij.data(), mc_pair_num,
+        A_jk, electron_pairs,
+        A_ij, electron_pairs,
         0.0,
-        A_ik.data(), mc_pair_num);
+        A_ik, electron_pairs);
 
     // scale A_ik by ik_1 and ik_2
-    std::transform(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin(), std::multiplies<>());
-    std::transform(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin(), std::multiplies<>());
+    this->blas_wrapper.transform_multiplies(A_ik, A_ik_1, A_ik);
+    this->blas_wrapper.transform_multiplies(A_ik, A_ik_2, A_ik);
 
     // A_ik . rv
-    cblas_dgemv(CblasColMajor,
-        CblasTrans,
-        mc_pair_num, mc_pair_num,
+    this->blas_wrapper.dgemv(true,
+        electron_pairs, electron_pairs,
         1.0,
-        A_ik.data(), mc_pair_num,
-        rv.data(), 1,
+        A_ik, electron_pairs,
+        rv, 1,
         0.0,
-        A_jk.data(), 1);
-    control[offset + 18] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // w * w * r
+        A_jk, 1);
+    this->blas_wrapper.ddot(wgt.size(), wgt, 1, A_jk, 1, &ddot_result); // w * w * r
+    control[offset + 18] += constant * ddot_result;
 
     // A_ik . wgt
-    cblas_dgemv(CblasColMajor,
-        CblasTrans,
-        mc_pair_num, mc_pair_num,
+    this->blas_wrapper.dgemv(true,
+        electron_pairs, electron_pairs,
         1.0,
-        A_ik.data(), mc_pair_num,
-        wgt.data(), 1,
+        A_ik, electron_pairs,
+        wgt, 1,
         0.0,
-        A_jk.data(), 1);
-    control[offset + 24] += constant * std::inner_product(wgt.begin(), wgt.end(), A_jk.begin(), 0.0); // r * w * w
-    control[offset + 30] += constant * std::inner_product(rv.begin(), rv.end(), A_jk.begin(), 0.0); // w * w * w
+        A_jk, 1);
+    this->blas_wrapper.ddot(wgt.size(), wgt, 1, A_jk, 1, &ddot_result); // r * w * w
+    control[offset + 24] += constant * ddot_result;
+    this->blas_wrapper.ddot( rv.size(),  rv, 1, A_jk, 1, &ddot_result); // w * w * w
+    control[offset + 30] += constant * ddot_result;
   }
 }
 
@@ -264,9 +156,8 @@ void MP3_Functional<CVMP3>::energy(double& emp, std::vector<double>& control, OV
   double en3 = 0;
   std::vector<double> ctrl(control.size(), 0.0);
 
-  std::vector<double>& rv = electron_pair_list->rv;
-  std::vector<double> wgt(electron_pair_list->size());
-  std::transform(electron_pair_list->wgt.begin(), electron_pair_list->wgt.end(), wgt.begin(), [](double w){return 1.0/w;});
+  vector_double& rv = electron_pair_list->rv;
+  vector_double& wgt = electron_pair_list->inverse_weight;
 
   mcmp3_helper(en3, ctrl, 0, electron_pair_list->size(), 2, ovps.v_set[0][0].s_11, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_11, ovps.o_set[1][0].s_22, ovps.v_set[1][1].s_11, ovps.v_set[1][1].s_22, rv, wgt);
   mcmp3_helper(en3, ctrl, 1, electron_pair_list->size(), 2, ovps.o_set[0][0].s_21, ovps.v_set[0][0].s_22, ovps.o_set[1][0].s_12, ovps.v_set[1][0].s_11, ovps.v_set[1][1].s_22, ovps.o_set[1][1].s_11, rv, wgt);

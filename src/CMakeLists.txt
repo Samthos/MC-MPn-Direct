@@ -69,6 +69,7 @@ set(source
   qc_random.cpp
   qc_random.h
   timer.h
+  MCMP/blas_wrapper.cpp
 )
 
 add_subdirectory(geometry)
@@ -116,6 +117,8 @@ if(${Enable_CUDA})
     ovps_set.cu
     qc_ovps.cu
   )
+  set_source_files_properties(MCMP/blas_wrapper.cpp PROPERTIES LANGUAGE CUDA)
+
 
   add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
   set_target_properties(GPU_MC_MPn_Direct PROPERTIES CUDA_SEPARABLE_COMPILATION ON)

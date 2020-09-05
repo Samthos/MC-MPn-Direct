@@ -1,8 +1,10 @@
 #ifndef BLAS_CALLS_H_
 #define BLAS_CALLS_H_
 
-enum DDGMM_SIDE { DDGMM_SIDE_LEFT = 101,
-  DDGMM_SIDE_RIGHT = 102 };
+enum DDGMM_SIDE { 
+  DDGMM_SIDE_LEFT = 101,
+  DDGMM_SIDE_RIGHT = 102
+};
 
 template <class BinaryOperator>
 void Ddgmm(const enum DDGMM_SIDE Side,

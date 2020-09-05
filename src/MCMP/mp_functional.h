@@ -4,9 +4,11 @@
 #ifdef HAVE_CUDA
 #include <thrust/device_vector.h>
 #endif
-#include <vector>
-#include <unordered_map>
 
+#include <unordered_map>
+#include <vector>
+
+#include "blas_wrapper.h"
 #include "../qc_ovps.h"
 #include "tau.h"
 #include "electron_pair_list.h"
@@ -34,12 +36,17 @@ class MP_Functional {
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Standard_MP_Functional : public MP_Functional {
  protected:
+  typedef Container<double, Allocator<double>> vector_double;
   typedef Electron_Pair_List<Container, Allocator> Electron_Pair_List_Type;
   typedef OVPS<Container, Allocator> OVPS_Type;
+  typedef Blas_Wrapper<Container, Allocator> Blas_Wrapper_Type;
 
  public:
   Standard_MP_Functional(int ncv, int ntc, const std::string& e) : MP_Functional(ncv, ntc, e, MP_FUNCTIONAL_TYPE::STANDARD) {}
   virtual void energy(double& emp, std::vector<double>& control, OVPS_Type&, Electron_Pair_List_Type*, Tau*) = 0;
+
+ protected:
+  Blas_Wrapper_Type blas_wrapper;
 };
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
