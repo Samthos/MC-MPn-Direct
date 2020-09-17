@@ -72,20 +72,37 @@ void Blas_Wrapper<std::vector, std::allocator>::ddgmm(bool right_side,
 }
 
 template <> 
-void Blas_Wrapper<std::vector, std::allocator>::ddot(size_t N, 
+double Blas_Wrapper<std::vector, std::allocator>::ddot(size_t N, 
     const vector_double& X, size_t incx,
-    const vector_double& Y, size_t incy, 
-    double *result) {
-  *result = cblas_ddot(N,
+    const vector_double& Y, size_t incy) { 
+  double result;
+  result = cblas_ddot(N,
       X.data(), incx,
       Y.data(), incy);
+  return result;
 };
 
 template <> 
-void Blas_Wrapper<std::vector, std::allocator>::transform_multiplies(const vector_double& A, 
+void Blas_Wrapper<std::vector, std::allocator>::dscal(size_t N, 
+    double alpha,
+    vector_double& X, size_t incx) { 
+  cblas_dscal(N,
+      alpha,
+      X.data(), incx);
+};
+
+template <> 
+void Blas_Wrapper<std::vector, std::allocator>::multiplies(const vector_double& A, 
       const vector_double& B, 
       vector_double& C) {
   std::transform(A.begin(), A.end(), B.begin(), C.begin(), std::multiplies<>());
+}
+
+template <> 
+void Blas_Wrapper<std::vector, std::allocator>::minus(const vector_double& A, 
+      const vector_double& B, 
+      vector_double& C) {
+  std::transform(A.begin(), A.end(), B.begin(), C.begin(), std::minus<>());
 }
 
 
@@ -154,20 +171,27 @@ template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::
 }
 
 template <> 
-void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddot(size_t N, 
+double Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddot(size_t N, 
     const vector_double& X, size_t incx,
-    const vector_double& Y, size_t incy, 
-    double *result) {
+    const vector_double& Y, size_t incy) { 
+  double result;
   cublasDdot(handle, N,
       X.data().get(), incx,
       Y.data().get(), incy,
-      result);
+      &result);
+  return result;
 };
 
-template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::transform_multiplies(const vector_double& A, 
+template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::multiplies(const vector_double& A, 
       const vector_double& B, 
       vector_double& C) {
   thrust::transform(A.begin(), A.end(), B.begin(), C.begin(), thrust::multiplies<double>());
+}
+
+template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::minus(const vector_double& A, 
+      const vector_double& B, 
+      vector_double& C) {
+  thrust::transform(A.begin(), A.end(), B.begin(), C.begin(), thrust::minus<double>());
 }
 #endif
 

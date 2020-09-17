@@ -26,11 +26,10 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
     vector_double& A_ik_1, vector_double& A_ik_2,
     vector_double& A_jk_1, vector_double& A_jk_2,
     vector_double& rv, vector_double& wgt) {
-  double ddot_result;
 
   // build ij jk intermetiates
-  this->blas_wrapper.transform_multiplies(A_ij_1, A_ij_2, A_ij);
-  this->blas_wrapper.transform_multiplies(A_jk_1, A_jk_2, A_jk);
+  this->blas_wrapper.multiplies(A_ij_1, A_ij_2, A_ij);
+  this->blas_wrapper.multiplies(A_jk_1, A_jk_2, A_jk);
 
   // rescale jk with rv
   this->blas_wrapper.ddgmm(true,
@@ -48,8 +47,8 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
       0.0,
       A_ik, electron_pairs);
   // scale A_ik by ik_1 and ik_2
-  this->blas_wrapper.transform_multiplies(A_ik, A_ik_1, A_ik);
-  this->blas_wrapper.transform_multiplies(A_ik, A_ik_2, A_ik);
+  this->blas_wrapper.multiplies(A_ik, A_ik_1, A_ik);
+  this->blas_wrapper.multiplies(A_ik, A_ik_2, A_ik);
 
   // A_ik . rv
   this->blas_wrapper.dgemv(true,
@@ -59,11 +58,9 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
       rv, 1,
       0.0,
       A_jk, 1);
-  this->blas_wrapper.ddot(electron_pairs, rv, 1, A_jk, 1, &ddot_result);
-  en3 += constant * ddot_result;
+  en3 += constant * this->blas_wrapper.ddot(electron_pairs, rv, 1, A_jk, 1);
   if (CVMP3 >= 1) {
-    this->blas_wrapper.ddot(electron_pairs, wgt, 1, A_jk, 1, &ddot_result);
-    control[offset + 0] += constant * ddot_result;
+    control[offset + 0] += constant * this->blas_wrapper.ddot(electron_pairs, wgt, 1, A_jk, 1);
   }
 
   if (CVMP3 >= 2) {
@@ -75,15 +72,13 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
         wgt, 1,
         0.0,
         A_jk, 1);
-    this->blas_wrapper.ddot(electron_pairs, rv, 1, A_jk, 1, &ddot_result); // r * r * w
-    control[offset + 6] += constant * ddot_result;
-    this->blas_wrapper.ddot(wgt.size(), wgt, 1, A_jk, 1, &ddot_result); // w * r * w
-    control[offset + 12] += constant * ddot_result;
+    control[offset + 6] += constant * this->blas_wrapper.ddot(electron_pairs, rv, 1, A_jk, 1); // r * r * w
+    control[offset + 12] += constant * this->blas_wrapper.ddot(wgt.size(), wgt, 1, A_jk, 1); // w * r * w
   }
 
   if (CVMP3 >= 3) {
     // recompute A_jk
-    this->blas_wrapper.transform_multiplies(A_jk_1, A_jk_2, A_jk);
+    this->blas_wrapper.multiplies(A_jk_1, A_jk_2, A_jk);
 
     // scale A_jk by wgt
     this->blas_wrapper.ddgmm(true,
@@ -102,8 +97,8 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
         A_ik, electron_pairs);
 
     // scale A_ik by ik_1 and ik_2
-    this->blas_wrapper.transform_multiplies(A_ik, A_ik_1, A_ik);
-    this->blas_wrapper.transform_multiplies(A_ik, A_ik_2, A_ik);
+    this->blas_wrapper.multiplies(A_ik, A_ik_1, A_ik);
+    this->blas_wrapper.multiplies(A_ik, A_ik_2, A_ik);
 
     // A_ik . rv
     this->blas_wrapper.dgemv(true,
@@ -113,8 +108,7 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
         rv, 1,
         0.0,
         A_jk, 1);
-    this->blas_wrapper.ddot(electron_pairs, wgt, 1, A_jk, 1, &ddot_result); // w * w * r
-    control[offset + 18] += constant * ddot_result;
+    control[offset + 18] += constant * this->blas_wrapper.ddot(electron_pairs, wgt, 1, A_jk, 1); // w * w * r
 
     // A_ik . wgt
     this->blas_wrapper.dgemv(true,
@@ -124,10 +118,8 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
         wgt, 1,
         0.0,
         A_jk, 1);
-    this->blas_wrapper.ddot(electron_pairs, wgt, 1, A_jk, 1, &ddot_result); // r * w * w
-    control[offset + 24] += constant * ddot_result;
-    this->blas_wrapper.ddot(electron_pairs,  rv, 1, A_jk, 1, &ddot_result); // w * w * w
-    control[offset + 30] += constant * ddot_result;
+    control[offset + 24] += constant * this->blas_wrapper.ddot(electron_pairs, wgt, 1, A_jk, 1); // r * w * w
+    control[offset + 30] += constant * this->blas_wrapper.ddot(electron_pairs,  rv, 1, A_jk, 1); // w * w * w
   }
 }
 

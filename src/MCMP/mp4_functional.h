@@ -7,16 +7,19 @@
 template <int CVMP4>
 class MP4_Functional : public Standard_MP_Functional<std::vector, std::allocator> {
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
+  typedef std::vector<double> vector_double;
+  typedef Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper_Type;
+
  public:
   MP4_Functional(int electron_pairs);
   void energy(double& emp, std::vector<double>& control, OVPS_Host&, Electron_Pair_List_Type*, Tau*) override;
 
  private:
-  void contract(std::vector<double>& result, const std::vector<double>& A, CBLAS_TRANSPOSE A_trans, const std::vector<double>& B, const std::vector<double>& v);
+  void contract(vector_double& result, const vector_double& A, bool A_trans, const vector_double& B, const vector_double& v);
   void mcmp4_ij_helper(double constant,
       double& emp4, std::vector<double>& control, int offset,
-      const std::vector<double>& ik, const std::vector<double>& jk,
-      const std::vector<double>& il, const std::vector<double>& jl);
+      const vector_double& ik, const vector_double& jk,
+      const vector_double& il, const vector_double& jl);
   void mcmp4_ij_helper_t1(double constant,
       double& emp4, std::vector<double>& control, int offset,
       const std::vector<double>& ik_1, const std::vector<double>& ik_2, const std::vector<double>& ik_3,
