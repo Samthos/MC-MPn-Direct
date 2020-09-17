@@ -185,7 +185,7 @@ void MP4_Functional<CVMP4>::mcmp4_ij_helper_t3(double constant,
 }
 
 template <int CVMP4>
-void MP4_Functional<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<double>& control, const OVPS_Type& ovps) {
   constexpr int offset = 0 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_ij_helper_t1(-4, emp4, control, offset,
       ovps.o_set[1][0].s_22, ovps.o_set[1][0].s_11, ovps.v_set[1][0].s_12, ovps.v_set[1][1].s_21,
@@ -300,7 +300,7 @@ void MP4_Functional<CVMP4>::mcmp4_energy_ij_fast(double& emp4, std::vector<doubl
 }
 
 template <int CVMP4>
-void MP4_Functional<CVMP4>::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_ik_fast(double& emp4, std::vector<double>& control, const OVPS_Type& ovps) {
   constexpr int offset = 1 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_ij_helper_t1(  4, emp4, control, offset,
       ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[0][0].s_11, ovps.o_set[1][1].s_21,
@@ -419,8 +419,8 @@ void MP4_Functional<CVMP4>::mcmp4_il_helper(double constant,
     double& emp4, std::vector<double>& control, int offset,
     const std::vector<double>& ij, const std::vector<double>& jl,
     const std::vector<double>& ik, const std::vector<double>& kl) {
-  std::transform(ij.begin(), ij.end(), ik.begin(), i_kl.begin(), std::multiplies<>());
-  std::transform(jl.begin(), jl.end(), kl.begin(), j_kl.begin(), std::multiplies<>());
+  this->blas_wrapper.multiplies(ij, ik, i_kl);
+  this->blas_wrapper.multiplies(jl, kl, j_kl);
 
   // contract k and j
   contract(ij_rl, jl, false, ij, rv);
@@ -433,106 +433,111 @@ void MP4_Functional<CVMP4>::mcmp4_il_helper(double constant,
 
   // build jrkr
   contract(T_r, j_kl, false, i_kl, r_r);
-  // combin ij_rk * ij_rl - T_r
-  std::transform(ij_rl.begin(), ij_rl.end(), ij_rk.begin(), T_w.begin(), std::multiplies<>());
-  std::transform(T_w.begin(), T_w.end(), T_r.begin(), T_w.begin(), std::minus<>());
-  cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
 
-  cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-  emp4 += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant; // r r r r
+  // combin ij_rk * ij_rl - T_r
+  this->blas_wrapper.multiplies(ij_rl, ij_rk, T_w);
+  this->blas_wrapper.minus(T_w, T_r, T_w);
+  this->blas_wrapper.dscal(mpn, 0.0, T_w, mpn+1);
+
+  this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, rv, 1, 0.0, en_r, 1);
+  emp4 += constant * this->blas_wrapper.ddot(mpn, rv, 1, en_r, 1); // r r r r
   if (CVMP4 >= 1) {
-    control[0 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r r
+    control[0 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w r r r
   }
 
   if (CVMP4 >= 2) {
-    cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[3 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r r w
-    control[6 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r r r w
+    this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, wgt, 1, 0.0, en_r, 1);
+    control[3 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w r r w
+    control[6 + offset] += constant * this->blas_wrapper.ddot(mpn, rv, 1, en_r, 1);   // r r r w
   }
 
   if (CVMP4 >= 3) {
     contract(T_r, j_kl, false, i_kl, r_w);
     // build jw kr
-    std::transform(ij_wl.begin(), ij_wl.end(), ij_rk.begin(), T_w.begin(), std::multiplies<>());
-    std::transform(T_w.begin(), T_w.end(), T_r.begin(), T_w.begin(), std::minus<>());
-    cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
+    this->blas_wrapper.multiplies(ij_wl, ij_rk, T_w);
+    this->blas_wrapper.minus(T_w, T_r, T_w);
+    this->blas_wrapper.dscal(mpn, 0.0, T_w, mpn+1);
 
-    cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[9 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r r
+    this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, rv, 1, 0.0, en_r, 1);
+    control[9 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w w r r
 
-    cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[12 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w r w
-    control[15 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w r w
+    this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, wgt, 1, 0.0, en_r, 1);
+    control[12 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w w r w
+    control[15 + offset] += constant * this->blas_wrapper.ddot(mpn, rv, 1, en_r, 1);   // r w r w
 
     // build jr kw
-    std::transform(ij_rl.begin(), ij_rl.end(), ij_wk.begin(), T_w.begin(), std::multiplies<>());
-    std::transform(T_w.begin(), T_w.end(), T_r.begin(), T_w.begin(), std::minus<>());
-    cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
+    this->blas_wrapper.multiplies(ij_rl, ij_wk, T_w);
+    this->blas_wrapper.minus(T_w, T_r, T_w);
+    this->blas_wrapper.dscal(mpn, 0.0, T_w, mpn+1);
 
-    cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[18 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w r
+    this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, rv, 1, 0.0, en_r, 1);
+    control[18 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w r w r
 
-    cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[21 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w r w w
-    control[24 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r r w w
+    this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, wgt, 1, 0.0, en_r, 1);
+    control[21 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w r w w
+    control[24 + offset] += constant * this->blas_wrapper.ddot(mpn, rv, 1, en_r, 1);   // r r w w
 
     // build jw kw
     contract(T_r, j_kl, false, i_kl, w_w);
-    std::transform(ij_wl.begin(), ij_wl.end(), ij_wk.begin(), T_w.begin(), std::multiplies<>());
-    std::transform(T_w.begin(), T_w.end(), T_r.begin(), T_w.begin(), std::minus<>());
-    cblas_dscal(mpn, 0.0, T_w.data(), mpn+1);
+    this->blas_wrapper.multiplies(ij_wl, ij_wk, T_w);
+    this->blas_wrapper.minus(T_w, T_r, T_w);
+    this->blas_wrapper.dscal(mpn, 0.0, T_w, mpn+1);
 
-    cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, rv.data(), 1, 0.0, en_r.data(), 1);
-    control[27 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w r
+    this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, rv, 1, 0.0, en_r, 1);
+    control[27 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w w w r
 
-    cblas_dgemv(CblasColMajor, CblasTrans, mpn, mpn, 1.0, T_w.data(), mpn, wgt.data(), 1, 0.0, en_r.data(), 1);
-    control[30 + offset] += std::inner_product(wgt.begin(), wgt.end(), en_r.begin(), 0.0) * constant; // w w w w
-    control[33 + offset] += std::inner_product(rv.begin(), rv.end(), en_r.begin(), 0.0) * constant;   // r w w w
+    this->blas_wrapper.dgemv(true, mpn, mpn, 1.0, T_w, mpn, wgt, 1, 0.0, en_r, 1);
+    control[30 + offset] += constant * this->blas_wrapper.ddot(mpn, wgt, 1, en_r, 1); // w w w w
+    control[33 + offset] += constant * this->blas_wrapper.ddot(mpn, rv, 1, en_r, 1);   // r w w w
   }
 }
+
 template <int CVMP4>
 void MP4_Functional<CVMP4>::mcmp4_il_helper_t1(double constant,
     double& emp4, std::vector<double>& control, int offset,
-    const std::vector<double>& ij_1, const std::vector<double>& ij_2, const std::vector<double>& ij_3,
-    const std::vector<double>& jl,
-    const std::vector<double>& ik,
-    const std::vector<double>& kl_1, const std::vector<double>& kl_2, const std::vector<double>& kl_3
+    const vector_double& ij_1, const vector_double& ij_2, const vector_double& ij_3,
+    const vector_double& jl,
+    const vector_double& ik,
+    const vector_double& kl_1, const vector_double& kl_2, const vector_double& kl_3
 ) {
-  std::transform(ij_1.begin(), ij_1.end(), ij_2.begin(), ij_.begin(), std::multiplies<>());
-  std::transform(ij_3.begin(), ij_3.end(), ij_.begin(), ij_.begin(), std::multiplies<>());
-  std::transform(kl_1.begin(), kl_1.end(), kl_2.begin(), kl_.begin(), std::multiplies<>());
-  std::transform(kl_3.begin(), kl_3.end(), kl_.begin(), kl_.begin(), std::multiplies<>());
+  this->blas_wrapper.multiplies(ij_1, ij_2, ij_);
+  this->blas_wrapper.multiplies(ij_3, ij_, ij_);
+  this->blas_wrapper.multiplies(kl_1, kl_2, kl_);
+  this->blas_wrapper.multiplies(kl_3, kl_, kl_);
   mcmp4_il_helper(constant, emp4, control, offset, ij_, jl, ik, kl_);
 }
+
 template <int CVMP4>
 void MP4_Functional<CVMP4>::mcmp4_il_helper_t2(double constant,
     double& emp4, std::vector<double>& control, int offset,
-    const std::vector<double>& ij_1, const std::vector<double>& ij_2,
-    const std::vector<double>& jl_1, const std::vector<double>& jl_2,
-    const std::vector<double>& ik_1, const std::vector<double>& ik_2,
-    const std::vector<double>& kl_1, const std::vector<double>& kl_2
+    const vector_double& ij_1, const vector_double& ij_2,
+    const vector_double& jl_1, const vector_double& jl_2,
+    const vector_double& ik_1, const vector_double& ik_2,
+    const vector_double& kl_1, const vector_double& kl_2
 ) {
-  std::transform(ij_1.begin(), ij_1.end(), ij_2.begin(), ij_.begin(), std::multiplies<>());
-  std::transform(jl_1.begin(), jl_1.end(), jl_2.begin(), jl_.begin(), std::multiplies<>());
-  std::transform(ik_1.begin(), ik_1.end(), ik_2.begin(), ik_.begin(), std::multiplies<>());
-  std::transform(kl_1.begin(), kl_1.end(), kl_2.begin(), kl_.begin(), std::multiplies<>());
+  this->blas_wrapper.multiplies(ij_1, ij_2, ij_);
+  this->blas_wrapper.multiplies(jl_1, jl_2, jl_);
+  this->blas_wrapper.multiplies(ik_1, ik_2, ik_);
+  this->blas_wrapper.multiplies(kl_1, kl_2, kl_);
   mcmp4_il_helper(constant, emp4, control, offset, ij_, jl_, ik_, kl_);
 }
+
 template <int CVMP4>
 void MP4_Functional<CVMP4>::mcmp4_il_helper_t3(double constant,
     double& emp4, std::vector<double>& control, int offset,
-    const std::vector<double>& ij,
-    const std::vector<double>& jl_1, const std::vector<double>& jl_2, const std::vector<double>& jl_3,
-    const std::vector<double>& ik_1, const std::vector<double>& ik_2, const std::vector<double>& ik_3,
-    const std::vector<double>& kl) {
-  std::transform(jl_1.begin(), jl_1.end(), jl_2.begin(), jl_.begin(), std::multiplies<>());
-  std::transform(jl_3.begin(), jl_3.end(), jl_.begin(), jl_.begin(), std::multiplies<>());
-  std::transform(ik_1.begin(), ik_1.end(), ik_2.begin(), ik_.begin(), std::multiplies<>());
-  std::transform(ik_3.begin(), ik_3.end(), ik_.begin(), ik_.begin(), std::multiplies<>());
+    const vector_double& ij,
+    const vector_double& jl_1, const vector_double& jl_2, const vector_double& jl_3,
+    const vector_double& ik_1, const vector_double& ik_2, const vector_double& ik_3,
+    const vector_double& kl) {
+  this->blas_wrapper.multiplies(jl_1, jl_2, jl_);
+  this->blas_wrapper.multiplies(jl_3, jl_, jl_);
+  this->blas_wrapper.multiplies(ik_1, ik_2, ik_);
+  this->blas_wrapper.multiplies(ik_3, ik_, ik_);
   mcmp4_il_helper(constant, emp4, control, offset, ij, jl_, ik_, kl);
 }
+
 template <int CVMP4>
-void MP4_Functional<CVMP4>::mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_il_fast(double& emp4, std::vector<double>& control, const OVPS_Type& ovps) {
   constexpr int offset = 2 + CVMP4*(2 + CVMP4*(8 + CVMP4*(-5 + CVMP4))) / 2;
   mcmp4_il_helper_t1( 2, emp4, control, offset,
       ovps.o_set[0][0].s_11, ovps.o_set[0][0].s_22, ovps.v_set[0][0].s_12, ovps.o_set[2][1].s_12,
@@ -793,7 +798,7 @@ void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_t3(double& emp4, std::vector<doubl
   mcmp4_energy_ijkl_helper(emp4, control, 2, constants, ext_ptr, ik, il, jk, jl, jl_);
 }
 template <int CVMP4>
-void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps) {
+void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPS_Type& ovps) {
   mcmp4_energy_ijkl_t1(emp4, control,
       { -2, -2, -2, 4, 4, 4, 4, -8},
       {&ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_12, &ovps.v_set[0][0].s_22, &ovps.v_set[0][0].s_11, &ovps.v_set[0][0].s_21, &ovps.v_set[0][0].s_21},
@@ -1050,7 +1055,7 @@ void MP4_Functional<CVMP4>::mcmp4_energy_ijkl_fast(double& emp4, std::vector<dou
 }
 
 template <int CVMP4>
-void MP4_Functional<CVMP4>::energy(double& emp, std::vector<double>& control, OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
+void MP4_Functional<CVMP4>::energy(double& emp, std::vector<double>& control, OVPS_Type& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   double en4 = 0.0;
   std::vector<double> ctrl(control.size(), 0.0);
 
