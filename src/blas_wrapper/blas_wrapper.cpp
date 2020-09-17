@@ -8,7 +8,7 @@
 
 
 #include "cblas.h"
-#include "../blas_calls.h"
+#include "blas_calls.h"
 
 #include "blas_wrapper.h"
 
@@ -58,17 +58,17 @@ void Blas_Wrapper<std::vector, std::allocator>::dgemv(bool Trans,
 }
 
 template <>
-void Blas_Wrapper<std::vector, std::allocator>::Ddgmm(bool right_side,
+void Blas_Wrapper<std::vector, std::allocator>::ddgmm(bool right_side,
       size_t m, size_t n,
       const vector_double& A, size_t lda,
       const vector_double& x, size_t incx,
       vector_double& B, size_t ldb) {
-  auto side = (right_side ? DDGMM_SIDE_RIGHT : DDGMM_SIDE_LEFT);
-// Ddgmm(side,
-//    m, n,
-//    A.data(), lda,
-//    x.data(), incx,
-//    B.data(), ldb);
+  DDGMM_SIDE side = (right_side ? DDGMM_SIDE_RIGHT : DDGMM_SIDE_LEFT);
+  Ddgmm(side,
+     m, n,
+     A.data(), lda,
+     x.data(), incx,
+     B.data(), ldb);
 }
 
 template <> 
@@ -90,7 +90,16 @@ void Blas_Wrapper<std::vector, std::allocator>::transform_multiplies(const vecto
 
 
 #ifdef HAVE_CUDA
-/*
+template <> 
+Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Blas_Wrapper() {
+  cublasCreate(&handle);
+}
+
+template <> 
+Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::~Blas_Wrapper() {
+  cublasDestroy(handle);
+}
+
 template <> 
 void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(bool TransA, bool TransB, 
       size_t m, size_t n, size_t k, 
@@ -99,16 +108,16 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(bool T
       const vector_double& B, size_t ldb,
       double beta,
       vector_double& C, size_t ldc) {
-  auto TA = (TransA ? CblasTrans : CblasNoTrans);
-  auto TB = (TransB ? CblasTrans : CblasNoTrans);
-  cblas_dgemm(CblasColMajor,
+  auto TA = (TransA ? CUBLAS_OP_T : CUBLAS_OP_N);
+  auto TB = (TransB ? CUBLAS_OP_T : CUBLAS_OP_N);
+  cublasDgemm(handle,
       TA, TB,
       m, n, k,
-      alpha,
-      A.data(), lda,
-      B.data(), ldb,
-      beta,
-      C.data(), ldc);
+      &alpha,
+      A.data().get(), lda,
+      B.data().get(), ldb,
+      &beta,
+      C.data().get(), ldc);
 }
 
 template <> 
@@ -119,28 +128,29 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemv(bool T
     const vector_double& x, size_t incx,
     double beta,
     vector_double& y, size_t incy) {
-  auto T = (Trans ? CblasTrans : CblasNoTrans);
-  cblas_dgemv(CblasColMajor,
+  auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
+  cublasDgemv(handle,
       T,
       m, n,
-      alpha,
-      A.data(), lda,
-      x.data(), incx,
-      beta,
-      y.data(), incy);
+      &alpha,
+      A.data().get(), lda,
+      x.data().get(), incx,
+      &beta,
+      y.data().get(), incy);
 }
 
-template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Ddgmm(bool right_side,
+template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddgmm(bool right_side,
       size_t m, size_t n,
       const vector_double& A, size_t lda,
       const vector_double& x, size_t incx,
       vector_double& B, size_t ldb) {
-  auto side = (right_side ? DDGMM_SIDE_RIGHT : DDGMM_SIDE_LEFT);
-  Ddgmm(side,
+  auto side = (right_side ? CUBLAS_SIDE_RIGHT : CUBLAS_SIDE_LEFT);
+  cublasDdgmm(handle,
+      side,
       m, n,
-      A.data(), lda,
-      x.data(), incx,
-      B.data(), ldb);
+      A.data().get(), lda,
+      x.data().get(), incx,
+      B.data().get(), ldb);
 }
 
 template <> 
@@ -148,10 +158,10 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddot(size_t 
     const vector_double& X, size_t incx,
     const vector_double& Y, size_t incy, 
     double *result) {
-// cublas_Ddot(N,
-//     X.data(), incx,
-//     Y.data(), incy,
-//     result);
+  cublasDdot(handle, N,
+      X.data().get(), incx,
+      Y.data().get(), incy,
+      result);
 };
 
 template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::transform_multiplies(const vector_double& A, 
@@ -159,6 +169,5 @@ template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::
       vector_double& C) {
   thrust::transform(A.begin(), A.end(), B.begin(), C.begin(), thrust::multiplies<double>());
 }
-*/
 #endif
 

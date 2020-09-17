@@ -55,8 +55,6 @@ set(source
   basis/shell.cpp
   basis/shell.h
   basis/wavefunction.h
-  blas_calls.cpp
-  blas_calls.h
   control_variate.cpp
   control_variate.h
   main.cpp
@@ -69,9 +67,9 @@ set(source
   qc_random.cpp
   qc_random.h
   timer.h
-  MCMP/blas_wrapper.cpp
 )
 
+add_subdirectory(blas_wrapper)
 add_subdirectory(geometry)
 add_subdirectory(electron_generators)
 add_subdirectory(tau_generators)
@@ -89,12 +87,14 @@ add_executable(MC_MPn_Direct ${source} ${CPU_SPECIFIC_SOURCES})
 
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
+target_link_libraries(MC_MPn_Direct blas_wrapper)
 target_link_libraries(MC_MPn_Direct geometry)
 target_link_libraries(MC_MPn_Direct electron_generators)
 target_link_libraries(MC_MPn_Direct tau)
 
 target_include_directories(MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
 target_include_directories(MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
+target_include_directories(MC_MPn_Direct PUBLIC ./blas_wrapper)
 target_include_directories(MC_MPn_Direct PUBLIC ./geometry)
 target_include_directories(MC_MPn_Direct PUBLIC ./tau_generators)
 target_include_directories(MC_MPn_Direct PUBLIC ./electron_generators)
@@ -117,7 +117,8 @@ if(${Enable_CUDA})
     ovps_set.cu
     qc_ovps.cu
   )
-  set_source_files_properties(MCMP/blas_wrapper.cpp PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(MCMP/mp3_functional.cpp
+    PROPERTIES LANGUAGE CUDA)
 
 
   add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})
@@ -127,15 +128,17 @@ if(${Enable_CUDA})
   target_link_libraries(GPU_MC_MPn_Direct ${ARMADILLO_LIBRARIES})
   target_link_libraries(GPU_MC_MPn_Direct ${BLAS_LIBRARIES})
   target_link_libraries(GPU_MC_MPn_Direct ${CUBLAS_LIBRARIES})
+  target_link_libraries(GPU_MC_MPn_Direct blas_wrapper)
   target_link_libraries(GPU_MC_MPn_Direct geometry)
   target_link_libraries(GPU_MC_MPn_Direct electron_generators)
   target_link_libraries(GPU_MC_MPn_Direct tau)
 
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${ARMADILLO_INCLUDE_DIRS})
   target_include_directories(GPU_MC_MPn_Direct PUBLIC ${BLAS_INCLUDE_DIRS})
-  target_include_directories(GPU_MC_MPn_Direct PUBLIC geometry)
-  target_include_directories(GPU_MC_MPn_Direct PUBLIC electron_generators)
-  target_include_directories(GPU_MC_MPn_Direct PUBLIC tau_generators)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./blas_wrapper)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./geometry)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./electron_generators)
+  target_include_directories(GPU_MC_MPn_Direct PUBLIC ./tau_generators)
 
   IF(${MPI_CXX_FOUND})
     message("Adding MPI compile options to GPU_MC_MPn_Direct")

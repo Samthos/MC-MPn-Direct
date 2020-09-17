@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "cblas.h"
-#include "../blas_calls.h"
+#include "blas_calls.h"
 #include "../qc_monte.h"
 #include "qc_mcgf3.h"
 

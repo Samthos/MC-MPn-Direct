@@ -107,15 +107,15 @@ namespace {
     for (auto stop = 0; stop < this->ovps_fixture.ovps.o_set.size(); stop++) {
       for (auto start = 0; start < this->ovps_fixture.ovps.o_set[stop].size(); start++) {
         int n_tau = 1 + stop - start;
-        this->check( 1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_11), this->array_name('o', stop, start, 11));
-      // this->check(-1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_12), this->array_name('o', stop, start, 12));
-      // this->check(-1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_21), this->array_name('o', stop, start, 21));
-      // this->check( 1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2,  n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_22), this->array_name('o', stop, start, 22));
-      //                 
-      // this->check( 1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_11), this->array_name('v', stop, start, 11));
-      // this->check(-1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_12), this->array_name('v', stop, start, 12));
-      // this->check(-1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_21), this->array_name('v', stop, start, 21));
-      // this->check( 1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, -n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_22), this->array_name('v', stop, start, 22));
+        this->check( 1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2, n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_11), this->array_name('o', stop, start, 11));
+        this->check(-1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2, n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_12), this->array_name('o', stop, start, 12));
+        this->check(-1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2, n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_21), this->array_name('o', stop, start, 21));
+        this->check( 1, this->ovps_fixture.movecs->iocc1, this->ovps_fixture.movecs->iocc2, n_tau, get_vector(this->ovps_fixture.ovps.o_set[stop][start].s_22), this->array_name('o', stop, start, 22));
+                        
+        this->check( 1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_11), this->array_name('v', stop, start, 11));
+        this->check(-1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_12), this->array_name('v', stop, start, 12));
+        this->check(-1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_21), this->array_name('v', stop, start, 21));
+        this->check( 1, this->ovps_fixture.movecs->ivir1, this->ovps_fixture.movecs->ivir2, n_tau, get_vector(this->ovps_fixture.ovps.v_set[stop][start].s_22), this->array_name('v', stop, start, 22));
       }
     }
   }

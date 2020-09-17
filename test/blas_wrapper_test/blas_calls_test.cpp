@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-#include "../../src/blas_calls.h"
+#include "blas_calls.h"
 
 
 namespace {

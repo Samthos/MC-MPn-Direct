@@ -106,8 +106,8 @@ namespace {
     auto ivir1 = this->ovps_set_fixture.ivir1;
     auto ivir2 = this->ovps_set_fixture.ivir2;
     this->check( 1, ivir1, ivir2, get_vector(this->ovps_set_fixture.ovps_set.s_11), "s_11");
-    //this->check(-1, ivir1, ivir2, get_vector(this->ovps_set_fixture.ovps_set.s_12), "s_12");
-    //this->check(-1, ivir1, ivir2, get_vector(this->ovps_set_fixture.ovps_set.s_21), "s_21");
-    //this->check( 1, ivir1, ivir2, get_vector(this->ovps_set_fixture.ovps_set.s_22), "s_22");
+    this->check(-1, ivir1, ivir2, get_vector(this->ovps_set_fixture.ovps_set.s_12), "s_12");
+    this->check(-1, ivir1, ivir2, get_vector(this->ovps_set_fixture.ovps_set.s_21), "s_21");
+    this->check( 1, ivir1, ivir2, get_vector(this->ovps_set_fixture.ovps_set.s_22), "s_22");
   }
 }

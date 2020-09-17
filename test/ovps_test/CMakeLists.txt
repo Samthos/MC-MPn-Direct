@@ -5,13 +5,13 @@ add_executable(ovps_set_test.x
   ../test_helper.h
   ../../src/ovps_set.cu
   ../../src/ovps_set.h
-  ../../src/blas_calls.h
-  ../../src/blas_calls.cpp
 )
 set_target_properties(ovps_set_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(ovps_set_test.x gtest_main)
 target_link_libraries(ovps_set_test.x ${BLAS_LIBRARIES})
 target_link_libraries(ovps_set_test.x ${CUBLAS_LIBRARIES})
+target_link_libraries(ovps_set_test.x blas_wrapper)
+target_include_directories(ovps_set_test.x PRIVATE ../../src/blas_wrapper)
 target_include_directories(ovps_set_test.x PRIVATE ${BLAS_INCLUDE_DIRS})
 target_compile_definitions(ovps_set_test.x PRIVATE -DHAVE_CUDA)
 add_test(NAME ovps_set_test COMMAND ovps_set_test.x)
@@ -26,8 +26,6 @@ add_executable(ovps_test.x
   ../../src/basis/movec_parser.h
   ../../src/basis/wavefunction.cu
   ../../src/basis/wavefunction.h
-  ../../src/blas_calls.cpp
-  ../../src/blas_calls.h
   ../../src/ovps_set.cu
   ../../src/ovps_set.h
   ../../src/qc_mpi.cpp
@@ -42,6 +40,8 @@ target_link_libraries(ovps_test.x gtest_main)
 target_link_libraries(ovps_test.x ${BLAS_LIBRARIES})
 target_link_libraries(ovps_test.x ${CUBLAS_LIBRARIES})
 target_link_libraries(ovps_test.x tau)
+target_link_libraries(ovps_test.x blas_wrapper)
+target_include_directories(ovps_test.x PRIVATE ../../src/blas_wrapper)
 target_include_directories(ovps_test.x PRIVATE ${BLAS_INCLUDE_DIRS})
 target_include_directories(ovps_test.x PRIVATE ../../src/tau_generators)
 target_include_directories(ovps_test.x PRIVATE ../../src/geometry)

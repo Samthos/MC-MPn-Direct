@@ -7,7 +7,7 @@
 #include <array>
 
 #include "cblas.h"
-#include "../blas_calls.h"
+#include "blas_calls.h"
 
 #include "F12_Traces.h"
 

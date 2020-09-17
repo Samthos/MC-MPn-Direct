@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "cblas.h"
-#include "../blas_calls.h"
+#include "blas_calls.h"
 #include "../qc_monte.h"
 
 void GF::mc_gf_statistics(int step,

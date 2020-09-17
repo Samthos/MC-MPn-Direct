@@ -15,8 +15,6 @@ add_executable(mp2_functional_test.x
   ../../src/basis/movec_parser.h
   ../../src/basis/wavefunction.cu
   ../../src/basis/wavefunction.h
-  ../../src/blas_calls.cpp
-  ../../src/blas_calls.h
   ../../src/ovps_set.cu
   ../../src/ovps_set.h
   ../../src/qc_mpi.cpp
@@ -33,6 +31,8 @@ target_link_libraries(mp2_functional_test.x electron_generators)
 target_link_libraries(mp2_functional_test.x tau)
 target_link_libraries(mp2_functional_test.x ${BLAS_LIBRARIES})
 target_link_libraries(mp2_functional_test.x ${CUBLAS_LIBRARIES})
+target_link_libraries(mp2_functional_test.x blas_wrapper)
+target_include_directories(mp2_functional_test.x PRIVATE ../../src/blas_wrapper)
 target_include_directories(mp2_functional_test.x PRIVATE ${BLAS_INCLUDE_DIRS})
 target_include_directories(mp2_functional_test.x PRIVATE ../../src/geometry)
 target_include_directories(mp2_functional_test.x PRIVATE ../../src/tau_generators)

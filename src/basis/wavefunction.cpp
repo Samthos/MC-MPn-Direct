@@ -1,7 +1,6 @@
 #include <vector>
 
 #include "cblas.h"
-#include "../blas_calls.h"
 
 #include "wavefunction.h"
 

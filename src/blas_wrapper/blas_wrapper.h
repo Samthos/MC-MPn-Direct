@@ -22,7 +22,7 @@ class Blas_Wrapper {
       const vector_double& B, size_t ldb,
       double beta,
       vector_double& C, size_t ldc);
-  void Ddgmm(bool right_side,
+  void ddgmm(bool right_side,
       size_t m, size_t n,
       const vector_double& A, size_t lda,
       const vector_double& x, size_t incx,
@@ -59,7 +59,7 @@ void Blas_Wrapper<std::vector, std::allocator>::dgemm(
     vector_double& C, size_t ldc);
 
 template <>
-void Blas_Wrapper<std::vector, std::allocator>::Ddgmm(
+void Blas_Wrapper<std::vector, std::allocator>::ddgmm(
     bool right_side,
     size_t m, size_t n,
     const vector_double& A, size_t lda,
@@ -106,7 +106,7 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(
     vector_double& C, size_t ldc);
 
 template <> 
-void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Ddgmm(
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddgmm(
     bool right_side,
     size_t m, size_t n,
     const vector_double& A, size_t lda,
