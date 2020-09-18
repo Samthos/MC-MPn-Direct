@@ -18,7 +18,7 @@ class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vecto
 
  private:
   void prep_arrays(OVPS_Type&, Electron_Pair_List_Type*);
-  void cv_energy_helper(int, const vector_double&, const vector_double&);
+  void cv_energy_helper(int, const vector_double&);
 
   int vector_size;
   int matrix_size;

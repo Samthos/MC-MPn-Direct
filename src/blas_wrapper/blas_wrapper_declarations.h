@@ -9,6 +9,16 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemm(
     vector_double& C, size_t ldc);
 
 template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemm(
+    bool TransA, bool TransB, 
+    size_t m, size_t n, size_t k, 
+    double alpha,
+    const vector_double& A, size_t offset_a, size_t lda,
+    const vector_double& B, size_t offset_b, size_t ldb,
+    double beta,
+    vector_double& C, size_t offset_c, size_t ldc);
+
+template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::ddgmm(
     bool right_side,
     size_t m, size_t n,
@@ -39,15 +49,13 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dscal(size_t N,
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::multiplies(
-    const vector_double& A, 
-    const vector_double& B, 
-    vector_double& C);
+    const_iterator first1, const_iterator last1,
+    const_iterator first2, iterator result);
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::minus(
-    const vector_double& A, 
-    const vector_double& B, 
-    vector_double& C);
+    const_iterator first1, const_iterator last1,
+    const_iterator first2, iterator result);
 
 template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::Blas_Wrapper();
 template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::~Blas_Wrapper();

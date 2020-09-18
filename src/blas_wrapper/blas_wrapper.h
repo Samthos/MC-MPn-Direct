@@ -11,6 +11,8 @@
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Blas_Wrapper {
   typedef Container<double, Allocator<double>> vector_double;
+  typedef typename vector_double::iterator iterator;
+  typedef typename vector_double::const_iterator const_iterator;
 
  public:
   Blas_Wrapper();
@@ -22,6 +24,13 @@ class Blas_Wrapper {
       const vector_double& B, size_t ldb,
       double beta,
       vector_double& C, size_t ldc);
+  void dgemm(bool TransA, bool TransB, 
+      size_t m, size_t n, size_t k, 
+      double alpha,
+      const vector_double& A, size_t offset_a, size_t lda,
+      const vector_double& B, size_t offset_b, size_t ldb,
+      double beta,
+      vector_double& C, size_t offset_c, size_t ldc);
   void ddgmm(bool right_side,
       size_t m, size_t n,
       const vector_double& A, size_t lda,
@@ -40,12 +49,10 @@ class Blas_Wrapper {
   double ddot(size_t N, 
       const vector_double& X, size_t incx,
       const vector_double& Y, size_t incy);
-  void multiplies(const vector_double& A, 
-      const vector_double& B, 
-      vector_double& C);
-  void minus(const vector_double& A, 
-      const vector_double& B, 
-      vector_double& C);
+  void multiplies(const_iterator first1, const_iterator last1,
+      const_iterator first2, iterator result);
+  void minus(const_iterator first1, const_iterator last1,
+      const_iterator first2, iterator result);
 
  private:
 #ifdef HAVE_CUDA

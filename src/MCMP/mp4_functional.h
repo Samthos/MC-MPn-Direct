@@ -103,8 +103,8 @@ class MP4_Functional : public Standard_MP_Functional<std::vector, std::allocator
   void mcmp4_energy_ijkl_fast(double& emp4, std::vector<double>& control, const OVPS_Host& ovps);
 
   int mpn;
-  std::vector<double> rv;
-  std::vector<double> wgt;
+  std::vector<double>* rv;
+  std::vector<double>* inverse_weight;
   std::vector<double> r_r;
   std::vector<double> r_w;
   std::vector<double> w_w;

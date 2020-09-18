@@ -41,6 +41,7 @@ class Electron_Pair_List {
   vector_double wgt;
   vector_double inverse_weight;
   vector_double rv;
+  vector_double rv_inverse_weight;
   vector_double r12;
 
  protected:

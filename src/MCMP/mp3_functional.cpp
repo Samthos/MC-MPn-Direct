@@ -28,8 +28,8 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
     vector_double& rv, vector_double& wgt) {
 
   // build ij jk intermetiates
-  this->blas_wrapper.multiplies(A_ij_1, A_ij_2, A_ij);
-  this->blas_wrapper.multiplies(A_jk_1, A_jk_2, A_jk);
+  this->blas_wrapper.multiplies(A_ij_1.begin(), A_ij_1.end(), A_ij_2.begin(), A_ij.begin());
+  this->blas_wrapper.multiplies(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin());
 
   // rescale jk with rv
   this->blas_wrapper.ddgmm(true,
@@ -47,8 +47,8 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
       0.0,
       A_ik, electron_pairs);
   // scale A_ik by ik_1 and ik_2
-  this->blas_wrapper.multiplies(A_ik, A_ik_1, A_ik);
-  this->blas_wrapper.multiplies(A_ik, A_ik_2, A_ik);
+  this->blas_wrapper.multiplies(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin());
+  this->blas_wrapper.multiplies(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin());
 
   // A_ik . rv
   this->blas_wrapper.dgemv(true,
@@ -78,7 +78,7 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
 
   if (CVMP3 >= 3) {
     // recompute A_jk
-    this->blas_wrapper.multiplies(A_jk_1, A_jk_2, A_jk);
+    this->blas_wrapper.multiplies(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin());
 
     // scale A_jk by wgt
     this->blas_wrapper.ddgmm(true,
@@ -97,8 +97,8 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
         A_ik, electron_pairs);
 
     // scale A_ik by ik_1 and ik_2
-    this->blas_wrapper.multiplies(A_ik, A_ik_1, A_ik);
-    this->blas_wrapper.multiplies(A_ik, A_ik_2, A_ik);
+    this->blas_wrapper.multiplies(A_ik.begin(), A_ik.end(), A_ik_1.begin(), A_ik.begin());
+    this->blas_wrapper.multiplies(A_ik.begin(), A_ik.end(), A_ik_2.begin(), A_ik.begin());
 
     // A_ik . rv
     this->blas_wrapper.dgemv(true,

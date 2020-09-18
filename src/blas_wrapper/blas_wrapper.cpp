@@ -39,6 +39,26 @@ void Blas_Wrapper<std::vector, std::allocator>::dgemm(bool TransA, bool TransB,
 }
 
 template <> 
+void Blas_Wrapper<std::vector, std::allocator>::dgemm(bool TransA, bool TransB, 
+      size_t m, size_t n, size_t k, 
+      double alpha,
+      const vector_double& A, size_t offset_a, size_t lda,
+      const vector_double& B, size_t offset_b, size_t ldb,
+      double beta,
+      vector_double& C, size_t offset_c, size_t ldc) {
+  auto TA = (TransA ? CblasTrans : CblasNoTrans);
+  auto TB = (TransB ? CblasTrans : CblasNoTrans);
+  cblas_dgemm(CblasColMajor,
+      TA, TB,
+      m, n, k,
+      alpha,
+      A.data() + offset_a, lda,
+      B.data() + offset_b, ldb,
+      beta,
+      C.data() + offset_c, ldc);
+}
+
+template <> 
 void Blas_Wrapper<std::vector, std::allocator>::dgemv(bool Trans, 
     size_t m, size_t n,
     double alpha,
@@ -59,10 +79,10 @@ void Blas_Wrapper<std::vector, std::allocator>::dgemv(bool Trans,
 
 template <>
 void Blas_Wrapper<std::vector, std::allocator>::ddgmm(bool right_side,
-      size_t m, size_t n,
-      const vector_double& A, size_t lda,
-      const vector_double& x, size_t incx,
-      vector_double& B, size_t ldb) {
+    size_t m, size_t n,
+    const vector_double& A, size_t lda,
+    const vector_double& x, size_t incx,
+    vector_double& B, size_t ldb) {
   DDGMM_SIDE side = (right_side ? DDGMM_SIDE_RIGHT : DDGMM_SIDE_LEFT);
   Ddgmm(side,
      m, n,
@@ -92,17 +112,17 @@ void Blas_Wrapper<std::vector, std::allocator>::dscal(size_t N,
 };
 
 template <> 
-void Blas_Wrapper<std::vector, std::allocator>::multiplies(const vector_double& A, 
-      const vector_double& B, 
-      vector_double& C) {
-  std::transform(A.begin(), A.end(), B.begin(), C.begin(), std::multiplies<>());
+void Blas_Wrapper<std::vector, std::allocator>::multiplies(
+    const_iterator first1, const_iterator last1,
+    const_iterator first2, iterator result) {
+  std::transform(first1, last1, first2, result, std::multiplies<>());
 }
 
 template <> 
-void Blas_Wrapper<std::vector, std::allocator>::minus(const vector_double& A, 
-      const vector_double& B, 
-      vector_double& C) {
-  std::transform(A.begin(), A.end(), B.begin(), C.begin(), std::minus<>());
+void Blas_Wrapper<std::vector, std::allocator>::minus(
+    const_iterator first1, const_iterator last1,
+    const_iterator first2, iterator result) {
+  std::transform(first1, last1, first2, result, std::minus<>());
 }
 
 
@@ -135,6 +155,26 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(bool T
       B.data().get(), ldb,
       &beta,
       C.data().get(), ldc);
+}
+
+template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(bool TransA, bool TransB, 
+      size_t m, size_t n, size_t k, 
+      double alpha,
+      const vector_double& A, size_t offset_a, size_t lda,
+      const vector_double& B, size_t offset_b, size_t ldb,
+      double beta,
+      vector_double& C, size_t offset_c, size_t ldc) {
+  auto TA = (TransA ? CUBLAS_OP_T : CUBLAS_OP_N);
+  auto TB = (TransB ? CUBLAS_OP_T : CUBLAS_OP_N);
+  cublasDgemm(handle,
+      TA, TB,
+      m, n, k,
+      &alpha,
+      A.data().get() + offset_a, lda,
+      B.data().get() + offset_b, ldb,
+      &beta,
+      C.data().get() + offset_c, ldc);
 }
 
 template <> 
@@ -182,16 +222,18 @@ double Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddot(size_
   return result;
 };
 
-template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::multiplies(const vector_double& A, 
-      const vector_double& B, 
-      vector_double& C) {
-  thrust::transform(A.begin(), A.end(), B.begin(), C.begin(), thrust::multiplies<double>());
+template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::multiplies(
+    const_iterator first1, const_iterator last1,
+    const_iterator first2, iterator result) {
+  thrust::transform(first1, last1, first2, result, thrust::multiplies<double>());
 }
 
-template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::minus(const vector_double& A, 
-      const vector_double& B, 
-      vector_double& C) {
-  thrust::transform(A.begin(), A.end(), B.begin(), C.begin(), thrust::minus<double>());
+template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::minus(
+    const_iterator first1, const_iterator last1,
+    const_iterator first2, iterator result) {
+  thrust::transform(first1, last1, first2, result, thrust::minus<double>());
 }
 #endif
 

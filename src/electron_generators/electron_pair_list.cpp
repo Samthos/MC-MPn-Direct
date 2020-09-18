@@ -25,6 +25,7 @@ Electron_Pair_List<Container, Allocator>::Electron_Pair_List(int size) :
     wgt(size),
     inverse_weight(size),
     rv(size),
+    rv_inverse_weight(size * 2),
     r12(size) {}
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
@@ -54,7 +55,8 @@ Electron_Pair_List<thrust::device_vector, thrust::device_allocator>::Electron_Pa
     pos2(size),
     wgt(size),
     inverse_weight(size),
-    rv(size * 2),
+    rv(size),
+    rv_inverse_weight(size * 2),
     r12(size),
     m_pos1(size),
     m_pos2(size),
@@ -79,6 +81,9 @@ void Electron_Pair_List<thrust::device_vector, thrust::device_allocator>::transp
   thrust::copy(m_inverse_weight.begin(), m_inverse_weight.end(), inverse_weight.begin());
   thrust::copy(m_rv.begin(), m_rv.end(), rv.begin());
   thrust::copy(m_r12.begin(), m_r12.end(), r12.begin());
-  thrust::copy(m_inverse_weight.begin(), m_inverse_weight.end(), rv.begin() + inverse_weight.size());
+
+
+  thrust::copy(rv.begin(), rv.end(), rv_inverse_weight.begin());
+  thrust::copy(inverse_weight.begin(), inverse_weight.end(), rv_inverse_weight.begin() + inverse_weight.size());
 }
 #endif
