@@ -117,8 +117,10 @@ if(${Enable_CUDA})
     ovps_set.cu
     qc_ovps.cu
   )
-  set_source_files_properties(MCMP/mp3_functional.cpp
-    PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(
+      MCMP/mp3_functional.cpp
+      MCMP/mp4_functional.cpp
+      PROPERTIES LANGUAGE CUDA)
 
 
   add_executable(GPU_MC_MPn_Direct ${source} ${GPU_SPECIFIC_SOURCES})

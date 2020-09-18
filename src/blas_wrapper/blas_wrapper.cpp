@@ -223,6 +223,16 @@ double Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddot(size_
 };
 
 template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dscal(size_t N, 
+    double alpha,
+    vector_double& X, size_t incx) { 
+  cublasDscal(handle,
+      N,
+      &alpha,
+      X.data().get(), incx);
+};
+
+template <> 
 void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::multiplies(
     const_iterator first1, const_iterator last1,
     const_iterator first2, iterator result) {

@@ -5,6 +5,7 @@
 #ifndef MC_MP2_DIRECT_CONTROL_VARIATE_H
 #define MC_MP2_DIRECT_CONTROL_VARIATE_H
 
+#define ARMA_ALLOW_FAKE_GCC
 #define ARMA_DONT_PRINT_ERRORS
 
 #include <functional>
