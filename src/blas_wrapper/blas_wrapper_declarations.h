@@ -37,6 +37,16 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemv(
     vector_double& y, size_t);
 
 template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemv(
+    bool Trans, 
+    size_t m, size_t n,
+    double alpha,
+    const vector_double& A, size_t offset_a, size_t lda,
+    const vector_double& x, size_t offset_x, size_t incx,
+    double beta,
+    vector_double& y, size_t offset_y, size_t);
+
+template <>
 double Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::ddot(
     size_t N, 
     const vector_double& X, size_t incx,
@@ -46,6 +56,14 @@ template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dscal(size_t N,
     double alpha,
     vector_double& X, size_t incx);
+
+template <>
+double Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::asum(
+    size_t N, const vector_double& X, size_t offset_x, size_t incx);
+
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::fill(
+    iterator first1, iterator last1, double value);
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::multiplies(

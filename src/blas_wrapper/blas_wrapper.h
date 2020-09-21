@@ -31,6 +31,7 @@ class Blas_Wrapper {
       const vector_double& B, size_t offset_b, size_t ldb,
       double beta,
       vector_double& C, size_t offset_c, size_t ldc);
+
   void ddgmm(bool right_side,
       size_t m, size_t n,
       const vector_double& A, size_t lda,
@@ -43,12 +44,24 @@ class Blas_Wrapper {
       const vector_double& x, size_t incx,
       double beta,
       vector_double& y, size_t);
+  void dgemv(bool Trans, 
+      size_t m, size_t n,
+      double alpha,
+      const vector_double& A, size_t offset_a, size_t lda,
+      const vector_double& x, size_t offset_x, size_t incx,
+      double beta,
+      vector_double& y, size_t offset_y, size_t);
+
   void dscal(size_t N,
       double alpha,
       vector_double& X, size_t incx);
   double ddot(size_t N, 
       const vector_double& X, size_t incx,
       const vector_double& Y, size_t incy);
+  double asum(size_t N, const vector_double& X, size_t offset_x, size_t incx);
+
+
+  void fill(iterator first1, iterator last1, double value);
   void multiplies(const_iterator first1, const_iterator last1,
       const_iterator first2, iterator result);
   void minus(const_iterator first1, const_iterator last1,

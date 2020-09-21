@@ -45,6 +45,8 @@ void Electron_Pair_List<Container, Allocator>::transpose() {
     rv[i] = electron_pairs[i].rv;
     r12[i] = electron_pairs[i].r12;
   }
+  std::copy(rv.begin(), rv.end(), rv_inverse_weight.begin());
+  std::copy(inverse_weight.begin(), inverse_weight.end(), rv_inverse_weight.begin() + inverse_weight.size());
 }
 
 #ifdef HAVE_CUDA

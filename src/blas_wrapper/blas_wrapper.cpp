@@ -77,6 +77,25 @@ void Blas_Wrapper<std::vector, std::allocator>::dgemv(bool Trans,
       y.data(), incy);
 }
 
+template <> 
+void Blas_Wrapper<std::vector, std::allocator>::dgemv(bool Trans, 
+    size_t m, size_t n,
+    double alpha,
+    const vector_double& A, size_t offset_a, size_t lda,
+    const vector_double& x, size_t offset_x, size_t incx,
+    double beta,
+    vector_double& y, size_t offset_y, size_t incy) {
+  auto T = (Trans ? CblasTrans : CblasNoTrans);
+  cblas_dgemv(CblasColMajor,
+      T,
+      m, n,
+      alpha,
+      A.data() + offset_a, lda,
+      x.data() + offset_x, incx,
+      beta,
+      y.data() + offset_y, incy);
+}
+
 template <>
 void Blas_Wrapper<std::vector, std::allocator>::ddgmm(bool right_side,
     size_t m, size_t n,
@@ -110,6 +129,12 @@ void Blas_Wrapper<std::vector, std::allocator>::dscal(size_t N,
       alpha,
       X.data(), incx);
 };
+
+template <> 
+void Blas_Wrapper<std::vector, std::allocator>::fill(
+    iterator first1, iterator last1, double value) {
+  std::fill(first1, last1, value);
+}
 
 template <> 
 void Blas_Wrapper<std::vector, std::allocator>::multiplies(
@@ -196,6 +221,25 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemv(bool T
       y.data().get(), incy);
 }
 
+template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemv(bool Trans, 
+    size_t m, size_t n,
+    double alpha,
+    const vector_double& A, size_t offset_a, size_t lda,
+    const vector_double& x, size_t offset_x, size_t incx,
+    double beta,
+    vector_double& y, size_t offset_y, size_t incy) {
+  auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
+  cublasDgemv(handle,
+      T,
+      m, n,
+      &alpha,
+      A.data().get() + offset_a, lda,
+      x.data().get() + offset_x, incx,
+      &beta,
+      y.data().get() + offset_y, incy);
+}
+
 template <> void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::ddgmm(bool right_side,
       size_t m, size_t n,
       const vector_double& A, size_t lda,
@@ -231,6 +275,12 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dscal(size_t
       &alpha,
       X.data().get(), incx);
 };
+
+template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::fill(
+    iterator first1, iterator last1, double value) {
+  thrust::fill(first1, last1, value);
+}
 
 template <> 
 void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::multiplies(
