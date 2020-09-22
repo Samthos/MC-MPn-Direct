@@ -18,18 +18,21 @@ class MP3_Functional : public Standard_MP_Functional<Container, Allocator> {
 
  private:
   void mcmp3_helper(
-    const int offset,
-    unsigned int electron_pairs, double constant,
+    const int offset, double constant,
     vector_double& A_ij_1, vector_double& A_ij_2,
     vector_double& A_ik_1, vector_double& A_ik_2,
     vector_double& A_jk_1, vector_double& A_jk_2,
     vector_double& rv, vector_double& wgt);
 
+  void call_helper(OVPS_Type& ovps, vector_double& j_op, vector_double& k_op, int offset);
+
+  int electron_pairs;
   vector_double A_ij;
   vector_double A_ik;
   vector_double A_jk;
   vector_double A_i;
   vector_double A;
+  vector_double ctrl;
 };
 
 template class MP3_Functional<0, std::vector, std::allocator>;
