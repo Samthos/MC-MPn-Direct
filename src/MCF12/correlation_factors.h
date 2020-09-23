@@ -5,6 +5,7 @@
 #ifndef F12_METHODS_SRC_CORRELATION_FACTORS_H_
 #define F12_METHODS_SRC_CORRELATION_FACTORS_H_
 
+#include <memory>
 #include <vector>
 
 #include "../qc_input.h"
@@ -34,171 +35,149 @@ namespace CORRELATION_FACTORS {
   };
 }
 
-class Correlation_Factor {
- protected:
-  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List_Host Electron_List_Type;
-
+class ABC_Correlation_Factor {
  public:
-  Correlation_Factor(const IOPs& iops, double gamma_, double beta_);
-  virtual double calculate_f12(double r12) = 0;
-  virtual double calculate_f12_a(double r12) = 0;
-  virtual double calculate_f12_b(double r12) = 0;
-  virtual double calculate_f12_c(double r12) = 0;
-  virtual double calculate_f12_d(double r12) = 0;
+  ABC_Correlation_Factor(const IOPs& iops, double gamma_, double beta_);
+  virtual double f12(double r12) = 0;
+  virtual double f12_a(double r12) = 0;
+  virtual double f12_b(double r12) = 0;
+  virtual double f12_c(double r12) = 0;
+  virtual double f12_d(double r12) = 0;
   virtual bool f12_d_is_zero() = 0;
-
-  virtual void update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
-
-
-  // electron_pair arrays
-  std::vector<double> f12p;
-  std::vector<double> f12p_a;
-  std::vector<double> f12p_c;
-  
-  // electron electron arrays
-  std::vector<double> f12o;
-  std::vector<double> f12o_b;
-  std::vector<double> f12o_d;
-
-  // electron_pair electron arrays
-  std::vector<double> f13;
-  std::vector<double> f23;
 
  protected:
   double gamma, beta;
 };
-Correlation_Factor* create_correlation_factor(const IOPs& iops);
+ABC_Correlation_Factor* create_correlation_factor(const IOPs& iops);
 CORRELATION_FACTORS::CORRELATION_FACTORS string_to_correlation_factors(const std::string&);
 std::string correlation_factors_to_string(const CORRELATION_FACTORS::CORRELATION_FACTORS&);
 
-class Linear_Correlation_Factor : public Correlation_Factor {
+class Linear_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Linear_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {};
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Linear_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {};
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 0.0;
   static constexpr double default_beta  = 0.0;
 };
-class Rational_Correlation_Factor : public Correlation_Factor {
+class Rational_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Rational_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Rational_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
-class Slater_Correlation_Factor : public Correlation_Factor {
+class Slater_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Slater_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  void update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
+  Slater_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
   bool f12_d_is_zero() override;
  private:
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
-class Slater_Linear_Correlation_Factor : public Correlation_Factor {
+class Slater_Linear_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Slater_Linear_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Slater_Linear_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 0.5;
   static constexpr double default_beta  = 0.0;
 };
-class Gaussian_Correlation_Factor : public Correlation_Factor {
+class Gaussian_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Gaussian_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Gaussian_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 0.5;
   static constexpr double default_beta  = 0.0;
 };
-class Cusped_Gaussian_Correlation_Factor : public Correlation_Factor {
+class Cusped_Gaussian_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Cusped_Gaussian_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Cusped_Gaussian_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
-class Yukawa_Coulomb_Correlation_Factor : public Correlation_Factor {
+class Yukawa_Coulomb_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Yukawa_Coulomb_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Yukawa_Coulomb_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 2.0;
   static constexpr double default_beta  = 0.0;
 };
-class Jastrow_Correlation_Factor : public Correlation_Factor {
+class Jastrow_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Jastrow_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Jastrow_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
-class ERFC_Correlation_Factor : public Correlation_Factor {
+class ERFC_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  ERFC_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  ERFC_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   constexpr static double sqrt_pi = 1.7724538509055160273;
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
-class ERFC_Linear_Correlation_Factor : public Correlation_Factor {
+class ERFC_Linear_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  ERFC_Linear_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  ERFC_Linear_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   constexpr static double sqrt_pi = 1.7724538509055160273;
@@ -206,109 +185,138 @@ class ERFC_Linear_Correlation_Factor : public Correlation_Factor {
   static constexpr double default_gamma = 0.4;
   static constexpr double default_beta  = 0.0;
 };
-class Tanh_Correlation_Factor : public Correlation_Factor {
+class Tanh_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Tanh_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Tanh_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
-class ArcTan_Correlation_Factor : public Correlation_Factor {
+class ArcTan_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  ArcTan_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  ArcTan_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.6;
   static constexpr double default_beta  = 0.0;
 };
-class Logarithm_Correlation_Factor : public Correlation_Factor {
+class Logarithm_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Logarithm_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Logarithm_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 2.0;
   static constexpr double default_beta  = 0.0;
 };
-class Hybrid_Correlation_Factor : public Correlation_Factor {
+class Hybrid_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Hybrid_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Hybrid_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.0;
 };
-class Two_Parameter_Rational_Correlation_Factor : public Correlation_Factor {
+class Two_Parameter_Rational_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Two_Parameter_Rational_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Two_Parameter_Rational_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.0;
   static constexpr double default_beta  = 1.0;
 };
-class Higher_Rational_Correlation_Factor : public Correlation_Factor {
+class Higher_Rational_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Higher_Rational_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Higher_Rational_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.6;
   static constexpr double default_beta  = 3.0;
 };
-class Cubic_Slater_Correlation_Factor : public Correlation_Factor {
+class Cubic_Slater_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Cubic_Slater_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Cubic_Slater_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 1.2;
   static constexpr double default_beta  = 0.003;
 };
-class Higher_Jastrow_Correlation_Factor : public Correlation_Factor {
+class Higher_Jastrow_Correlation_Factor : public ABC_Correlation_Factor {
  public:
-  Higher_Jastrow_Correlation_Factor(const IOPs& iops) : Correlation_Factor(iops, default_gamma, default_beta) {}
-  double calculate_f12(double r12) override;
-  double calculate_f12_a(double r12) override;
-  double calculate_f12_b(double r12) override;
-  double calculate_f12_c(double r12) override;
-  double calculate_f12_d(double r12) override;
+  Higher_Jastrow_Correlation_Factor(const IOPs& iops) : ABC_Correlation_Factor(iops, default_gamma, default_beta) {}
+  double f12(double r12) override;
+  double f12_a(double r12) override;
+  double f12_b(double r12) override;
+  double f12_c(double r12) override;
+  double f12_d(double r12) override;
   bool f12_d_is_zero() override;
  private:
   static constexpr double default_gamma = 0.8;
   static constexpr double default_beta  = 0.75;
 };
 
+class Correlation_Factor {
+ protected:
+  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
+  typedef Electron_List_Host Electron_List_Type;
+  typedef std::vector<double> vector_double;
+
+ public:
+  Correlation_Factor(const IOPs& iops);
+  virtual void update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
+  bool f12_d_is_zero();
+
+
+  // electron_pair arrays
+  vector_double f12p;
+  vector_double f12p_a;
+  vector_double f12p_c;
+  
+  // electron electron arrays
+  vector_double f12o;
+  vector_double f12o_b;
+  vector_double f12o_d;
+
+  // electron_pair electron arrays
+  vector_double f13;
+  vector_double f23;
+
+ private:
+  std::shared_ptr<ABC_Correlation_Factor> m_correlation_factor;
+};
 #endif //F12_METHODS_SRC_CORRELATION_FACTORS_H_

@@ -16,16 +16,15 @@ GF2_F12_V::GF2_F12_V(IOPs& iops, std::string extension) :
     core_23(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_ip_jo(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
-    T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS])
+    T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
+    correlation_factor(new Correlation_Factor(iops))
 {
-  correlation_factor = create_correlation_factor(iops);
   nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);
   nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::ELECTRONS] - 1.0);
 }
 
 GF2_F12_V::~GF2_F12_V() {
-  delete correlation_factor;
 }
 
 void GF2_F12_V::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List_Type* electron_pair_list, Electron_List_Type* electron_list) {

@@ -53,7 +53,7 @@ class GF2_F12_V : public MCGF {
 
   F12_Traces traces;
   X_Traces x_traces;
-  Correlation_Factor* correlation_factor;
+  std::shared_ptr<Correlation_Factor> correlation_factor;
 
   std::vector<double> core_11p;
   std::vector<double> core_12p;

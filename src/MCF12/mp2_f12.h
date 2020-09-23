@@ -37,7 +37,7 @@ class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
   static constexpr double c2 = 2.0*a2-a1;
 
   F12_Traces traces;
-  Correlation_Factor* correlation_factor;
+  std::shared_ptr<Correlation_Factor> correlation_factor;
 
   std::vector<double> T_ip_io;
   std::vector<double> T_ip_jo;
