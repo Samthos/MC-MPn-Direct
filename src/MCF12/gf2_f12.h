@@ -12,7 +12,8 @@
 #include "../MCGF/qc_mcgf.h"
 #include "F12_Traces.h"
 #include "x_traces.h"
-#include "correlation_factors.h"
+
+#include "correlation_factor_data.h"
 
 class GF2_F12_V : public MCGF {
  protected: 
@@ -53,7 +54,7 @@ class GF2_F12_V : public MCGF {
 
   F12_Traces traces;
   X_Traces x_traces;
-  std::shared_ptr<Correlation_Factor> correlation_factor;
+  std::shared_ptr<Correlation_Factor_Data> correlation_factor;
 
   std::vector<double> core_11p;
   std::vector<double> core_12p;

@@ -17,7 +17,7 @@ GF2_F12_V::GF2_F12_V(IOPs& iops, std::string extension) :
     T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_ip_jo(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
-    correlation_factor(new Correlation_Factor(iops))
+    correlation_factor(new Correlation_Factor_Data(iops))
 {
   nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);

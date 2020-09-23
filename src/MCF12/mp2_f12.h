@@ -10,7 +10,7 @@
 #include "electron_list.h"
 #include "../MCMP/mp_functional.h"
 #include "F12_Traces.h"
-#include "correlation_factors.h"
+#include "correlation_factor_data.h"
 
 class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
  protected:
@@ -37,7 +37,7 @@ class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
   static constexpr double c2 = 2.0*a2-a1;
 
   F12_Traces traces;
-  std::shared_ptr<Correlation_Factor> correlation_factor;
+  std::shared_ptr<Correlation_Factor_Data> correlation_factor;
 
   std::vector<double> T_ip_io;
   std::vector<double> T_ip_jo;

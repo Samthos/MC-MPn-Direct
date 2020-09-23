@@ -7,7 +7,7 @@
 
 #include "qc_mpi.h"
 #include "qc_input.h"
-#include "MCF12/correlation_factors.h"
+#include "MCF12/correlation_factor.h"
 
 IOPs::IOPs() {
   /*
