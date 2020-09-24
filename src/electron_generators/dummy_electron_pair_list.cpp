@@ -10,6 +10,8 @@ Dummy_Electron_Pair_List<Container, Allocator>::Dummy_Electron_Pair_List(int siz
   NS::fill(this->wgt.begin(), this->wgt.end(), 1.0);
   NS::fill(this->inverse_weight.begin(), this->inverse_weight.end(), 1.0);
   NS::fill(this->rv.begin(), this->rv.end(), 1.0);
+  NS::copy(this->rv.begin(), this->rv.end(), this->rv_inverse_weight.begin());
+  NS::copy(this->inverse_weight.begin(), this->inverse_weight.end(), this->rv_inverse_weight.begin() + size);
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
