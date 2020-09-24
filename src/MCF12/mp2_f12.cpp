@@ -35,7 +35,12 @@ MP2_F12_V::MP2_F12_V(const IOPs& iops, std::string extension) :
     T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS], 0.0),
     T_ip_jo(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS], 0.0),
     T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS], 0.0),
-    correlation_factor(new Correlation_Factor_Data(iops))
+    correlation_factor(new Correlation_Factor_Data(
+          iops.iopns[KEYS::ELECTRONS],
+          iops.iopns[KEYS::ELECTRON_PAIRS],
+          static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iops.iopns[KEYS::F12_CORRELATION_FACTOR]),
+          iops.dopns[KEYS::F12_GAMMA],
+          iops.dopns[KEYS::F12_BETA]))
 {
   nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);

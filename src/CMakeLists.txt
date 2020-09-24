@@ -112,13 +112,14 @@ endif()
 
 if(${Enable_CUDA})
   set(GPU_SPECIFIC_SOURCES
+    MCF12/correlation_factor_function.cpp
     MCMP/device_mp2_functional.cu
     MCMP/device_mp2_functional.h
-    qc_monte.cu
     basis/atomic_orbital.cu
     basis/basis.cu
     basis/wavefunction.cu
     ovps_set.cu
+    qc_monte.cu
     qc_ovps.cu
   )
   set_source_files_properties(

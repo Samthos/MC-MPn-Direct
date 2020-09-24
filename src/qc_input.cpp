@@ -23,6 +23,8 @@ IOPs::IOPs() {
   bopns[KEYS::SPHERICAL] = true;
   bopns[KEYS::F12_GAMMA] = false;
   bopns[KEYS::F12_BETA] = false;
+  dopns[KEYS::F12_GAMMA] = -1;
+  dopns[KEYS::F12_BETA] = -1;
   bopns[KEYS::FREEZE_CORE] = true;
 
   dopns[KEYS::MC_DELX] = 0.1;

@@ -9,19 +9,29 @@
 
 #include "correlation_factor_data.h"
 
-Correlation_Factor_Data::Correlation_Factor_Data(const IOPs& iops) :
-    f12p(iops.iopns[KEYS::ELECTRON_PAIRS]),
-    f12p_a(iops.iopns[KEYS::ELECTRON_PAIRS]),
-    f12p_c(iops.iopns[KEYS::ELECTRON_PAIRS]),
-    f12o(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS], 0.0),
-    f12o_b(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS], 0.0),
-    f12o_d(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS], 0.0),
-    f13(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS], 0.0),
-    f23(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS], 0.0),
-    m_correlation_factor(create_correlation_factor_function(iops))
-{ }
+Correlation_Factor_Data::Correlation_Factor_Data(int electrons_in, 
+      int electron_pairs_in, 
+      CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_in,
+      double gamma_in,
+      double beta_in) :
+    f12p(electron_pairs_in),
+    f12p_a(electron_pairs_in),
+    f12p_c(electron_pairs_in),
+    f12o(electrons_in * electrons_in, 0.0),
+    f12o_b(electrons_in * electrons_in, 0.0),
+    f12o_d(electrons_in * electrons_in, 0.0),
+    f13(electron_pairs_in * electrons_in, 0.0),
+    f23(electron_pairs_in * electrons_in, 0.0),
+    correlation_factor(correlation_factor_in),
+    gamma(gamma_in),
+    beta(beta_in)
+{
+  auto m_correlation_factor = create_correlation_factor_function(correlation_factor, gamma, beta);
+  m_f12d_is_zero = m_correlation_factor->f12_d_is_zero();
+}
 
 void Correlation_Factor_Data::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+  auto m_correlation_factor = create_correlation_factor_function(correlation_factor, gamma, beta);
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     f12p[ip] = m_correlation_factor->f12(electron_pair_list->r12[ip]);
     f12p_a[ip] = m_correlation_factor->f12_a(electron_pair_list->r12[ip]);
@@ -52,9 +62,8 @@ void Correlation_Factor_Data::update(const Electron_Pair_List_Type* electron_pai
 }
 
 bool Correlation_Factor_Data::f12_d_is_zero() {
-  return m_correlation_factor->f12_d_is_zero();
+  return m_f12d_is_zero;
 }
-
 
 /*
 void Slater_Correlation_Factor_Data::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {

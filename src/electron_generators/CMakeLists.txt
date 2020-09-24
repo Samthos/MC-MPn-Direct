@@ -1,11 +1,12 @@
 set(source
-  direct_electron_pair_list.cpp
   direct_electron_list.cpp
+  direct_electron_pair_list.cpp
+  dummy_electron_list.cpp
   dummy_electron_pair_list.cpp
   electron_list.cpp
   electron_pair_list.cpp
-  metropolis_electron_pair_list.cpp
   metropolis_electron_list.cpp
+  metropolis_electron_pair_list.cpp
   weight_function.cpp
 )
 # direct_electron_pair_list.h
