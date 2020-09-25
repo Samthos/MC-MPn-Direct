@@ -1,12 +1,12 @@
 set(source
   MCF12/F12_Traces.cpp
   MCF12/F12_Traces.h
+  MCF12/correlation_factor.cpp
+  MCF12/correlation_factor.h
   MCF12/correlation_factor_data.cpp
   MCF12/correlation_factor_data.h
   MCF12/correlation_factor_function.cpp
   MCF12/correlation_factor_function.h
-  MCF12/correlation_factor.cpp
-  MCF12/correlation_factor.h
   MCF12/gf2_f12.cpp
   MCF12/gf2_f12.h
   MCF12/mp2_f12.cpp
@@ -62,11 +62,13 @@ set(source
   control_variate.cpp
   control_variate.h
   main.cpp
+  ovps_set.cpp
   ovps_set.h
   qc_input.cpp
   qc_monte.h
   qc_mpi.cpp
   qc_mpi.h
+  qc_ovps.cpp 
   qc_ovps.h
   qc_random.cpp
   qc_random.h
@@ -83,8 +85,6 @@ set(CPU_SPECIFIC_SOURCES
   basis/basis.cpp
   basis/wavefunction.cpp
   qc_monte.cpp
-  ovps_set.cpp
-  qc_ovps.cpp 
 )
 
 add_executable(MC_MPn_Direct ${source} ${CPU_SPECIFIC_SOURCES})
@@ -113,15 +113,14 @@ endif()
 if(${Enable_CUDA})
   set(GPU_SPECIFIC_SOURCES
     MCMP/device_mp2_functional.cu
-    MCMP/device_mp2_functional.h
     basis/atomic_orbital.cu
     basis/basis.cu
     basis/wavefunction.cu
-    ovps_set.cu
     qc_monte.cu
-    qc_ovps.cu
   )
   set_source_files_properties(
+      ovps_set.cpp
+      qc_ovps.cpp
       MCF12/correlation_factor_function.cpp
       MCF12/correlation_factor_data.cpp
       MCMP/mp3_functional.cpp
