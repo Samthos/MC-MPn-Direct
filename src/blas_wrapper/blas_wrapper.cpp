@@ -38,6 +38,7 @@ void Blas_Wrapper<std::vector, std::allocator>::dgemm(bool TransA, bool TransB,
       C.data(), ldc);
 }
 
+
 template <> 
 void Blas_Wrapper<std::vector, std::allocator>::dgemm(bool TransA, bool TransB, 
       size_t m, size_t n, size_t k, 
@@ -56,6 +57,42 @@ void Blas_Wrapper<std::vector, std::allocator>::dgemm(bool TransA, bool TransB,
       B.data() + offset_b, ldb,
       beta,
       C.data() + offset_c, ldc);
+}
+
+template <> 
+void Blas_Wrapper<std::vector, std::allocator>::dsyrk(bool Fill_Lower, bool Trans, 
+      size_t m, size_t k, 
+      double alpha,
+      const vector_double& A, size_t lda,
+      double beta,
+      vector_double& B, size_t ldb) {
+  auto F = (Fill_Lower ? CblasLower : CblasUpper);
+  auto T = (Trans ? CblasTrans : CblasNoTrans);
+  cblas_dsyrk(CblasColMajor,
+      F, T,
+      m, k,
+      alpha,
+      A.data(), lda,
+      beta,
+      B.data(), ldb);
+}
+
+template <> 
+void Blas_Wrapper<std::vector, std::allocator>::dsyrk(bool Fill_Lower, bool Trans, 
+      size_t m, size_t k, 
+      double alpha,
+      const vector_double& A, size_t offset_a, size_t lda,
+      double beta,
+      vector_double& B, size_t offset_b, size_t ldb) {
+  auto F = (Fill_Lower ? CblasLower : CblasUpper);
+  auto T = (Trans ? CblasTrans : CblasNoTrans);
+  cblas_dsyrk(CblasColMajor,
+      F, T,
+      m, k,
+      alpha,
+      A.data() + offset_a, lda,
+      beta,
+      B.data() + offset_b, ldb);
 }
 
 template <> 
@@ -200,6 +237,42 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(bool T
       B.data().get() + offset_b, ldb,
       &beta,
       C.data().get() + offset_c, ldc);
+}
+
+template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dsyrk(bool Fill_Lower, bool Trans, 
+      size_t m, size_t k, 
+      double alpha,
+      const vector_double& A, size_t lda,
+      double beta,
+      vector_double& B, size_t ldb) {
+  auto F = (Fill_Lower ? CUBLAS_FILL_MODE_LOWER : CUBLAS_FILL_MODE_UPPER);
+  auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
+  cublasDsyrk(handle,
+      F, T,
+      m, k,
+      &alpha,
+      A.data().get(), lda,
+      &beta,
+      B.data().get(), ldb);
+}
+
+template <> 
+void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dsyrk(bool Fill_Lower, bool Trans, 
+      size_t m, size_t k, 
+      double alpha,
+      const vector_double& A, size_t offset_a, size_t lda,
+      double beta,
+      vector_double& B, size_t offset_b, size_t ldb) {
+  auto F = (Fill_Lower ? CUBLAS_FILL_MODE_LOWER : CUBLAS_FILL_MODE_UPPER);
+  auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
+  cublasDsyrk(handle,
+      F, T,
+      m, k,
+      &alpha,
+      A.data().get() + offset_a, lda,
+      &beta,
+      B.data().get() + offset_b, ldb);
 }
 
 template <> 
