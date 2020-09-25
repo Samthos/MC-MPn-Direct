@@ -5,6 +5,10 @@
 #ifndef CORRELATION_FACTORS_DATA_H_
 #define CORRELATION_FACTORS_DATA_H_
 
+#ifdef HAVE_CUDA
+#include <thrust/device_vector.h>
+#endif
+
 #include <memory>
 #include <vector>
 
@@ -12,11 +16,12 @@
 #include "electron_pair_list.h"
 #include "correlation_factor_function.h"
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Correlation_Factor_Data {
  protected:
-  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List_Host Electron_List_Type;
-  typedef std::vector<double> vector_double;
+  typedef Container<double, Allocator<double>> vector_double;
+  typedef Electron_Pair_List<Container, Allocator> Electron_Pair_List_Type;
+  typedef Electron_List<Container, Allocator> Electron_List_Type;
 
  public:
   Correlation_Factor_Data(int electrons_in, 
@@ -49,4 +54,13 @@ class Correlation_Factor_Data {
   double beta;
   bool m_f12d_is_zero;
 };
+
+template <> void Correlation_Factor_Data<std::vector, std::allocator>::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
+template class Correlation_Factor_Data<std::vector, std::allocator>;
+
+#ifdef HAVE_CUDA
+template <> void Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
+template class Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>;
+#endif
+
 #endif //  CORRELATION_FACTORS_DATA_H_

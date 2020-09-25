@@ -13,6 +13,7 @@
 #define HOSTDEVICE
 #endif
 
+HOSTDEVICE
 Correlation_Factor_Function* create_correlation_factor_function(CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta) {
   Correlation_Factor_Function* correlation_factor = nullptr;
   switch (correlation_factor_id) {
@@ -38,11 +39,13 @@ Correlation_Factor_Function* create_correlation_factor_function(CORRELATION_FACT
   return correlation_factor;
 }
 
+HOSTDEVICE
 Correlation_Factor_Function::Correlation_Factor_Function(double gamma_, double beta_) :
     gamma(gamma_), 
     beta(beta_) {
 }
 
+HOSTDEVICE
 Correlation_Factor_Function::Correlation_Factor_Function(double gamma_, double beta_, double default_gamma, double default_beta) {
   gamma = gamma_;
   if (gamma_ < 0) {

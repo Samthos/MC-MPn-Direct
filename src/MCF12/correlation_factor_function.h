@@ -17,21 +17,23 @@ class Correlation_Factor_Function {
  public:
   HOSTDEVICE Correlation_Factor_Function(double gamma_, double beta_);
   HOSTDEVICE Correlation_Factor_Function(double gamma_, double beta_, double default_gamma, double default_beta);
-  virtual HOSTDEVICE HOSTDEVICE double f12(double r12) = 0;
-  virtual HOSTDEVICE HOSTDEVICE double f12_a(double r12) = 0;
-  virtual HOSTDEVICE HOSTDEVICE double f12_b(double r12) = 0;
-  virtual HOSTDEVICE HOSTDEVICE double f12_c(double r12) = 0;
-  virtual HOSTDEVICE HOSTDEVICE double f12_d(double r12) = 0;
+  virtual HOSTDEVICE double f12(double r12) = 0;
+  virtual HOSTDEVICE double f12_a(double r12) = 0;
+  virtual HOSTDEVICE double f12_b(double r12) = 0;
+  virtual HOSTDEVICE double f12_c(double r12) = 0;
+  virtual HOSTDEVICE double f12_d(double r12) = 0;
   virtual bool f12_d_is_zero() = 0;
 
  protected:
   double gamma, beta;
 };
+
+HOSTDEVICE
 Correlation_Factor_Function* create_correlation_factor_function(CORRELATION_FACTORS::CORRELATION_FACTORS, double gamma = -1, double beta = -1);
 
 class Linear_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Linear_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {};
+  HOSTDEVICE Linear_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {};
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -45,7 +47,7 @@ class Linear_Correlation_Factor_Function : public Correlation_Factor_Function {
 };
 class Rational_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Rational_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Rational_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -58,7 +60,7 @@ class Rational_Correlation_Factor_Function : public Correlation_Factor_Function 
 };
 class Slater_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Slater_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Slater_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   bool f12_d_is_zero() override;
  private:
   HOSTDEVICE double f12(double r12) override;
@@ -71,7 +73,7 @@ class Slater_Correlation_Factor_Function : public Correlation_Factor_Function {
 };
 class Slater_Linear_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Slater_Linear_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Slater_Linear_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -84,7 +86,7 @@ class Slater_Linear_Correlation_Factor_Function : public Correlation_Factor_Func
 };
 class Gaussian_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Gaussian_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Gaussian_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -97,7 +99,7 @@ class Gaussian_Correlation_Factor_Function : public Correlation_Factor_Function 
 };
 class Cusped_Gaussian_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Cusped_Gaussian_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Cusped_Gaussian_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -110,7 +112,7 @@ class Cusped_Gaussian_Correlation_Factor_Function : public Correlation_Factor_Fu
 };
 class Yukawa_Coulomb_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Yukawa_Coulomb_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Yukawa_Coulomb_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -123,7 +125,7 @@ class Yukawa_Coulomb_Correlation_Factor_Function : public Correlation_Factor_Fun
 };
 class Jastrow_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Jastrow_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Jastrow_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -136,7 +138,7 @@ class Jastrow_Correlation_Factor_Function : public Correlation_Factor_Function {
 };
 class ERFC_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  ERFC_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE ERFC_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -150,7 +152,7 @@ class ERFC_Correlation_Factor_Function : public Correlation_Factor_Function {
 };
 class ERFC_Linear_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  ERFC_Linear_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE ERFC_Linear_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -165,7 +167,7 @@ class ERFC_Linear_Correlation_Factor_Function : public Correlation_Factor_Functi
 };
 class Tanh_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Tanh_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Tanh_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -178,7 +180,7 @@ class Tanh_Correlation_Factor_Function : public Correlation_Factor_Function {
 };
 class ArcTan_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  ArcTan_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE ArcTan_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -191,7 +193,7 @@ class ArcTan_Correlation_Factor_Function : public Correlation_Factor_Function {
 };
 class Logarithm_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Logarithm_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Logarithm_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -204,7 +206,7 @@ class Logarithm_Correlation_Factor_Function : public Correlation_Factor_Function
 };
 class Hybrid_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Hybrid_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Hybrid_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -217,7 +219,7 @@ class Hybrid_Correlation_Factor_Function : public Correlation_Factor_Function {
 };
 class Two_Parameter_Rational_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Two_Parameter_Rational_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Two_Parameter_Rational_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -230,7 +232,7 @@ class Two_Parameter_Rational_Correlation_Factor_Function : public Correlation_Fa
 };
 class Higher_Rational_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Higher_Rational_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Higher_Rational_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -243,7 +245,7 @@ class Higher_Rational_Correlation_Factor_Function : public Correlation_Factor_Fu
 };
 class Cubic_Slater_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Cubic_Slater_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Cubic_Slater_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;
@@ -256,7 +258,7 @@ class Cubic_Slater_Correlation_Factor_Function : public Correlation_Factor_Funct
 };
 class Higher_Jastrow_Correlation_Factor_Function : public Correlation_Factor_Function {
  public:
-  Higher_Jastrow_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
+  HOSTDEVICE Higher_Jastrow_Correlation_Factor_Function(double gamma, double beta) : Correlation_Factor_Function(gamma, beta, default_gamma, default_beta) {}
   HOSTDEVICE double f12(double r12) override;
   HOSTDEVICE double f12_a(double r12) override;
   HOSTDEVICE double f12_b(double r12) override;

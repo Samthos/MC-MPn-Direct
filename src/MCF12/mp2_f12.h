@@ -17,6 +17,7 @@ class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
   typedef Electron_List_Host Electron_List_Type;
   typedef Wavefunction_Host Wavefunction_Type;
+  typedef Correlation_Factor_Data<std::vector, std::allocator> Correlation_Factor_Data_Type;
 
  public:
   explicit MP2_F12_V(const IOPs& iops, std::string extension="f12_V");
@@ -37,7 +38,7 @@ class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
   static constexpr double c2 = 2.0*a2-a1;
 
   F12_Traces traces;
-  std::shared_ptr<Correlation_Factor_Data> correlation_factor;
+  std::shared_ptr<Correlation_Factor_Data_Type> correlation_factor;
 
   std::vector<double> T_ip_io;
   std::vector<double> T_ip_jo;

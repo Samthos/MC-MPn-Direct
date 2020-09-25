@@ -20,6 +20,7 @@ class GF2_F12_V : public MCGF {
   typedef Electron_Pair_List_Host Electron_Pair_List_Type;
   typedef Electron_List_Host Electron_List_Type;
   typedef Wavefunction_Host Wavefunction_Type;
+  typedef Correlation_Factor_Data<std::vector, std::allocator> Correlation_Factor_Data_Type;
 
  public:
   explicit GF2_F12_V(IOPs& iops, std::string extension="f12_V");
@@ -54,7 +55,7 @@ class GF2_F12_V : public MCGF {
 
   F12_Traces traces;
   X_Traces x_traces;
-  std::shared_ptr<Correlation_Factor_Data> correlation_factor;
+  std::shared_ptr<Correlation_Factor_Data_Type> correlation_factor;
 
   std::vector<double> core_11p;
   std::vector<double> core_12p;

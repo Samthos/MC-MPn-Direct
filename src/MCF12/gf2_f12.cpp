@@ -17,7 +17,7 @@ GF2_F12_V::GF2_F12_V(IOPs& iops, std::string extension) :
     T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_ip_jo(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
-    correlation_factor(new Correlation_Factor_Data(
+    correlation_factor(new Correlation_Factor_Data_Type(
           iops.iopns[KEYS::ELECTRONS],
           iops.iopns[KEYS::ELECTRON_PAIRS],
           static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iops.iopns[KEYS::F12_CORRELATION_FACTOR]),
