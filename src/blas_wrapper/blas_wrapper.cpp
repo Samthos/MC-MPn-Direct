@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <functional>
 
-
 #include "cblas.h"
 #include "blas_calls.h"
 
@@ -18,26 +17,57 @@ Blas_Wrapper<std::vector, std::allocator>::Blas_Wrapper() {}
 template <> 
 Blas_Wrapper<std::vector, std::allocator>::~Blas_Wrapper() {}
 
-template <> 
-void Blas_Wrapper<std::vector, std::allocator>::dgemm(bool TransA, bool TransB, 
+template <template <typename, typename> typename Container, template <typename> typename Allocator> 
+void Blas_Wrapper<Container, Allocator>::dgemm(bool TransA, bool TransB, 
       size_t m, size_t n, size_t k, 
       double alpha,
       const vector_double& A, size_t lda,
       const vector_double& B, size_t ldb,
       double beta,
       vector_double& C, size_t ldc) {
-  auto TA = (TransA ? CblasTrans : CblasNoTrans);
-  auto TB = (TransB ? CblasTrans : CblasNoTrans);
-  cblas_dgemm(CblasColMajor,
-      TA, TB,
+  this->dgemm(
+      TransA, TransB,
       m, n, k,
       alpha,
-      A.data(), lda,
-      B.data(), ldb,
+      A, 0, lda,
+      B, 0, ldb,
       beta,
-      C.data(), ldc);
+      C, 0, ldc);
 }
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator> 
+void Blas_Wrapper<Container, Allocator>::dgemv(bool Trans, 
+    size_t m, size_t n,
+    double alpha,
+    const vector_double& A, size_t lda,
+    const vector_double& x, size_t incx,
+    double beta,
+    vector_double& y, size_t incy) {
+  this->dgemv(
+      Trans,
+      m, n,
+      alpha,
+      A, 0, lda,
+      x, 0, incx,
+      beta,
+      y, 0, incy);
+}
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator> 
+void Blas_Wrapper<Container, Allocator>::dsyrk(bool Fill_Lower, bool Trans, 
+      size_t m, size_t k, 
+      double alpha,
+      const vector_double& A, size_t lda,
+      double beta,
+      vector_double& B, size_t ldb) {
+  this->dsyrk(
+      Fill_Lower, Trans,
+      m, k,
+      alpha,
+      A, 0, lda,
+      beta,
+      B, 0, ldb);
+}
 
 template <> 
 void Blas_Wrapper<std::vector, std::allocator>::dgemm(bool TransA, bool TransB, 
@@ -63,24 +93,6 @@ template <>
 void Blas_Wrapper<std::vector, std::allocator>::dsyrk(bool Fill_Lower, bool Trans, 
       size_t m, size_t k, 
       double alpha,
-      const vector_double& A, size_t lda,
-      double beta,
-      vector_double& B, size_t ldb) {
-  auto F = (Fill_Lower ? CblasLower : CblasUpper);
-  auto T = (Trans ? CblasTrans : CblasNoTrans);
-  cblas_dsyrk(CblasColMajor,
-      F, T,
-      m, k,
-      alpha,
-      A.data(), lda,
-      beta,
-      B.data(), ldb);
-}
-
-template <> 
-void Blas_Wrapper<std::vector, std::allocator>::dsyrk(bool Fill_Lower, bool Trans, 
-      size_t m, size_t k, 
-      double alpha,
       const vector_double& A, size_t offset_a, size_t lda,
       double beta,
       vector_double& B, size_t offset_b, size_t ldb) {
@@ -93,25 +105,6 @@ void Blas_Wrapper<std::vector, std::allocator>::dsyrk(bool Fill_Lower, bool Tran
       A.data() + offset_a, lda,
       beta,
       B.data() + offset_b, ldb);
-}
-
-template <> 
-void Blas_Wrapper<std::vector, std::allocator>::dgemv(bool Trans, 
-    size_t m, size_t n,
-    double alpha,
-    const vector_double& A, size_t lda,
-    const vector_double& x, size_t incx,
-    double beta,
-    vector_double& y, size_t incy) {
-  auto T = (Trans ? CblasTrans : CblasNoTrans);
-  cblas_dgemv(CblasColMajor,
-      T,
-      m, n,
-      alpha,
-      A.data(), lda,
-      x.data(), incx,
-      beta,
-      y.data(), incy);
 }
 
 template <> 
@@ -203,26 +196,6 @@ template <>
 void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(bool TransA, bool TransB, 
       size_t m, size_t n, size_t k, 
       double alpha,
-      const vector_double& A, size_t lda,
-      const vector_double& B, size_t ldb,
-      double beta,
-      vector_double& C, size_t ldc) {
-  auto TA = (TransA ? CUBLAS_OP_T : CUBLAS_OP_N);
-  auto TB = (TransB ? CUBLAS_OP_T : CUBLAS_OP_N);
-  cublasDgemm(handle,
-      TA, TB,
-      m, n, k,
-      &alpha,
-      A.data().get(), lda,
-      B.data().get(), ldb,
-      &beta,
-      C.data().get(), ldc);
-}
-
-template <> 
-void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemm(bool TransA, bool TransB, 
-      size_t m, size_t n, size_t k, 
-      double alpha,
       const vector_double& A, size_t offset_a, size_t lda,
       const vector_double& B, size_t offset_b, size_t ldb,
       double beta,
@@ -243,24 +216,6 @@ template <>
 void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dsyrk(bool Fill_Lower, bool Trans, 
       size_t m, size_t k, 
       double alpha,
-      const vector_double& A, size_t lda,
-      double beta,
-      vector_double& B, size_t ldb) {
-  auto F = (Fill_Lower ? CUBLAS_FILL_MODE_LOWER : CUBLAS_FILL_MODE_UPPER);
-  auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
-  cublasDsyrk(handle,
-      F, T,
-      m, k,
-      &alpha,
-      A.data().get(), lda,
-      &beta,
-      B.data().get(), ldb);
-}
-
-template <> 
-void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dsyrk(bool Fill_Lower, bool Trans, 
-      size_t m, size_t k, 
-      double alpha,
       const vector_double& A, size_t offset_a, size_t lda,
       double beta,
       vector_double& B, size_t offset_b, size_t ldb) {
@@ -273,25 +228,6 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dsyrk(bool F
       A.data().get() + offset_a, lda,
       &beta,
       B.data().get() + offset_b, ldb);
-}
-
-template <> 
-void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgemv(bool Trans, 
-    size_t m, size_t n,
-    double alpha,
-    const vector_double& A, size_t lda,
-    const vector_double& x, size_t incx,
-    double beta,
-    vector_double& y, size_t incy) {
-  auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
-  cublasDgemv(handle,
-      T,
-      m, n,
-      &alpha,
-      A.data().get(), lda,
-      x.data().get(), incx,
-      &beta,
-      y.data().get(), incy);
 }
 
 template <> 
