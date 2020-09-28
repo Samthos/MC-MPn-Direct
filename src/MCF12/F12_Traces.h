@@ -54,10 +54,10 @@ class F12_Traces {
   vector_double dp32;
 
   // extra one electron traces
-  std::vector<std::vector<double>> ds_p11;
-  std::vector<std::vector<double>> ds_p12;
-  std::vector<std::vector<double>> ds_p21;
-  std::vector<std::vector<double>> ds_p22;
+  vector_double ds_p11;
+  vector_double ds_p12;
+  vector_double ds_p21;
+  vector_double ds_p22;
   std::vector<std::vector<std::vector<double>>> ds_p31;
   std::vector<std::vector<std::vector<double>>> ds_p32;
 

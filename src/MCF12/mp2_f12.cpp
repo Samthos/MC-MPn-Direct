@@ -420,8 +420,8 @@ double MP2_F12_VBX::calculate_bx_t_fd_2e(const Electron_Pair_List_Type* electron
     std::array<double, 2> t_io{0.0, 0.0};
     for (int jo = 0; jo < electron_list->size(); ++jo) {
       auto f_d = correlation_factor->f12o_d[io * traces.electrons + jo];
-      t_io[0] += f_d * correlation_factor->f12o[io * traces.electrons + jo] * (traces.op11[io] * traces.ds_p22[io][jo] - traces.ds_p11[io][jo] * traces.op11[jo]) * electron_list->inverse_weight[jo];
-      t_io[1] += f_d * correlation_factor->f12o[io * traces.electrons + jo] * (traces.op12[io * traces.electrons + jo] * traces.ds_p12[io][jo] - traces.ds_p21[io][jo] * traces.op12[io * traces.electrons + jo]) * electron_list->inverse_weight[jo];
+      t_io[0] += f_d * correlation_factor->f12o[io * traces.electrons + jo] * (traces.op11[io] * traces.ds_p22[io * traces.electrons + jo] - traces.ds_p11[io * traces.electrons + jo] * traces.op11[jo]) * electron_list->inverse_weight[jo];
+      t_io[1] += f_d * correlation_factor->f12o[io * traces.electrons + jo] * (traces.op12[io * traces.electrons + jo] * traces.ds_p12[io * traces.electrons + jo] - traces.ds_p21[io * traces.electrons + jo] * traces.op12[io * traces.electrons + jo]) * electron_list->inverse_weight[jo];
     }
     t[0] += t_io[0] * electron_list->inverse_weight[io];
     t[1] += t_io[1] * electron_list->inverse_weight[io];
@@ -444,8 +444,8 @@ double MP2_F12_VBX::calculate_bx_t_fd_3e(const Electron_Pair_List_Type* electron
           }
         }
         auto f_d = correlation_factor->f12o_d[io * traces.electrons + jo];
-        t_io[0] += (t_jo[0] * traces.ds_p22[io][jo]   - t_jo[1] * traces.op11[jo]      ) * f_d * electron_list->inverse_weight[jo];
-        t_io[1] += (t_jo[2] * traces.op12[io * traces.electrons + jo]     - t_jo[3] * traces.ds_p21[io][jo]) * f_d * electron_list->inverse_weight[jo];
+        t_io[0] += (t_jo[0] * traces.ds_p22[io * traces.electrons + jo]   - t_jo[1] * traces.op11[jo]      ) * f_d * electron_list->inverse_weight[jo];
+        t_io[1] += (t_jo[2] * traces.op12[io * traces.electrons + jo]     - t_jo[3] * traces.ds_p21[io * traces.electrons + jo]) * f_d * electron_list->inverse_weight[jo];
       }
     }
     t[0] += t_io[0] * electron_list->inverse_weight[io];
