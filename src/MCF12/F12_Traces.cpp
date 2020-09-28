@@ -50,6 +50,37 @@ void F12_Traces::update_v(std::unordered_map<int, Wavefunction_Type>& wavefuncti
 }
 
 void F12_Traces::update_bx(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+  auto iocc1 = wavefunctions[WC::electrons].iocc1;
+  auto iocc2 = wavefunctions[WC::electrons].iocc2;
+  auto ivir1 = wavefunctions[WC::electrons].ivir1;
+  auto ivir2 = wavefunctions[WC::electrons].ivir2;
+
+  const vector_double& psi1_dx = wavefunctions[WC::electron_pairs_1_dx].psi;
+  const vector_double& psi1_dy = wavefunctions[WC::electron_pairs_1_dy].psi;
+  const vector_double& psi1_dz = wavefunctions[WC::electron_pairs_1_dz].psi;
+
+  const vector_double& psi2_dx = wavefunctions[WC::electron_pairs_2_dx].psi;
+  const vector_double& psi2_dy = wavefunctions[WC::electron_pairs_2_dy].psi;
+  const vector_double& psi2_dz = wavefunctions[WC::electron_pairs_2_dz].psi;
+
+  vector_double& psi1_tau_dx= wavefunctions[WC::electron_pairs_1_dx].psiTau;
+  vector_double& psi1_tau_dy= wavefunctions[WC::electron_pairs_1_dy].psiTau;
+         
+  vector_double& psi2_tau_dx= wavefunctions[WC::electron_pairs_2_dx].psiTau;
+  vector_double& psi2_tau_dy= wavefunctions[WC::electron_pairs_2_dy].psiTau;
+
+  for (int ip = 0; ip < electron_pairs; ip++) {
+    auto dr = electron_pair_list->pos1[ip] - electron_pair_list->pos2[ip];
+    for (int im = iocc1, idx = ip * ivir2 + iocc1; im < iocc2; ++im, ++idx) {
+      psi1_tau_dx[idx]  = dr[0] * psi1_dx[idx];
+      psi1_tau_dx[idx] += dr[1] * psi1_dy[idx];
+      psi1_tau_dx[idx] += dr[2] * psi1_dz[idx];
+      psi2_tau_dx[idx]  = dr[0] * psi2_dx[idx];
+      psi2_tau_dx[idx] += dr[1] * psi2_dy[idx];
+      psi2_tau_dx[idx] += dr[2] * psi2_dz[idx];
+    }
+  }
+
   build_two_e_derivative_traces(wavefunctions, electron_pair_list);
   build_two_e_one_e_derivative_traces(wavefunctions, electron_pair_list, electron_list);
 }
@@ -148,42 +179,23 @@ void F12_Traces::build_two_e_traces(const Wavefunction_Type& electron_pair_psi1,
   auto iocc2 = electron_pair_psi1.iocc2;
   auto ivir1 = electron_pair_psi1.ivir1;
   auto ivir2 = electron_pair_psi1.ivir2;
-//   blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
-//       electron_pair_psi1.psi, iocc1, ivir2,
-//       electron_pair_psi1.psi, iocc1, ivir2,
-//       p11, 1);
-//   blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
-//       electron_pair_psi1.psi, iocc1, ivir2,
-//       electron_pair_psi2.psi, iocc1, ivir2,
-//       p12, 1);
-//   blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
-//       electron_pair_psi2.psi, iocc1, ivir2,
-//       electron_pair_psi2.psi, iocc1, ivir2,
-//       p22, 1);
-//   blas_wrapper.batched_ddot(electron_pairs, iocc1,
-//       electron_pair_psi2.psi, 0, ivir2,
-//       electron_pair_psi2.psi, 0, ivir2,
-//       k12, 1);
-//   blas_wrapper.plus(k12.begin(), k12.end(), p12.begin(), k12.begin());
-
-  for(int ip = 0; ip < electron_pairs;ip++) {
-   p11[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
-       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-       0.0);
-   p12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
-       electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-       0.0);
-   p22[ip] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-       electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc2,
-       electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-       0.0);
-   k12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda,
-       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-       electron_pair_psi2.data() + ip * electron_pair_psi2.lda,
-       p12[ip]);
-  }
+  blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+      electron_pair_psi1.psi, iocc1, ivir2,
+      electron_pair_psi1.psi, iocc1, ivir2,
+      p11, 1);
+  blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+      electron_pair_psi1.psi, iocc1, ivir2,
+      electron_pair_psi2.psi, iocc1, ivir2,
+      p12, 1);
+  blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+      electron_pair_psi2.psi, iocc1, ivir2,
+      electron_pair_psi2.psi, iocc1, ivir2,
+      p22, 1);
+  blas_wrapper.batched_ddot(electron_pairs, iocc1,
+      electron_pair_psi1.psi, 0, ivir2,
+      electron_pair_psi2.psi, 0, ivir2,
+      k12, 1);
+  blas_wrapper.plus(k12.begin(), k12.end(), p12.begin(), k12.begin());
 }
 
 void F12_Traces::build_two_e_one_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2, const Wavefunction_Type& electron_psi) {
@@ -194,89 +206,85 @@ void F12_Traces::build_two_e_one_e_traces(const Wavefunction_Type& electron_pair
   auto ivir1 = electron_psi.ivir1;
   auto ivir2 = electron_psi.ivir2;
 
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  blas_wrapper.dgemm(true, false,
       electrons, electron_pairs, iocc2 - iocc1,
       alpha,
-      electron_psi.data() + iocc1, electron_psi.lda,
-      electron_pair_psi1.data() + iocc1, electron_pair_psi2.lda,
+      electron_psi.psi, iocc1, electron_psi.lda,
+      electron_pair_psi1.psi, iocc1, electron_pair_psi2.lda,
       beta,
-      p13.data(), electrons);
+      p13, 0, electrons);
 
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  blas_wrapper.dgemm(true, false,
       electrons, electron_pairs, iocc2 - iocc1,
       alpha,
-      electron_psi.data() + iocc1, electron_psi.lda,
-      electron_pair_psi2.data() + iocc1, electron_pair_psi2.lda,
+      electron_psi.psi, iocc1, electron_psi.lda,
+      electron_pair_psi2.psi, iocc1, electron_pair_psi2.lda,
       beta,
-      p23.data(), electrons);
+      p23, 0, electrons);
 
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  blas_wrapper.dgemm(true, false,
       electrons, electron_pairs, ivir2 - ivir1,
       alpha,
-      electron_psi.data() + ivir1, electron_psi.lda,
-      electron_pair_psi1.data() + ivir1, electron_pair_psi2.lda,
+      electron_psi.psi, ivir1, electron_psi.lda,
+      electron_pair_psi1.psi, ivir1, electron_pair_psi2.lda,
       beta,
-      v13.data(), electrons);
+      v13, 0, electrons);
 
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  blas_wrapper.dgemm(true, false,
       electrons, electron_pairs, ivir2 - ivir1,
       alpha,
-      electron_psi.data() + ivir1, electron_psi.lda,
-      electron_pair_psi2.data() + ivir1, electron_pair_psi2.lda,
+      electron_psi.psi, ivir1, electron_psi.lda,
+      electron_pair_psi2.psi, ivir1, electron_pair_psi2.lda,
       beta,
-      v23.data(), electrons);
+      v23, 0, electrons);
 
   beta = 1.0;
-  std::copy(p13.begin(), p13.end(), k13.begin());
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  blas_wrapper.dcopy(p13.size(), p13, 1, k13, 1);
+  blas_wrapper.dgemm(true, false,
       electrons, electron_pairs, iocc1,
       alpha,
-      electron_psi.data(), electron_psi.lda,
-      electron_pair_psi1.data(), electron_pair_psi2.lda,
+      electron_psi.psi, electron_psi.lda,
+      electron_pair_psi1.psi, electron_pair_psi2.lda,
       beta,
-      k13.data(), electrons);
+      k13, electrons);
 
-  std::copy(p23.begin(), p23.end(), k23.begin());
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+  blas_wrapper.dcopy(p23.size(), p23, 1, k23, 1);
+  blas_wrapper.dgemm(true, false,
       electrons, electron_pairs, iocc1,
       alpha,
-      electron_psi.data(), electron_psi.lda,
-      electron_pair_psi2.data(), electron_pair_psi2.lda,
+      electron_psi.psi, electron_psi.lda,
+      electron_pair_psi2.psi, electron_pair_psi2.lda,
       beta,
-      k23.data(), electrons);
+      k23, electrons);
 }
 
 void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list) {
-  auto lda = wavefunctions[WC::electron_pairs_1].lda;
   auto iocc1 = wavefunctions[WC::electrons].iocc1;
   auto iocc2 = wavefunctions[WC::electrons].iocc2;
   auto ivir1 = wavefunctions[WC::electrons].ivir1;
   auto ivir2 = wavefunctions[WC::electrons].ivir2;
 
-  const double* psi1 = wavefunctions[WC::electron_pairs_1].data();
-  const double* psi2 = wavefunctions[WC::electron_pairs_2].data();
+  const vector_double& psi1 = wavefunctions[WC::electron_pairs_1].psi;
+  const vector_double& psi2 = wavefunctions[WC::electron_pairs_2].psi;
+  const vector_double& psi1_tau_dx = wavefunctions[WC::electron_pairs_1_dx].psiTau;
+  const vector_double& psi2_tau_dx = wavefunctions[WC::electron_pairs_2_dx].psiTau;
 
-  const double* psi1_dx = wavefunctions[WC::electron_pairs_1_dx].data();
-  const double* psi1_dy = wavefunctions[WC::electron_pairs_1_dy].data();
-  const double* psi1_dz = wavefunctions[WC::electron_pairs_1_dz].data();
-
-  const double* psi2_dx = wavefunctions[WC::electron_pairs_2_dx].data();
-  const double* psi2_dy = wavefunctions[WC::electron_pairs_2_dy].data();
-  const double* psi2_dz = wavefunctions[WC::electron_pairs_2_dz].data();
-
-  for (int ip = 0; ip < electron_pairs; ip++) {
-    auto dr = electron_pair_list->pos1[ip] - electron_pair_list->pos2[ip];
-    dp11[ip] = 0.0;
-    dp12[ip] = 0.0;
-    dp21[ip] = 0.0;
-    dp22[ip] = 0.0;
-    for (int im = iocc1, idx = ip * lda + iocc1; im < iocc2; ++im, ++idx) {
-      dp11[ip] = dp11[ip] + psi1[idx] * (dr[0] * psi1_dx[idx] + dr[1] * psi1_dy[idx] + dr[2] * psi1_dz[idx]);
-      dp12[ip] = dp12[ip] + psi1[idx] * (dr[0] * psi2_dx[idx] + dr[1] * psi2_dy[idx] + dr[2] * psi2_dz[idx]);
-      dp21[ip] = dp21[ip] + psi2[idx] * (dr[0] * psi1_dx[idx] + dr[1] * psi1_dy[idx] + dr[2] * psi1_dz[idx]);
-      dp22[ip] = dp22[ip] + psi2[idx] * (dr[0] * psi2_dx[idx] + dr[1] * psi2_dy[idx] + dr[2] * psi2_dz[idx]);
-    }
-  }
+  blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+      psi1, iocc1, ivir2,
+      psi1_tau_dx, iocc1, ivir2,
+      dp11, 1);
+  blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+      psi1, iocc1, ivir2,
+      psi2_tau_dx, iocc1, ivir2,
+      dp12, 1); 
+  blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+      psi2, iocc1, ivir2,
+      psi1_tau_dx, iocc1, ivir2,
+      dp21, 1);
+  blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+      psi2, iocc1, ivir2,
+      psi2_tau_dx, iocc1, ivir2,
+      dp22, 1);
 }
 
 void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
@@ -287,25 +295,23 @@ void F12_Traces::build_two_e_one_e_derivative_traces(std::unordered_map<int, Wav
   auto o_lda = wavefunctions[WC::electrons].lda;
   auto p_lda = wavefunctions[WC::electron_pairs_1].lda;
 
-  const double* psi = wavefunctions[WC::electrons].data();
+  const vector_double& psi = wavefunctions[WC::electrons].psi;
+  const vector_double& psi1_tau_dx = wavefunctions[WC::electron_pairs_1_dx].psiTau;
+  const vector_double& psi2_tau_dx = wavefunctions[WC::electron_pairs_2_dx].psiTau;
 
-  const double* psi1_dx = wavefunctions[WC::electron_pairs_1_dx].data();
-  const double* psi1_dy = wavefunctions[WC::electron_pairs_1_dy].data();
-  const double* psi1_dz = wavefunctions[WC::electron_pairs_1_dz].data();
+  blas_wrapper.dgemm(true, false,
+      electrons, electron_pairs, iocc2 - iocc1,
+      1.0,
+      psi, iocc1, o_lda,
+      psi1_tau_dx, iocc1, p_lda,
+      0.0,
+      dp31, 0, electrons);
 
-  const double* psi2_dx = wavefunctions[WC::electron_pairs_2_dx].data();
-  const double* psi2_dy = wavefunctions[WC::electron_pairs_2_dy].data();
-  const double* psi2_dz = wavefunctions[WC::electron_pairs_2_dz].data();
-
-  for(int ip = 0, idx=0; ip < electron_pairs; ++ip) {
-    auto dr = electron_pair_list->pos1[ip] - electron_pair_list->pos2[ip];
-    for(int io = 0; io < electrons; ++io, ++idx) {
-      dp31[idx] = 0.0;
-      dp32[idx] = 0.0;
-      for(int im = iocc1, p_idx = ip * p_lda + iocc1, o_idx = io * o_lda + iocc1; im < iocc2; ++im, p_idx++, o_idx++) {
-        dp31[idx] += psi[o_idx] * (dr[0] * psi1_dx[p_idx] + dr[1] * psi1_dy[p_idx] + dr[2] * psi1_dz[p_idx]);
-        dp32[idx] += psi[o_idx] * (dr[0] * psi2_dx[p_idx] + dr[1] * psi2_dy[p_idx] + dr[2] * psi2_dz[p_idx]);
-      }
-    }
-  }
+  blas_wrapper.dgemm(true, false,
+      electrons, electron_pairs, iocc2 - iocc1,
+      1.0,
+      psi, iocc1, o_lda,
+      psi2_tau_dx, iocc1, p_lda,
+      0.0,
+      dp32, 0, electrons);
 }
