@@ -7,14 +7,18 @@
 
 #include <unordered_map>
 #include <vector>
+#include "blas_wrapper.h"
 #include "../basis/wavefunction.h"
 #include "electron_pair_list.h"
 #include "electron_list.h"
 
 class F12_Traces {
-  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List_Host Electron_List_Type;
-  typedef Wavefunction_Host Wavefunction_Type;
+  typedef std::vector<double> vector_double;
+  typedef Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper_Type;
+  typedef Electron_Pair_List<std::vector, std::allocator> Electron_Pair_List_Type;
+  typedef Electron_List<std::vector, std::allocator> Electron_List_Type;
+  typedef Wavefunction<std::vector, std::allocator> Wavefunction_Type;
+
  public:
   F12_Traces(int electron_pairs_, int electrons_);
 
@@ -22,32 +26,32 @@ class F12_Traces {
   int electron_pairs, electrons;
 
   // traces of single electrons with themselves
-  std::vector<double> op11;
+  vector_double op11;
 
   // traces of single electrons with single electrons
-  std::vector<double> op12;
-  std::vector<double> ok12;
-  std::vector<double> ov12;
+  vector_double op12;
+  vector_double ok12;
+  vector_double ov12;
 
   // traces of electrons pairs with themselves
-  std::vector<double> p11;
-  std::vector<double> p12;
-  std::vector<double> p22;
-  std::vector<double> k12;
-  std::vector<double> dp11;
-  std::vector<double> dp12;
-  std::vector<double> dp21;
-  std::vector<double> dp22;
+  vector_double p11;
+  vector_double p12;
+  vector_double p22;
+  vector_double k12;
+  vector_double dp11;
+  vector_double dp12;
+  vector_double dp21;
+  vector_double dp22;
 
   // traces of electron pairs with single electrons
-  std::vector<double> p13;
-  std::vector<double> k13;
-  std::vector<double> v13;
-  std::vector<double> dp31;
-  std::vector<double> p23;
-  std::vector<double> k23;
-  std::vector<double> v23;
-  std::vector<double> dp32;
+  vector_double p13;
+  vector_double k13;
+  vector_double v13;
+  vector_double dp31;
+  vector_double p23;
+  vector_double k23;
+  vector_double v23;
+  vector_double dp32;
 
   // extra one electron traces
   std::vector<std::vector<double>> ds_p11;
@@ -62,6 +66,8 @@ class F12_Traces {
   void update_bx_fd_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_List_Type* electron_list);
 
  private:
+  Blas_Wrapper_Type blas_wrapper;
+
   void build_one_e_one_e_traces(const Wavefunction_Type& electron_psi);
   void build_two_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2);
   void build_two_e_one_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2, const Wavefunction_Type& electron_psi);

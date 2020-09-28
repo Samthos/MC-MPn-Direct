@@ -110,45 +110,37 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction_Type>&
 }
 
 void F12_Traces::build_one_e_one_e_traces(const Wavefunction_Type& electron_psi) {
-  double alpha = 1.0;
-  double beta = 0.0;
   auto iocc1 = electron_psi.iocc1;
   auto iocc2 = electron_psi.iocc2;
   auto ivir1 = electron_psi.ivir1;
   auto ivir2 = electron_psi.ivir2;
-  cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+  blas_wrapper.dsyrk(BLAS_WRAPPER::FILL_FULL, true,
       electrons, iocc2 - iocc1,
-      alpha,
-      electron_psi.data() + iocc1, electron_psi.lda,
-      beta,
-      op12.data(), electrons);
-  set_Upper_from_Lower(op12.data(), electrons);
+      1.0,
+      electron_psi.psi, iocc1, electron_psi.lda,
+      0.0,
+      op12, 0, electrons);
 
-  for (int io = 0; io < electrons; io++) {
-    op11[io] = op12[io * electrons + io];
-  }
+  blas_wrapper.dcopy(electrons, op12, electrons+1, op11, 1);
 
-  cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+  blas_wrapper.dsyrk(BLAS_WRAPPER::FILL_FULL, true,
       electrons, ivir2 - ivir1,
-      alpha,
-      electron_psi.data() + ivir1, electron_psi.lda,
-      beta,
-      ov12.data(), electrons);
-  set_Upper_from_Lower(ov12.data(), electrons);
+      1.0,
+      electron_psi.psi, ivir1, electron_psi.lda,
+      0.0,
+      ov12, 0, electrons);
 
-  beta = 1.0;
-  std::copy(op12.begin(), op12.end(), ok12.begin());
-  cblas_dsyrk(CblasColMajor, CblasLower, CblasTrans,
+  blas_wrapper.dcopy(op12.size(), op12, 1, ok12, 1);
+  blas_wrapper.dsyrk(BLAS_WRAPPER::FILL_FULL, true,
       electrons, iocc1,
-      alpha,
-      electron_psi.data(), electron_psi.lda,
-      beta,
-      ok12.data(), electrons);
-  set_Upper_from_Lower(ok12.data(), electrons);
+      1.0,
+      electron_psi.psi, electron_psi.lda,
+      1.0,
+      ok12, electrons);
 
-  cblas_dscal(electrons, 0.0, op12.data(), electrons+1);
-  cblas_dscal(electrons, 0.0, ov12.data(), electrons+1);
-  cblas_dscal(electrons, 0.0, ok12.data(), electrons+1);
+  blas_wrapper.dscal(electrons, 0.0, op12, electrons+1);
+  blas_wrapper.dscal(electrons, 0.0, ov12, electrons+1);
+  blas_wrapper.dscal(electrons, 0.0, ok12, electrons+1);
 }
 
 void F12_Traces::build_two_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2) {
@@ -156,23 +148,41 @@ void F12_Traces::build_two_e_traces(const Wavefunction_Type& electron_pair_psi1,
   auto iocc2 = electron_pair_psi1.iocc2;
   auto ivir1 = electron_pair_psi1.ivir1;
   auto ivir2 = electron_pair_psi1.ivir2;
+//   blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+//       electron_pair_psi1.psi, iocc1, ivir2,
+//       electron_pair_psi1.psi, iocc1, ivir2,
+//       p11, 1);
+//   blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+//       electron_pair_psi1.psi, iocc1, ivir2,
+//       electron_pair_psi2.psi, iocc1, ivir2,
+//       p12, 1);
+//   blas_wrapper.batched_ddot(electron_pairs, iocc2 - iocc1,
+//       electron_pair_psi2.psi, iocc1, ivir2,
+//       electron_pair_psi2.psi, iocc1, ivir2,
+//       p22, 1);
+//   blas_wrapper.batched_ddot(electron_pairs, iocc1,
+//       electron_pair_psi2.psi, 0, ivir2,
+//       electron_pair_psi2.psi, 0, ivir2,
+//       k12, 1);
+//   blas_wrapper.plus(k12.begin(), k12.end(), p12.begin(), k12.begin());
+
   for(int ip = 0; ip < electron_pairs;ip++) {
-    p11[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
-        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-        0.0);
-    p12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
-        electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-        0.0);
-    p22[ip] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-        electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc2,
-        electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
-        0.0);
-    k12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda,
-        electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
-        electron_pair_psi2.data() + ip * electron_pair_psi2.lda,
-        p12[ip]);
+   p11[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
+       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+       0.0);
+   p12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc2,
+       electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+       0.0);
+   p22[ip] = std::inner_product(electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+       electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc2,
+       electron_pair_psi2.data() + ip * electron_pair_psi2.lda + iocc1,
+       0.0);
+   k12[ip] = std::inner_product(electron_pair_psi1.data() + ip * electron_pair_psi1.lda,
+       electron_pair_psi1.data() + ip * electron_pair_psi1.lda + iocc1,
+       electron_pair_psi2.data() + ip * electron_pair_psi2.lda,
+       p12[ip]);
   }
 }
 

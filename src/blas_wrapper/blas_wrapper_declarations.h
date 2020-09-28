@@ -1,3 +1,6 @@
+//
+// Level 3 blas
+//
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemm(
     bool TransA, bool TransB, 
@@ -10,12 +13,21 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemm(
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dsyrk(
-    bool TransA, bool TransB, 
+    BLAS_WRAPPER::Fill_Mode_t fill_mode_t, bool Trans, 
     size_t m, size_t k, 
     double alpha,
     const vector_double& A, size_t offset_a, size_t lda,
     double beta,
     vector_double& B, size_t offset_b, size_t ldb);
+
+//
+// Level 2 blas
+//
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::batched_ddot(size_t N, size_t K,
+    const vector_double& A, size_t offset_a, size_t lda,
+    const vector_double& B, size_t offset_b, size_t ldb,
+    vector_double& X, size_t incx);
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::ddgmm(
@@ -35,24 +47,43 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemv(
     double beta,
     vector_double& y, size_t offset_y, size_t);
 
+//
+// Level 1 blas
+//
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dcopy(
+    size_t N, 
+    const vector_double& X, size_t offset_x, size_t incx,
+    vector_double& Y, size_t offset_y, size_t incy);
+
 template <>
 double Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::ddot(
     size_t N, 
-    const vector_double& X, size_t incx,
-    const vector_double& Y, size_t incy);
+    const vector_double& X, size_t offset_x, size_t incx,
+    const vector_double& Y, size_t offset_y, size_t incy);
+
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::ddot(size_t N, 
+    const vector_double& X, size_t offset_x, size_t incx,
+    const vector_double& Y, size_t offset_y, size_t incy, 
+    double* result);
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dscal(size_t N,
     double alpha,
     vector_double& X, size_t incx);
 
-template <>
-double Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::asum(
-    size_t N, const vector_double& X, size_t offset_x, size_t incx);
-
+// 
+// Iterators
+//
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::fill(
     iterator first1, iterator last1, double value);
+
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::minus(
+    const_iterator first1, const_iterator last1,
+    const_iterator first2, iterator result);
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::multiplies(
@@ -60,9 +91,10 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::multiplies(
     const_iterator first2, iterator result);
 
 template <>
-void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::minus(
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::plus(
     const_iterator first1, const_iterator last1,
     const_iterator first2, iterator result);
+
 
 template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::Blas_Wrapper();
 template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::~Blas_Wrapper();
