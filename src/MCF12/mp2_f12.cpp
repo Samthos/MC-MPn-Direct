@@ -438,8 +438,8 @@ double MP2_F12_VBX::calculate_bx_t_fd_3e(const Electron_Pair_List_Type* electron
         for (int ko = 0; ko < electron_list->size(); ++ko) {
           if (ko != jo && ko != io) {
             t_jo[0] += correlation_factor->f12o[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko] * traces.op12[io * traces.electrons + ko]       * electron_list->inverse_weight[ko];
-            t_jo[1] += correlation_factor->f12o[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko] * traces.ds_p31[io][jo][ko] * electron_list->inverse_weight[ko];
-            t_jo[2] += correlation_factor->f12o[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko] * traces.ds_p32[io][jo][ko] * electron_list->inverse_weight[ko];
+            t_jo[1] += correlation_factor->f12o[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko] * electron_list->inverse_weight[ko];
+            t_jo[2] += correlation_factor->f12o[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko] * electron_list->inverse_weight[ko];
             t_jo[3] += correlation_factor->f12o[jo * traces.electrons + ko] * traces.ok12[io * traces.electrons + ko] * traces.op12[jo * traces.electrons + ko]       * electron_list->inverse_weight[ko];
           }
         }
@@ -465,23 +465,23 @@ double MP2_F12_VBX::calculate_bx_t_fd_4e(const Electron_Pair_List_Type* electron
           for (int lo = 0; lo < electron_list->size(); ++lo) {
             if (lo != io) {
               auto wgt = electron_list->inverse_weight[lo];
-              t_ko[0] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p32[io][jo][lo]                     * traces.ok12[jo * traces.electrons + lo] * wgt;
+              t_ko[0] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + lo]                     * traces.ok12[jo * traces.electrons + lo] * wgt;
               t_ko[1] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.op12[jo * traces.electrons + lo]       * traces.ok12[jo * traces.electrons + lo] * wgt;
 
-              t_ko[2] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p32[io][jo][lo]                     * traces.ov12[jo * traces.electrons + lo] * wgt;
+              t_ko[2] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + lo]                     * traces.ov12[jo * traces.electrons + lo] * wgt;
               t_ko[3] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.op12[jo * traces.electrons + lo]       * traces.ov12[jo * traces.electrons + lo] * wgt;
 
               t_ko[4] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.op12[io * traces.electrons + lo]       * traces.ok12[jo * traces.electrons + lo] * wgt;
-              t_ko[5] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p31[io][jo][lo]                     * traces.ok12[jo * traces.electrons + lo] * wgt;
+              t_ko[5] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + lo]                     * traces.ok12[jo * traces.electrons + lo] * wgt;
 
               t_ko[6] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.op12[io * traces.electrons + lo]       * traces.ov12[jo * traces.electrons + lo] * wgt;
-              t_ko[7] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p31[io][jo][lo]                     * traces.ov12[jo * traces.electrons + lo] * wgt;
+              t_ko[7] += correlation_factor->f12o[ko * traces.electrons + lo] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + lo]                     * traces.ov12[jo * traces.electrons + lo] * wgt;
             }
           }
-          t_jo[0] += (t_ko[0] * traces.op12[io * traces.electrons + ko] - t_ko[1] * traces.ds_p31[io][jo][ko]) * traces.ok12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
-          t_jo[1] += (t_ko[2] * traces.op12[io * traces.electrons + ko] - t_ko[3] * traces.ds_p31[io][jo][ko]) * traces.ov12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
-          t_jo[2] += (t_ko[4] * traces.ds_p32[io][jo][ko]              - t_ko[5] * traces.op12[jo * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
-          t_jo[3] += (t_ko[6] * traces.ds_p32[io][jo][ko]              - t_ko[7] * traces.op12[jo * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
+          t_jo[0] += (t_ko[0] * traces.op12[io * traces.electrons + ko] - t_ko[1] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
+          t_jo[1] += (t_ko[2] * traces.op12[io * traces.electrons + ko] - t_ko[3] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
+          t_jo[2] += (t_ko[4] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko]              - t_ko[5] * traces.op12[jo * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
+          t_jo[3] += (t_ko[6] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko]              - t_ko[7] * traces.op12[jo * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * electron_list->inverse_weight[ko];
         }
       }
       auto f_d = correlation_factor->f12o_d[io * traces.electrons + jo];

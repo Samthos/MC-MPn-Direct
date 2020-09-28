@@ -615,10 +615,10 @@ double GF2_F12_VBX::calculate_bx_t_fd_3e(const Electron_Pair_List_Type* electron
         auto wgt = 1.0 * electron_list->inverse_weight[io]* electron_list->inverse_weight[jo] * electron_list->inverse_weight[ko];
         auto cf = correlation_factor->f12o[jo * traces.electrons + ko] * correlation_factor->f12o_d[io * traces.electrons + jo];
       t[0] += cf * traces.ok12[io * traces.electrons + ko] * (x_traces.ox12[io*traces.electrons+ko] * traces.ds_p22[io * traces.electrons + jo]   - x_traces.ds_x31[io][jo][ko] * traces.op11[jo]      ) * wgt;
-      t[0] += cf * traces.ok12[io * traces.electrons + ko] * (traces.op12[io * traces.electrons + ko] * x_traces.ds_x22[io][jo]   - traces.ds_p31[io][jo][ko] * x_traces.ox11[jo]      ) * wgt;
+      t[0] += cf * traces.ok12[io * traces.electrons + ko] * (traces.op12[io * traces.electrons + ko] * x_traces.ds_x22[io][jo]   - traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko] * x_traces.ox11[jo]      ) * wgt;
 
       t[1] += cf * traces.ok12[io * traces.electrons + ko] * (x_traces.ds_x32[io][jo][ko] * traces.op12[io * traces.electrons + jo]     -  x_traces.ox12[jo*traces.electrons+ko]      * traces.ds_p21[io * traces.electrons + jo]) * wgt;
-      t[1] += cf * traces.ok12[io * traces.electrons + ko] * (traces.ds_p32[io][jo][ko] * x_traces.ox12[io*traces.electrons+jo]     -  traces.op12[jo * traces.electrons + ko]      * x_traces.ds_x21[io][jo]) * wgt;
+      t[1] += cf * traces.ok12[io * traces.electrons + ko] * (traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko] * x_traces.ox12[io*traces.electrons+jo]     -  traces.op12[jo * traces.electrons + ko]      * x_traces.ds_x21[io][jo]) * wgt;
       }
     }
   }
@@ -634,15 +634,15 @@ double GF2_F12_VBX::calculate_bx_t_fd_4e(const Electron_Pair_List_Type* electron
               if (lo != io) {
                 auto cf = correlation_factor->f12o[ko * traces.electrons + lo] * correlation_factor->f12o_d[io * traces.electrons + jo]; 
                 auto wgt = 1.0 * electron_list->inverse_weight[io]* electron_list->inverse_weight[jo] * electron_list->inverse_weight[ko] * electron_list->inverse_weight[lo];
-   t[0] += cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[io][jo][ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[0] += cf * (traces.ds_p32[io][jo][lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[0] -= cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[io][jo][ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
-   t[0] -= cf * (traces.ds_p32[io][jo][lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[0] += cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[0] += cf * (traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[0] -= cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[0] -= cf * (traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
 
-   t[1] += cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[io][jo][ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[1] += cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[io][jo][lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[1] -= cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[io][jo][ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
-   t[1] -= cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[io][jo][lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[1] += cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[1] += cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[1] -= cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[1] -= cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
               }
             }
           }

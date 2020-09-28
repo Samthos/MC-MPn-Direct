@@ -38,8 +38,8 @@ F12_Traces::F12_Traces(int electron_pairs_, int electrons_) :
     ds_p12(electrons * electrons, 0.0),
     ds_p21(electrons * electrons, 0.0),
     ds_p22(electrons * electrons, 0.0),
-    ds_p31(electrons, std::vector<std::vector<double>>(electrons, std::vector<double>(electrons, 0.0))),
-    ds_p32(electrons, std::vector<std::vector<double>>(electrons, std::vector<double>(electrons, 0.0)))
+    ds_p31(electrons * electrons * electrons, 0.0),
+    ds_p32(electrons * electrons * electrons, 0.0)
 {
 }
 
@@ -112,11 +112,11 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction_Type>&
 
 
       for (int ko = 0; ko < electrons; ++ko) {
-        ds_p31[io][jo][ko] = 0.0;
-        ds_p32[io][jo][ko] = 0.0;
+        ds_p31[(io * electrons + jo) * electrons + ko] = 0.0;
+        ds_p32[(io * electrons + jo) * electrons + ko] = 0.0;
         for (int im = iocc1; im < iocc2; ++im) {
-          ds_p31[io][jo][ko] = ds_p31[io][jo][ko] + psi[ko * lda + im] * (dr[0] * psi_dx[io * lda + im] + dr[1] * psi_dy[io * lda + im] + dr[2] * psi_dz[io * lda + im]);
-          ds_p32[io][jo][ko] = ds_p32[io][jo][ko] + psi[ko * lda + im] * (dr[0] * psi_dx[jo * lda + im] + dr[1] * psi_dy[jo * lda + im] + dr[2] * psi_dz[jo * lda + im]);
+          ds_p31[(io * electrons + jo) * electrons + ko] = ds_p31[(io * electrons + jo) * electrons + ko] + psi[ko * lda + im] * (dr[0] * psi_dx[io * lda + im] + dr[1] * psi_dy[io * lda + im] + dr[2] * psi_dz[io * lda + im]);
+          ds_p32[(io * electrons + jo) * electrons + ko] = ds_p32[(io * electrons + jo) * electrons + ko] + psi[ko * lda + im] * (dr[0] * psi_dx[jo * lda + im] + dr[1] * psi_dy[jo * lda + im] + dr[2] * psi_dz[jo * lda + im]);
         }
       }
     }
@@ -127,16 +127,16 @@ void F12_Traces::update_bx_fd_traces(std::unordered_map<int, Wavefunction_Type>&
   }
   for (int io = 0; io < electrons; ++io) {
     for (int jo = 0; jo < electrons; ++jo) {
-      ds_p31[io][io][jo] = 0.0;
-      ds_p31[io][jo][io] = 0.0;
-      ds_p31[jo][io][io] = 0.0;
+      ds_p31[(io * electrons + io) * electrons + jo] = 0.0;
+      ds_p31[(io * electrons + jo) * electrons + io] = 0.0;
+      ds_p31[(jo * electrons + io) * electrons + io] = 0.0;
 
-      ds_p32[io][io][jo] = 0.0;
-      ds_p32[io][jo][io] = 0.0;
-      ds_p32[jo][io][io] = 0.0;
+      ds_p32[(io * electrons + io) * electrons + jo] = 0.0;
+      ds_p32[(io * electrons + jo) * electrons + io] = 0.0;
+      ds_p32[(jo * electrons + io) * electrons + io] = 0.0;
     }
-    ds_p31[io][io][io] = 0.0;
-    ds_p32[io][io][io] = 0.0;
+    ds_p31[(io * electrons + io) * electrons + io] = 0.0;
+    ds_p32[(io * electrons + io) * electrons + io] = 0.0;
   }
 }
 

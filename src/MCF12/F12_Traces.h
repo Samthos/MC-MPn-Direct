@@ -58,8 +58,8 @@ class F12_Traces {
   vector_double ds_p12;
   vector_double ds_p21;
   vector_double ds_p22;
-  std::vector<std::vector<std::vector<double>>> ds_p31;
-  std::vector<std::vector<std::vector<double>>> ds_p32;
+  vector_double ds_p31;
+  vector_double ds_p32;
 
   void update_v(std::unordered_map<int, Wavefunction_Type>& wavefunctions);
   void update_bx(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
