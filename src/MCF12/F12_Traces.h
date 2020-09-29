@@ -12,13 +12,14 @@
 #include "electron_pair_list.h"
 #include "electron_list.h"
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 class F12_Traces {
-  typedef std::vector<double> vector_double;
-  typedef std::vector<Point> vector_Point;
-  typedef Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper_Type;
-  typedef Electron_Pair_List<std::vector, std::allocator> Electron_Pair_List_Type;
-  typedef Electron_List<std::vector, std::allocator> Electron_List_Type;
-  typedef Wavefunction<std::vector, std::allocator> Wavefunction_Type;
+  typedef Blas_Wrapper<Container, Allocator> Blas_Wrapper_Type;
+  typedef Container<Point, Allocator<Point>> vector_Point;
+  typedef Container<double, Allocator<double>> vector_double;
+  typedef Electron_List<Container, Allocator> Electron_List_Type;
+  typedef Electron_Pair_List<Container, Allocator> Electron_Pair_List_Type;
+  typedef Wavefunction<Container, Allocator> Wavefunction_Type;
 
  public:
   F12_Traces(int electron_pairs_, int electrons_);
@@ -82,5 +83,8 @@ class F12_Traces {
   void build_two_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list);
   void build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
 };
+
+template <> void F12_Traces<std::vector, std::allocator>::build_delta_pos(const vector_Point&, const vector_Point&);
+template class F12_Traces<std::vector, std::allocator>;
 
 #endif //F12_METHODS_SRC_F12_TRACES_H_

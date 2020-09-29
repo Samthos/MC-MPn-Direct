@@ -10,7 +10,7 @@ double calculate_v_4e_help(
     const std::vector<double>& S_ip_io_1, const std::vector<double>& S_ip_io_2,
     const std::vector<double>& S_ip, size_t size, size_t size_ep
     ) {
-  cblas_dgemm( CblasColMajor, CblasTrans, CblasNoTrans,
+  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
       size, size_ep, size,
       1.0,
       S_io_jo.data(), size,
@@ -55,15 +55,42 @@ void MP2_F12_V::energy(double& emp, std::vector<double>& control, std::unordered
 }
 
 double MP2_F12_V::calculate_v_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  std::array<double, 2> t{0.0, 0.0};
-  for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
-    auto f_12 = correlation_factor->f12p[ip];
-    t[0] += f_12 * traces.p11[ip] * traces.p22[ip] * electron_pair_list->rv[ip];
-    t[1] += f_12 * traces.p12[ip] * traces.p12[ip] * electron_pair_list->rv[ip];
-  }
-  return (c1 * t[0] + c2 * t[1]) * nsamp_pair;
+  blas_wrapper.dgekv(electron_pair_list->size(), 
+      1.0, 
+      correlation_factor->f12p, 1, 
+      electron_pair_list->rv,  1,
+      0.0, 
+      T_ip_io, 1);
+  blas_wrapper.dgekv(electron_pair_list->size(), 
+      c1, 
+      traces.p11, 
+      0, 1, 
+      traces.p22, 0, 1,
+      0.0, 
+      T_ip_io, electron_pair_list->size(), 1);
+  blas_wrapper.dgekv(electron_pair_list->size(),
+      c2, 
+      traces.p12, 0, 1,
+      traces.p12, 0, 1,
+      1.0, 
+      T_ip_io, electron_pair_list->size(), 1);
+  double result = blas_wrapper.ddot(electron_pair_list->size(), 
+      T_ip_io, 0, 1, 
+      T_ip_io, electron_pair_list->size(), 1);
+  result *= nsamp_pair;
+  return result;
 }
 double MP2_F12_V::calculate_v_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+// add_mul(1.0, f23, k12, 0.0, t1);
+// add_mul(1.0, t1, p13, 0.0, t2);
+// add_mull(1.0, p22, rv, t_ip);
+// dgemv(c1, t2, t_ip, t3);
+// add_mul(c2, t1, p23, 0.0, t2);
+// add_mull(1.0, p12, rv, t_ip);
+// dgemv(c2, t2, ip, t3);
+// r = dot(t3, wgt);
+// r *= -2 * nsamp_pari * nsamp_one_1;
+
   std::array<double, 2> t{0.0, 0.0};
   for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
     std::array<double, 2> t_ip{0.0, 0.0};

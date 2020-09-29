@@ -14,15 +14,19 @@
 
 class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
  protected:
-  typedef Electron_Pair_List_Host Electron_Pair_List_Type;
-  typedef Electron_List_Host Electron_List_Type;
-  typedef Wavefunction_Host Wavefunction_Type;
+  typedef Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper_Type;
+  typedef std::vector<double, std::allocator<double>> vector_double;
   typedef Correlation_Factor_Data<std::vector, std::allocator> Correlation_Factor_Data_Type;
+  typedef Electron_List<std::vector, std::allocator> Electron_List_Type;
+  typedef Electron_Pair_List<std::vector, std::allocator> Electron_Pair_List_Type;
+  typedef F12_Traces<std::vector, std::allocator> F12_Traces_Type;
+  typedef Wavefunction<std::vector, std::allocator> Wavefunction_Type;
 
  public:
   explicit MP2_F12_V(const IOPs& iops, std::string extension="f12_V");
   ~MP2_F12_V();
   void energy(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
+
  protected:
   double calculate_v_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
   double calculate_v_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
@@ -37,12 +41,13 @@ class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
   static constexpr double c1 = 2.0*a1-a2;
   static constexpr double c2 = 2.0*a2-a1;
 
-  F12_Traces traces;
+  Blas_Wrapper_Type blas_wrapper;
+  F12_Traces_Type traces;
   std::shared_ptr<Correlation_Factor_Data_Type> correlation_factor;
 
-  std::vector<double> T_ip_io;
-  std::vector<double> T_ip_jo;
-  std::vector<double> T_io_jo;
+  vector_double T_ip_io;
+  vector_double T_ip_jo;
+  vector_double T_io_jo;
 
   double nsamp_pair;
   double nsamp_one_1;
