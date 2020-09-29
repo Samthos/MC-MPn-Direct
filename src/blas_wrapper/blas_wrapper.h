@@ -23,9 +23,10 @@ namespace BLAS_WRAPPER {
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
 class Blas_Wrapper {
-  typedef Container<double, Allocator<double>> vector_double;
-  typedef typename vector_double::iterator iterator;
-  typedef typename vector_double::const_iterator const_iterator;
+  typedef double value_type;
+  typedef Container<value_type, Allocator<value_type>> vector_type;
+  typedef typename vector_type::iterator iterator;
+  typedef typename vector_type::const_iterator const_iterator;
 
  public:
   Blas_Wrapper();
@@ -36,62 +37,70 @@ class Blas_Wrapper {
   //
   void dgemm(bool TransA, bool TransB, 
       size_t m, size_t n, size_t k, 
-      double alpha,
-      const vector_double& A, size_t lda,
-      const vector_double& B, size_t ldb,
-      double beta,
-      vector_double& C, size_t ldc);
+      value_type alpha,
+      const vector_type& A, size_t lda,
+      const vector_type& B, size_t ldb,
+      value_type beta,
+      vector_type& C, size_t ldc);
 
   void dsyrk(BLAS_WRAPPER::Fill_Mode_t fill_mode, bool Trans, 
       size_t m, size_t k, 
-      double alpha,
-      const vector_double& A, size_t lda,
-      double beta,
-      vector_double& B, size_t ldb);
+      value_type alpha,
+      const vector_type& A, size_t lda,
+      value_type beta,
+      vector_type& B, size_t ldb);
 
   // 
   // Instantiated Level 3 Blas 
   //
   void dgemm(bool TransA, bool TransB, 
       size_t m, size_t n, size_t k, 
-      double alpha,
-      const vector_double& A, size_t offset_a, size_t lda,
-      const vector_double& B, size_t offset_b, size_t ldb,
-      double beta,
-      vector_double& C, size_t offset_c, size_t ldc);
+      value_type alpha,
+      const vector_type& A, size_t offset_a, size_t lda,
+      const vector_type& B, size_t offset_b, size_t ldb,
+      value_type beta,
+      vector_type& C, size_t offset_c, size_t ldc);
 
 
   void dsyrk(BLAS_WRAPPER::Fill_Mode_t fill_mode, bool Trans, 
       size_t m, size_t k, 
-      double alpha,
-      const vector_double& A, size_t offset_a, size_t lda,
-      double beta,
-      vector_double& B, size_t offset_b, size_t ldb);
+      value_type alpha,
+      const vector_type& A, size_t offset_a, size_t lda,
+      value_type beta,
+      vector_type& B, size_t offset_b, size_t ldb);
 
   // 
   // Template Level 2 Blas 
   //
-  void dgemv(bool Trans, 
-      size_t m, size_t n,
-      double alpha,
-      const vector_double& A, size_t lda,
-      const vector_double& x, size_t incx,
-      double beta,
-      vector_double& y, size_t);
-
   void dgeam(bool TransA, bool TransB,
       size_t m, size_t n,
-      double alpha,
-      const vector_double& A, size_t lda,
-      double beta,
-      const vector_double& B, size_t ldb,
-      vector_double& C, size_t ldc);
+      value_type alpha,
+      const vector_type& A, size_t lda,
+      value_type beta,
+      const vector_type& B, size_t ldb,
+      vector_type& C, size_t ldc);
+
+  void dgekm(bool TransA, bool TransB, 
+      size_t m, size_t n,
+      value_type alpha,
+      const vector_type& A, size_t lda,
+      const vector_type& B, size_t ldb,
+      value_type beta,
+      vector_type& C, size_t ldc);
+
+  void dgemv(bool Trans, 
+      size_t m, size_t n,
+      value_type alpha,
+      const vector_type& A, size_t lda,
+      const vector_type& x, size_t incx,
+      value_type beta,
+      vector_type& y, size_t);
 
   void ddgmm(BLAS_WRAPPER::Side_t side,
       size_t m, size_t n,
-      const vector_double& A, size_t lda,
-      const vector_double& x, size_t incx,
-      vector_double& B, size_t ldb);
+      const vector_type& A, size_t lda,
+      const vector_type& x, size_t incx,
+      vector_type& B, size_t ldb);
 
 
 
@@ -99,82 +108,105 @@ class Blas_Wrapper {
   // Instantiated Level 2 Blas 
   //
   void batched_ddot(size_t N, size_t K,
-      const vector_double& A, size_t offset_a, size_t lda,
-      const vector_double& B, size_t offset_b, size_t ldb,
-      vector_double& X, size_t incx);
+      const vector_type& A, size_t offset_a, size_t lda,
+      const vector_type& B, size_t offset_b, size_t ldb,
+      vector_type& X, size_t incx);
 
   void ddgmm(BLAS_WRAPPER::Side_t side,
       size_t m, size_t n,
-      const vector_double& A, size_t offset_a, size_t lda,
-      const vector_double& x, size_t offset_x, size_t incx,
-      vector_double& B, size_t offset_b, size_t ldb);
+      const vector_type& A, size_t offset_a, size_t lda,
+      const vector_type& x, size_t offset_x, size_t incx,
+      vector_type& B, size_t offset_b, size_t ldb);
 
   void dgeam(bool TransA, bool TransB,
       size_t m, size_t n,
-      double alpha,
-      const vector_double& A, size_t offset_a, size_t lda,
-      double beta,
-      const vector_double& B, size_t offset_b, size_t ldb,
-      vector_double& C, size_t offset_c, size_t ldc);
+      value_type alpha,
+      const vector_type& A, size_t offset_a, size_t lda,
+      value_type beta,
+      const vector_type& B, size_t offset_b, size_t ldb,
+      vector_type& C, size_t offset_c, size_t ldc);
+
+  void dgekm(bool TransA, bool TransB, 
+      size_t m, size_t n,
+      value_type alpha,
+      const vector_type& A, size_t offset_a, size_t lda,
+      const vector_type& B, size_t offset_b, size_t ldb,
+      value_type beta,
+      vector_type& C, size_t offset_c, size_t ldc);
 
   void dgemv(bool Trans, 
       size_t m, size_t n,
-      double alpha,
-      const vector_double& A, size_t offset_a, size_t lda,
-      const vector_double& x, size_t offset_x, size_t incx,
-      double beta,
-      vector_double& y, size_t offset_y, size_t);
+      value_type alpha,
+      const vector_type& A, size_t offset_a, size_t lda,
+      const vector_type& x, size_t offset_x, size_t incx,
+      value_type beta,
+      vector_type& y, size_t offset_y, size_t);
 
   // 
   // Template Level 1 Blas 
   //
   void daxpy(size_t N,
-      double alpha,
-      const vector_double& X, size_t incx,
-      vector_double& Y, size_t incy);
+      value_type alpha,
+      const vector_type& X, size_t incx,
+      vector_type& Y, size_t incy);
 
   void dcopy(size_t N,
-      const vector_double& X, size_t incx,
-      vector_double& Y, size_t incy);
+      const vector_type& X, size_t incx,
+      vector_type& Y, size_t incy);
 
-  double ddot(size_t N, 
-      const vector_double& X, size_t incx,
-      const vector_double& Y, size_t incy);
+  value_type ddot(size_t N, 
+      const vector_type& X, size_t incx,
+      const vector_type& Y, size_t incy);
 
   void ddot(size_t N, 
-      const vector_double& X, size_t incx,
-      const vector_double& Y, size_t incy, 
-      double* result);
+      const vector_type& X, size_t incx,
+      const vector_type& Y, size_t incy, 
+      value_type* result);
+
+  void dgekv(size_t m,
+      value_type alpha,
+      const vector_type& A, size_t inc_a,
+      const vector_type& B, size_t inc_b,
+      value_type beta,
+      vector_type& C, size_t inc_c);
+
 
   // 
   // Instantiated Level 1 Blas 
   //
   void daxpy(size_t N,
-      double alpha,
-      const vector_double& X, size_t offset_x, size_t incx,
-      vector_double& Y, size_t offset_y, size_t incy);
+      value_type alpha,
+      const vector_type& X, size_t offset_x, size_t incx,
+      vector_type& Y, size_t offset_y, size_t incy);
 
   void dcopy(size_t N,
-      const vector_double& X, size_t offset_x, size_t incx,
-      vector_double& Y, size_t offset_y, size_t incy);
+      const vector_type& X, size_t offset_x, size_t incx,
+      vector_type& Y, size_t offset_y, size_t incy);
 
-  double ddot(size_t N, 
-      const vector_double& X, size_t offset_x, size_t incx,
-      const vector_double& Y, size_t offset_y, size_t incy);
+  value_type ddot(size_t N, 
+      const vector_type& X, size_t offset_x, size_t incx,
+      const vector_type& Y, size_t offset_y, size_t incy);
 
   void ddot(size_t N, 
-      const vector_double& X, size_t offset_x, size_t incx,
-      const vector_double& Y, size_t offset_y, size_t incy, 
-      double* result);
+      const vector_type& X, size_t offset_x, size_t incx,
+      const vector_type& Y, size_t offset_y, size_t incy, 
+      value_type* result);
+
+  void dgekv(size_t m,
+      value_type alpha,
+      const vector_type& A, size_t offset_a, size_t inc_a,
+      const vector_type& B, size_t offset_b, size_t inc_b,
+      value_type beta,
+      vector_type& C, size_t offset_c, size_t inc_c);
 
   void dscal(size_t N,
-      double alpha,
-      vector_double& X, size_t incx);
+      value_type alpha,
+      vector_type& X, size_t incx);
 
   //
   // Iterator 
   //
-  void fill(iterator first1, iterator last1, double value);
+  void fill(iterator first1, iterator last1, value_type value);
 
   void minus(const_iterator first1, const_iterator last1,
       const_iterator first2, iterator result);

@@ -1,6 +1,18 @@
 set(source
   blas_calls.cpp
   blas_wrapper.cpp
+  daxpy.cpp
+  dcopy.cpp
+  ddgmm.cpp
+  ddot_batched.cpp
+  ddot.cpp
+  dgeam.cpp
+  dgekm.cpp
+  dgekv.cpp
+  dgemm.cpp
+  dgemv.cpp
+  dscal.cpp
+  dsyrk.cpp
 )
 
 add_library(blas_wrapper STATIC ${source})
