@@ -14,6 +14,11 @@ namespace BLAS_WRAPPER {
     FILL_LOWER,
     FILL_UPPER,
   };
+
+  enum Side_t {
+    RIGHT_SIDE,
+    LEFT_SIDE
+  };
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
@@ -74,6 +79,21 @@ class Blas_Wrapper {
       double beta,
       vector_double& y, size_t);
 
+  void dgeam(bool TransA, bool TransB,
+      size_t m, size_t n,
+      double alpha,
+      const vector_double& A, size_t lda,
+      double beta,
+      const vector_double& B, size_t ldb,
+      vector_double& C, size_t ldc);
+
+  void ddgmm(BLAS_WRAPPER::Side_t side,
+      size_t m, size_t n,
+      const vector_double& A, size_t lda,
+      const vector_double& x, size_t incx,
+      vector_double& B, size_t ldb);
+
+
 
   // 
   // Instantiated Level 2 Blas 
@@ -83,11 +103,19 @@ class Blas_Wrapper {
       const vector_double& B, size_t offset_b, size_t ldb,
       vector_double& X, size_t incx);
 
-  void ddgmm(bool right_side,
+  void ddgmm(BLAS_WRAPPER::Side_t side,
       size_t m, size_t n,
-      const vector_double& A, size_t lda,
-      const vector_double& x, size_t incx,
-      vector_double& B, size_t ldb);
+      const vector_double& A, size_t offset_a, size_t lda,
+      const vector_double& x, size_t offset_x, size_t incx,
+      vector_double& B, size_t offset_b, size_t ldb);
+
+  void dgeam(bool TransA, bool TransB,
+      size_t m, size_t n,
+      double alpha,
+      const vector_double& A, size_t offset_a, size_t lda,
+      double beta,
+      const vector_double& B, size_t offset_b, size_t ldb,
+      vector_double& C, size_t offset_c, size_t ldc);
 
   void dgemv(bool Trans, 
       size_t m, size_t n,
@@ -100,6 +128,11 @@ class Blas_Wrapper {
   // 
   // Template Level 1 Blas 
   //
+  void daxpy(size_t N,
+      double alpha,
+      const vector_double& X, size_t incx,
+      vector_double& Y, size_t incy);
+
   void dcopy(size_t N,
       const vector_double& X, size_t incx,
       vector_double& Y, size_t incy);
@@ -116,6 +149,11 @@ class Blas_Wrapper {
   // 
   // Instantiated Level 1 Blas 
   //
+  void daxpy(size_t N,
+      double alpha,
+      const vector_double& X, size_t offset_x, size_t incx,
+      vector_double& Y, size_t offset_y, size_t incy);
+
   void dcopy(size_t N,
       const vector_double& X, size_t offset_x, size_t incx,
       vector_double& Y, size_t offset_y, size_t incy);

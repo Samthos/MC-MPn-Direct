@@ -31,11 +31,20 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::batched_ddot(size_t N, size_t K,
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::ddgmm(
-    bool right_side,
+    BLAS_WRAPPER::Side_t side,
     size_t m, size_t n,
-    const vector_double& A, size_t lda,
-    const vector_double& x, size_t incx,
-    vector_double& B, size_t ldb);
+    const vector_double& A, size_t offset_a, size_t lda,
+    const vector_double& x, size_t offset_x, size_t incx,
+    vector_double& B, size_t offset_b, size_t ldb);
+
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgeam(bool TransA, bool TransB,
+    size_t m, size_t n,
+    double alpha,
+    const vector_double& A, size_t offset_a, size_t lda,
+    double beta,
+    const vector_double& B, size_t offset_b, size_t ldb,
+    vector_double& C, size_t offset_c, size_t ldc);
 
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemv(
@@ -50,6 +59,13 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemv(
 //
 // Level 1 blas
 //
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::daxpy(
+    size_t N, 
+    double alpha,
+    const vector_double& X, size_t offset_x, size_t incx,
+    vector_double& Y, size_t offset_y, size_t incy);
+
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dcopy(
     size_t N, 

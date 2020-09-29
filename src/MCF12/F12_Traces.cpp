@@ -22,17 +22,18 @@ F12_Traces::F12_Traces(int electron_pairs_, int electrons_) :
     p12(electron_pairs, 0.0),
     p22(electron_pairs, 0.0),
     k12(electron_pairs, 0.0),
+    p13(electron_pairs * electrons, 0.0),
+    k13(electron_pairs * electrons, 0.0),
+    v13(electron_pairs * electrons, 0.0),
+    p23(electron_pairs * electrons, 0.0),
+    k23(electron_pairs * electrons, 0.0),
+    v23(electron_pairs * electrons, 0.0),
+    delta_pos(electron_pairs * 3, 0.0),
     dp11(electron_pairs, 0.0),
     dp12(electron_pairs, 0.0),
     dp21(electron_pairs, 0.0),
     dp22(electron_pairs, 0.0),
-    p13(electron_pairs * electrons, 0.0),
-    k13(electron_pairs * electrons, 0.0),
-    v13(electron_pairs * electrons, 0.0),
     dp31(electron_pairs * electrons, 0.0),
-    p23(electron_pairs * electrons, 0.0),
-    k23(electron_pairs * electrons, 0.0),
-    v23(electron_pairs * electrons, 0.0),
     dp32(electron_pairs * electrons, 0.0),
     ds_p11(electrons * electrons, 0.0),
     ds_p12(electrons * electrons, 0.0),
@@ -65,21 +66,71 @@ void F12_Traces::update_bx(std::unordered_map<int, Wavefunction_Type>& wavefunct
 
   vector_double& psi1_tau_dx= wavefunctions[WC::electron_pairs_1_dx].psiTau;
   vector_double& psi1_tau_dy= wavefunctions[WC::electron_pairs_1_dy].psiTau;
+  vector_double& psi1_tau_dz= wavefunctions[WC::electron_pairs_1_dz].psiTau;
          
   vector_double& psi2_tau_dx= wavefunctions[WC::electron_pairs_2_dx].psiTau;
   vector_double& psi2_tau_dy= wavefunctions[WC::electron_pairs_2_dy].psiTau;
+  vector_double& psi2_tau_dz= wavefunctions[WC::electron_pairs_2_dz].psiTau;
 
-  for (int ip = 0; ip < electron_pairs; ip++) {
-    auto dr = electron_pair_list->pos1[ip] - electron_pair_list->pos2[ip];
-    for (int im = iocc1, idx = ip * ivir2 + iocc1; im < iocc2; ++im, ++idx) {
-      psi1_tau_dx[idx]  = dr[0] * psi1_dx[idx];
-      psi1_tau_dx[idx] += dr[1] * psi1_dy[idx];
-      psi1_tau_dx[idx] += dr[2] * psi1_dz[idx];
-      psi2_tau_dx[idx]  = dr[0] * psi2_dx[idx];
-      psi2_tau_dx[idx] += dr[1] * psi2_dy[idx];
-      psi2_tau_dx[idx] += dr[2] * psi2_dz[idx];
-    }
-  }
+  build_delta_pos(electron_pair_list->pos1, electron_pair_list->pos2);
+
+  // scale psi1 derivatives by components of distance
+  blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
+      iocc2 - iocc1, electron_pairs,
+      psi1_dx, iocc1, ivir2,
+      delta_pos, 0, 3,
+      psi1_tau_dx, iocc1, ivir2);
+  blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
+      iocc2 - iocc1, electron_pairs,
+      psi1_dy, iocc1, ivir2,
+      delta_pos, 1, 3,
+      psi1_tau_dy, iocc1, ivir2);
+  blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
+      iocc2 - iocc1, electron_pairs,
+      psi1_dz, iocc1, ivir2,
+      delta_pos, 2, 3,
+      psi1_tau_dz, iocc1, ivir2);
+  blas_wrapper.dgeam(
+      false, false, 
+      iocc2 - iocc1, electron_pairs, 
+      1.0, psi1_tau_dx, iocc1, ivir2,
+      1.0, psi1_tau_dy, iocc1, ivir2,
+      psi1_tau_dx, iocc1, ivir2);
+  blas_wrapper.dgeam(
+      false, false, 
+      iocc2 - iocc1, electron_pairs, 
+      1.0, psi1_tau_dx, iocc1, ivir2,
+      1.0, psi1_tau_dz, iocc1, ivir2,
+      psi1_tau_dx, iocc1, ivir2);
+
+  // scale psi2 derivatives by components of distance
+  blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
+      iocc2 - iocc1, electron_pairs,
+      psi2_dx, iocc1, ivir2,
+      delta_pos, 0, 3,
+      psi2_tau_dx, iocc1, ivir2);
+  blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
+      iocc2 - iocc1, electron_pairs,
+      psi2_dy, iocc1, ivir2,
+      delta_pos, 1, 3,
+      psi2_tau_dy, iocc1, ivir2);
+  blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
+      iocc2 - iocc1, electron_pairs,
+      psi2_dz, iocc1, ivir2,
+      delta_pos, 2, 3,
+      psi2_tau_dz, iocc1, ivir2);
+  blas_wrapper.dgeam(
+      false, false, 
+      iocc2 - iocc1, electron_pairs, 
+      1.0, psi2_tau_dx, iocc1, ivir2,
+      1.0, psi2_tau_dy, iocc1, ivir2,
+      psi2_tau_dx, iocc1, ivir2);
+  blas_wrapper.dgeam(
+      false, false, 
+      iocc2 - iocc1, electron_pairs, 
+      1.0, psi2_tau_dx, iocc1, ivir2,
+      1.0, psi2_tau_dz, iocc1, ivir2,
+      psi2_tau_dx, iocc1, ivir2);
 
   build_two_e_derivative_traces(wavefunctions, electron_pair_list);
   build_two_e_one_e_derivative_traces(wavefunctions, electron_pair_list, electron_list);
@@ -256,6 +307,14 @@ void F12_Traces::build_two_e_one_e_traces(const Wavefunction_Type& electron_pair
       electron_pair_psi2.psi, electron_pair_psi2.lda,
       beta,
       k23, electrons);
+}
+
+void F12_Traces::build_delta_pos(const vector_Point& pos1, const vector_Point& pos2) {
+  for (int i = 0, idx = 0; i < electron_pairs; i++) {
+    for (int j = 0; j < 3; j++, idx++) {
+      delta_pos[idx] = pos1[i][j] - pos2[i][j];
+    }
+  }
 }
 
 void F12_Traces::build_two_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list) {

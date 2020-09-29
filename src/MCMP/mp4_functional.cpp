@@ -37,7 +37,7 @@ template <int CVMP4, template <typename, typename> typename Container, template 
 void MP4_Functional<CVMP4, Container, Allocator>::contract(vector_double& result,
     const vector_double& A, bool A_trans, 
     const vector_double& B, const vector_double& v) {
-  this->blas_wrapper.ddgmm(false,
+  this->blas_wrapper.ddgmm(BLAS_WRAPPER::LEFT_SIDE,
       mpn, mpn,
       B, mpn,
       v, 1,

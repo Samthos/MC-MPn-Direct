@@ -35,7 +35,7 @@ void MP3_Functional<CVMP3, Container, Allocator>::mcmp3_helper(
   this->blas_wrapper.multiplies(A_jk_1.begin(), A_jk_1.end(), A_jk_2.begin(), A_jk.begin());
 
   // rescale jk with rv
-  this->blas_wrapper.ddgmm(true,
+  this->blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
       electron_pairs, electron_pairs,
       A_jk, electron_pairs,
       j_operator, 1,

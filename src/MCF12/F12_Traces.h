@@ -14,6 +14,7 @@
 
 class F12_Traces {
   typedef std::vector<double> vector_double;
+  typedef std::vector<Point> vector_Point;
   typedef Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper_Type;
   typedef Electron_Pair_List<std::vector, std::allocator> Electron_Pair_List_Type;
   typedef Electron_List<std::vector, std::allocator> Electron_List_Type;
@@ -38,19 +39,24 @@ class F12_Traces {
   vector_double p12;
   vector_double p22;
   vector_double k12;
-  vector_double dp11;
-  vector_double dp12;
-  vector_double dp21;
-  vector_double dp22;
 
   // traces of electron pairs with single electrons
   vector_double p13;
   vector_double k13;
   vector_double v13;
-  vector_double dp31;
   vector_double p23;
   vector_double k23;
   vector_double v23;
+
+  // derivative traces of electron pairs with themselves
+  vector_double delta_pos;
+  vector_double dp11;
+  vector_double dp12;
+  vector_double dp21;
+  vector_double dp22;
+
+  // derivative traces of electron pairs with electrons
+  vector_double dp31;
   vector_double dp32;
 
   // extra one electron traces
@@ -72,6 +78,7 @@ class F12_Traces {
   void build_two_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2);
   void build_two_e_one_e_traces(const Wavefunction_Type& electron_pair_psi1, const Wavefunction_Type& electron_pair_psi2, const Wavefunction_Type& electron_psi);
 
+  void build_delta_pos(const vector_Point&, const vector_Point&);
   void build_two_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list);
   void build_two_e_one_e_derivative_traces(std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
 };
