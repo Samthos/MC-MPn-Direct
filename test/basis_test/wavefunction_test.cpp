@@ -29,9 +29,7 @@ namespace {
         pos(10),
         movecs(new Dummy_Movec_Parser()),
         wavefunction(&pos, movecs),
-        ao_amplitudes(create_ao_amplitudes(wavefunction.electrons, wavefunction.n_basis_functions)) 
-      {
-      }
+        ao_amplitudes(create_ao_amplitudes(wavefunction.electrons, wavefunction.n_basis_functions)) { }
 
       vector_Point pos;
       std::shared_ptr<Movec_Parser> movecs;
@@ -45,10 +43,14 @@ namespace {
     T fixture;
   };
 
+#ifdef HAVE_CUDA
   using Implementations = testing::Types<
     WavefunctionFixture<std::vector, std::allocator>,
-    WavefunctionFixture<thrust::device_vector, thrust::device_allocator>
-        >;
+    WavefunctionFixture<thrust::device_vector, thrust::device_allocator>>;
+#else
+  using Implementations = testing::Types<
+    WavefunctionFixture<std::vector, std::allocator>>
+#endif
   TYPED_TEST_SUITE(WavefunctionTest, Implementations);
 
   TYPED_TEST(WavefunctionTest, AOtoMO) {

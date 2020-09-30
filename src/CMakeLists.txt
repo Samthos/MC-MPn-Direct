@@ -60,6 +60,7 @@ set(source
   basis/nwchem_movec_parser.h
   basis/shell.cpp
   basis/shell.h
+  basis/wavefunction.cpp
   basis/wavefunction.h
   control_variate.cpp
   control_variate.h
@@ -85,7 +86,6 @@ add_subdirectory(tau_generators)
 set(CPU_SPECIFIC_SOURCES
   basis/atomic_orbital.cpp
   basis/basis.cpp
-  basis/wavefunction.cpp
   qc_monte.cpp
 )
 
@@ -117,12 +117,12 @@ if(${Enable_CUDA})
     MCMP/device_mp2_functional.cu
     basis/atomic_orbital.cu
     basis/basis.cu
-    basis/wavefunction.cu
     qc_monte.cu
   )
   set_source_files_properties(
       ovps_set.cpp
       qc_ovps.cpp
+      basis/wavefunction.cpp
       MCF12/correlation_factor_function.cpp
       MCF12/correlation_factor_data.cpp
       MCMP/mp3_functional.cpp

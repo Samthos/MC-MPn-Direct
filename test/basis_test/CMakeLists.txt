@@ -42,19 +42,22 @@ target_include_directories(basis_test.x PRIVATE ../../src/geometry)
 target_compile_definitions(basis_test.x PRIVATE -DHAVE_CUDA)
 add_test(NAME basis_test COMMAND basis_test.x)
 
-add_executable(wavefunction_test.x 
-  wavefunction_test.cu
-  ../../src/basis/wavefunction.h
-  ../../src/basis/wavefunction.cu
-  ../../src/basis/dummy_movec_parser.h
+set(wavefunction_test_source 
+  wavefunction_test.cpp
+  ../../src/basis/wavefunction.cpp
   ../../src/basis/dummy_movec_parser.cpp
 )
-set_target_properties(wavefunction_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+add_executable(wavefunction_test.x ${wavefunction_test_source})
 target_link_libraries(wavefunction_test.x gtest_main)
-target_link_libraries(wavefunction_test.x ${BLAS_LIBRARIES})
-target_link_libraries(wavefunction_test.x ${CUBLAS_LIBRARIES})
 target_link_libraries(wavefunction_test.x geometry)
-target_include_directories(wavefunction_test.x PRIVATE ${BLAS_INCLUDE_DIRS})
+target_link_libraries(wavefunction_test.x blas_wrapper)
+target_link_libraries(wavefunction_test.x ${BLAS_LIBRARIES})
 target_include_directories(wavefunction_test.x PRIVATE ../../src/geometry)
-target_compile_definitions(wavefunction_test.x PRIVATE -DHAVE_CUDA)
+target_include_directories(wavefunction_test.x PRIVATE ../../src/blas_wrapper)
+if (${Enable_CUDA})
+  target_link_libraries(wavefunction_test.x ${CUBLAS_LIBRARIES})
+  set_target_properties(wavefunction_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  target_compile_definitions(wavefunction_test.x PRIVATE -DHAVE_CUDA)
+  set_source_files_properties(${wavefunction_test_source} PROPERTIES LANGUAGE CUDA)
+endif()
 add_test(NAME wavefunction_test COMMAND wavefunction_test.x)

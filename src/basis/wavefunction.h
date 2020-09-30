@@ -6,6 +6,7 @@
 #endif 
 #include <vector>
 #include <array>
+#include "blas_wrapper.h"
 #include "movec_parser.h"
 
 namespace WS {
@@ -57,12 +58,11 @@ template <template <class, class> class Container, template <class> class Alloca
 class Wavefunction {
   typedef Container<double, Allocator<double>> vector_double;
   typedef Container<Point, Allocator<Point>> vector_Point;
+  typedef Blas_Wrapper<Container, Allocator> Blas_Wrapper_Type;
 
  public:
   Wavefunction() {}
   Wavefunction(vector_Point* p, const std::shared_ptr<Movec_Parser>);
-
-  ~Wavefunction() { destroy_handle(); }
 
   void ao_to_mo(const vector_double&);
 
@@ -98,23 +98,15 @@ class Wavefunction {
  private:
   static double* get_raw_pointer(vector_double&);
   static const double* get_raw_pointer(const vector_double&);
-
-  std::shared_ptr<void> create_handle();
-  void destroy_handle();
-
-  std::shared_ptr<void> v_handle;
+  Blas_Wrapper_Type blas_wrapper;
 };
 
-template <> void Wavefunction<std::vector, std::allocator>::ao_to_mo(const vector_double&);
 template <> double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(vector_double&);
 template <> const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const vector_double&);
 template class Wavefunction<std::vector, std::allocator>;
 typedef Wavefunction<std::vector, std::allocator> Wavefunction_Host;
 
 #ifdef HAVE_CUDA
-template <> std::shared_ptr<void> Wavefunction<thrust::device_vector, thrust::device_allocator>::create_handle();
-template <> void Wavefunction<thrust::device_vector, thrust::device_allocator>::destroy_handle();
-template <> void Wavefunction<thrust::device_vector, thrust::device_allocator>::ao_to_mo(const vector_double&);
 template <> double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(vector_double&);
 template <> const double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(const vector_double&);
 template class Wavefunction<thrust::device_vector, thrust::device_allocator>;

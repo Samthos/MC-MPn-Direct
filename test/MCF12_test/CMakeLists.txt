@@ -20,9 +20,8 @@ if (${Enable_CUDA})
   set_target_properties(correlation_factor_data_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
   target_link_libraries(correlation_factor_data_test.x ${CUBLAS_LIBRARIES})
   target_compile_definitions(correlation_factor_data_test.x PRIVATE -DHAVE_CUDA)
-  set_source_files_properties(
-    ${correlation_factor_data_source}
-    PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(${correlation_factor_data_source} PROPERTIES LANGUAGE CUDA)
 endif()
+add_test(NAME correlation_factor_data_test COMMAND correlation_factor_data_test.x)
 
-add_test(NAME mp2_funcational_test COMMAND correlation_factor_data_test.x)
+#set(f12_traces_source

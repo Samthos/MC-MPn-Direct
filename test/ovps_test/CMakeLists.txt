@@ -27,7 +27,7 @@ add_executable(ovps_test.x
   ../../src/basis/dummy_movec_parser.h
   ../../src/basis/movec_parser.cpp
   ../../src/basis/movec_parser.h
-  ../../src/basis/wavefunction.cu
+  ../../src/basis/wavefunction.cpp
   ../../src/basis/wavefunction.h
   ../../src/ovps_set.cpp
   ../../src/ovps_set.h
@@ -54,6 +54,7 @@ if (${Enable_CUDA})
   set_source_files_properties(
     ../../src/ovps_set.cpp
     ../../src/qc_ovps.cpp
+    ../../src/basis/wavefunction.cpp
     PROPERTIES LANGUAGE CUDA)
 endif()
 add_test(NAME ovps_test COMMAND ovps_test.x)

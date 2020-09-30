@@ -1,7 +1,3 @@
-#include <vector>
-
-#include "cblas.h"
-
 #include "wavefunction.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
@@ -16,8 +12,7 @@ Wavefunction<Container, Allocator>::Wavefunction(vector_Point* p, const std::sha
   lda(ivir2),
   psi(lda * electrons, 0.0),
   psiTau(lda * electrons, 0.0),
-  pos(p),
-  v_handle(create_handle())
+  pos(p)
 {
 }
 
@@ -91,25 +86,15 @@ const double* Wavefunction<Container, Allocator>::get_raw_pointer(const Containe
   return nullptr;
 }
 
-
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-std::shared_ptr<void> Wavefunction<Container, Allocator>::create_handle() {
-  return std::shared_ptr<void>();
-}
-
-template <template <typename, typename> typename Container, template <typename> typename Allocator>
-void Wavefunction<Container, Allocator>::destroy_handle() {
-}
-
-template <>
-void Wavefunction<std::vector, std::allocator>::ao_to_mo(const vector_double& ao_amplitudes) {
-  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+void Wavefunction<Container, Allocator>::ao_to_mo(const vector_double& ao_amplitudes) {
+  blas_wrapper.dgemm(true, false,
       lda, electrons, n_basis_functions,
       1.0,
-      movecs.data(), n_basis_functions,
-      ao_amplitudes.data(), n_basis_functions,
+      movecs, n_basis_functions,
+      ao_amplitudes, n_basis_functions,
       0.0,
-      psi.data(), lda);
+      psi, lda);
 }
 
 template <>
@@ -121,3 +106,15 @@ template <>
 const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const vector_double& v) {
   return v.data();
 }
+
+#ifdef HAVE_CUDA
+template <>
+double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(thrust::device_vector<double, thrust::device_allocator<double>>& v) {
+  return v.data().get();
+}
+
+template <>
+const double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(const thrust::device_vector<double, thrust::device_allocator<double>>& v) {
+  return v.data().get();
+}
+#endif
