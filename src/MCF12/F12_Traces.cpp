@@ -385,3 +385,20 @@ void F12_Traces<std::vector, std::allocator>::build_delta_pos(const vector_Point
   }
 }
 
+#ifdef HAVE_CUDA
+__global__
+void build_delta_pos_kernel(size_t size, const Point* pos1, const Point* pos2, double* delta_pos) {
+  int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid < size) {
+    int i = tid / 3;
+    int j = tid % 3;
+    delta_pos[tid] = pos1[i][j] - pos2[i][j];
+  }
+}
+template <>
+void F12_Traces<thrust::device_vector, thrust::device_allocator>::build_delta_pos(const vector_Point& pos1, const vector_Point& pos2) {
+  int blockSize = 128;
+  int gridSize = (delta_pos.size() + blockSize - 1) / blockSize;
+  build_delta_pos_kernel<<<gridSize, blockSize>>>(delta_pos.size(), pos1.data().get(), pos2.data().get(), delta_pos.data().get());
+}
+#endif

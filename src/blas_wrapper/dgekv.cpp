@@ -147,8 +147,8 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgekv(size_t
   const double* a_ptr = A.data().get() + offset_a;
   const double* b_ptr = B.data().get() + offset_b;
   double* c_ptr = C.data().get() + offset_c;
-  dim3 blockSize;
-  dim3 gridSize;
+  dim3 blockSize(128, 1, 1);
+  dim3 gridSize((m + blockSize.x - 1) / blockSize.x, 1, 1);
   if (0.0 == beta) {
     if (alpha == 1.0) {
       dgekv_kernel_1a_0b<<<gridSize, blockSize>>>(m, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);

@@ -15,6 +15,7 @@ set(source
   dgemv.cpp
   dscal.cpp
   dsyrk.cpp
+  mfill.cpp
 )
 
 add_library(blas_wrapper STATIC ${source})

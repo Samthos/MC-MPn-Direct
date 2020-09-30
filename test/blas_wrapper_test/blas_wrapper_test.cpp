@@ -1,6 +1,3 @@
-#include <thrust/device_vector.h>
-#include <vector>
-
 #include "gtest/gtest.h"
 #include "blas_wrapper.h"
 #include "../test_helper.h"
@@ -13,61 +10,88 @@ namespace {
       typedef Blas_Wrapper<Container, Allocator> Blas_Wrapper_Type;
 
       Blas_Wrapper_Fixture() : 
-        n(20),
-        A(n * n),
-        B(n * n),
-        C(n * n),
-        x(n),
-        y(n)
-    {
-#ifdef HAVE_CUDA
-      namespace NS = thrust;
-#else
-      namespace NS = std;
-#endif
-      auto v = make_psi(n, n, 1.0);
-      NS::copy(v.begin(), v.end(), A.begin());
-      NS::copy(v.begin(), v.end(), B.begin());
-      NS::copy(v.begin(), v.begin() + n, x.begin());
-    }
+        m(10), n(10),
+        lda(20), ldb(20), ldc(20),
+        offset_a(1), offset_b(2), offset_c(3),
+        A(lda * n, 0.0),
+        B(ldb * n, 0.0),
+        C(ldc * n, 0.0) { }
 
+      size_t m;
       size_t n;
+      size_t lda;
+      size_t ldb;
+      size_t ldc;
+      size_t offset_a;
+      size_t offset_b;
+      size_t offset_c;
       vector_double A;
       vector_double B;
       vector_double C;
-      vector_double x;
-      vector_double y;
       Blas_Wrapper_Type blas_wrapper;
   };
 
   template class Blas_Wrapper_Fixture<std::vector, std::allocator>;
   typedef Blas_Wrapper_Fixture<std::vector, std::allocator> Blas_Wrapper_Host_Fixture;
 
-/*
   template class Blas_Wrapper_Fixture<thrust::device_vector, thrust::device_allocator>;
   typedef Blas_Wrapper_Fixture<thrust::device_vector, thrust::device_allocator> Blas_Wrapper_Device_Fixture;
-*/
 
   template <class T>
   class BlasWrapperTest : public testing::Test {
    public:
-    void check(int sign, int start, int stop, int n_tau, const std::vector<double>& array, const std::string& array_name) {
-      // double polygamma_factor = sign * PolyGamma_Difference(start, stop, n_tau+1);
-      // for (int row = 0; row < electron_pairs; row++) {
-      //   for (int col = 0; col < electron_pairs; col++) {
-      //     ASSERT_FLOAT_EQ(array[col * electron_pairs + row], polygamma_factor* value(row, col))
-      //       << "row = " << row << ", col = " << col << " of " << array_name << "\n";
-      //   }
-      // }
-    }
-
     T blas_wrapper_fixture;
   };
 
   using Implementations = testing::Types<Blas_Wrapper_Host_Fixture>; // , Blas_Wrapper_Device_Fixture>;
   TYPED_TEST_SUITE(BlasWrapperTest, Implementations);
 
-  TYPED_TEST(BlasWrapperTest, ddotTest) {
-    this->blas_wrapper_fixture.blas_wrapper.ddot();
+  void pmat(size_t m, size_t n, 
+      const std::vector<double>& A, size_t lda) {
+    for (int row = 0; row < m; row++) {
+      for (int col = 0; col < n; col++) {
+        printf("%12.6f", A[col * lda + row]);
+      }
+      printf("\n");
+    }
+    printf("\n");
+  }
+
+  TYPED_TEST(BlasWrapperTest, dgeamTest) {
+    auto& f = this->blas_wrapper_fixture;
+    f.blas_wrapper.mfill(
+        f.m, f.n,
+        1.0,
+        f.A, f.offset_a, f.lda);
+    f.blas_wrapper.mfill(
+        f.m, f.n,
+        2.0,
+        f.B, f.offset_b, f.ldb);
+    f.blas_wrapper.mfill(
+        f.ldc, f.n,
+        1.0,
+        f.C, f.offset_c, f.ldc);
+    f.blas_wrapper.dgeam(
+        false, false,
+        f.m, f.n,
+        2.0,
+        f.A, f.offset_a, f.lda,
+        -1.0,
+        f.B, f.offset_b, f.ldb,
+        f.C, f.offset_c, f.ldc);
+    
+    std::vector<double> h_C = get_vector(f.C);
+    for (int col = 0; col < f.n; col++) {
+      int row = 0;
+      for (; row < f.offset_c; row++) {
+        ASSERT_EQ(h_C[col * f.ldc + row], 1.0);
+      }
+      for (; row < f.offset_c + f.m; row++) {
+        ASSERT_EQ(h_C[col * f.ldc + row], 0.0);
+      }
+      for (; row < f.ldc; row++) {
+        ASSERT_EQ(h_C[col * f.ldc + row], 1.0);
+      }
+    }
   }
 }

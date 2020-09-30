@@ -9,8 +9,10 @@ set(source
   MCF12/correlation_factor_function.h
   MCF12/gf2_f12.cpp
   MCF12/gf2_f12.h
-  MCF12/mp2_f12.cpp
-  MCF12/mp2_f12.h
+  MCF12/mp2_f12_vbx.cpp
+  MCF12/mp2_f12_vbx.h
+  MCF12/mp2_f12_v.cpp
+  MCF12/mp2_f12_v.h
   MCF12/x_traces.cpp
   MCF12/x_traces.h
   MCGF/gf3_core_c.h
@@ -125,6 +127,8 @@ if(${Enable_CUDA})
       MCF12/correlation_factor_data.cpp
       MCMP/mp3_functional.cpp
       MCMP/mp4_functional.cpp
+      MCF12/mp2_f12_v.cpp
+      MCF12/F12_Traces.cpp
       PROPERTIES LANGUAGE CUDA)
 
 

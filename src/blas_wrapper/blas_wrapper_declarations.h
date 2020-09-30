@@ -65,6 +65,10 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemv(
     double beta,
     vector_type& y, size_t offset_y, size_t);
 
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::mfill(size_t m, size_t n,
+    double alpha,
+    vector_type& A, size_t offset_a, size_t lda);
 //
 // Level 1 blas
 //

@@ -171,8 +171,12 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgekm(bool T
   const double* a_ptr = A.data().get() + offset_a;
   const double* b_ptr = B.data().get() + offset_b;
   double* c_ptr = C.data().get() + offset_c;
-  dim3 blockSize;
-  dim3 gridSize;
+  dim3 blockSize(16, 16, 1);
+  dim3 gridSize(
+      (m + blockSize.x - 1) / blockSize.x,
+      (n + blockSize.y - 1) / blockSize.y,
+      1);
+
   if (TransA == false && TransB == false) {
     if (0.0 == beta) {
       if (alpha == 1.0) {

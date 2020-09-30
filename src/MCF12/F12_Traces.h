@@ -87,4 +87,8 @@ class F12_Traces {
 template <> void F12_Traces<std::vector, std::allocator>::build_delta_pos(const vector_Point&, const vector_Point&);
 template class F12_Traces<std::vector, std::allocator>;
 
+#ifdef HAVE_CUDA
+template <> void F12_Traces<thrust::device_vector, thrust::device_allocator>::build_delta_pos(const vector_Point&, const vector_Point&);
+template class F12_Traces<thrust::device_vector, thrust::device_allocator>;
+#endif 
 #endif //F12_METHODS_SRC_F12_TRACES_H_

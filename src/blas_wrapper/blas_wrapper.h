@@ -102,6 +102,10 @@ class Blas_Wrapper {
       const vector_type& x, size_t incx,
       vector_type& B, size_t ldb);
 
+  void mfill(size_t m, size_t n,
+      double alpha,
+      vector_type& A, size_t lda);
+
 
 
   // 
@@ -141,6 +145,10 @@ class Blas_Wrapper {
       const vector_type& x, size_t offset_x, size_t incx,
       value_type beta,
       vector_type& y, size_t offset_y, size_t);
+
+  void mfill(size_t m, size_t n,
+      double alpha,
+      vector_type& A, size_t offset_a, size_t lda);
 
   // 
   // Template Level 1 Blas 

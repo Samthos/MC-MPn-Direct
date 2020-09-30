@@ -7,7 +7,8 @@
 #include <iomanip>
 #include <iostream>
 
-#include "../MCF12/mp2_f12.h"
+#include "../MCF12/mp2_f12_v.h"
+#include "../MCF12/mp2_f12_vbx.h"
 #include "create_mp2_functional.h"
 #include "mp3_functional.h"
 #include "mp4_functional.h"
@@ -36,7 +37,7 @@ MCMP<Container, Allocator>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p
     energy_functions.push_back(create_MP4_Functional<Container, Allocator>(this->iops.iopns[KEYS::MP4CV_LEVEL], this->electron_pair_list->size()));
   }
   if (this->iops.iopns[KEYS::TASK] & TASK::MP2_F12_V) {
-    energy_functions.push_back(new MP2_F12_V(this->iops));
+    energy_functions.push_back(new MP2_F12_V<Container, Allocator>(this->iops));
   }
   if (this->iops.iopns[KEYS::TASK] & TASK::MP2_F12_VBX) {
     energy_functions.push_back(new MP2_F12_VBX(this->iops));
