@@ -69,6 +69,10 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dgemv(
 // Level 1 blas
 //
 template <>
+double Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dasum(
+    size_t N, const vector_type& X, size_t incx);
+
+template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::daxpy(
     size_t N, 
     double alpha,
@@ -109,6 +113,10 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dscal(size_t N,
 // 
 // Iterators
 //
+template <>
+double Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::accumulate(
+    iterator first1, iterator last1, double value);
+
 template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::fill(
     iterator first1, iterator last1, double value);

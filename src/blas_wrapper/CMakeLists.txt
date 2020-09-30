@@ -1,11 +1,13 @@
 set(source
+  accumulate.cpp
   blas_calls.cpp
   blas_wrapper.cpp
+  dasum.cpp
   daxpy.cpp
   dcopy.cpp
   ddgmm.cpp
-  ddot_batched.cpp
   ddot.cpp
+  ddot_batched.cpp
   dgeam.cpp
   dgekm.cpp
   dgekv.cpp

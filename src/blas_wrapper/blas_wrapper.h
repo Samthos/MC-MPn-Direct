@@ -145,6 +145,8 @@ class Blas_Wrapper {
   // 
   // Template Level 1 Blas 
   //
+  double dasum(size_t N, const vector_type& X, size_t incx);
+
   void daxpy(size_t N,
       value_type alpha,
       const vector_type& X, size_t incx,
@@ -206,6 +208,8 @@ class Blas_Wrapper {
   //
   // Iterator 
   //
+  double accumulate(iterator first1, iterator last1, value_type value);
+
   void fill(iterator first1, iterator last1, value_type value);
 
   void minus(const_iterator first1, const_iterator last1,

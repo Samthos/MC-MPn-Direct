@@ -31,6 +31,13 @@ class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
   double calculate_v_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
   double calculate_v_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
   double calculate_v_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
+  double calculate_v_4e_help(
+      vector_double& R_ip_io, vector_double& R_ip_jo, 
+      const vector_double& S_io_jo,
+      const vector_double& S_ip_io_1, const vector_double& S_ip_io_2,
+      const vector_double& S_ip_jo_1, const vector_double& S_ip_jo_2,
+      const vector_double& S_ip,
+      size_t size, size_t size_ep);
   void calculate_v(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
 
   //define the amplitudes
@@ -48,6 +55,8 @@ class MP2_F12_V : public F12_MP_Functional<std::vector, std::allocator> {
   vector_double T_ip_io;
   vector_double T_ip_jo;
   vector_double T_io_jo;
+  vector_double T_ip;
+  vector_double T_io;
 
   double nsamp_pair;
   double nsamp_one_1;
@@ -98,7 +107,6 @@ class MP2_F12_VBX : public MP2_F12_V {
   double nsamp_one_3;
   double nsamp_one_4;
 
-  std::vector<double> T_ip;
   std::vector<double> T_io_ko;
   std::vector<double> T_jo_ko;
 };
