@@ -29,6 +29,7 @@ Correlation_Factor_Data<Container, Allocator>::Correlation_Factor_Data(int elect
 {
   auto m_correlation_factor = create_correlation_factor_function(correlation_factor, gamma, beta);
   m_f12d_is_zero = m_correlation_factor->f12_d_is_zero();
+  delete m_correlation_factor;
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator> 
@@ -66,6 +67,8 @@ void Correlation_Factor_Data<std::vector, std::allocator>::update(const Electron
       f23[ip * electron_list->size() + io] = m_correlation_factor->f12(Point::distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
     }
   }
+
+  delete m_correlation_factor;
 }
 
 #ifdef HAVE_CUDA
@@ -78,6 +81,7 @@ void f12p_kernal(
   if (tid < size) {
     f12p[tid] = m_correlation_factor->f12(r12[tid]);
   }
+  delete m_correlation_factor;
 }
 
 __global__ 
@@ -89,6 +93,7 @@ void f12p_a_kernal(
   if (tid < size) {
     f12p_a[tid] = m_correlation_factor->f12_a(r12[tid]);
   }
+  delete m_correlation_factor;
 }
 
 __global__ 
@@ -100,6 +105,7 @@ void f12p_c_kernal(
   if (tid < size) {
     f12p_c[tid] = m_correlation_factor->f12_c(r12[tid]);
   }
+  delete m_correlation_factor;
 }
 
 __global__ 
@@ -114,6 +120,7 @@ void f12o_kernal(
     auto dr = Point::distance(pos[tidx], pos[tidy]);
     f12o[tid] = m_correlation_factor->f12(dr);
   }
+  delete m_correlation_factor;
 }
 
 __global__ 
@@ -128,6 +135,7 @@ void f12o_b_kernal(
     auto dr = Point::distance(pos[tidx], pos[tidy]);
     f12o_b[tid] = m_correlation_factor->f12_b(dr);
   }
+  delete m_correlation_factor;
 }
 
 __global__ 
@@ -142,6 +150,7 @@ void f12o_d_kernal(
     auto dr = Point::distance(pos[tidx], pos[tidy]);
     f12o_d[tid] = m_correlation_factor->f12_d(dr);
   }
+  delete m_correlation_factor;
 }
 
 __global__ 
@@ -157,6 +166,7 @@ void f13_kernal(
     auto dr = Point::distance(electron_pair_pos[tidx], electron_pos[tidy]);
     f13[tid] = m_correlation_factor->f12(dr);
   }
+  delete m_correlation_factor;
 }
 
 /*
@@ -200,7 +210,7 @@ void Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>::u
   grid_size = dim3((electron_list->size() + 15) / 16, (electron_list->size() + 15) / 16, 1);
   f12o_kernal  <<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o.data().get());
   f12o_b_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_b.data().get());
-  f12o_d_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_d.data().get());
+f12o_d_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_d.data().get());
 
   block_size = dim3(16, 16, 1);
   grid_size = dim3((electron_pair_list->size() + 15) / 16, (electron_list->size() + 15) / 16, 1);
