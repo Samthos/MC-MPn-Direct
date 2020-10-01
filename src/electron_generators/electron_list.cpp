@@ -19,7 +19,8 @@ Electron_List<Container, Allocator>::Electron_List(int size) :
     electrons(size),
     pos(size),
     weight(size),
-    inverse_weight(size) {}
+    inverse_weight(size)
+{}
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 void Electron_List<Container, Allocator>::set_weight(Electron& electron, const Electron_GTO_Weight& weight) {
@@ -36,3 +37,27 @@ void Electron_List<Container, Allocator>::transpose() {
   }
 }
 
+#ifdef HAVE_CUDA
+template <>
+Electron_List<thrust::device_vector, thrust::device_allocator>::Electron_List(int size) :
+    electrons(size),
+    pos(size),
+    weight(size),
+    inverse_weight(size),
+    m_pos(size),
+    m_weight(size),
+    m_inverse_weight(size)
+{}
+
+template <>
+void Electron_List<thrust::device_vector, thrust::device_allocator>::transpose() {
+  for (size_t i = 0; i < electrons.size(); i++) {
+    m_pos[i] = electrons[i].pos;
+    m_weight[i] = electrons[i].weight;
+    m_inverse_weight[i] = electrons[i].inverse_weight;
+  }
+  thrust::copy(m_pos.begin(), m_pos.end(), pos.begin());
+  thrust::copy(m_weight.begin(), m_weight.end(), weight.begin());
+  thrust::copy(m_inverse_weight.begin(), m_inverse_weight.end(), inverse_weight.begin());
+}
+#endif

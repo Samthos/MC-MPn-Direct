@@ -142,6 +142,8 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::plus(
 
 
 template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::Blas_Wrapper();
+template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::Blas_Wrapper(const Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>&);
+template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::operator = (const Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>& other);
 template <> Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::~Blas_Wrapper();
 template class Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>;
 

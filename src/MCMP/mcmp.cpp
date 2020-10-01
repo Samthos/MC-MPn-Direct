@@ -238,8 +238,8 @@ void GPU_MCMP::energy() {
         Standard_MP_Functional_Type* functional = dynamic_cast<Standard_MP_Functional_Type*>(energy_functions[i]);
         functional->energy(emp[i], control[i], this->ovps, this->electron_pair_list, this->tau);
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
-        // F12_MP_Functional* functional = dynamic_cast<F12_MP_Functional*>(energy_functions[i]);
-        // functional->energy(emp[i], control[i], this->wavefunctions, this->electron_pair_list, this->electron_list); 
+        F12_MP_Functional_Type* functional = dynamic_cast<F12_MP_Functional_Type*>(energy_functions[i]);
+        functional->energy(emp[i], control[i], this->wavefunctions, this->electron_pair_list, this->electron_list); 
       } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
         // Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(energy_functions[i]);
         // functional->energy(emp[i], control[i], this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->electron_pair_list, this->tau); 

@@ -4,23 +4,30 @@
 #include <thrust/device_vector.h>
 #include <vector>
 
-  void vfill(thrust::device_vector<double>& v) {
-    thrust::fill(v.begin(), v.end(), -1);
-  }
-  
-  std::vector<double> get_vector(thrust::device_vector<double>& v) {
-    std::vector<double> w(v.size());
-    thrust::copy(v.begin(), v.end(), w.begin());
-    return w;
-  }
-  
-  void vfill(std::vector<double>& v) {
-    std::fill(v.begin(), v.end(), -1);
-  }
-  
-  std::vector<double> get_vector(std::vector<double> v) {
-    return v;
-  }
+/*
+   the fill heper function fill a vector with -1.0
+*/
+void vfill(thrust::device_vector<double>& v) {
+  thrust::fill(v.begin(), v.end(), -1);
+}
+
+void vfill(std::vector<double>& v) {
+  std::fill(v.begin(), v.end(), -1);
+}
+
+
+/*
+   returns a copy of the argument as std::vector<double>
+*/
+std::vector<double> get_vector(thrust::device_vector<double>& v) {
+  std::vector<double> w(v.size());
+  thrust::copy(v.begin(), v.end(), w.begin());
+  return w;
+}
+
+std::vector<double> get_vector(std::vector<double> v) {
+  return v;
+}
 
 std::vector<double> make_psi(int n_electron_pairs, int n_orbitals, double sign) {
   // the values of psi are such that they produce green's functions traces that

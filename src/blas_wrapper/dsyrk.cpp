@@ -52,18 +52,27 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dsyrk(BLAS_W
       const vector_type& A, size_t offset_a, size_t lda,
       double beta,
       vector_type& B, size_t offset_b, size_t ldb) {
-  auto F = (fill_mode == BLAS_WRAPPER::FILL_UPPER ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER );
-  auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
-  cublasDsyrk(handle,
-      F, T,
-      m, k,
-      &alpha,
-      A.data().get() + offset_a, lda,
-      &beta,
-      B.data().get() + offset_b, ldb);
-  if (fill_mode == BLAS_WRAPPER::FILL_FULL) {
-    printf("FILL MODE FULL in dysrk not supported for cuda\n");
-    exit(0);
+  if (fill_mode != BLAS_WRAPPER::FILL_FULL) {
+    auto T = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
+    auto F = (fill_mode == BLAS_WRAPPER::FILL_UPPER ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER );
+    cublasDsyrk(handle,
+        F, T,
+        m, k,
+        &alpha,
+        A.data().get() + offset_a, lda,
+        &beta,
+        B.data().get() + offset_b, ldb);
+  } else {
+    auto TA = (Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
+    auto TB = (!Trans ? CUBLAS_OP_T : CUBLAS_OP_N);
+    cublasDgemm(handle,
+        TA, TB,
+        m, m, k,
+        &alpha,
+        A.data().get() + offset_a, lda,
+        A.data().get() + offset_a, lda,
+        &beta,
+        B.data().get() + offset_b, ldb);
   }
 }
 #endif

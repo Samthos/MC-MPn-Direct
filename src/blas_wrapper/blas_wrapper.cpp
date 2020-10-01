@@ -16,6 +16,14 @@ template <>
 Blas_Wrapper<std::vector, std::allocator>::Blas_Wrapper() {}
 
 template <> 
+Blas_Wrapper<std::vector, std::allocator>::Blas_Wrapper(const Blas_Wrapper&) {}
+
+template <> 
+Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper<std::vector, std::allocator>::operator = (const Blas_Wrapper<std::vector, std::allocator>&) {
+  return *this;
+}
+
+template <> 
 Blas_Wrapper<std::vector, std::allocator>::~Blas_Wrapper() {}
 
 template <> 
@@ -50,6 +58,19 @@ void Blas_Wrapper<std::vector, std::allocator>::plus(
 template <> 
 Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Blas_Wrapper() {
   cublasCreate(&handle);
+}
+
+template <> 
+Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Blas_Wrapper(const Blas_Wrapper&) {
+  cublasCreate(&handle);
+}
+
+template <> 
+Blas_Wrapper<thrust::device_vector, thrust::device_allocator> Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::operator = (const Blas_Wrapper<thrust::device_vector, thrust::device_allocator>& other) {
+  if (this != &other) {
+    cublasCreate(&handle);
+  }
+  return *this;
 }
 
 template <> 

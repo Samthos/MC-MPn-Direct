@@ -49,6 +49,9 @@ class Electron_List {
     return electrons.end();
   }
 
+  std::vector<Point> m_pos;
+  std::vector<double> m_weight;
+  std::vector<double> m_inverse_weight;
   std::vector<Electron> electrons;
 };
 
@@ -56,6 +59,8 @@ template class Electron_List<std::vector, std::allocator>;
 typedef Electron_List<std::vector, std::allocator> Electron_List_Host;
 
 #ifdef HAVE_CUDA
+template <> Electron_List<thrust::device_vector, thrust::device_allocator>::Electron_List(int size);
+template <> void Electron_List<thrust::device_vector, thrust::device_allocator>::transpose();
 template class Electron_List<thrust::device_vector, thrust::device_allocator>;
 typedef Electron_List<thrust::device_vector, thrust::device_allocator> Electron_List_Device;
 #endif

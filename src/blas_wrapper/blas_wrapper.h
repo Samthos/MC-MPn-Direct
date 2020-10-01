@@ -30,6 +30,8 @@ class Blas_Wrapper {
 
  public:
   Blas_Wrapper();
+  Blas_Wrapper(const Blas_Wrapper&);
+  Blas_Wrapper operator = (const Blas_Wrapper&);
   ~Blas_Wrapper();
 
   // 

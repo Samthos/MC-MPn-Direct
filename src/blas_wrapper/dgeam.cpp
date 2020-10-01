@@ -71,7 +71,7 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgeam(bool T
     vector_type& C, size_t offset_c, size_t ldc) {
   auto TA = (TransA ? CUBLAS_OP_T : CUBLAS_OP_N);
   auto TB = (TransB ? CUBLAS_OP_T : CUBLAS_OP_N);
-  cublasDgeam(handle,
+  auto status = cublasDgeam(handle,
       TA, TB,
       m, n,
       &alpha,
