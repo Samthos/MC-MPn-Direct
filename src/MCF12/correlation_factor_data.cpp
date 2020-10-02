@@ -161,13 +161,40 @@ void f13_kernal(
   auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
   int tidx = blockIdx.x * blockDim.x + threadIdx.x;
   int tidy = blockIdx.y * blockDim.y + threadIdx.y;
-  int tid = tidy * electron_pairs + tidx;
-  if (tidx < electron_pairs && tidy < electrons) {
-    auto dr = Point::distance(electron_pair_pos[tidx], electron_pos[tidy]);
+  int tid = tidy * electrons + tidx;
+  if (tidx < electrons && tidy < electron_pairs) {
+    auto dr = Point::distance(electron_pair_pos[tidy], electron_pos[tidx]);
     f13[tid] = m_correlation_factor->f12(dr);
   }
   delete m_correlation_factor;
 }
+
+template <>
+void Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+  dim3 block_size(128, 1, 1);
+  dim3 grid_size((electron_pair_list->size() + 127) / 128, 1, 1);
+  f12p_kernal  <<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p.data().get());
+  f12p_a_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p_a.data().get());
+  f12p_c_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p_c.data().get());
+
+  block_size = dim3(16, 16, 1);
+  grid_size = dim3((electron_list->size() + 15) / 16, (electron_list->size() + 15) / 16, 1);
+  f12o_kernal  <<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o.data().get());
+  f12o_b_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_b.data().get());
+f12o_d_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_d.data().get());
+
+  block_size = dim3(16, 16, 1);
+  grid_size = dim3((electron_list->size() + 15) / 16, (electron_pair_list->size() + 15) / 16,  1);
+  f13_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, 
+      electron_pair_list->size(), electron_pair_list->pos1.data().get(), 
+      electron_list->size(), electron_list->pos.data().get(), 
+      f13.data().get());
+  f13_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, 
+      electron_pair_list->size(), electron_pair_list->pos2.data().get(), 
+      electron_list->size(), electron_list->pos.data().get(), 
+      f23.data().get());
+}
+#endif
 
 /*
 void Slater_Correlation_Factor_Data::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
@@ -197,31 +224,4 @@ void Slater_Correlation_Factor_Data::update(const Electron_Pair_List_Type* elect
   }
 }
 */
-
-template <>
-void Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  dim3 block_size(128, 1, 1);
-  dim3 grid_size((electron_pair_list->size() + 127) / 128, 1, 1);
-  f12p_kernal  <<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p.data().get());
-  f12p_a_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p_a.data().get());
-  f12p_c_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p_c.data().get());
-
-  block_size = dim3(16, 16, 1);
-  grid_size = dim3((electron_list->size() + 15) / 16, (electron_list->size() + 15) / 16, 1);
-  f12o_kernal  <<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o.data().get());
-  f12o_b_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_b.data().get());
-f12o_d_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_d.data().get());
-
-  block_size = dim3(16, 16, 1);
-  grid_size = dim3((electron_pair_list->size() + 15) / 16, (electron_list->size() + 15) / 16, 1);
-  f13_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, 
-      electron_pair_list->size(), electron_pair_list->pos1.data().get(), 
-      electron_list->size(), electron_list->pos.data().get(), 
-      f13.data().get());
-  f13_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, 
-      electron_pair_list->size(), electron_pair_list->pos2.data().get(), 
-      electron_list->size(), electron_list->pos.data().get(), 
-      f23.data().get());
-}
-#endif
 

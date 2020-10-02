@@ -9,7 +9,7 @@ Dummy_Electron_List<Container, Allocator>::Dummy_Electron_List(int size) : Elect
 #endif
   std::vector<Point> p;
   for (int i = 0; i < size; i++) {
-    p.emplace_back(i, i, i);
+    p.emplace_back(0.1 * i, 0.1 * i, 0.1 * i);
   }
   NS::copy(p.begin(), p.end(), this->pos.begin());
   NS::fill(this->weight.begin(), this->weight.end(), 1.0);

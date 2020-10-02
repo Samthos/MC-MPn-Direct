@@ -67,7 +67,6 @@ namespace {
       F12_Traces_Type f12_traces;
   };
 
-
   template <typename T>
   class F12TracesTest : public testing::Test {
     public:
