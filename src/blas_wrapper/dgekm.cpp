@@ -37,13 +37,13 @@ void Blas_Wrapper<std::vector, std::allocator>::dgekm(bool TransA, bool TransB,
       if (alpha == 1.0) {
         for (size_t col = 0; col < n; col++) {
           for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * ldc + row] * b_ptr[col * ldb + row];
+            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row];
           }
         }
       } else {
         for (size_t col = 0; col < n; col++) {
           for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * ldc + row] * b_ptr[col * ldb + row];
+            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row];
           }
         }
       }
@@ -51,13 +51,13 @@ void Blas_Wrapper<std::vector, std::allocator>::dgekm(bool TransA, bool TransB,
       if (alpha == 1.0) {
         for (size_t col = 0; col < n; col++) {
           for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * ldc + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
+            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
           }
         }
       } else {
         for (size_t col = 0; col < n; col++) {
           for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * ldc + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
+            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
           }
         }
       }
@@ -65,13 +65,13 @@ void Blas_Wrapper<std::vector, std::allocator>::dgekm(bool TransA, bool TransB,
       if (alpha == 1.0) {
         for (size_t col = 0; col < n; col++) {
           for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * ldc + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
+            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
           }
         }
       } else {
         for (size_t col = 0; col < n; col++) {
           for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * ldc + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
+            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
           }
         }
       }
@@ -196,5 +196,4 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgekm(bool T
   }
   cudaDeviceSynchronize();
 }
-
 #endif

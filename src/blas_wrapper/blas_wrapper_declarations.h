@@ -114,6 +114,11 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dscal(size_t N,
     double alpha,
     vector_type& X, size_t incx);
 
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::vfill(size_t N,
+    double alpha,
+    vector_type& X, size_t offset_x, size_t incx);
+
 // 
 // Iterators
 //

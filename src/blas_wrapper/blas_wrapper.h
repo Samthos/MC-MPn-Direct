@@ -182,6 +182,10 @@ class Blas_Wrapper {
       value_type beta,
       vector_type& C, size_t inc_c);
 
+  void vfill(size_t n,
+      double alpha,
+      vector_type& X, size_t inc_x);
+
 
   // 
   // Instantiated Level 1 Blas 
@@ -214,6 +218,10 @@ class Blas_Wrapper {
   void dscal(size_t N,
       value_type alpha,
       vector_type& X, size_t incx);
+
+  void vfill(size_t n,
+      double alpha,
+      vector_type& X, size_t offset_x, size_t inc_x);
 
   //
   // Iterator 

@@ -16,6 +16,7 @@ set(source
   dscal.cpp
   dsyrk.cpp
   mfill.cpp
+  vfill.cpp
 )
 
 add_library(blas_wrapper STATIC ${source})

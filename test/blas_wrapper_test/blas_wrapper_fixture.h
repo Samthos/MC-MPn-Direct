@@ -16,12 +16,21 @@ class Blas_Wrapper_Fixture {
   size_t lda;
   size_t ldb;
   size_t ldc;
+  size_t inc_x;
+  size_t inc_y;
+  size_t inc_z;
   size_t offset_a;
   size_t offset_b;
   size_t offset_c;
+  size_t offset_x;
+  size_t offset_y;
+  size_t offset_z;
   vector_double A;
   vector_double B;
   vector_double C;
+  vector_double X;
+  vector_double Y;
+  vector_double Z;
   Blas_Wrapper_Type blas_wrapper;
 };
 

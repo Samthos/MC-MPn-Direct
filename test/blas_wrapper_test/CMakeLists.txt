@@ -10,6 +10,7 @@ set(blas_wrapper_test_source
   blas_wrapper_fixture.cpp
   dgeam_test.cpp
   dgekm_test.cpp
+  dgekv_test.cpp
 )
 add_executable(blas_wrapper_test.x ${blas_wrapper_test_source})
 if(${Enable_CUDA})
