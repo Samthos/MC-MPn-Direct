@@ -2,7 +2,7 @@
 #include <memory>
 #include "gtest/gtest.h"
 
-#include "../test_helper.h"
+#include "test_helper.h"
 
 #include "../../src/basis/dummy_movec_parser.h"
 #include "../../src/basis/wavefunction.h"

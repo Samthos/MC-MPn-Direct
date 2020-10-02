@@ -1,3 +1,4 @@
+add_subdirectory(test_helper)
 add_subdirectory(blas_wrapper_test)
 add_subdirectory(ovps_test)
 add_subdirectory(basis_test)

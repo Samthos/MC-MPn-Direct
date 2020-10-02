@@ -1,15 +1,8 @@
-#ifndef OVPS_TEST_HELPER_H_
-#define OVPS_TEST_HELPER_H_
-
-#include <thrust/device_vector.h>
-#include <vector>
+#include "test_helper.h"
 
 /*
    the fill heper function fill a vector with -1.0
 */
-void vfill(thrust::device_vector<double>& v) {
-  thrust::fill(v.begin(), v.end(), -1);
-}
 
 void vfill(std::vector<double>& v) {
   std::fill(v.begin(), v.end(), -1);
@@ -23,10 +16,6 @@ std::vector<double> get_vector(thrust::device_vector<double>& v) {
   std::vector<double> w(v.size());
   thrust::copy(v.begin(), v.end(), w.begin());
   return w;
-}
-
-std::vector<double> get_vector(std::vector<double> v) {
-  return v;
 }
 
 std::vector<double> make_psi(int n_electron_pairs, int n_orbitals, double sign) {
@@ -86,4 +75,12 @@ double PolyGamma_Difference(int start, int stop, int n) {
   return polygamma / fac;
 }
 
-#endif  // OVPS_TEST_HELPER_H_
+#ifdef HAVE_CUDA
+void vfill(thrust::device_vector<double>& v) {
+  thrust::fill(v.begin(), v.end(), -1);
+}
+
+std::vector<double> get_vector(std::vector<double> v) {
+  return v;
+}
+#endif

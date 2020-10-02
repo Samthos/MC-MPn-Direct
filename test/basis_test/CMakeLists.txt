@@ -1,18 +1,19 @@
-add_executable(shell_test.x
+set(shell_test_source
   shell_test.cpp
   ../../src/basis/shell.h
-  ../../src/basis/shell.cpp
-)
+  ../../src/basis/shell.cpp)
+add_executable(shell_test.x ${shell_test_source})
 target_link_libraries(shell_test.x gtest_main)
 add_test(NAME shell_test COMMAND shell_test.x)
 
-add_executable(atomic_orbital_test.x 
+set(atomic_orbital_test_source
   atomic_orbital_test.cu
   ../../src/basis/shell.h
   ../../src/basis/shell.cpp
   ../../src/basis/atomic_orbital.h
   ../../src/basis/atomic_orbital.cu
 )
+add_executable(atomic_orbital_test.x ${atomic_orbital_test_source})
 set_target_properties(atomic_orbital_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(atomic_orbital_test.x gtest_main)
 target_link_libraries(atomic_orbital_test.x geometry)
@@ -51,7 +52,9 @@ add_executable(wavefunction_test.x ${wavefunction_test_source})
 target_link_libraries(wavefunction_test.x gtest_main)
 target_link_libraries(wavefunction_test.x geometry)
 target_link_libraries(wavefunction_test.x blas_wrapper)
+target_link_libraries(wavefunction_test.x test_helper)
 target_link_libraries(wavefunction_test.x ${BLAS_LIBRARIES})
+target_include_directories(wavefunction_test.x PRIVATE ../test_helper)
 target_include_directories(wavefunction_test.x PRIVATE ../../src/geometry)
 target_include_directories(wavefunction_test.x PRIVATE ../../src/blas_wrapper)
 if (${Enable_CUDA})

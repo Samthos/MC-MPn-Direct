@@ -75,7 +75,7 @@ void dgekv_kernel(size_t m,
     double* C, size_t inc_c) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < m) {
-    C[idx * inc_c] = A[idx * inc_c] * B[idx * inc_b];
+    C[idx * inc_c] = alpha * A[idx * inc_a] * B[idx * inc_b] + beta * C[idx * inc_c];
   }
 }
 
@@ -87,7 +87,7 @@ void dgekv_kernel_0b(size_t m,
     double* C, size_t inc_c) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < m) {
-    C[idx * inc_c] = alpha * A[idx * inc_c] * B[idx * inc_b];
+    C[idx * inc_c] = alpha * A[idx * inc_a] * B[idx * inc_b];
   }
 }
 
@@ -99,7 +99,7 @@ void dgekv_kernel_1b(size_t m,
     double* C, size_t inc_c) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < m) {
-    C[idx * inc_c] = alpha * A[idx * inc_c] * B[idx * inc_b] + C[idx * inc_c];
+    C[idx * inc_c] = alpha * A[idx * inc_a] * B[idx * inc_b] + C[idx * inc_c];
   }
 }
 
@@ -111,7 +111,7 @@ void dgekv_kernel_1a(size_t m,
     double* C, size_t inc_c) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < m) {
-    C[idx * inc_c] = A[idx * inc_c] * B[idx * inc_b] + beta * C[idx * inc_c];
+    C[idx * inc_c] = A[idx * inc_a] * B[idx * inc_b] + beta * C[idx * inc_c];
   }
 }
 
@@ -122,7 +122,7 @@ void dgekv_kernel_1a_0b(size_t m,
     double* C, size_t inc_c) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < m) {
-    C[idx * inc_c] = A[idx * inc_c] * B[idx * inc_b];
+    C[idx * inc_c] = A[idx * inc_a] * B[idx * inc_b];
   }
 }
 
@@ -133,7 +133,7 @@ void dgekv_kernel_1a_1b(size_t m,
     double* C, size_t inc_c) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < m) {
-    C[idx * inc_c] = A[idx * inc_c] * B[idx * inc_b] + C[idx * inc_c];
+    C[idx * inc_c] = A[idx * inc_a] * B[idx * inc_b] + C[idx * inc_c];
   }
 }
 
@@ -150,23 +150,24 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgekv(size_t
   dim3 blockSize(128, 1, 1);
   dim3 gridSize((m + blockSize.x - 1) / blockSize.x, 1, 1);
   if (0.0 == beta) {
-    if (alpha == 1.0) {
-      dgekv_kernel_1a_0b<<<gridSize, blockSize>>>(m, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
-    } else {
-      dgekv_kernel_0b<<<gridSize, blockSize>>>(m, alpha, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
-    }
-  } else if (beta == 1.0) {
-    if (alpha == 1.0) {
-      dgekv_kernel_1a_1b<<<gridSize, blockSize>>>(m, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
-    } else {
-      dgekv_kernel_1b<<<gridSize, blockSize>>>(m, alpha, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
-    }
-  } else {
-    if (alpha == 1.0) {
-      dgekv_kernel_1a<<<gridSize, blockSize>>>(m, a_ptr, inc_a, b_ptr, inc_b, beta, c_ptr, inc_c);
-    } else {
-      dgekv_kernel<<<gridSize, blockSize>>>(m, alpha, a_ptr, inc_a, b_ptr, inc_b, beta, c_ptr, inc_c);
-    }
+//   if (alpha == 1.0) {
+//     dgekv_kernel_1a_0b<<<gridSize, blockSize>>>(m, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
+//   } else {
+//     dgekv_kernel_0b<<<gridSize, blockSize>>>(m, alpha, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
+//   }
+// } else if (beta == 1.0) {
+//   if (alpha == 1.0) {
+//     dgekv_kernel_1a_1b<<<gridSize, blockSize>>>(m, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
+//   } else {
+//     dgekv_kernel_1b<<<gridSize, blockSize>>>(m, alpha, a_ptr, inc_a, b_ptr, inc_b, c_ptr, inc_c);
+//   }
+// } else {
+//   if (alpha == 1.0) {
+//     dgekv_kernel_1a<<<gridSize, blockSize>>>(m, a_ptr, inc_a, b_ptr, inc_b, beta, c_ptr, inc_c);
+//   } else {
+    dgekv_kernel<<<gridSize, blockSize>>>(m, alpha, a_ptr, inc_a, b_ptr, inc_b, beta, c_ptr, inc_c);
+//   }
   }
+  cudaDeviceSynchronize();
 }
 #endif

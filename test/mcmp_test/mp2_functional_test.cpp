@@ -5,7 +5,7 @@
 #include <list>
 
 #include "gtest/gtest.h"
-#include "../test_helper.h"
+#include "test_helper.h"
 
 #include "dummy_tau.h"
 
@@ -97,9 +97,11 @@ namespace {
     MP2_Functional_Fixture<std::vector, std::allocator, true, 0>,
     MP2_Functional_Fixture<std::vector, std::allocator, true, 1>,
     MP2_Functional_Fixture<std::vector, std::allocator, true, 2>,
+#ifdef HAVE_CUDA
     MP2_Functional_Fixture<thrust::device_vector, thrust::device_allocator, true, 0>,
     MP2_Functional_Fixture<thrust::device_vector, thrust::device_allocator, true, 1>,
     MP2_Functional_Fixture<thrust::device_vector, thrust::device_allocator, true, 2>,
+#endif
     MP2_Functional_Fixture<std::vector, std::allocator, false, 0>,
     MP2_Functional_Fixture<std::vector, std::allocator, false, 1>,
     MP2_Functional_Fixture<std::vector, std::allocator, false, 2>

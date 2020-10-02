@@ -1,6 +1,6 @@
 #include <unordered_map>
 #include "gtest/gtest.h"
-#include "../test_helper.h"
+#include "test_helper.h"
 
 #include "dummy_movec_parser.h"
 #include "dummy_electron_list.h"

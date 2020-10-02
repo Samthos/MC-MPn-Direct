@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../test_helper.h"
+#include "test_helper.h"
 
 #include "dummy_electron_list.h"
 #include "dummy_electron_pair_list.h"
