@@ -31,12 +31,13 @@ void MP2_F12_V<Container, Allocator>::energy(double& emp, std::vector<double>& c
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
-double MP2_F12_V<Container, Allocator>::calculate_v_4e_help(
+void MP2_F12_V<Container, Allocator>::calculate_v_4e_help(
     vector_double& R_ip_io, vector_double& R_ip_jo, 
     const vector_double& S_io_jo,
     const vector_double& S_ip_io_1, const vector_double& S_ip_io_2,
     const vector_double& S_ip_jo_1, const vector_double& S_ip_jo_2,
     const vector_double& S_ip,
+    double alpha, double beta,
     size_t size, size_t size_ep) {
   blas_wrapper.multiplies(S_ip_jo_1.begin(), S_ip_jo_1.end(), S_ip_jo_2.begin(), R_ip_jo.begin());
   blas_wrapper.dgemm(true, false,
@@ -51,13 +52,11 @@ double MP2_F12_V<Container, Allocator>::calculate_v_4e_help(
   blas_wrapper.dgemv(
       false,
       size_ep, size,
-      1.0,
+      alpha,
       R_ip_jo, size,
       S_ip, 1,
-      0.0,
+      beta,
       T_io, 1);
-  double en = blas_wrapper.accumulate(T_io.begin(), T_io.end(), 0.0);
-  return en;
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
@@ -97,7 +96,6 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       traces.k13, electron_list->size(),
       0.0, 
       T_ip_io, electron_list->size());
-
   blas_wrapper.dgekm(false, false,
       electron_pair_list->size(), electron_list->size(),
       1.0,
@@ -163,31 +161,35 @@ double MP2_F12_V<Container, Allocator>::calculate_v_4e(const Electron_Pair_List_
       electron_list->inverse_weight, 1,
       T_io_jo, electron_list->size());
 
-  std::array<double, 2> t{0.0, 0.0};
-  t[0] += calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
+  vector_double one(electron_list->size(), 1.0);
+  calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p13, traces.k13,
       traces.p23, traces.k23,
       electron_pair_list->rv,
+      c1, 0.0,
       electron_list->size(), electron_pair_list->size());
 
-  t[0] -= calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
+  calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p13, traces.v13,
       traces.p23, traces.v23,
       electron_pair_list->rv,
+      -c1, 1.0,
       electron_list->size(), electron_pair_list->size());
 
-  t[1] += calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo,
+  calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo,
       traces.p23, traces.k13,
       traces.p13, traces.k23,
       electron_pair_list->rv,
+      c2, 1.0,
       electron_list->size(), electron_pair_list->size());
 
-  t[1] -= calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
+  calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p23, traces.v13,
       traces.p13, traces.v23,
       electron_pair_list->rv,
+      -c2, 1.0,
       electron_list->size(), electron_pair_list->size());
-  return (c1 * t[0] + c2 * t[1]) * nsamp_pair * nsamp_one_2;
+  return blas_wrapper.ddot(electron_list->size(), T_io, 1, one, 1) * nsamp_pair * nsamp_one_2;
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>

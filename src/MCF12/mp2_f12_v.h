@@ -34,12 +34,13 @@ class MP2_F12_V : public F12_MP_Functional<Container, Allocator> {
   double calculate_v_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
   double calculate_v_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
   double calculate_v_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
-  double calculate_v_4e_help(
+  void calculate_v_4e_help(
       vector_double& R_ip_io, vector_double& R_ip_jo, 
       const vector_double& S_io_jo,
       const vector_double& S_ip_io_1, const vector_double& S_ip_io_2,
       const vector_double& S_ip_jo_1, const vector_double& S_ip_jo_2,
       const vector_double& S_ip,
+      double alpha, double beta,
       size_t size, size_t size_ep);
   void calculate_v(double& emp, std::vector<double>& control,
       std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
