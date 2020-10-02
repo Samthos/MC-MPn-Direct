@@ -161,7 +161,6 @@ double MP2_F12_V<Container, Allocator>::calculate_v_4e(const Electron_Pair_List_
       electron_list->inverse_weight, 1,
       T_io_jo, electron_list->size());
 
-  vector_double one(electron_list->size(), 1.0);
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p13, traces.k13,
       traces.p23, traces.k23,
@@ -189,7 +188,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_4e(const Electron_Pair_List_
       electron_pair_list->rv,
       -c2, 1.0,
       electron_list->size(), electron_pair_list->size());
-  return blas_wrapper.ddot(electron_list->size(), T_io, 1, one, 1) * nsamp_pair * nsamp_one_2;
+  return blas_wrapper.accumulate(T_io.size(), T_io, 1) * nsamp_pair * nsamp_one_2;
 }
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>

@@ -13,13 +13,16 @@
 #include "blas_wrapper.h"
 
 template <> 
-Blas_Wrapper<std::vector, std::allocator>::Blas_Wrapper() {}
+Blas_Wrapper<std::vector, std::allocator>::Blas_Wrapper() : one(1, 1.0) {}
 
 template <> 
-Blas_Wrapper<std::vector, std::allocator>::Blas_Wrapper(const Blas_Wrapper&) {}
+Blas_Wrapper<std::vector, std::allocator>::Blas_Wrapper(const Blas_Wrapper&) : one(1, 1.0) {}
 
 template <> 
-Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper<std::vector, std::allocator>::operator = (const Blas_Wrapper<std::vector, std::allocator>&) {
+Blas_Wrapper<std::vector, std::allocator> Blas_Wrapper<std::vector, std::allocator>::operator = (const Blas_Wrapper<std::vector, std::allocator>& other) {
+  if (this != &other) {
+    one.push_back(1.0);
+  }
   return *this;
 }
 
@@ -56,12 +59,12 @@ void Blas_Wrapper<std::vector, std::allocator>::plus(
 
 #ifdef HAVE_CUDA
 template <> 
-Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Blas_Wrapper() {
+Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Blas_Wrapper() : one(1, 1.0) {
   cublasCreate(&handle);
 }
 
 template <> 
-Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Blas_Wrapper(const Blas_Wrapper&) {
+Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::Blas_Wrapper(const Blas_Wrapper&) : one(1, 1.0) {
   cublasCreate(&handle);
 }
 
@@ -69,6 +72,7 @@ template <>
 Blas_Wrapper<thrust::device_vector, thrust::device_allocator> Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::operator = (const Blas_Wrapper<thrust::device_vector, thrust::device_allocator>& other) {
   if (this != &other) {
     cublasCreate(&handle);
+    one = other.one;
   }
   return *this;
 }

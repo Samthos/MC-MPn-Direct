@@ -62,7 +62,6 @@ double MP2_F12_VBX::calculate_bx_t_fa_4e(const Electron_Pair_List_Type* electron
     }
   }
 
-  vector_double one(electron_list->size(), 1.0);
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     T_ip[ip] = (correlation_factor->f12p_a[ip] + 2.0 * c1 / c3) * electron_pair_list->rv[ip];
   }
@@ -96,9 +95,7 @@ double MP2_F12_VBX::calculate_bx_t_fa_4e(const Electron_Pair_List_Type* electron
       T_ip, 
       -c4, 1.0,
       electron_list->size(), electron_pair_list->size());
-  return blas_wrapper.ddot(electron_list->size(),
-      T_io, 1,
-      one, 1) * nsamp_pair * nsamp_one_2;
+  return blas_wrapper.accumulate(electron_list->size(), T_io, 1) * nsamp_pair * nsamp_one_2;
 }
 double MP2_F12_VBX::calculate_bx_t_fa(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;
@@ -195,7 +192,7 @@ double MP2_F12_VBX::calculate_bx_t_fb_4e_help(
   for (int jo = 0; jo < size; ++jo) {
     T_jo_ko[jo * size + jo] = 0.0;
   }
-  return std::accumulate(T_jo_ko.begin(), T_jo_ko.end(), 0.0);
+  return blas_wrapper.accumulate(T_jo_ko.size(), T_jo_ko, 1);
 }
 double MP2_F12_VBX::calculate_bx_t_fb_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
@@ -296,8 +293,6 @@ double MP2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List_Type* electron
   }
   std::transform(correlation_factor->f12p_c.begin(), correlation_factor->f12p_c.end(), electron_pair_list->rv.begin(), T_ip.begin(), std::multiplies<>());
 
-  vector_double one(electron_list->size(), 1.0);
-
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p13, traces.k13, 
       traces.dp32, traces.k23,
@@ -353,9 +348,7 @@ double MP2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List_Type* electron
       T_ip,
       c4, 1.0,
       electron_list->size(), electron_pair_list->size());
-  return blas_wrapper.ddot(electron_list->size(),
-      T_io, 1,
-      one, 1) * nsamp_pair * nsamp_one_2;
+  return blas_wrapper.accumulate(electron_list->size(), T_io, 1) * nsamp_pair * nsamp_one_2;
 }
 double MP2_F12_VBX::calculate_bx_t_fc(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;

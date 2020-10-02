@@ -123,10 +123,6 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::vfill(size_t N,
 // Iterators
 //
 template <>
-double Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::accumulate(
-    iterator first1, iterator last1, double value);
-
-template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::fill(
     iterator first1, iterator last1, double value);
 

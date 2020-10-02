@@ -226,7 +226,8 @@ class Blas_Wrapper {
   //
   // Iterator 
   //
-  double accumulate(iterator first1, iterator last1, value_type value);
+  double accumulate(size_t N, const vector_type& X, size_t incx);
+  double accumulate(size_t N, const vector_type& X, size_t offset_x, size_t incx);
 
   void fill(iterator first1, iterator last1, value_type value);
 
@@ -240,6 +241,7 @@ class Blas_Wrapper {
       const_iterator first2, iterator result);
 
  private:
+  vector_type one;
 #ifdef HAVE_CUDA
   cublasHandle_t handle;
 #endif
