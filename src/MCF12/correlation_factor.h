@@ -1,31 +1,31 @@
-#ifndef CORRELATION_FACTORS_H_
-#define CORRELATION_FACTORS_H_
+#ifndef CORRELATION_FACTOR_H_
+#define CORRELATION_FACTOR_H_
 
-namespace CORRELATION_FACTORS {
-  enum CORRELATION_FACTORS {
-    Linear,
-    Rational,
-    Slater,
-    Slater_Linear,
-    Gaussian,
-    Cusped_Gaussian,
-    Yukawa_Coulomb,
-    Jastrow,
-    ERFC,
-    ERFC_Linear,
-    Tanh,
-    ArcTan,
-    Logarithm,
-    Hybrid,
-    Two_Parameter_Rational,
-    Higher_Rational,
-    Cubic_Slater,
-    Higher_Jastrow,
-  };
-}
+#include "correlation_factor_types.h"
 
-CORRELATION_FACTORS::CORRELATION_FACTORS string_to_correlation_factors(const std::string&);
+class Correlation_Factor {
+ public:
+  Correlation_Factor(double gamma_in, double beta_in);
+  Correlation_Factor(double gamma_in, double beta_in, double default_gamma, double default_beta);
+  virtual double f12(double r12) = 0;
+  virtual double f12_a(double r12) = 0;
+  virtual double f12_b(double r12) = 0;
+  virtual double f12_c(double r12) = 0;
+  virtual double f12_d(double r12) = 0;
+  virtual bool f12_d_is_zero() = 0;
+  double gamma();
+  double beta();
 
-std::string correlation_factors_to_string(const CORRELATION_FACTORS::CORRELATION_FACTORS&);
+ protected:
+  double m_gamma;
+  double m_beta;
+};
 
-#endif // CORRELATION_FACTORS_H_
+Correlation_Factor* create_correlation_factor(CORRELATION_FACTOR::Type, double gamma = -1, double beta = -1);
+
+#define SOURCE_FILE "correlation_factor.imp.h"
+#include "correlation_factor_patterns.h"
+#undef SOURCE_FILE
+
+#endif // CORRELATION_FACTOR_H_
+

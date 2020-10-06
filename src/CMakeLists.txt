@@ -2,11 +2,9 @@ set(source
   MCF12/F12_Traces.cpp
   MCF12/F12_Traces.h
   MCF12/correlation_factor.cpp
-  MCF12/correlation_factor.h
   MCF12/correlation_factor_data.cpp
-  MCF12/correlation_factor_data.h
+  MCF12/correlation_factor_types.cpp
   MCF12/correlation_factor_function.cpp
-  MCF12/correlation_factor_function.h
   MCF12/gf2_f12.cpp
   MCF12/gf2_f12.h
   MCF12/mp2_f12_vbx.cpp

@@ -1,73 +1,59 @@
-#include <iostream>
-#include <string>
+//
+// Created by aedoran on 12/18/19.
+//
 
 #include "correlation_factor.h"
+#include "correlation_factor_function.h"
 
-CORRELATION_FACTORS::CORRELATION_FACTORS string_to_correlation_factors(const std::string& str) {
-  CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor;
-  if (str == "Linear") {
-    correlation_factor = CORRELATION_FACTORS::Linear;
-  } else if (str == "Rational") {
-    correlation_factor = CORRELATION_FACTORS::Rational;
-  } else if (str == "Slater") {
-    correlation_factor = CORRELATION_FACTORS::Slater;
-  } else if (str == "Slater_Linear") {
-    correlation_factor = CORRELATION_FACTORS::Slater_Linear;
-  } else if (str == "Gaussian") {
-    correlation_factor = CORRELATION_FACTORS::Gaussian;
-  } else if (str == "Cusped_Gaussian") {
-    correlation_factor = CORRELATION_FACTORS::Cusped_Gaussian;
-  } else if (str == "Yukawa_Coulomb") {
-    correlation_factor = CORRELATION_FACTORS::Yukawa_Coulomb;
-  } else if (str == "Jastrow") {
-    correlation_factor = CORRELATION_FACTORS::Jastrow;
-  } else if (str == "ERFC") {
-    correlation_factor = CORRELATION_FACTORS::ERFC;
-  } else if (str == "ERFC_Linear") {
-    correlation_factor = CORRELATION_FACTORS::ERFC_Linear;
-  } else if (str == "Tanh") {
-    correlation_factor = CORRELATION_FACTORS::Tanh;
-  } else if (str == "ArcTan") {
-    correlation_factor = CORRELATION_FACTORS::ArcTan;
-  } else if (str == "Logarithm") {
-    correlation_factor = CORRELATION_FACTORS::Logarithm;
-  } else if (str == "Hybrid") {
-    correlation_factor = CORRELATION_FACTORS::Hybrid;
-  } else if (str == "Two_Parameter_Rational") {
-    correlation_factor = CORRELATION_FACTORS::Two_Parameter_Rational;
-  } else if (str == "Higher_Rational") {
-    correlation_factor = CORRELATION_FACTORS::Higher_Rational;
-  } else if (str == "Cubic_Slater") {
-    correlation_factor = CORRELATION_FACTORS::Cubic_Slater;
-  } else if (str == "Higher_Jastrow") {
-    correlation_factor = CORRELATION_FACTORS::Higher_Jastrow;
-  } else {
-    std::cerr << "Correlation factor " << str << " not supported\n";
-    exit(0);
+Correlation_Factor* create_correlation_factor(CORRELATION_FACTOR::Type correlation_factor_id, double gamma, double beta) {
+  Correlation_Factor* correlation_factor = nullptr;
+  switch (correlation_factor_id) {
+    case CORRELATION_FACTOR::Linear: correlation_factor =  new Linear_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Rational: correlation_factor =  new Rational_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Slater: correlation_factor =  new Slater_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Slater_Linear: correlation_factor =  new Slater_Linear_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Gaussian: correlation_factor =  new Gaussian_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Cusped_Gaussian: correlation_factor =  new Cusped_Gaussian_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Yukawa_Coulomb: correlation_factor =  new Yukawa_Coulomb_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Jastrow: correlation_factor =  new Jastrow_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::ERFC: correlation_factor =  new ERFC_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::ERFC_Linear: correlation_factor =  new ERFC_Linear_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Tanh: correlation_factor =  new Tanh_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::ArcTan: correlation_factor =  new ArcTan_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Logarithm: correlation_factor =  new Logarithm_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Hybrid: correlation_factor =  new Hybrid_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Two_Parameter_Rational: correlation_factor =  new Two_Parameter_Rational_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Higher_Rational: correlation_factor =  new Higher_Rational_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Cubic_Slater: correlation_factor =  new Cubic_Slater_Correlation_Factor(gamma, beta); break;
+    case CORRELATION_FACTOR::Higher_Jastrow: correlation_factor =  new Higher_Jastrow_Correlation_Factor(gamma, beta); break;
   }
   return correlation_factor;
 }
-std::string correlation_factors_to_string(const CORRELATION_FACTORS::CORRELATION_FACTORS& correlation_factor) {
-  std::string str;
-  switch (correlation_factor) {
-    case CORRELATION_FACTORS::Linear: str = "Linear"; break;
-    case CORRELATION_FACTORS::Rational: str = "Rational"; break;
-    case CORRELATION_FACTORS::Slater: str = "Slater"; break;
-    case CORRELATION_FACTORS::Slater_Linear: str = "Slater_Linear"; break;
-    case CORRELATION_FACTORS::Gaussian: str = "Gaussian"; break;
-    case CORRELATION_FACTORS::Cusped_Gaussian: str = "Cusped_Gaussian"; break;
-    case CORRELATION_FACTORS::Yukawa_Coulomb: str = "Yukawa_Coulomb"; break;
-    case CORRELATION_FACTORS::Jastrow: str = "Jastrow"; break;
-    case CORRELATION_FACTORS::ERFC: str = "ERFC"; break;
-    case CORRELATION_FACTORS::ERFC_Linear: str = "ERFC_Linear"; break;
-    case CORRELATION_FACTORS::Tanh: str = "Tanh"; break;
-    case CORRELATION_FACTORS::ArcTan: str = "ArcTan"; break;
-    case CORRELATION_FACTORS::Logarithm: str = "Logarithm"; break;
-    case CORRELATION_FACTORS::Hybrid: str = "Hybrid"; break;
-    case CORRELATION_FACTORS::Two_Parameter_Rational: str = "Two_Parameter_Rational"; break;
-    case CORRELATION_FACTORS::Higher_Rational: str = "Higher_Rational"; break;
-    case CORRELATION_FACTORS::Cubic_Slater: str = "Cubic_Slater"; break;
-    case CORRELATION_FACTORS::Higher_Jastrow: str = "Higher_Jastrow"; break;
-  }
-  return str;
+
+Correlation_Factor::Correlation_Factor(double gamma_in, double beta_in) :
+    m_gamma(gamma_in), 
+    m_beta(beta_in) {
 }
+
+Correlation_Factor::Correlation_Factor(double gamma_in, double beta_in, double default_gamma, double default_beta) {
+  m_gamma = gamma_in;
+  if (gamma_in < 0) {
+    m_gamma = default_gamma;
+  }
+  m_beta = beta_in;
+  if (beta_in < 0) {
+    m_beta = default_beta;
+  }
+}
+
+double Correlation_Factor::gamma() {
+  return m_gamma;
+}
+
+double Correlation_Factor::beta() {
+  return m_beta;
+}
+
+#define SOURCE_FILE "correlation_factor.imp.cpp"
+#include "correlation_factor_patterns.h"
+#undef SOURCE_FILE

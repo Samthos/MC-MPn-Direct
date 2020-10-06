@@ -2,19 +2,20 @@
 // Created by aedoran on 12/18/19.
 //
 
-#include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <numeric>
 
 #include "correlation_factor_data.h"
+#include "correlation_factor_function.h"
 
-template <template <typename, typename> typename Container, template <typename> typename Allocator> 
-Correlation_Factor_Data<Container, Allocator>::Correlation_Factor_Data(int electrons_in, 
-      int electron_pairs_in, 
-      CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_in,
-      double gamma_in,
-      double beta_in) :
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+Correlation_Factor_Data<Container, Allocator>::Correlation_Factor_Data(int electrons_in,
+    int electron_pairs_in,
+    CORRELATION_FACTOR::Type correlation_factor_in,
+    double gamma_in,
+    double beta_in) :
     f12p(electron_pairs_in),
     f12p_a(electron_pairs_in),
     f12p_c(electron_pairs_in),
@@ -23,205 +24,139 @@ Correlation_Factor_Data<Container, Allocator>::Correlation_Factor_Data(int elect
     f12o_d(electrons_in * electrons_in, 0.0),
     f13(electron_pairs_in * electrons_in, 0.0),
     f23(electron_pairs_in * electrons_in, 0.0),
-    correlation_factor(correlation_factor_in),
-    gamma(gamma_in),
-    beta(beta_in)
+    correlation_factor(correlation_factor_in) 
 {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor, gamma, beta);
-  m_f12d_is_zero = m_correlation_factor->f12_d_is_zero();
-  delete m_correlation_factor;
+  auto cf = create_correlation_factor(correlation_factor, gamma_in, beta_in);
+  m_f12d_is_zero = cf->f12_d_is_zero();
+  gamma = cf->gamma();
+  beta  = cf->beta();
+  delete cf;
 }
 
-template <template <typename, typename> typename Container, template <typename> typename Allocator> 
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 bool Correlation_Factor_Data<Container, Allocator>::f12_d_is_zero() {
   return m_f12d_is_zero;
 }
 
-template <>
-void Correlation_Factor_Data<std::vector, std::allocator>::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor, gamma, beta);
+Correlation_Factor_Data_Host::Correlation_Factor_Data_Host(int electrons_in,
+    int electron_pairs_in,
+    CORRELATION_FACTOR::Type correlation_factor_in,
+    double gamma_in,
+    double beta_in) :
+    Correlation_Factor_Data(electrons_in, electron_pairs_in, correlation_factor_in, gamma_in, beta_in),
+    m_correlation_factor(create_correlation_factor(correlation_factor_in, gamma_in, beta_in)) {}
+
+void Correlation_Factor_Data_Host::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
     f12p[ip] = m_correlation_factor->f12(electron_pair_list->r12[ip]);
     f12p_a[ip] = m_correlation_factor->f12_a(electron_pair_list->r12[ip]);
     f12p_c[ip] = m_correlation_factor->f12_c(electron_pair_list->r12[ip]);
   }
-  
-  for(int io = 0; io < electron_list->size();io++) {
-    for(int jo = 0; jo < electron_list->size();jo++) {
+
+  for (int io = 0; io < electron_list->size(); io++) {
+    for (int jo = 0; jo < electron_list->size(); jo++) {
       if (jo != io) {
         auto dr = Point::distance(electron_list->pos[io], electron_list->pos[jo]);
-        f12o[io * electron_list->size() + jo]  = m_correlation_factor->f12(dr);
-        f12o_b[io * electron_list->size() + jo] =  m_correlation_factor->f12_b(dr);
-        f12o_d[io * electron_list->size() + jo] =  m_correlation_factor->f12_d(dr);
+        f12o[io * electron_list->size() + jo] = m_correlation_factor->f12(dr);
+        f12o_b[io * electron_list->size() + jo] = m_correlation_factor->f12_b(dr);
+        f12o_d[io * electron_list->size() + jo] = m_correlation_factor->f12_d(dr);
       } else {
-        f12o[io * electron_list->size() + jo]   = 0.0;
+        f12o[io * electron_list->size() + jo] = 0.0;
         f12o_b[io * electron_list->size() + jo] = 0.0;
         f12o_d[io * electron_list->size() + jo] = 0.0;
       }
     }
   }
 
-  for(int ip = 0; ip < electron_pair_list->size(); ++ip) {
-    for(int io = 0; io < electron_list->size(); ++io) {
+  for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
+    for (int io = 0; io < electron_list->size(); ++io) {
       f13[ip * electron_list->size() + io] = m_correlation_factor->f12(Point::distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
       f23[ip * electron_list->size() + io] = m_correlation_factor->f12(Point::distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
     }
   }
-
-  delete m_correlation_factor;
 }
 
-#ifdef HAVE_CUDA
-__global__ 
-void f12p_kernal(
-    CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta, 
-    int size, const double* r12, double* f12p) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
-  int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid < size) {
-    f12p[tid] = m_correlation_factor->f12(r12[tid]);
-  }
-  delete m_correlation_factor;
-}
+Slater_Correlation_Factor_Data_Host::Slater_Correlation_Factor_Data_Host(int electrons_in,
+    int electron_pairs_in,
+    double gamma_in,
+    double beta_in) :
+    Correlation_Factor_Data(electrons_in, electron_pairs_in, CORRELATION_FACTOR::Slater, gamma_in, beta_in) {}
 
-__global__ 
-void f12p_a_kernal(
-    CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta, 
-    int size, const double* r12, double* f12p_a) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
-  int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid < size) {
-    f12p_a[tid] = m_correlation_factor->f12_a(r12[tid]);
-  }
-  delete m_correlation_factor;
-}
-
-__global__ 
-void f12p_c_kernal(
-    CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta, 
-    int size, const double* r12, double* f12p_c) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
-  int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  if (tid < size) {
-    f12p_c[tid] = m_correlation_factor->f12_c(r12[tid]);
-  }
-  delete m_correlation_factor;
-}
-
-__global__ 
-void f12o_kernal(
-    CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta, 
-    int size, const Point* pos, double* f12o) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
-  int tidx = blockIdx.x * blockDim.x + threadIdx.x;
-  int tidy = blockIdx.y * blockDim.y + threadIdx.y;
-  int tid = tidy * size + tidx;
-  if (tidx < size && tidy < size && tidx != tidy) {
-    auto dr = Point::distance(pos[tidx], pos[tidy]);
-    f12o[tid] = m_correlation_factor->f12(dr);
-  }
-  delete m_correlation_factor;
-}
-
-__global__ 
-void f12o_b_kernal(
-    CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta, 
-    int size, const Point* pos, double* f12o_b) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
-  int tidx = blockIdx.x * blockDim.x + threadIdx.x;
-  int tidy = blockIdx.y * blockDim.y + threadIdx.y;
-  int tid = tidy * size + tidx;
-  if (tidx < size && tidy < size && tidx != tidy) {
-    auto dr = Point::distance(pos[tidx], pos[tidy]);
-    f12o_b[tid] = m_correlation_factor->f12_b(dr);
-  }
-  delete m_correlation_factor;
-}
-
-__global__ 
-void f12o_d_kernal(
-    CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta, 
-    int size, const Point* pos, double* f12o_d) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
-  int tidx = blockIdx.x * blockDim.x + threadIdx.x;
-  int tidy = blockIdx.y * blockDim.y + threadIdx.y;
-  int tid = tidy * size + tidx;
-  if (tidx < size && tidy < size && tidx != tidy) {
-    auto dr = Point::distance(pos[tidx], pos[tidy]);
-    f12o_d[tid] = m_correlation_factor->f12_d(dr);
-  }
-  delete m_correlation_factor;
-}
-
-__global__ 
-void f13_kernal(
-    CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor_id, double gamma, double beta, 
-    int electron_pairs, const Point* electron_pair_pos,
-    int electrons, const Point* electron_pos, double* f13) {
-  auto m_correlation_factor = create_correlation_factor_function(correlation_factor_id, gamma, beta);
-  int tidx = blockIdx.x * blockDim.x + threadIdx.x;
-  int tidy = blockIdx.y * blockDim.y + threadIdx.y;
-  int tid = tidy * electrons + tidx;
-  if (tidx < electrons && tidy < electron_pairs) {
-    auto dr = Point::distance(electron_pair_pos[tidy], electron_pos[tidx]);
-    f13[tid] = m_correlation_factor->f12(dr);
-  }
-  delete m_correlation_factor;
-}
-
-template <>
-void Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  dim3 block_size(128, 1, 1);
-  dim3 grid_size((electron_pair_list->size() + 127) / 128, 1, 1);
-  f12p_kernal  <<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p.data().get());
-  f12p_a_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p_a.data().get());
-  f12p_c_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_pair_list->size(), electron_pair_list->r12.data().get(), f12p_c.data().get());
-
-  block_size = dim3(16, 16, 1);
-  grid_size = dim3((electron_list->size() + 15) / 16, (electron_list->size() + 15) / 16, 1);
-  f12o_kernal  <<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o.data().get());
-  f12o_b_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_b.data().get());
-f12o_d_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, electron_list->size(), electron_list->pos.data().get(), f12o_d.data().get());
-
-  block_size = dim3(16, 16, 1);
-  grid_size = dim3((electron_list->size() + 15) / 16, (electron_pair_list->size() + 15) / 16,  1);
-  f13_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, 
-      electron_pair_list->size(), electron_pair_list->pos1.data().get(), 
-      electron_list->size(), electron_list->pos.data().get(), 
-      f13.data().get());
-  f13_kernal<<<grid_size, block_size>>>(correlation_factor, gamma, beta, 
-      electron_pair_list->size(), electron_pair_list->pos2.data().get(), 
-      electron_list->size(), electron_list->pos.data().get(), 
-      f23.data().get());
-}
-#endif
-
-/*
-void Slater_Correlation_Factor_Data::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+void Slater_Correlation_Factor_Data_Host::update(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   for (int ip = 0; ip < electron_pair_list->size(); ip++) {
-    f12p[ip] = f12(electron_pair_list->r12[ip]);
+    f12p[ip] = Slater_f12(electron_pair_list->r12[ip], gamma, beta);
     f12p_a[ip] = 2.0 * gamma * f12p[ip];
     f12p_c[ip] = -gamma * f12p[ip];
   }
-  
-  for(int io = 0, idx = 0; io < electron_list->size(); io++) {
-    for(int jo = 0; jo < electron_list->size(); jo++, idx++) {
+
+  for (int io = 0, idx = 0; io < electron_list->size(); io++) {
+    for (int jo = 0; jo < electron_list->size(); jo++, idx++) {
       if (jo != io) {
-        f12o[idx] = f12(Point::distance(electron_list->pos[io], electron_list->pos[jo]));
-        f12o_b[idx] =  -gamma * gamma * f12o[idx];
+        f12o[idx] = Slater_f12(Point::distance(electron_list->pos[io], electron_list->pos[jo]), gamma, beta);
+        f12o_b[idx] = -gamma * gamma * f12o[idx];
       } else {
-        f12o[idx]   = 0.0;
+        f12o[idx] = 0.0;
         f12o_b[idx] = 0.0;
       }
     }
   }
 
-  for(int ip = 0; ip < electron_pair_list->size(); ++ip) {
-    for(int io = 0; io < electron_list->size(); ++io) {
-      f13[ip * electron_list->size() + io] = f12(Point::distance(electron_pair_list->pos1[ip], electron_list->pos[io]));
-      f23[ip * electron_list->size() + io] = f12(Point::distance(electron_pair_list->pos2[ip], electron_list->pos[io]));
+  for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
+    for (int io = 0; io < electron_list->size(); ++io) {
+      f13[ip * electron_list->size() + io] = Slater_f12(Point::distance(electron_pair_list->pos1[ip], electron_list->pos[io]), gamma, beta);
+      f23[ip * electron_list->size() + io] = Slater_f12(Point::distance(electron_pair_list->pos2[ip], electron_list->pos[io]), gamma, beta);
     }
   }
 }
-*/
 
+template <>
+Correlation_Factor_Data<std::vector, std::allocator>* create_Correlation_Factor_Data<std::vector, std::allocator>(int electrons,
+    int electron_pairs,
+    CORRELATION_FACTOR::Type correlation_factor,
+    double gamma,
+    double beta) {
+  Correlation_Factor_Data<std::vector, std::allocator>* correlation_factor_data;
+  switch (correlation_factor) {
+    case CORRELATION_FACTOR::Slater: correlation_factor_data =  new Slater_Correlation_Factor_Data_Host(electrons, electron_pairs, gamma, beta); break;
+    default:
+      correlation_factor_data = new Correlation_Factor_Data_Host(electrons, electron_pairs, correlation_factor, gamma, beta);
+      break;
+  }
+  return correlation_factor_data;
+}
+
+#ifdef HAVE_CUDA
+template <>
+Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>* create_Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>(int electrons,
+    int electron_pairs,
+    CORRELATION_FACTOR::Type correlation_factor,
+    double gamma,
+    double beta) {
+  Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>* correlation_factor_data;
+  switch (correlation_factor) {
+    case CORRELATION_FACTOR::Linear: correlation_factor_data =  new Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Rational: correlation_factor_data =  new Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Slater: correlation_factor_data =  new Slater_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Slater_Linear: correlation_factor_data =  new Slater_Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Gaussian: correlation_factor_data =  new Gaussian_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Cusped_Gaussian: correlation_factor_data =  new Cusped_Gaussian_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Yukawa_Coulomb: correlation_factor_data =  new Yukawa_Coulomb_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Jastrow: correlation_factor_data =  new Jastrow_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::ERFC: correlation_factor_data =  new ERFC_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::ERFC_Linear: correlation_factor_data =  new ERFC_Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Tanh: correlation_factor_data =  new Tanh_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::ArcTan: correlation_factor_data =  new ArcTan_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Logarithm: correlation_factor_data =  new Logarithm_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Hybrid: correlation_factor_data =  new Hybrid_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Two_Parameter_Rational: correlation_factor_data =  new Two_Parameter_Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Higher_Rational: correlation_factor_data =  new Higher_Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Cubic_Slater: correlation_factor_data =  new Cubic_Slater_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Higher_Jastrow: correlation_factor_data =  new Higher_Jastrow_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+  }
+  return correlation_factor_data;
+}
+#endif
+
+#define SOURCE_FILE "correlation_factor_data.imp.cpp"
+#include "correlation_factor_patterns.h"
+#undef SOURCE_FILE

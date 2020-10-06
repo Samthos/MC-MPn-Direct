@@ -9,10 +9,10 @@ MP2_F12_V<Container, Allocator>::MP2_F12_V(const IOPs& iops, std::string extensi
     T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS], 0.0),
     T_ip(iops.iopns[KEYS::ELECTRON_PAIRS], 0.0),
     T_io(iops.iopns[KEYS::ELECTRONS], 0.0),
-    correlation_factor(new Correlation_Factor_Data_Type(
+    correlation_factor(create_Correlation_Factor_Data<Container, Allocator>(
           iops.iopns[KEYS::ELECTRONS],
           iops.iopns[KEYS::ELECTRON_PAIRS],
-          static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iops.iopns[KEYS::F12_CORRELATION_FACTOR]),
+          static_cast<CORRELATION_FACTOR::Type>(iops.iopns[KEYS::F12_CORRELATION_FACTOR]),
           iops.dopns[KEYS::F12_GAMMA],
           iops.dopns[KEYS::F12_BETA]))
 {

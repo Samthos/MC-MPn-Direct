@@ -41,7 +41,7 @@ IOPs::IOPs() {
   iopns[KEYS::JOBTYPE] = JOBTYPE::ENERGY;
   iopns[KEYS::SAMPLER] = SAMPLER::DIRECT;
   iopns[KEYS::TAU_GENERATORS] = TAU_GENERATORS::STOCHASTIC;
-  iopns[KEYS::F12_CORRELATION_FACTOR] = CORRELATION_FACTORS::Slater;
+  iopns[KEYS::F12_CORRELATION_FACTOR] = CORRELATION_FACTOR::Slater;
 
   iopns[KEYS::MP2CV_LEVEL] = 0;
   iopns[KEYS::MP3CV_LEVEL] = 0;
@@ -283,7 +283,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
    
     if (iopns[KEYS::TASK] | TASK::ANY_F12) {
       std::cout << "Number of Electrons Walkers = " << iopns[KEYS::ELECTRONS] << "\n";
-      std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
+      std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTOR::Type>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
 
       std::cout << "F12_GAMMA = ";
       if (!bopns[KEYS::F12_GAMMA]) {
