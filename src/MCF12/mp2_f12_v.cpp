@@ -51,7 +51,7 @@ void MP2_F12_V<Container, Allocator>::calculate_v_4e_help(
   blas_wrapper.multiplies(R_ip_jo.begin(), R_ip_jo.end(), R_ip_io.begin(), R_ip_jo.begin());
   blas_wrapper.dgemv(
       false,
-      size_ep, size,
+      size, size_ep,
       alpha,
       R_ip_jo, size,
       S_ip, 1,
@@ -90,14 +90,14 @@ double MP2_F12_V<Container, Allocator>::calculate_v_2e(const Electron_Pair_List_
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   blas_wrapper.dgekm(false, false,
-      electron_pair_list->size(), electron_list->size(),
+      electron_list->size(), electron_pair_list->size(),
       1.0,
       correlation_factor->f23, electron_list->size(),
       traces.k13, electron_list->size(),
       0.0, 
       T_ip_io, electron_list->size());
   blas_wrapper.dgekm(false, false,
-      electron_pair_list->size(), electron_list->size(),
+      electron_list->size(), electron_pair_list->size(),
       1.0,
       T_ip_io, electron_list->size(),
       traces.p13, electron_list->size(),
@@ -112,7 +112,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       T_ip, 1);
   blas_wrapper.dgemv(
       false,
-      electron_pair_list->size(), electron_list->size(),
+      electron_list->size(), electron_pair_list->size(), 
       c1,
       T_ip_jo, electron_list->size(),
       T_ip, 1,
@@ -120,7 +120,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       T_io, 1);
 
   blas_wrapper.dgekm(false, false,
-      electron_pair_list->size(), electron_list->size(),
+      electron_list->size(), electron_pair_list->size(),
       1.0,
       T_ip_io, electron_list->size(),
       traces.p23, electron_list->size(),
@@ -135,7 +135,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       T_ip, 1);
   blas_wrapper.dgemv(
       false,
-      electron_pair_list->size(), electron_list->size(),
+      electron_list->size(), electron_pair_list->size(),
       c2,
       T_ip_jo, electron_list->size(),
       T_ip, 1,
