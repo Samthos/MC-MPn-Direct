@@ -146,24 +146,24 @@ class Correlation_Factor_Data_Fixture {
   Correlation_Factor_Data_Fixture() :
       electrons(8),
       electron_pairs(10),
-      correlation_factor(CORRELATION_FACTORS::Rational),
+      correlation_factor(CORRELATION_FACTOR::Rational),
       gamma(-1.0),
       beta(-1.0),
       electron_list(new Electron_List_Type(electrons)),
       electron_pair_list(new Electron_Pair_List_Type(electron_pairs)),
-      correlation_factor_data(electrons, electron_pairs, correlation_factor, gamma, beta) {
-    correlation_factor_data.update(electron_pair_list.get(), electron_list.get());
+      correlation_factor_data(create_Correlation_Factor_Data<Container, Allocator>(electrons, electron_pairs, correlation_factor, gamma, beta)) {
+    correlation_factor_data->update(electron_pair_list.get(), electron_list.get());
   }
 
   int electrons;
   int electron_pairs;
-  CORRELATION_FACTORS::CORRELATION_FACTORS correlation_factor;
+  CORRELATION_FACTOR::Type correlation_factor;
   double gamma;
   double beta;
 
   std::shared_ptr<Electron_List_Type> electron_list;
   std::shared_ptr<Electron_Pair_List_Type> electron_pair_list;
-  Correlation_Factor_Data_Type correlation_factor_data;
+  std::shared_ptr<Correlation_Factor_Data_Type> correlation_factor_data;
 };
 
 template <typename T>
@@ -189,42 +189,42 @@ TYPED_TEST_SUITE(CorrelationFactorDataTest, Implementations);
 
 TYPED_TEST(CorrelationFactorDataTest, f12pTest) {
   this->check(f12p_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f12p),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f12p),
       "f12p_Test");
 }
 TYPED_TEST(CorrelationFactorDataTest, f12paTest) {
   this->check(f12pa_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f12p_a),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f12p_a),
       "f12pa_Test");
 }
 TYPED_TEST(CorrelationFactorDataTest, f12pcTest) {
   this->check(f12pc_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f12p_c),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f12p_c),
       "f12pc_Test");
 }
 TYPED_TEST(CorrelationFactorDataTest, f12oTest) {
   this->check(f12o_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f12o),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f12o),
       "f12o_Test");
 }
 TYPED_TEST(CorrelationFactorDataTest, f12obTest) {
   this->check(f12ob_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f12o_b),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f12o_b),
       "f12ob_Test");
 }
 TYPED_TEST(CorrelationFactorDataTest, f12odTest) {
   this->check(f12od_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f12o_d),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f12o_d),
       "f12od_Test");
 }
 TYPED_TEST(CorrelationFactorDataTest, f13Test) {
   this->check(f13_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f13),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f13),
       "f13_Test");
 }
 TYPED_TEST(CorrelationFactorDataTest, f23Test) {
   this->check(f23_result(),
-      get_vector(this->correlation_factor_data_fixture.correlation_factor_data.f23),
+      get_vector(this->correlation_factor_data_fixture.correlation_factor_data->f23),
       "f23_Test");
 }
 }  // namespace
