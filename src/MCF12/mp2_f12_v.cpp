@@ -69,8 +69,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_2e(const Electron_Pair_List_
       T_ip_io, 1);
   blas_wrapper.dgekv(electron_pair_list->size(), 
       c1, 
-      traces.p11, 
-      0, 1, 
+      traces.p11, 0, 1, 
       traces.p22, 0, 1,
       0.0, 
       T_ip_io, electron_pair_list->size(), 1);

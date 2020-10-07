@@ -32,39 +32,157 @@ void MP2_F12_VBX::calculate_bx(double& emp, std::vector<double>& control, std::u
 }
 
 double MP2_F12_VBX::calculate_bx_t_fa_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  std::array<double, 2> t{0.0, 0.0};
-  for(int ip = 0; ip < electron_pair_list->size(); ip++) {
-    auto f_a = correlation_factor->f12p_a[ip];
-    auto f_12 = correlation_factor->f12p[ip];
-    t[0] += f_12 * (f_a + 2.0 * c1 / c3) * traces.p11[ip] * traces.p22[ip] * electron_pair_list->rv[ip];
-    t[1] += f_12 * (f_a + 2.0 * c2 / c4) * traces.p12[ip] * traces.p12[ip] * electron_pair_list->rv[ip];
-  }
-  return (c3 * t[0] + c4 * t[1]) * nsamp_pair;
+  blas_wrapper.dgekv(electron_pair_list->size(), 
+      1.0, 
+      correlation_factor->f12p, 1, 
+      electron_pair_list->rv,  1,
+      0.0, 
+      T_ip_io, 1);
+ 
+  blas_wrapper.shift(electron_pair_list->size(),
+      2.0 * c1 / c3,
+      correlation_factor->f12p_a, 1,
+      T_ip, 1);
+  blas_wrapper.dgekv(electron_pair_list->size(), 
+      c3, 
+      traces.p11, 0, 1, 
+      traces.p22, 0, 1,
+      0.0, 
+      T_ip_io, 2*electron_pair_list->size(), 1);
+  blas_wrapper.dgekv(electron_pair_list->size(), 
+      1.0, 
+      T_ip_io, 2.0*electron_pair_list->size(), 1, 
+      T_ip, 0, 1,
+      0.0, 
+      T_ip_io, electron_pair_list->size(), 1);
+ 
+  blas_wrapper.shift(electron_pair_list->size(),
+      2.0 * c2 / c4,
+      correlation_factor->f12p_a, 1,
+      T_ip, 1);
+  blas_wrapper.dgekv(electron_pair_list->size(),
+      c4, 
+      traces.p12, 0, 1,
+      traces.p12, 0, 1,
+      0.0, 
+      T_ip_io, 2*electron_pair_list->size(), 1);
+  blas_wrapper.dgekv(electron_pair_list->size(), 
+      1.0, 
+      T_ip_io, 2.0*electron_pair_list->size(), 1, 
+      T_ip, 0, 1,
+      1.0, 
+      T_ip_io, electron_pair_list->size(), 1);
+ 
+  double result = blas_wrapper.ddot(electron_pair_list->size(), 
+      T_ip_io, 0, 1, 
+      T_ip_io, electron_pair_list->size(), 1);
+  result *= nsamp_pair;
+  return result;
 }
 double MP2_F12_VBX::calculate_bx_t_fa_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  std::array<double, 2> t{0.0, 0.0};
-  for(int ip = 0; ip < electron_pair_list->size(); ip++) {
-    std::array<double, 2> t_ip{0.0, 0.0};
-    for (int io = 0; io < electron_list->size(); ++io) {
-      t_ip[0] += correlation_factor->f23[ip * traces.electrons + io] * traces.p13[ip * traces.electrons + io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
-      t_ip[1] += correlation_factor->f23[ip * traces.electrons + io] * traces.p23[ip * traces.electrons + io] * traces.k13[ip * traces.electrons + io] * electron_list->inverse_weight[io];
-    }
-    auto f_a = correlation_factor->f12p_a[ip];
-    t[0] += t_ip[0] * (f_a + 2.0 * c1 / c3) * traces.p22[ip] * electron_pair_list->rv[ip];
-    t[1] += t_ip[1] * (f_a + 2.0 * c2 / c4) * traces.p12[ip] * electron_pair_list->rv[ip];
-  }
-  return -2.0 * (c3 * t[0] + c4 * t[1]) * nsamp_pair * nsamp_one_1;
+  blas_wrapper.dgekm(false, false,
+      electron_list->size(), electron_pair_list->size(),
+      1.0,
+      correlation_factor->f23, electron_list->size(),
+      traces.k13, electron_list->size(),
+      0.0, 
+      T_ip_io, electron_list->size());
+  blas_wrapper.dgekm(false, false,
+      electron_list->size(), electron_pair_list->size(),
+      1.0,
+      T_ip_io, electron_list->size(),
+      traces.p13, electron_list->size(),
+      0.0, 
+      T_ip_jo, electron_list->size());
+  blas_wrapper.shift(electron_pair_list->size(),
+      2.0 * c1 / c3,
+      correlation_factor->f12p_a, 1,
+      T_ip, 1);
+  blas_wrapper.dgekv(
+      electron_pair_list->size(),
+      1.0,
+      electron_pair_list->rv, 1,
+      T_ip, 1,
+      0.0, 
+      T_ip, 1);
+  blas_wrapper.dgekv(
+      electron_pair_list->size(),
+      1.0,
+      traces.p22, 1,
+      T_ip, 1,
+      0.0, 
+      T_ip, 1);
+  blas_wrapper.dgemv(
+      false,
+      electron_list->size(), electron_pair_list->size(), 
+      c3,
+      T_ip_jo, electron_list->size(),
+      T_ip, 1,
+      0.0,
+      T_io, 1);
+
+  blas_wrapper.dgekm(false, false,
+      electron_list->size(), electron_pair_list->size(),
+      1.0,
+      T_ip_io, electron_list->size(),
+      traces.p23, electron_list->size(),
+      0.0, 
+      T_ip_jo, electron_list->size());
+  blas_wrapper.shift(electron_pair_list->size(),
+      2.0 * c2 / c4,
+      correlation_factor->f12p_a, 1,
+      T_ip, 1);
+  blas_wrapper.dgekv(
+      electron_pair_list->size(),
+      1.0,
+      electron_pair_list->rv, 1,
+      T_ip, 1,
+      0.0, 
+      T_ip, 1);
+  blas_wrapper.dgekv(
+      electron_pair_list->size(),
+      1.0,
+      traces.p12, 1,
+      T_ip, 1,
+      0.0, 
+      T_ip, 1);
+  blas_wrapper.dgemv(
+      false,
+      electron_list->size(), electron_pair_list->size(),
+      c4,
+      T_ip_jo, electron_list->size(),
+      T_ip, 1,
+      1.0,
+      T_io, 1);
+  double result = blas_wrapper.ddot(electron_list->size(),
+      T_io, 1,
+      electron_list->inverse_weight, 1);
+  result = -2.0 * result * nsamp_pair * nsamp_one_1;
+  return result;
 }
 double MP2_F12_VBX::calculate_bx_t_fa_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  for (int io = 0, idx = 0; io < electron_list->size(); ++io) {
-    for (int jo = 0; jo < electron_list->size(); ++jo, ++idx) {
-      T_io_jo[idx] = correlation_factor->f12o[idx] * electron_list->inverse_weight[io] * electron_list->inverse_weight[jo];
-    }
-  }
+  blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
+      electron_list->size(), electron_list->size(),
+      correlation_factor->f12o, electron_list->size(),
+      electron_list->inverse_weight, 1,
+      T_io_jo, electron_list->size());
+  blas_wrapper.ddgmm(BLAS_WRAPPER::LEFT_SIDE,
+      electron_list->size(), electron_list->size(),
+      T_io_jo, electron_list->size(),
+      electron_list->inverse_weight, 1,
+      T_io_jo, electron_list->size());
 
-  for (int ip = 0; ip < electron_pair_list->size(); ip++) {
-    T_ip[ip] = (correlation_factor->f12p_a[ip] + 2.0 * c1 / c3) * electron_pair_list->rv[ip];
-  }
+  blas_wrapper.shift(electron_pair_list->size(),
+      2.0 * c1 / c3,
+      correlation_factor->f12p_a, 1,
+      T_ip, 1);
+  blas_wrapper.dgekv(
+      electron_pair_list->size(),
+      1.0,
+      electron_pair_list->rv, 1,
+      T_ip, 1,
+      0.0, 
+      T_ip, 1);
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p13, traces.k13, 
       traces.p23, traces.k23,
@@ -79,9 +197,17 @@ double MP2_F12_VBX::calculate_bx_t_fa_4e(const Electron_Pair_List_Type* electron
       -c3, 1.0,
       electron_list->size(), electron_pair_list->size());
  
-  for (int ip = 0; ip < electron_pair_list->size(); ip++) {
-    T_ip[ip] = (correlation_factor->f12p_a[ip] + 2.0 * c2 / c4) * electron_pair_list->rv[ip];
-  }
+  blas_wrapper.shift(electron_pair_list->size(),
+      2.0 * c2 / c4,
+      correlation_factor->f12p_a, 1,
+      T_ip, 1);
+  blas_wrapper.dgekv(
+      electron_pair_list->size(),
+      1.0,
+      electron_pair_list->rv, 1,
+      T_ip, 1,
+      0.0, 
+      T_ip, 1);
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p23, traces.k13, 
       traces.p13, traces.k23,

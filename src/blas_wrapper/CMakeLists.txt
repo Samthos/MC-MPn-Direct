@@ -16,6 +16,7 @@ set(source
   dscal.cpp
   dsyrk.cpp
   mfill.cpp
+  shift.cpp
   vfill.cpp
 )
 

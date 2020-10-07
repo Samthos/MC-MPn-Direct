@@ -182,6 +182,11 @@ class Blas_Wrapper {
       value_type beta,
       vector_type& C, size_t inc_c);
 
+  void shift(size_t m,
+      value_type alpha,
+      const vector_type& X, size_t incx,
+      vector_type& Y, size_t incy);
+
   void vfill(size_t n,
       double alpha,
       vector_type& X, size_t inc_x);
@@ -218,6 +223,11 @@ class Blas_Wrapper {
   void dscal(size_t N,
       value_type alpha,
       vector_type& X, size_t incx);
+
+  void shift(size_t m,
+      value_type alpha,
+      const vector_type& X, size_t offset_x, size_t incx,
+      vector_type& Y, size_t offset_y, size_t incy);
 
   void vfill(size_t n,
       double alpha,

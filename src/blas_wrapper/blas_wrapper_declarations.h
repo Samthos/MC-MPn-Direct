@@ -109,6 +109,12 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dscal(size_t N,
     vector_type& X, size_t incx);
 
 template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::shift(size_t m,
+    value_type alpha,
+    const vector_type& X, size_t offset_x, size_t incx,
+    vector_type& Y, size_t offset_y, size_t incy);
+
+template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::vfill(size_t N,
     double alpha,
     vector_type& X, size_t offset_x, size_t incx);
