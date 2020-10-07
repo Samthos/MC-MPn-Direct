@@ -76,6 +76,50 @@ void Blas_Wrapper<std::vector, std::allocator>::dgekm(bool TransA, bool TransB,
         }
       }
     }
+  } else if (TransA == false) {
+    if (0.0 == beta) {
+      if (alpha == 1.0) {
+        for (size_t col = 0; col < n; col++) {
+          for (size_t row = 0; row < m; row++) {
+            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[row * ldb + col];
+          }
+        }
+      } else {
+        for (size_t col = 0; col < n; col++) {
+          for (size_t row = 0; row < m; row++) {
+            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[row * ldb + col];
+          }
+        }
+      }
+    } else if (1.0 == beta) {
+      if (alpha == 1.0) {
+        for (size_t col = 0; col < n; col++) {
+          for (size_t row = 0; row < m; row++) {
+            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[row * ldb + col] + c_ptr[col * ldc + row];
+          }
+        }
+      } else {
+        for (size_t col = 0; col < n; col++) {
+          for (size_t row = 0; row < m; row++) {
+            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[row * ldb + col] + c_ptr[col * ldc + row];
+          }
+        }
+      }
+    } else {
+      if (alpha == 1.0) {
+        for (size_t col = 0; col < n; col++) {
+          for (size_t row = 0; row < m; row++) {
+            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[row * ldb + col] + beta * c_ptr[col * ldc + row];
+          }
+        }
+      } else {
+        for (size_t col = 0; col < n; col++) {
+          for (size_t row = 0; row < m; row++) {
+            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[row * ldb + col] + beta * c_ptr[col * ldc + row];
+          }
+        }
+      }
+    }
   } else {
     std::cerr << "vector<double> implation of blas_wrapper.dgekm is unable to transpose matrices\n";
     exit(0);
