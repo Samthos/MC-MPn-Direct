@@ -24,12 +24,6 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dsyrk(
 // Level 2 blas
 //
 template <>
-void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::batched_ddot(size_t N, size_t K,
-    const vector_type& A, size_t offset_a, size_t lda,
-    const vector_type& B, size_t offset_b, size_t ldb,
-    vector_type& X, size_t incx);
-
-template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::ddgmm(
     BLAS_WRAPPER::Side_t side,
     size_t m, size_t n,
