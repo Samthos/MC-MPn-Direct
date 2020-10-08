@@ -21,11 +21,9 @@ class ovpsSetFixture {
       psi1Tau(make_psi(electron_pairs, lda, 1.0)),
       psi2Tau(make_psi(electron_pairs, lda, -1.0)) {
     ovps_set.resize(electron_pairs);
-    cublasCreate(&handle);
   }
 
   ~ovpsSetFixture() {
-    cublasDestroy(handle);
   }
 
   void fill() {
@@ -39,17 +37,17 @@ class ovpsSetFixture {
     fill();
     ovps_set.update(psi1Tau, iocc1,
         psi2Tau, iocc1,
-        iocc2 - iocc1, lda, &handle);
+        iocc2 - iocc1, lda, blas_wrapper);
   }
 
   void build_vir() {
     fill();
     ovps_set.update(psi1Tau, ivir1,
         psi2Tau, ivir1,
-        ivir2 - ivir1, lda, &handle);
+        ivir2 - ivir1, lda, blas_wrapper);
   }
 
-  cublasHandle_t handle;
+  Blas_Wrapper<Container, Allocator> blas_wrapper;
   int iocc1, iocc2, ivir1, ivir2, lda, electron_pairs;
   OVPS_Set<Container, Allocator> ovps_set;
   Container<double, Allocator<double>> psi1Tau;

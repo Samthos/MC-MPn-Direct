@@ -20,6 +20,15 @@ void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dsyrk(
     double beta,
     vector_type& B, size_t offset_b, size_t ldb);
 
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::dherk(
+    BLAS_WRAPPER::Fill_Mode_t fill_mode_t, bool Trans, 
+    size_t m, size_t k, 
+    double alpha,
+    const vector_type& A, size_t offset_a, size_t lda,
+    double beta,
+    vector_type& B, size_t offset_b, size_t ldb);
+
 //
 // Level 2 blas
 //
@@ -63,6 +72,11 @@ template <>
 void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::mfill(size_t m, size_t n,
     double alpha,
     vector_type& A, size_t offset_a, size_t lda);
+
+template <>
+void Blas_Wrapper<VECTOR_TYPE, ALLOCATOR_TYPE>::transpose(size_t m, size_t n,
+    const vector_type& A, size_t lda,
+    vector_type& B, size_t ldb);
 //
 // Level 1 blas
 //

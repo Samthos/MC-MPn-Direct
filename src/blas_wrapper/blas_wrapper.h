@@ -15,6 +15,12 @@ namespace BLAS_WRAPPER {
     FILL_UPPER,
   };
 
+  enum Transpose{
+    NoTrans, 
+    Trans,
+    Adjoint,
+  };
+
   enum Side_t {
     RIGHT_SIDE,
     LEFT_SIDE
@@ -52,6 +58,13 @@ class Blas_Wrapper {
       value_type beta,
       vector_type& B, size_t ldb);
 
+  void dherk(BLAS_WRAPPER::Fill_Mode_t fill_mode, bool Trans, 
+      size_t m, size_t k, 
+      value_type alpha,
+      const vector_type& A, size_t lda,
+      value_type beta,
+      vector_type& B, size_t ldb);
+
   // 
   // Instantiated Level 3 Blas 
   //
@@ -65,6 +78,13 @@ class Blas_Wrapper {
 
 
   void dsyrk(BLAS_WRAPPER::Fill_Mode_t fill_mode, bool Trans, 
+      size_t m, size_t k, 
+      value_type alpha,
+      const vector_type& A, size_t offset_a, size_t lda,
+      value_type beta,
+      vector_type& B, size_t offset_b, size_t ldb);
+
+  void dherk(BLAS_WRAPPER::Fill_Mode_t fill_mode, bool Trans, 
       size_t m, size_t k, 
       value_type alpha,
       const vector_type& A, size_t offset_a, size_t lda,
@@ -113,8 +133,6 @@ class Blas_Wrapper {
       double alpha,
       vector_type& A, size_t lda);
 
-
-
   // 
   // Instantiated Level 2 Blas 
   //
@@ -151,6 +169,10 @@ class Blas_Wrapper {
   void mfill(size_t m, size_t n,
       double alpha,
       vector_type& A, size_t offset_a, size_t lda);
+
+  void transpose(size_t m, size_t n,
+      const vector_type& A, size_t lda,
+      vector_type& B, size_t ldb);
 
   // 
   // Template Level 1 Blas 

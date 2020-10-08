@@ -13,10 +13,12 @@ set(source
   dgekv.cpp
   dgemm.cpp
   dgemv.cpp
+  dherk.cpp
   dscal.cpp
   dsyrk.cpp
   mfill.cpp
   shift.cpp
+  transpose.cpp
   vfill.cpp
 )
 
