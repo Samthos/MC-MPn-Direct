@@ -61,24 +61,28 @@ void MP2_F12_V<Container, Allocator>::calculate_v_4e_help(
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 double MP2_F12_V<Container, Allocator>::calculate_v_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+  // f12 / (r12 w12)
   blas_wrapper.dgekv(electron_pair_list->size(), 
       1.0, 
       correlation_factor->f12p, 1, 
       electron_pair_list->rv,  1,
       0.0, 
       T_ip_io, 1);
+  // c1 p11 p22
   blas_wrapper.dgekv(electron_pair_list->size(), 
       c1, 
       traces.p11, 0, 1, 
       traces.p22, 0, 1,
       0.0, 
       T_ip_io, electron_pair_list->size(), 1);
+  // c1 p11 p22 + c2 p12 p21
   blas_wrapper.dgekv(electron_pair_list->size(),
       c2, 
       traces.p12, 0, 1,
       traces.p12, 0, 1,
       1.0, 
       T_ip_io, electron_pair_list->size(), 1);
+  // c1 f12 p11 p22 / (r12 w12) + c2 f12 p12 p21 / (r12 w12)
   double result = blas_wrapper.ddot(electron_pair_list->size(), 
       T_ip_io, 0, 1, 
       T_ip_io, electron_pair_list->size(), 1);
@@ -88,6 +92,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_2e(const Electron_Pair_List_
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+  // f23 k31
   blas_wrapper.dgekm(false, false,
       electron_list->size(), electron_pair_list->size(),
       1.0,
@@ -95,6 +100,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       traces.k13, electron_list->size(),
       0.0, 
       T_ip_io, electron_list->size());
+  // f23 o13 k31
   blas_wrapper.dgekm(false, false,
       electron_list->size(), electron_pair_list->size(),
       1.0,
@@ -102,6 +108,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       traces.p13, electron_list->size(),
       0.0, 
       T_ip_jo, electron_list->size());
+  // o22 / (r12 w12)
   blas_wrapper.dgekv(
       electron_pair_list->size(),
       1.0,
@@ -109,6 +116,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       traces.p22, 1,
       0.0, 
       T_ip, 1);
+  // c1 f23 o13 o22 k31 / (r12 w12)
   blas_wrapper.dgemv(
       false,
       electron_list->size(), electron_pair_list->size(), 
@@ -118,6 +126,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       0.0,
       T_io, 1);
 
+  // f23 o23 k31
   blas_wrapper.dgekm(false, false,
       electron_list->size(), electron_pair_list->size(),
       1.0,
@@ -125,6 +134,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       traces.p23, electron_list->size(),
       0.0, 
       T_ip_jo, electron_list->size());
+  // o12 / (r12 w12)
   blas_wrapper.dgekv(
       electron_pair_list->size(),
       1.0,
@@ -132,6 +142,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       traces.p12, 1,
       0.0, 
       T_ip, 1);
+  // f23 (o13 o22 k31 + c2 o12 o23 k31) / (r12 w12)
   blas_wrapper.dgemv(
       false,
       electron_list->size(), electron_pair_list->size(),
@@ -140,6 +151,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
       T_ip, 1,
       1.0,
       T_io, 1);
+  // f23 (o13 o22 k31 + c2 o12 o23 k31) / (r12 w12 w3)
   double result = blas_wrapper.ddot(electron_list->size(),
       T_io, 1,
       electron_list->inverse_weight, 1);
@@ -149,17 +161,20 @@ double MP2_F12_V<Container, Allocator>::calculate_v_3e(const Electron_Pair_List_
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>
 double MP2_F12_V<Container, Allocator>::calculate_v_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
+  // f34 / w3 <- might be w4?
   blas_wrapper.ddgmm(BLAS_WRAPPER::RIGHT_SIDE,
       electron_list->size(), electron_list->size(),
       correlation_factor->f12o, electron_list->size(),
       electron_list->inverse_weight, 1,
       T_io_jo, electron_list->size());
+  // f34 / (w3 w4)
   blas_wrapper.ddgmm(BLAS_WRAPPER::LEFT_SIDE,
       electron_list->size(), electron_list->size(),
       T_io_jo, electron_list->size(),
       electron_list->inverse_weight, 1,
       T_io_jo, electron_list->size());
 
+  // c1 f34 o13 o24 o31 o42 / (r12 w12 w3 w4)
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p13, traces.k13,
       traces.p23, traces.k23,
@@ -167,6 +182,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_4e(const Electron_Pair_List_
       c1, 0.0,
       electron_list->size(), electron_pair_list->size());
 
+  // -c1 f34 o13 o24 v31 v42 / (r12 w12 w3 w4)
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p13, traces.v13,
       traces.p23, traces.v23,
@@ -174,6 +190,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_4e(const Electron_Pair_List_
       -c1, 1.0,
       electron_list->size(), electron_pair_list->size());
 
+  // c2 f34 o14 o23 o31 o42 / (r12 w12 w3 w4)
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo,
       traces.p23, traces.k13,
       traces.p13, traces.k23,
@@ -181,6 +198,7 @@ double MP2_F12_V<Container, Allocator>::calculate_v_4e(const Electron_Pair_List_
       c2, 1.0,
       electron_list->size(), electron_pair_list->size());
 
+  // -c2 f34 o14 o23 v31 v42 / (r12 w12 w3 w4)
   calculate_v_4e_help(T_ip_io, T_ip_jo, T_io_jo, 
       traces.p23, traces.v13,
       traces.p13, traces.v23,

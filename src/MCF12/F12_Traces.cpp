@@ -201,7 +201,7 @@ void F12_Traces<Container, Allocator>::build_one_e_one_e_traces(const Wavefuncti
   auto iocc2 = electron_psi.iocc2;
   auto ivir1 = electron_psi.ivir1;
   auto ivir2 = electron_psi.ivir2;
-  blas_wrapper.dsyrk(BLAS_WRAPPER::FILL_FULL, true,
+  blas_wrapper.dherk(BLAS_WRAPPER::FILL_FULL, true,
       electrons, iocc2 - iocc1,
       1.0,
       electron_psi.psi, iocc1, electron_psi.lda,
@@ -210,7 +210,7 @@ void F12_Traces<Container, Allocator>::build_one_e_one_e_traces(const Wavefuncti
 
   blas_wrapper.dcopy(electrons, op12, electrons+1, op11, 1);
 
-  blas_wrapper.dsyrk(BLAS_WRAPPER::FILL_FULL, true,
+  blas_wrapper.dherk(BLAS_WRAPPER::FILL_FULL, true,
       electrons, ivir2 - ivir1,
       1.0,
       electron_psi.psi, ivir1, electron_psi.lda,
@@ -218,7 +218,7 @@ void F12_Traces<Container, Allocator>::build_one_e_one_e_traces(const Wavefuncti
       ov12, 0, electrons);
 
   blas_wrapper.dcopy(op12.size(), op12, 1, ok12, 1);
-  blas_wrapper.dsyrk(BLAS_WRAPPER::FILL_FULL, true,
+  blas_wrapper.dherk(BLAS_WRAPPER::FILL_FULL, true,
       electrons, iocc1,
       1.0,
       electron_psi.psi, electron_psi.lda,

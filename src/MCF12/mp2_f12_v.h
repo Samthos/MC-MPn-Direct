@@ -17,7 +17,6 @@ template <template <typename, typename> typename Container, template <typename> 
 class MP2_F12_V : public F12_MP_Functional<Container, Allocator> {
  protected:
   typedef Container<double, Allocator<double>> vector_double;
-
   typedef Blas_Wrapper<Container, Allocator> Blas_Wrapper_Type;
   typedef Correlation_Factor_Data<Container, Allocator> Correlation_Factor_Data_Type;
   typedef Electron_List<Container, Allocator> Electron_List_Type;

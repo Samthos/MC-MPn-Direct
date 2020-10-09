@@ -19,7 +19,14 @@ class MP2_F12_VBX : public MP2_F12_V<std::vector, std::allocator> {
   double calculate_bx_t_fb_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
   double calculate_bx_t_fb_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
   double calculate_bx_t_fb_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
-  double calculate_bx_t_fb_4e_help(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, size_t size);
+  double calculate_bx_t_fb_4e_help_direct(const std::vector<double>&, const std::vector<double>&,
+      const std::vector<double>&, const std::vector<double>&,
+      const std::vector<double>&, const std::vector<double>&, 
+      const std::vector<double>&, size_t size);
+  double calculate_bx_t_fb_4e_help_exchange(const std::vector<double>&, const std::vector<double>&,
+      const std::vector<double>&, const std::vector<double>&,
+      const std::vector<double>&, const std::vector<double>&, 
+      const std::vector<double>&, size_t size);
   double calculate_bx_t_fb(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
 
   double calculate_bx_t_fc_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
@@ -47,6 +54,9 @@ class MP2_F12_VBX : public MP2_F12_V<std::vector, std::allocator> {
   double nsamp_one_4;
 
   std::vector<double> T_io_ko;
+  std::vector<double> T_io_lo;
   std::vector<double> T_jo_ko;
+  std::vector<double> T_jo_lo;
+  std::vector<double> T_ko_lo;
 };
 #endif  // MP2_F12_VBX_H_
