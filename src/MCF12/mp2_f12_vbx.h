@@ -48,7 +48,8 @@ class MP2_F12_VBX : public MP2_F12_V<std::vector, std::allocator> {
       const std::vector<double>& S_jo, std::vector<double>& T_io);
   double calculate_bx_k_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
   double calculate_bx_k_5e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
-  double calculate_bx_k_5e_help( const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, size_t, size_t);
+  double calculate_bx_k_5e_direct_help( const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, size_t, size_t);
+  double calculate_bx_k_5e_exchange_help();
   double calculate_bx_k   (const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
   void normalize();
 
