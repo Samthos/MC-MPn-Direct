@@ -44,14 +44,6 @@ class MP2_F12_V : public F12_MP_Functional<Container, Allocator> {
   void calculate_v(double& emp, std::vector<double>& control,
       std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list);
 
-  //define the amplitudes
-  static constexpr double a1 = 3.0/8.0;
-  static constexpr double a2 = 1.0/8.0;
-
-  // auto-generate the correct coefficients
-  static constexpr double c1 = 2.0*a1-a2;
-  static constexpr double c2 = 2.0*a2-a1;
-
   Blas_Wrapper_Type blas_wrapper;
   F12_Traces_Type traces;
   std::shared_ptr<Correlation_Factor_Data_Type> correlation_factor;
@@ -65,6 +57,15 @@ class MP2_F12_V : public F12_MP_Functional<Container, Allocator> {
   double nsamp_pair;
   double nsamp_one_1;
   double nsamp_one_2;
+ private:
+  //define the amplitudes
+  static constexpr double a1 = 3.0/8.0;
+  static constexpr double a2 = 1.0/8.0;
+
+  // auto-generate the correct coefficients
+  static constexpr double c1 = 2.0*a1-a2;
+  static constexpr double c2 = 2.0*a2-a1;
+
 };
 
 template class MP2_F12_V<std::vector, std::allocator>;

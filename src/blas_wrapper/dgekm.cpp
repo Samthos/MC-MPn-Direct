@@ -32,97 +32,73 @@ void Blas_Wrapper<std::vector, std::allocator>::dgekm(bool TransA, bool TransB,
   const double* a_ptr = A.data() + offset_a;
   const double* b_ptr = B.data() + offset_b;
   double* c_ptr = C.data() + offset_c;
-  if (TransA == false && TransB == false) {
-    if (0.0 == beta) {
-      if (alpha == 1.0) {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row];
-          }
-        }
-      } else {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row];
-          }
-        }
-      }
-    } else if (1.0 == beta) {
-      if (alpha == 1.0) {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
-          }
-        }
-      } else {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
-          }
+
+  vector_type A_T;
+  vector_type B_T;
+  if (TransA) {
+    if (offset_a != 0) {
+      std::cerr << "BAD\n";
+    }
+    A_T.resize(A.size());
+    this->transpose(
+        m, n,
+        A, lda,
+        A_T, n);
+    a_ptr = A_T.data() + offset_a;
+  }
+  if (TransB) {
+    if (offset_b != 0) {
+      std::cerr << "BAD\n";
+    }
+    B_T.resize(B.size());
+    this->transpose(
+        m, n,
+        B, lda,
+        B_T, n);
+    b_ptr = B_T.data() + offset_b;
+  }
+  if (0.0 == beta) {
+    if (alpha == 1.0) {
+      for (size_t col = 0; col < n; col++) {
+        for (size_t row = 0; row < m; row++) {
+          c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row];
         }
       }
     } else {
-      if (alpha == 1.0) {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
-          }
-        }
-      } else {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
-          }
+      for (size_t col = 0; col < n; col++) {
+        for (size_t row = 0; row < m; row++) {
+          c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row];
         }
       }
     }
-  } else if (TransA == false) {
-    if (0.0 == beta) {
-      if (alpha == 1.0) {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[row * ldb + col];
-          }
-        }
-      } else {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[row * ldb + col];
-          }
-        }
-      }
-    } else if (1.0 == beta) {
-      if (alpha == 1.0) {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[row * ldb + col] + c_ptr[col * ldc + row];
-          }
-        }
-      } else {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[row * ldb + col] + c_ptr[col * ldc + row];
-          }
+  } else if (1.0 == beta) {
+    if (alpha == 1.0) {
+      for (size_t col = 0; col < n; col++) {
+        for (size_t row = 0; row < m; row++) {
+          c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
         }
       }
     } else {
-      if (alpha == 1.0) {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[row * ldb + col] + beta * c_ptr[col * ldc + row];
-          }
-        }
-      } else {
-        for (size_t col = 0; col < n; col++) {
-          for (size_t row = 0; row < m; row++) {
-            c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[row * ldb + col] + beta * c_ptr[col * ldc + row];
-          }
+      for (size_t col = 0; col < n; col++) {
+        for (size_t row = 0; row < m; row++) {
+          c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row] + c_ptr[col * ldc + row];
         }
       }
     }
   } else {
-    std::cerr << "vector<double> implation of blas_wrapper.dgekm is unable to transpose matrices\n";
-    exit(0);
+    if (alpha == 1.0) {
+      for (size_t col = 0; col < n; col++) {
+        for (size_t row = 0; row < m; row++) {
+          c_ptr[col * ldc + row] = a_ptr[col * lda + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
+        }
+      }
+    } else {
+      for (size_t col = 0; col < n; col++) {
+        for (size_t row = 0; row < m; row++) {
+          c_ptr[col * ldc + row] = alpha * a_ptr[col * lda + row] * b_ptr[col * ldb + row] + beta * c_ptr[col * ldc + row];
+        }
+      }
+    }
   }
 }
 
@@ -187,6 +163,16 @@ __global__ void dgekm_kernel_1a_0b(size_t m, size_t n,
   }
 }
 
+__global__ void dgekm_kernel_1a_0b_fast(size_t m,
+    const double* A,
+    const double* B,
+    double* C) {
+  int row = blockIdx.x * blockDim.x + threadIdx.x;
+  if (row < m) {
+    C[row] = A[row] * B[row];
+  }
+}
+
 __global__ void dgekm_kernel_1a_1b(size_t m, size_t n,
     const double* A, size_t lda,
     const double* B, size_t ldb,
@@ -214,30 +200,57 @@ void Blas_Wrapper<thrust::device_vector, thrust::device_allocator>::dgekm(bool T
       (m + blockSize.x - 1) / blockSize.x,
       (n + blockSize.y - 1) / blockSize.y,
       1);
-  if (TransA == false && TransB == false) {
-    //   if (0.0 == beta) {
-    //     if (alpha == 1.0) {
-    //       dgekm_kernel_1a_0b<<<gridSize, blockSize>>>(m, n, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
-    //     } else {
-    //       dgekm_kernel_0b<<<gridSize, blockSize>>>(m, n, alpha, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
-    //     }
-    //   } else if (beta == 1.0) {
-    //     if (alpha == 1.0) {
-    //       dgekm_kernel_1a_1b<<<gridSize, blockSize>>>(m, n, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
-    //     } else {
-    //       dgekm_kernel_1b<<<gridSize, blockSize>>>(m, n, alpha, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
-    //     }
-    //   } else {
-    //     if (alpha == 1.0) {
-    //       dgekm_kernel_1a<<<gridSize, blockSize>>>(m, n, a_ptr, lda, b_ptr, ldb, beta, c_ptr, ldc);
-    //     } else {
-    dgekm_kernel<<<gridSize, blockSize>>>(m, n, alpha, a_ptr, lda, b_ptr, ldb, beta, c_ptr, ldc);
-    //     }
-    //   }
-  } else {
-    std::cerr << "vector<double> implation of blas_wrapper.dgekm is unable to transpose matrices\n";
-    exit(0);
+  vector_type A_T;
+  vector_type B_T;
+  if (TransA) {
+    if (offset_a != 0) {
+      std::cerr << "BAD\n";
+    }
+    A_T.resize(A.size());
+    this->transpose(
+        m, n,
+        A, lda,
+        A_T, n);
+    a_ptr = A_T.data().get() + offset_a;
   }
+  if (TransB) {
+    if (offset_b != 0) {
+      std::cerr << "BAD\n";
+    }
+    B_T.resize(B.size());
+    this->transpose(
+        m, n,
+        B, lda,
+        B_T, n);
+    b_ptr = B_T.data().get() + offset_b;
+  }
+ if (0.0 == beta) {
+   if (alpha == 1.0) {
+     if (lda == ldb && lda == ldc && lda == m) {
+      blockSize.x = 128;
+      blockSize.y = 1;
+      gridSize.x = (m*n + blockSize.x - 1) / blockSize.x;
+      gridSize.y = 1;
+      dgekm_kernel_1a_0b_fast<<<gridSize, blockSize>>>(m*n, a_ptr, b_ptr, c_ptr);
+     } else {
+      dgekm_kernel_1a_0b<<<gridSize, blockSize>>>(m, n, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
+     }
+   } else {
+     dgekm_kernel_0b<<<gridSize, blockSize>>>(m, n, alpha, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
+   }
+ } else if (beta == 1.0) {
+   if (alpha == 1.0) {
+     dgekm_kernel_1a_1b<<<gridSize, blockSize>>>(m, n, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
+   } else {
+     dgekm_kernel_1b<<<gridSize, blockSize>>>(m, n, alpha, a_ptr, lda, b_ptr, ldb, c_ptr, ldc);
+   }
+ } else {
+   if (alpha == 1.0) {
+     dgekm_kernel_1a<<<gridSize, blockSize>>>(m, n, a_ptr, lda, b_ptr, ldb, beta, c_ptr, ldc);
+   } else {
+      dgekm_kernel<<<gridSize, blockSize>>>(m, n, alpha, a_ptr, lda, b_ptr, ldb, beta, c_ptr, ldc);
+   }
+ }
   cudaDeviceSynchronize();
 }
 #endif

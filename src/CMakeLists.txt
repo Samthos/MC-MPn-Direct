@@ -126,6 +126,7 @@ if(${Enable_CUDA})
       MCMP/mp3_functional.cpp
       MCMP/mp4_functional.cpp
       MCF12/mp2_f12_v.cpp
+      MCF12/mp2_f12_vbx.cpp
       MCF12/F12_Traces.cpp
       PROPERTIES LANGUAGE CUDA)
 

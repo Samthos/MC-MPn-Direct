@@ -40,7 +40,7 @@ MCMP<Container, Allocator>::MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p
     energy_functions.push_back(new MP2_F12_V<Container, Allocator>(this->iops));
   }
   if (this->iops.iopns[KEYS::TASK] & TASK::MP2_F12_VBX) {
-    energy_functions.push_back(new MP2_F12_VBX(this->iops));
+    energy_functions.push_back(new MP2_F12_VBX<Container, Allocator>(this->iops));
   }
 
   emp.resize(energy_functions.size());
