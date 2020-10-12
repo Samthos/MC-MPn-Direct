@@ -48,8 +48,17 @@ class MP2_F12_VBX : public MP2_F12_V<std::vector, std::allocator> {
       const std::vector<double>& S_jo, std::vector<double>& T_io);
   double calculate_bx_k_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
   double calculate_bx_k_5e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
-  double calculate_bx_k_5e_direct_help( const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, size_t, size_t);
-  double calculate_bx_k_5e_exchange_help();
+  double calculate_bx_k_5e_direct_help(double alpha, const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>& , const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, size_t, size_t);
+  double calculate_bx_k_5e_exchange_help(
+      double alpha,
+      const vector_double& S_ip_io,
+      const vector_double& S_ip_jo,
+      const vector_double& S_ip_ko,
+      const vector_double& S_io_jo,
+      const vector_double& S_io_ko,
+      const vector_double& S_jo_ko,
+      const vector_double& weight,
+      size_t electrons, size_t electron_pairs);
   double calculate_bx_k   (const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* el_one_list);
   void normalize();
 

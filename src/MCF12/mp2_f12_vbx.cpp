@@ -936,7 +936,7 @@ double MP2_F12_VBX::calculate_bx_k_3e(const Electron_Pair_List_Type* electron_pa
   blas_wrapper.dgemv(
       false,
       electron_list->size(), electron_pair_list->size(), 
-      c4,
+      2.0 * c4 * nsamp_pair * nsamp_one_1,
       T_ip_jo, electron_list->size(),
       T_ip, 1,
       0.0,
@@ -953,7 +953,7 @@ double MP2_F12_VBX::calculate_bx_k_3e(const Electron_Pair_List_Type* electron_pa
   blas_wrapper.dgemv(
       false,
       electron_list->size(), electron_pair_list->size(), 
-      c3,
+      2.0 * c3 * nsamp_pair * nsamp_one_1,
       T_ip_io, electron_list->size(),
       T_ip, 1,
       0.0,
@@ -968,10 +968,7 @@ double MP2_F12_VBX::calculate_bx_k_3e(const Electron_Pair_List_Type* electron_pa
       T_io, 1);
 
   std::array<double, 2> t{0.0, 0.0};
-  double result = blas_wrapper.ddot(electron_list->size(), 
-      T_io, 1,
-      electron_list->inverse_weight, 1);
-  return 2.0 * result * nsamp_pair * nsamp_one_1;
+  return blas_wrapper.ddot(electron_list->size(), T_io, 1, electron_list->inverse_weight, 1);
 }
 void MP2_F12_VBX::calculate_bx_k_4e_help(
     size_t electrons, size_t electron_pairs, double alpha,
@@ -1140,6 +1137,7 @@ double MP2_F12_VBX::calculate_bx_k_4e(const Electron_Pair_List_Type* electron_pa
   return -2.0 * result * nsamp_pair * nsamp_one_2;
 }
 double MP2_F12_VBX::calculate_bx_k_5e_direct_help(
+    double alpha,
     const std::vector<double>& S_ip_io_1, const std::vector<double>& S_ip_io_2,
     const std::vector<double>& S_jo_ko_1, const std::vector<double>& S_jo_ko_2,
     const std::vector<double>& S_io_ko, const std::vector<double>& S_ip_jo,
@@ -1199,7 +1197,7 @@ double MP2_F12_VBX::calculate_bx_k_5e_direct_help(
   blas_wrapper.dgemv(
       true,
       size, size, 
-      1.0,
+      alpha,
       T_io_jo, size, 
       weight, 1,
       0.0,
@@ -1208,8 +1206,69 @@ double MP2_F12_VBX::calculate_bx_k_5e_direct_help(
   double en = blas_wrapper.ddot(size, T_io, 1, weight, 1);
   return en;
 }
+double MP2_F12_VBX::calculate_bx_k_5e_exchange_help(
+    double alpha,
+    const vector_double& S_ip_io,
+    const vector_double& S_ip_jo,
+    const vector_double& S_ip_ko,
+    const vector_double& S_io_jo,
+    const vector_double& S_io_ko,
+    const vector_double& S_jo_ko,
+    const vector_double& weight,
+    size_t electrons, size_t electron_pairs
+    ) {
+  for (int io = 0; io < electrons; io++) {
+    blas_wrapper.ddgmm(
+        BLAS_WRAPPER::RIGHT_SIDE,
+        electrons, electron_pairs,
+        S_ip_ko, 0, electrons,
+        S_ip_io, io, electrons,
+        T_ip_io, 0, electrons);
+    blas_wrapper.dgemm(
+        false, true,
+        electrons, electrons, electron_pairs,
+        1.0,
+        T_ip_io, electrons,
+        S_ip_jo, electrons,
+        0.0, 
+        T_jo_ko, electrons);
+    blas_wrapper.dgekm(
+        false, false,
+        electrons, electrons,
+        1.0,
+        T_jo_ko, electrons,
+        S_jo_ko, electrons,
+        0.0,
+        T_jo_ko, electrons);
+    blas_wrapper.dgemv(
+        true,
+        electrons, electrons,
+        1.0,
+        T_jo_ko, 0, electrons,
+        S_io_ko, electrons * io, 1,
+        0.0,
+        T_io_jo, electrons * io, 1);
+  }
+  blas_wrapper.dgekm(
+      false, false,
+      electrons, electrons,
+      1.0,
+      T_io_jo, electrons,
+      S_io_jo, electrons,
+      0.0,
+      T_io_jo, electrons);
+  blas_wrapper.dgemv(
+      true,
+      electrons, electrons,
+      alpha,
+      T_io_jo, electrons,
+      weight, 1,
+      0.0,
+      T_io, 1);
+  return blas_wrapper.ddot(electrons, T_io, 1, weight, 1);
+}
 double MP2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
-  std::array<double, 2> t{0.0, 0.0};
+  double t;
   blas_wrapper.dgekv(
       electron_pair_list->size(),
       1.0,
@@ -1232,63 +1291,25 @@ double MP2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List_Type* electron_pa
       T_ip, 1,
       T_ip_jo, electron_list->size());
 
-  t[0] += calculate_bx_k_5e_direct_help(traces.k13, traces.p23, traces.ok12,traces.op12, correlation_factor->f12o, T_ip_jo, 
+  t += calculate_bx_k_5e_direct_help(c3, traces.k13, traces.p23, traces.ok12, traces.op12, correlation_factor->f12o, T_ip_jo, 
       electron_list->inverse_weight, electron_list->size(), electron_pair_list->size());
-  t[0] -= calculate_bx_k_5e_direct_help(traces.v13, traces.p23, traces.ov12,traces.op12, correlation_factor->f12o, T_ip_jo, 
+  t += calculate_bx_k_5e_direct_help(-c3, traces.v13, traces.p23, traces.ov12, traces.op12, correlation_factor->f12o, T_ip_jo, 
       electron_list->inverse_weight, electron_list->size(), electron_pair_list->size());
 
-  std::transform(correlation_factor->f13.begin(), correlation_factor->f13.end(), correlation_factor->f23.begin(), T_ip_jo.begin(), std::minus<>());
-  for (int ip = 0; ip < electron_pair_list->size(); ip++) {
-    for (int jo = 0; jo < electron_list->size(); ++jo) {
-      T_ip_jo[ip * traces.electrons + jo] *= electron_pair_list->rv[ip] * electron_list->inverse_weight[jo];
-    }
-  }
-  for (int io = 0; io < electron_list->size(); ++io) {
-    for (int ko = 0; ko < electron_list->size(); ++ko) {
-      T_io_ko[io * traces.electrons + ko] = correlation_factor->f12o[io * traces.electrons + ko] * electron_list->inverse_weight[io] * electron_list->inverse_weight[ko];
-    }
-  }
+  blas_wrapper.ddgmm(
+      BLAS_WRAPPER::LEFT_SIDE,
+      electron_list->size(), electron_list->size(),
+      correlation_factor->f12o, electron_list->size(),
+      electron_list->inverse_weight, 1,
+      T_io_ko, electron_list->size());
 
-  for (int ip = 0; ip < electron_pair_list->size(); ip++) {
-    std::array<double, 2> t_ip{0.0, 0.0};
-    for (int io = 0; io < electron_list->size(); ++io) {
-      for (int ko = 0; ko < electron_list->size(); ++ko) {
-        T_io_jo[io * traces.electrons + ko] = T_io_ko[io * traces.electrons + ko] * traces.p23[ip * traces.electrons + ko];
-      }
-    }
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-        traces.electrons, traces.electrons, traces.electrons,
-        1.0,
-        traces.ok12.data(), traces.electrons, // jo ko
-        T_io_jo.data(), traces.electrons, // io ko 
-        0.0,
-        T_jo_ko.data(), traces.electrons); // io jo 
-    for (int io = 0; io < electron_list->size(); ++io) {
-      double t_io = 0.0;
-      for (int jo = 0; jo < electron_list->size(); ++jo) {
-        t_io += T_jo_ko[io * traces.electrons + jo] * T_ip_jo[ip * traces.electrons + jo] * traces.op12[io * traces.electrons + jo]; 
-      }
-      t_ip[0] += t_io * traces.k13[ip * traces.electrons + io];
-    }
+  t += calculate_bx_k_5e_exchange_help(c4, traces.k13, T_ip_jo, traces.p23, traces.op12, T_io_ko, traces.ok12,
+      electron_list->inverse_weight, electron_list->size(), electron_pair_list->size());
 
-    cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-        traces.electrons, traces.electrons, traces.electrons,
-        1.0,
-        traces.ov12.data(), traces.electrons, // jo ko
-        T_io_jo.data(), traces.electrons, // io ko 
-        0.0,
-        T_jo_ko.data(), traces.electrons); // io jo 
-    for (int io = 0; io < electron_list->size(); ++io) {
-      double t_io = 0.0;
-      for (int jo = 0; jo < electron_list->size(); ++jo) {
-        t_io += T_jo_ko[io * traces.electrons + jo] * T_ip_jo[ip * traces.electrons + jo] * traces.op12[io * traces.electrons + jo]; 
-      }
-      t_ip[0] -= t_io * traces.v13[ip * traces.electrons + io];
-    }
+  t += calculate_bx_k_5e_exchange_help(-c4, traces.v13, T_ip_jo, traces.p23, traces.op12, T_io_ko, traces.ov12,
+      electron_list->inverse_weight, electron_list->size(), electron_pair_list->size());
 
-    t[1] += t_ip[0] * traces.k12[ip];
-  }
-  return 2.0 * (c3 * t[0] + c4 * t[1]) * nsamp_pair * nsamp_one_3;
+  return 2.0 * (t) * nsamp_pair * nsamp_one_3;
 }
 double MP2_F12_VBX::calculate_bx_k(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;
