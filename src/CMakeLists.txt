@@ -3,14 +3,14 @@ set(source
   MCF12/F12_Traces.h
   MCF12/correlation_factor.cpp
   MCF12/correlation_factor_data.cpp
-  MCF12/correlation_factor_types.cpp
   MCF12/correlation_factor_function.cpp
+  MCF12/correlation_factor_types.cpp
   MCF12/gf2_f12.cpp
   MCF12/gf2_f12.h
-  MCF12/mp2_f12_vbx.cpp
-  MCF12/mp2_f12_vbx.h
   MCF12/mp2_f12_v.cpp
   MCF12/mp2_f12_v.h
+  MCF12/mp2_f12_vbx.cpp
+  MCF12/mp2_f12_vbx.h
   MCF12/x_traces.cpp
   MCF12/x_traces.h
   MCGF/gf3_core_c.h
@@ -44,7 +44,9 @@ set(source
   MCMP/mp4_functional.cpp
   MCMP/mp4_functional.h
   MCMP/mp_functional.h
+  basis/atomic_orbital.cpp
   basis/atomic_orbital.h
+  basis/basis.cpp
   basis/basis.h
   basis/basis_parser.cpp
   basis/basis_parser.h
@@ -66,6 +68,7 @@ set(source
   ovps_set.cpp
   ovps_set.h
   qc_input.cpp
+  qc_monte.cpp
   qc_monte.h
   qc_mpi.cpp
   qc_mpi.h
@@ -81,13 +84,7 @@ add_subdirectory(geometry)
 add_subdirectory(electron_generators)
 add_subdirectory(tau_generators)
 
-set(CPU_SPECIFIC_SOURCES
-  basis/atomic_orbital.cpp
-  basis/basis.cpp
-  qc_monte.cpp
-)
-
-add_executable(MC_MPn_Direct ${source} ${CPU_SPECIFIC_SOURCES})
+add_executable(MC_MPn_Direct ${source})
 
 target_link_libraries(MC_MPn_Direct ${ARMADILLO_LIBRARIES})
 target_link_libraries(MC_MPn_Direct ${BLAS_LIBRARIES})
@@ -113,21 +110,21 @@ endif()
 if(${Enable_CUDA})
   set(GPU_SPECIFIC_SOURCES
     MCMP/device_mp2_functional.cu
-    basis/atomic_orbital.cu
-    basis/basis.cu
-    qc_monte.cu
   )
   set_source_files_properties(
-      ovps_set.cpp
-      qc_ovps.cpp
-      basis/wavefunction.cpp
-      MCF12/correlation_factor_function.cpp
+      MCF12/F12_Traces.cpp
       MCF12/correlation_factor_data.cpp
-      MCMP/mp3_functional.cpp
-      MCMP/mp4_functional.cpp
+      MCF12/correlation_factor_function.cpp
       MCF12/mp2_f12_v.cpp
       MCF12/mp2_f12_vbx.cpp
-      MCF12/F12_Traces.cpp
+      MCMP/mp3_functional.cpp
+      MCMP/mp4_functional.cpp
+      basis/atomic_orbital.cpp
+      basis/basis.cpp
+      basis/wavefunction.cpp
+      ovps_set.cpp
+      qc_monte.cpp
+      qc_ovps.cpp
       PROPERTIES LANGUAGE CUDA)
 
 

@@ -11,36 +11,37 @@ set(atomic_orbital_test_source
   ../../src/basis/shell.h
   ../../src/basis/shell.cpp
   ../../src/basis/atomic_orbital.h
-  ../../src/basis/atomic_orbital.cu
+  ../../src/basis/atomic_orbital.cpp
 )
 add_executable(atomic_orbital_test.x ${atomic_orbital_test_source})
 set_target_properties(atomic_orbital_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(atomic_orbital_test.x gtest_main)
 target_link_libraries(atomic_orbital_test.x geometry)
 target_include_directories(atomic_orbital_test.x PRIVATE ../../src/geometry)
+if (${Enable_CUDA})
 target_compile_definitions(atomic_orbital_test.x PRIVATE -DHAVE_CUDA)
+  set_source_files_properties(${atomic_orbital_test_source} PROPERTIES LANGUAGE CUDA)
+endif()
 add_test(NAME atomic_orbital_test COMMAND atomic_orbital_test.x)
 
-add_executable(basis_test.x 
+set(basis_test_source 
   basis_test.cu
-  ../../src/qc_mpi.h
   ../../src/qc_mpi.cpp
-  ../../src/basis/dummy_basis_parser.h
   ../../src/basis/dummy_basis_parser.cpp
-  ../../src/basis/basis_parser.h
   ../../src/basis/basis_parser.cpp
-  ../../src/basis/shell.h
   ../../src/basis/shell.cpp
-  ../../src/basis/basis.h
-  ../../src/basis/basis.cu
-  ../../src/basis/atomic_orbital.h
-  ../../src/basis/atomic_orbital.cu
+  ../../src/basis/basis.cpp
+  ../../src/basis/atomic_orbital.cpp
 )
+add_executable(basis_test.x  ${basis_test_source})
 set_target_properties(basis_test.x PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(basis_test.x gtest_main)
 target_link_libraries(basis_test.x geometry)
 target_include_directories(basis_test.x PRIVATE ../../src/geometry)
-target_compile_definitions(basis_test.x PRIVATE -DHAVE_CUDA)
+if (${Enable_CUDA})
+  target_compile_definitions(basis_test.x PRIVATE -DHAVE_CUDA)
+  set_source_files_properties(${basis_test_source} PROPERTIES LANGUAGE CUDA)
+endif()
 add_test(NAME basis_test COMMAND basis_test.x)
 
 set(wavefunction_test_source 
