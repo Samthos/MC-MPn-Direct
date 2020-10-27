@@ -1,7 +1,6 @@
 #include <iostream>
 
 #ifdef HAVE_CUDA
-#include <thrust/device_vector.h>
 #include "cublas_v2.h"
 #endif
 

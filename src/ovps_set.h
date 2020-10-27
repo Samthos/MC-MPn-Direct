@@ -2,6 +2,7 @@
 #define OVPS_Set_H_
 #ifdef HAVE_CUDA
 #include <thrust/device_vector.h>
+#include <thrust/device_allocator.h>
 #endif // HAVE_CUDA
 
 #include <vector>

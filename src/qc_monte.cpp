@@ -7,6 +7,7 @@
 
 #ifdef HAVE_CUDA
 #include <thrust/device_vector.h>
+#include <thrust/device_allocator.h>
 #endif 
 #include <unordered_map>
 

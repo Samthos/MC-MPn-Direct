@@ -1,7 +1,3 @@
-#ifdef HAVE_CUDA
-#include <thrust/device_vector.h>
-#endif
-
 #include "blas_wrapper.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>

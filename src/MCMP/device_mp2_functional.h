@@ -2,6 +2,7 @@
 #define DEVICE_MP2_Functional_H_
 
 #include <thrust/device_vector.h>
+#include <thrust/device_allocator.h>
 #include "cublas_v2.h"
 
 #include "mp_functional.h"

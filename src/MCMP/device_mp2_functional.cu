@@ -1,4 +1,5 @@
 #include <thrust/device_vector.h>
+#include <thrust/device_allocator.h>
 #include "cublas_v2.h"
 #include "device_mp2_functional.h"
 

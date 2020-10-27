@@ -1,5 +1,4 @@
 #ifdef HAVE_CUDA
-#include <thrust/device_vector.h>
 #include <thrust/execution_policy.h>
 #include <thrust/reduce.h>
 #endif
