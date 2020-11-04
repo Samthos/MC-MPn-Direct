@@ -223,134 +223,96 @@ void MCMP<Container, Allocator>::energy() {
   }
 }
 
-
-#ifdef HAVE_CUDA
-template <> void MCMP<thrust::device_vector, thrust::device_allocator>::energy() {}
-
-GPU_MCMP::GPU_MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : MCMP(p1, p2, p3, p4) {
-}
- 
-void GPU_MCMP::energy() {
-  this->ovps.update(this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->tau);
-  for (int i = 0; i < energy_functions.size(); i++) {
-    if (this->tau->is_new(energy_functions[i]->n_tau_coordinates)) {
-      if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
-        Standard_MP_Functional_Type* functional = dynamic_cast<Standard_MP_Functional_Type*>(energy_functions[i]);
-        functional->energy(emp[i], control[i], this->ovps, this->electron_pair_list, this->tau);
-      } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
-        F12_MP_Functional_Type* functional = dynamic_cast<F12_MP_Functional_Type*>(energy_functions[i]);
-        functional->energy(emp[i], control[i], this->wavefunctions, this->electron_pair_list, this->electron_list); 
-      } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
-        // Direct_MP_Functional* functional = dynamic_cast<Direct_MP_Functional*>(energy_functions[i]);
-        // functional->energy(emp[i], control[i], this->wavefunctions[WC::electron_pairs_1], this->wavefunctions[WC::electron_pairs_2], this->electron_pair_list, this->tau); 
-      }
-    }
-  }
-}
-#endif
-
-
-Dimer::Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : MCMP(p1, p2, p3, p4),
-                                                         l_emp(emp),
-                                                         l_control(control)
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+Dimer<Container, Allocator>::Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4) : MCMP<Container, Allocator>(p1, p2, p3, p4),
+                                                         l_emp(this->emp),
+                                                         l_control(this->control)
 {
-  Molecule monomer_a_geometry(mpi_info, iops.sopns[KEYS::MONOMER_A_GEOM]);
-  Molecule monomer_b_geometry(mpi_info, iops.sopns[KEYS::MONOMER_B_GEOM]);
+  Molecule monomer_a_geometry(this->mpi_info, this->iops.sopns[KEYS::MONOMER_A_GEOM]);
+  Molecule monomer_b_geometry(this->mpi_info, this->iops.sopns[KEYS::MONOMER_B_GEOM]);
 
-  auto monomer_a_movecs = create_movec_parser(mpi_info, monomer_a_geometry, MOVEC_TYPE::NWCHEM_BINARY, iops.sopns[KEYS::MONOMER_A_MOVECS], iops.bopns[KEYS::FREEZE_CORE]);
-  auto monomer_b_movecs = create_movec_parser(mpi_info, monomer_b_geometry, MOVEC_TYPE::NWCHEM_BINARY, iops.sopns[KEYS::MONOMER_B_MOVECS], iops.bopns[KEYS::FREEZE_CORE]);
+  auto monomer_a_movecs = create_movec_parser(this->mpi_info, monomer_a_geometry, MOVEC_TYPE::NWCHEM_BINARY, this->iops.sopns[KEYS::MONOMER_A_MOVECS], this->iops.bopns[KEYS::FREEZE_CORE]);
+  auto monomer_b_movecs = create_movec_parser(this->mpi_info, monomer_b_geometry, MOVEC_TYPE::NWCHEM_BINARY, this->iops.sopns[KEYS::MONOMER_B_MOVECS], this->iops.bopns[KEYS::FREEZE_CORE]);
 
-  monomer_a_tau = create_tau_sampler(static_cast<TAU_GENERATORS::TAU_GENERATORS>(iops.iopns[KEYS::TAU_GENERATORS]), monomer_a_movecs);
-  monomer_b_tau = create_tau_sampler(static_cast<TAU_GENERATORS::TAU_GENERATORS>(iops.iopns[KEYS::TAU_GENERATORS]), monomer_b_movecs);
+  monomer_a_tau = create_tau_sampler(static_cast<TAU_GENERATORS::TAU_GENERATORS>(this->iops.iopns[KEYS::TAU_GENERATORS]), monomer_a_movecs);
+  monomer_b_tau = create_tau_sampler(static_cast<TAU_GENERATORS::TAU_GENERATORS>(this->iops.iopns[KEYS::TAU_GENERATORS]), monomer_b_movecs);
 
-  monomer_a_tau->resize(tau->get_n_coordinates());
-  monomer_b_tau->resize(tau->get_n_coordinates());
+  monomer_a_tau->resize(this->tau->get_n_coordinates());
+  monomer_b_tau->resize(this->tau->get_n_coordinates());
 
-  for (auto &it : wavefunctions) {
+  for (auto &it : this->wavefunctions) {
     auto pos_source = it.second.pos;
     monomer_a_wavefunctions.emplace(it.first, Wavefunction_Type(pos_source, monomer_a_movecs));
     monomer_b_wavefunctions.emplace(it.first, Wavefunction_Type(pos_source, monomer_b_movecs));
   }
 }
 
-Dimer::~Dimer() {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+Dimer<Container, Allocator>::~Dimer() {
 }
 
-/*
-Dimer::Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis p4) : QC_monte(p1, p2, p3, p4) {
-  // build temp list of current wavefunctions keys
-
-  // loop over wavefunctions keys.
-  //     wavefunctions.emplace(monomer_a & key, wavefunction(monomer_a))
-  //     wavefunctions.emplace(monomer_b & key, wavefunction(monomer_b))
-  //     wavefunction_groups[key & mask].push_back(monomer_a & key)
-  //     wavefunction_groups[key & mask].push_back(monomer_b & key)
-
-  // ^^^^need to update WT::mask with new dimer/monomer keys
-
-  // create extra tau functions
-}
-*/
-
-void Dimer::update_wavefunction() {
-  for (auto &it : wavefunction_groups) {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Dimer<Container, Allocator>::update_wavefunction() {
+  for (auto &it : this->wavefunction_groups) {
     if (it.second.size() == 1) {
-      basis.build_contractions(*wavefunctions[it.second.front()].pos);
+      this->basis.build_contractions(*this->wavefunctions[it.second.front()].pos);
     } else {
-      basis.build_contractions_with_derivatives(*wavefunctions[it.second.front()].pos);
+      this->basis.build_contractions_with_derivatives(*this->wavefunctions[it.second.front()].pos);
     }
     for (auto &jt : it.second) {
-      Wavefunction_Type& wavefunction = wavefunctions[jt];
+      Wavefunction_Type& wavefunction = this->wavefunctions[jt];
       Wavefunction_Type& monomer_a_wavefunction = monomer_a_wavefunctions[jt];
       Wavefunction_Type& monomer_b_wavefunction = monomer_b_wavefunctions[jt];
       auto code = jt & WT::mask;
       switch (code) {
-        case WT::normal: basis.build_ao_amplitudes(*wavefunction.pos); break;
-        case WT::dx:     basis.build_ao_amplitudes_dx(*wavefunction.pos); break;
-        case WT::dy:     basis.build_ao_amplitudes_dy(*wavefunction.pos); break;
-        case WT::dz:     basis.build_ao_amplitudes_dz(*wavefunction.pos); break;
+        case WT::normal: this->basis.build_ao_amplitudes(*wavefunction.pos); break;
+        case WT::dx:     this->basis.build_ao_amplitudes_dx(*wavefunction.pos); break;
+        case WT::dy:     this->basis.build_ao_amplitudes_dy(*wavefunction.pos); break;
+        case WT::dz:     this->basis.build_ao_amplitudes_dz(*wavefunction.pos); break;
       }
-      wavefunction.ao_to_mo(basis.ao_amplitudes);
-      monomer_a_wavefunction.ao_to_mo(basis.ao_amplitudes);
-      monomer_b_wavefunction.ao_to_mo(basis.ao_amplitudes);
+      wavefunction.ao_to_mo(this->basis.ao_amplitudes);
+      monomer_a_wavefunction.ao_to_mo(this->basis.ao_amplitudes);
+      monomer_b_wavefunction.ao_to_mo(this->basis.ao_amplitudes);
     }
   }
 }
 
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
 template <class Binary_Op>
-void Dimer::local_energy(std::unordered_map<int, Wavefunction_Type>& l_wavefunctions, Tau* l_tau, Binary_Op op) {
+void Dimer<Container, Allocator>::local_energy(std::unordered_map<int, Wavefunction_Type>& l_wavefunctions, Tau* l_tau, Binary_Op op) {
   std::fill(l_emp.begin(), l_emp.end(), 0.0);
   for (auto &c : l_control) {
     std::fill(c.begin(), c.end(), 0.0);
   }
 
-  ovps.update(l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], l_tau);
-  for (int i = 0; i < energy_functions.size(); i++) {
-    if (tau->is_new(energy_functions[i]->n_tau_coordinates)) {
-      if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
-        Standard_MP_Functional_Type* functional = dynamic_cast<Standard_MP_Functional_Type*>(energy_functions[i]);
-        functional->energy(l_emp[i], l_control[i], ovps, electron_pair_list, l_tau);
-      } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
-        F12_MP_Functional_Type* functional = dynamic_cast<F12_MP_Functional_Type*>(energy_functions[i]);
-        functional->energy(l_emp[i], l_control[i], l_wavefunctions, electron_pair_list, electron_list); 
-      } else if (energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
-        Direct_MP_Functional_Type* functional = dynamic_cast<Direct_MP_Functional_Type*>(energy_functions[i]);
-        functional->energy(l_emp[i], l_control[i], l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], electron_pair_list, l_tau); 
+  this->ovps.update(l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], l_tau);
+  for (int i = 0; i < this->energy_functions.size(); i++) {
+    if (l_tau->is_new(this->energy_functions[i]->n_tau_coordinates)) {
+      if (this->energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::STANDARD) {
+        Standard_MP_Functional_Type* functional = dynamic_cast<Standard_MP_Functional_Type*>(this->energy_functions[i]);
+        functional->energy(l_emp[i], l_control[i], this->ovps, this->electron_pair_list, l_tau);
+      } else if (this->energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::F12) {
+        F12_MP_Functional_Type* functional = dynamic_cast<F12_MP_Functional_Type*>(this->energy_functions[i]);
+        functional->energy(l_emp[i], l_control[i], l_wavefunctions, this->electron_pair_list, this->electron_list); 
+      } else if (this->energy_functions[i]->functional_type == MP_FUNCTIONAL_TYPE::DIRECT) {
+        Direct_MP_Functional_Type* functional = dynamic_cast<Direct_MP_Functional_Type*>(this->energy_functions[i]);
+        functional->energy(l_emp[i], l_control[i], l_wavefunctions[WC::electron_pairs_1], l_wavefunctions[WC::electron_pairs_2], this->electron_pair_list, l_tau); 
       }
     }
   }
 
-  std::transform(emp.begin(), emp.end(), l_emp.begin(), emp.begin(), op);
-  for (auto it = control.begin(), jt = l_control.begin(); it != control.end(); it++, jt++) {
+  std::transform(this->emp.begin(), this->emp.end(), l_emp.begin(), this->emp.begin(), op);
+  for (auto it = this->control.begin(), jt = l_control.begin(); it != this->control.end(); it++, jt++) {
     std::transform(it->begin(), it->end(), jt->begin(), it->begin(), op);
   }
 }
 
-void Dimer::energy() {
-  monomer_a_tau->set_from_other(tau);
-  monomer_b_tau->set_from_other(tau);
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+void Dimer<Container, Allocator>::energy() {
+  monomer_a_tau->set_from_other(this->tau);
+  monomer_b_tau->set_from_other(this->tau);
 
   local_energy(monomer_a_wavefunctions, monomer_a_tau, std::minus<>());
   local_energy(monomer_b_wavefunctions, monomer_b_tau, std::minus<>());
-  local_energy(wavefunctions, tau, std::plus<>());
+  local_energy(this->wavefunctions, this->tau, std::plus<>());
 }

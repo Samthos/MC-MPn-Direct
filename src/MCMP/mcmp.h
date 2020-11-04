@@ -32,19 +32,16 @@ class MCMP : public QC_monte<Container, Allocator> {
 template class MCMP<std::vector, std::allocator>;
 
 #ifdef HAVE_CUDA
-template <> void MCMP<thrust::device_vector, thrust::device_allocator>::energy();
 template class MCMP<thrust::device_vector, thrust::device_allocator>;
-
-class GPU_MCMP : public MCMP<thrust::device_vector, thrust::device_allocator> {
- public:
-  GPU_MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
-
- protected:
-  void energy() override;
-};
 #endif
 
-class Dimer : public MCMP<std::vector, std::allocator> {
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+class Dimer : public MCMP<Container, Allocator> {
+  typedef Wavefunction<Container, Allocator> Wavefunction_Type;
+  typedef Standard_MP_Functional<Container, Allocator> Standard_MP_Functional_Type;
+  typedef Direct_MP_Functional<Container, Allocator> Direct_MP_Functional_Type;
+  typedef F12_MP_Functional<Container, Allocator> F12_MP_Functional_Type;
+
  public:
   Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
   ~Dimer();
@@ -63,5 +60,10 @@ class Dimer : public MCMP<std::vector, std::allocator> {
   std::vector<double> l_emp;
   std::vector<std::vector<double>> l_control;
 };
+
+template class Dimer<std::vector, std::allocator>;
+#ifdef HAVE_CUDA
+template class Dimer<thrust::device_vector, thrust::device_allocator>;
+#endif
 
 #endif  // MCMP_H_

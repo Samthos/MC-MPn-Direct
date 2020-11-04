@@ -3,12 +3,6 @@
 #include <algorithm>
 #include <cmath>
 
-#ifdef HAVE_CUDA 
-#include "cublas_v2.h"
-#endif
-
-#include "cblas.h"
-#include "blas_calls.h"
 #include "qc_ovps.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>

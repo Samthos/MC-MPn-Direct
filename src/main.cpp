@@ -38,14 +38,19 @@ int main(int argc, char* argv[]) {
 #ifdef HAVE_CUDA
   QC_monte<thrust::device_vector, thrust::device_allocator>* gpu_qc_monte = nullptr;
 #endif
+
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
 #ifdef HAVE_CUDA
-    gpu_qc_monte = new GPU_MCMP(mpi_info, iops, molec, basis);
+    gpu_qc_monte = new MCMP<thrust::device_vector, thrust::device_allocator>(mpi_info, iops, molec, basis);
 #else
     qc_monte = new MCMP<std::vector, std::allocator>(mpi_info, iops, molec, basis);
 #endif
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::DIMER) {
-    qc_monte = new Dimer(mpi_info, iops, molec, basis);
+#ifdef HAVE_CUDA
+    gpu_qc_monte = new Dimer<thrust::device_vector, thrust::device_allocator>(mpi_info, iops, molec, basis);
+#else
+    qc_monte = new Dimer<std::vector, std::allocator>(mpi_info, iops, molec, basis);
+#endif
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {
     qc_monte = new Diagonal_GF(mpi_info, iops, molec, basis);
   } else {
@@ -55,6 +60,7 @@ int main(int argc, char* argv[]) {
       qc_monte = new GF3(mpi_info, iops, molec, basis);
     }
   }
+
   if (qc_monte) {
     qc_monte->monte_energy();
     delete qc_monte;

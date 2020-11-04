@@ -134,24 +134,24 @@ Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>* create
     double beta) {
   Correlation_Factor_Data<thrust::device_vector, thrust::device_allocator>* correlation_factor_data;
   switch (correlation_factor) {
-    case CORRELATION_FACTOR::Linear: correlation_factor_data =  new Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Rational: correlation_factor_data =  new Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Slater: correlation_factor_data =  new Slater_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Slater_Linear: correlation_factor_data =  new Slater_Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Gaussian: correlation_factor_data =  new Gaussian_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Cusped_Gaussian: correlation_factor_data =  new Cusped_Gaussian_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Yukawa_Coulomb: correlation_factor_data =  new Yukawa_Coulomb_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Jastrow: correlation_factor_data =  new Jastrow_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::ERFC: correlation_factor_data =  new ERFC_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::ERFC_Linear: correlation_factor_data =  new ERFC_Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Tanh: correlation_factor_data =  new Tanh_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::ArcTan: correlation_factor_data =  new ArcTan_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Logarithm: correlation_factor_data =  new Logarithm_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Hybrid: correlation_factor_data =  new Hybrid_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Two_Parameter_Rational: correlation_factor_data =  new Two_Parameter_Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Higher_Rational: correlation_factor_data =  new Higher_Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Cubic_Slater: correlation_factor_data =  new Cubic_Slater_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
-    case CORRELATION_FACTOR::Higher_Jastrow: correlation_factor_data =  new Higher_Jastrow_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta); break;; break;
+    case CORRELATION_FACTOR::Linear: correlation_factor_data =  new Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Rational: correlation_factor_data =  new Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Slater: correlation_factor_data =  new Slater_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Slater_Linear: correlation_factor_data =  new Slater_Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Gaussian: correlation_factor_data =  new Gaussian_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Cusped_Gaussian: correlation_factor_data =  new Cusped_Gaussian_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Yukawa_Coulomb: correlation_factor_data =  new Yukawa_Coulomb_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Jastrow: correlation_factor_data =  new Jastrow_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::ERFC: correlation_factor_data =  new ERFC_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::ERFC_Linear: correlation_factor_data =  new ERFC_Linear_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Tanh: correlation_factor_data =  new Tanh_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::ArcTan: correlation_factor_data =  new ArcTan_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Logarithm: correlation_factor_data =  new Logarithm_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Hybrid: correlation_factor_data =  new Hybrid_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Two_Parameter_Rational: correlation_factor_data =  new Two_Parameter_Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Higher_Rational: correlation_factor_data =  new Higher_Rational_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Cubic_Slater: correlation_factor_data =  new Cubic_Slater_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
+    case CORRELATION_FACTOR::Higher_Jastrow: correlation_factor_data =  new Higher_Jastrow_Correlation_Factor_Data_Device(electrons, electron_pairs, gamma, beta);  break;
   }
   return correlation_factor_data;
 }
