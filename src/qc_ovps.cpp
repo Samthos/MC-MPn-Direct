@@ -78,7 +78,7 @@ void OVPS_Device::update(Wavefunction_Type& electron_pair_psi1, Wavefunction_Typ
     for (auto start = 0; start < o_set[stop].size(); start++) {
       auto t_val = tau->get_exp_tau(stop, start);
       std::transform(t_val.begin(), t_val.end(), t_val.begin(), [](double x){return sqrt(x);});
-      thrust::device_vector<double> d_t_val = t_val;
+      thrust::device_vector<double, thrust::device_allocator<double>> d_t_val = t_val;
 
       blas_wrapper.ddgmm(BLAS_WRAPPER::LEFT_SIDE,
           ivir2 - iocc1, electron_pairs,
