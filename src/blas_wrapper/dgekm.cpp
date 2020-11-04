@@ -1,3 +1,4 @@
+#include <iostream>
 #include "blas_wrapper.h"
 
 template <template <typename, typename> typename Container, template <typename> typename Allocator>

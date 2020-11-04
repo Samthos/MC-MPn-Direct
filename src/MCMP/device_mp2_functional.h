@@ -10,7 +10,7 @@
 template <int CVMP2> 
 class Device_MP2_Functional : public Standard_MP_Functional<thrust::device_vector, thrust::device_allocator> {
   typedef Electron_Pair_List_Device Electron_Pair_List_Type;
-  typedef thrust::device_vector<double> vector_double;
+  typedef thrust::device_vector<double, thrust::device_allocator<double>> vector_double;
 
  public:
    Device_MP2_Functional(int);

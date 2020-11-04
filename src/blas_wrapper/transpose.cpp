@@ -1,3 +1,5 @@
+#include <iostream>
+
 #ifdef HAVE_CUDA
 #include "cublas_v2.h"
 #endif

@@ -173,7 +173,7 @@ void MCMP<Container, Allocator>::monte_energy() {
 #endif // DIMER_PRINT
 
     // print if i is a multiple of 128
-    if (0 == step % 128) {
+    if (0 == step % 64) {
       for (auto i = 0; i < emp.size(); i++) {
         output[i] << *cv[i] << "\t";
         output[i] << stepTimer << "\n";
@@ -302,8 +302,8 @@ void Dimer<Container, Allocator>::local_energy(std::unordered_map<int, Wavefunct
   }
 
   std::transform(this->emp.begin(), this->emp.end(), l_emp.begin(), this->emp.begin(), op);
-  for (auto it = this->control.begin(), jt = l_control.begin(); it != this->control.end(); it++, jt++) {
-    std::transform(it->begin(), it->end(), jt->begin(), it->begin(), op);
+  for (auto it = 0; it < this->control.size(); it++) {
+    std::transform(this->control[it].begin(), this->control[it].end(), l_control[it].begin(), this->control[it].begin(), op);
   }
 }
 
