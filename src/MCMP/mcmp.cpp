@@ -173,7 +173,7 @@ void MCMP<Container, Allocator>::monte_energy() {
 #endif // DIMER_PRINT
 
     // print if i is a multiple of 128
-    if (0 == step % 64) {
+    if (0 == step % 128) {
       for (auto i = 0; i < emp.size(); i++) {
         output[i] << *cv[i] << "\t";
         output[i] << stepTimer << "\n";

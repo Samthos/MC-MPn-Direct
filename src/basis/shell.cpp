@@ -148,8 +148,8 @@ void SHELL::Shell::normalize() {
   for (auto first_guassian = contracted_gaussian.begin(); first_guassian != contracted_gaussian.end(); first_guassian++) {
     for (auto second_guassian = first_guassian; second_guassian != contracted_gaussian.end(); second_guassian++) {
       for (auto m = 0; m < norm.size(); m++) {
-        double fac = 1 / overlap(first_guassian->first, second_guassian->first);
-        double dum = first_guassian->second[m] * second_guassian->second[m] / fac;
+        double fac = overlap(first_guassian->first, second_guassian->first);
+        double dum = first_guassian->second[m] * second_guassian->second[m] * fac;
         if (first_guassian != second_guassian) {
           dum = dum + dum;
         }
