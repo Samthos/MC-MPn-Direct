@@ -1,25 +1,69 @@
-#ifndef MBPT_H_
-#define MBPT_H_
-#include <vector>
-#include <unordered_map>
+#ifndef MCMP_H_
+#define MCMP_H_
 
-#include "../qc_ovps.h"
-#include "../tau_integrals.h"
-#include "../electron_pair_list.h"
-#include "../electron_list.h"
+#include "../qc_monte.h"
 
-class MCMP {
+#include "mp_functional.h"
+
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+class MCMP : public QC_monte<Container, Allocator> {
+ protected:
+  typedef Standard_MP_Functional<Container, Allocator> Standard_MP_Functional_Type;
+  typedef Direct_MP_Functional<Container, Allocator> Direct_MP_Functional_Type;
+  typedef F12_MP_Functional<Container, Allocator> F12_MP_Functional_Type;
+
  public:
-  MCMP(int ncv, int ntc, const std::string& e, bool f) : n_control_variates(ncv), n_tau_coordinates(ntc), extension(e), is_f12(f) {}
-  virtual void energy(double& emp, std::vector<double>& control, OVPs&, Electron_Pair_List*, Tau*) = 0;
-  virtual void energy_f12(double& emp, std::vector<double>& control, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) = 0;
+  MCMP(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
+  ~MCMP();
 
-  int n_control_variates;
-  int n_tau_coordinates;
-  std::string extension;
-  bool is_f12;
+  void monte_energy() override;
 
  protected:
+  std::vector<MP_Functional*> energy_functions;
+  std::vector<Accumulator*> cv;
+
+  std::vector<double> emp;
+  std::vector<std::vector<double>> control;
+
+  void zero_energies();
+  virtual void energy();
+};
+template class MCMP<std::vector, std::allocator>;
+
+#ifdef HAVE_CUDA
+template class MCMP<thrust::device_vector, thrust::device_allocator>;
+#endif
+
+template <template <typename, typename> typename Container, template <typename> typename Allocator>
+class Dimer : public MCMP<Container, Allocator> {
+  typedef Wavefunction<Container, Allocator> Wavefunction_Type;
+  typedef Standard_MP_Functional<Container, Allocator> Standard_MP_Functional_Type;
+  typedef Direct_MP_Functional<Container, Allocator> Direct_MP_Functional_Type;
+  typedef F12_MP_Functional<Container, Allocator> F12_MP_Functional_Type;
+
+ public:
+  Dimer(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4);
+  ~Dimer();
+
+ protected:
+  Tau* monomer_a_tau;
+  Tau* monomer_b_tau;
+  std::unordered_map<int, Wavefunction_Type> monomer_a_wavefunctions;
+  std::unordered_map<int, Wavefunction_Type> monomer_b_wavefunctions;
+  void update_wavefunction() override;
+  void energy() override;
+
+  template <class Binary_Op> 
+  void local_energy(std::unordered_map<int, Wavefunction_Type>& l_wavefunction, Tau* l_tau, Binary_Op);
+
+  std::vector<double> l_emp;
+  std::vector<std::vector<double>> l_control;
 };
 
-#endif  // MBPT_H_
+template class Dimer<std::vector, std::allocator>;
+#ifdef HAVE_CUDA
+template class Dimer<thrust::device_vector, thrust::device_allocator>;
+#endif
+
+#endif  // MCMP_H_

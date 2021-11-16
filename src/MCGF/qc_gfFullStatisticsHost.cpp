@@ -9,6 +9,7 @@
 
 #include "../qc_mpi.h"
 #include "../qc_monte.h"
+#include "blas_calls.h"
 
 std::string GF::genFileName(int checkNum, int type, int order, int band, int diff, int block) {
   std::stringstream ss;
@@ -38,8 +39,8 @@ std::string GF::genFileName(int checkNum, int type, int order, int band, int dif
 }
 
 void GF::mc_gf_full_print(int band, int steps, int checkNum, int order,
-    std::vector<double*>& d_ex1,
-    std::vector<std::vector<double*>>& d_cov) {
+    std::vector<std::vector<double>>& d_ex1,
+    std::vector<std::vector<std::vector<double>>>& d_cov) {
   int nDiff = iops.iopns[KEYS::DIFFS];
   // variables for streams
   std::stringstream ss;

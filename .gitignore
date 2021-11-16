@@ -1,8 +1,9 @@
-calculations/
 cmake-build-*/
-release/
+googletest/
+calculations/
 __pycache__/
-*.swp
 .idea
+*.swp
 *.bash
 *.py
+.vscode

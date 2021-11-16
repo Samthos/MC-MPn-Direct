@@ -1,9 +1,14 @@
 #ifndef WAVEFUNCTION_H_
 #define WAVEFUNCTION_H_
 
+#ifdef HAVE_CUDA
+#include <thrust/device_vector.h>
+#include <thrust/device_allocator.h>
+#endif 
 #include <vector>
 #include <array>
-#include "nw_vectors.h"
+#include "blas_wrapper.h"
+#include "movec_parser.h"
 
 namespace WS {
   enum Wavefunction_Sources {
@@ -50,36 +55,63 @@ namespace WM {
   };
 }
 
+template <template <class, class> class Container, template <class> class Allocator>
 class Wavefunction {
+  typedef Container<double, Allocator<double>> vector_double;
+  typedef Container<Point, Allocator<Point>> vector_Point;
+  typedef Blas_Wrapper<Container, Allocator> Blas_Wrapper_Type;
+
  public:
   Wavefunction() {}
-  Wavefunction(std::vector<std::array<double, 3>>* p, NWChem_Movec_Parser&);
+  Wavefunction(vector_Point* p, const std::shared_ptr<Movec_Parser>);
+
+  void ao_to_mo(const vector_double&);
+
+  double *data();
+  double *occ();
+  double *vir();
+  double *dataTau();
+  double *occTau();
+  double *virTau();
 
   const double *data() const;
   const double *occ() const;
   const double *vir() const;
-  double *dataTau();
-  double *occTau();
-  double *virTau();
+  const double *dataTau() const;
+  const double *occTau() const;
+  const double *virTau() const;
 
   size_t iocc1;
   size_t iocc2;
   size_t ivir1;
   size_t ivir2;
-  size_t number_of_molecuar_orbitals;
+  size_t n_basis_functions;
+
 
   size_t electrons;
-
   size_t lda;
-  size_t rows;
-  size_t col;
-  // type for row/col major
 
-  std::vector<double> psi;
-  std::vector<double> psiTau;
-  std::vector<double> movecs;
-  std::vector<std::array<double, 3>>* pos;
+  vector_double psi;
+  vector_double psiTau;
+  vector_double movecs;
+  vector_Point* pos;
 
  private:
+  static double* get_raw_pointer(vector_double&);
+  static const double* get_raw_pointer(const vector_double&);
+  Blas_Wrapper_Type blas_wrapper;
 };
+
+template <> double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(vector_double&);
+template <> const double* Wavefunction<std::vector, std::allocator>::get_raw_pointer(const vector_double&);
+template class Wavefunction<std::vector, std::allocator>;
+typedef Wavefunction<std::vector, std::allocator> Wavefunction_Host;
+
+#ifdef HAVE_CUDA
+template <> double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(vector_double&);
+template <> const double* Wavefunction<thrust::device_vector, thrust::device_allocator>::get_raw_pointer(const vector_double&);
+template class Wavefunction<thrust::device_vector, thrust::device_allocator>;
+typedef Wavefunction<thrust::device_vector, thrust::device_allocator> Wavefunction_Device;
+#endif  // HAVE_CUDA
+
 #endif  // WAVEFUNCTION_H_

@@ -1,0 +1,15 @@
+Basis:
+  shouldn't know that wavefunction exist
+
+  contraction_exp -> contraction_exponent
+  contraction_coef -> contraction_coeficien
+  ...rest of arrays
+
+basismetadata
+  rename to atomic orbital
+  refactor compuation of contraction into this class
+  refactor compuation of atomic orbitals into the class
+
+Basis data 
+  refactor into struct for gpu usage
+  don't alloc

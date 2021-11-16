@@ -91,7 +91,7 @@ void GF2::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   mcgf2_local_energy_core();
 
   for(int band=0;band<numBand;band++) {
@@ -105,13 +105,13 @@ void GF2::mc_local_energy(const int& step) {
     }
   }
   if (step > 0 && (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL)) {
-    mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_statistics(step, d_ovps.enBlock, d_ovps.enEx1, d_ovps.enCov);
   }
 }
 
 int GF2::full_print(int& step, int checkNum) {
   for (auto band = 0; band < numBand; band++) {
-    mc_gf_full_print(band, step, checkNum % 2, 0, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_full_print(band, step, checkNum % 2, 0, d_ovps.enEx1, d_ovps.enCov);
   }
   checkNum += 1;
   return checkNum;
@@ -125,7 +125,7 @@ void GF3::mc_local_energy(const int& step) {
     std::fill(it.begin(), it.end(), 0.00);
   }
 
-  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
 
   mcgf2_local_energy_core();
   mcgf3_local_energy_core();
@@ -150,19 +150,19 @@ void GF3::mc_local_energy(const int& step) {
   }
 
   if (step > 0 && (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULLDIFF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFFULL)) {
-    mc_gf_statistics(step, ovps.d_ovps.enBlock, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_statistics(step, d_ovps.enBlock, d_ovps.enEx1, d_ovps.enCov);
   }
 }
 
 int GF3::full_print(int& step, int checkNum) {
   for (auto band = 0; band < numBand; band++) {
-    mc_gf_full_print(band, step, checkNum % 2, 0, ovps.d_ovps.enEx1, ovps.d_ovps.enCov);
+    mc_gf_full_print(band, step, checkNum % 2, 0, d_ovps.enEx1, d_ovps.enCov);
   }
   checkNum += 1;
   return checkNum;
 }
 
-MCGF::MCGF(IOPs& iops, Basis& basis, int ntc, std::string ext, bool f) :
+MCGF::MCGF(IOPs& iops, int ntc, std::string ext, bool f) :
   n_tau_coordinates(ntc),
   extension(ext),
   is_f12(f),
@@ -172,8 +172,8 @@ MCGF::MCGF(IOPs& iops, Basis& basis, int ntc, std::string ext, bool f) :
   numDiff(iops.iopns[KEYS::DIFFS]) {} 
 
 void MCGF::energy(std::vector<std::vector<double>>& egf,
-       std::unordered_map<int, Wavefunction>& wavefunctions,
-       OVPs& ovps, Electron_Pair_List* electron_pair_list, Tau* tau) {
+       std::unordered_map<int, Wavefunction_Type>& wavefunctions,
+       OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   core(ovps, electron_pair_list);
   if (numDiff == 0) {
     energy_no_diff(egf, wavefunctions, electron_pair_list, tau);
@@ -182,22 +182,22 @@ void MCGF::energy(std::vector<std::vector<double>>& egf,
   }
 }
 
-Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molec p3, Basis p4)
+Diagonal_GF::Diagonal_GF(MPI_info p1, IOPs p2, Molecule p3, Basis_Host p4)
   : GF(p1, p2, p3, p4)
 {
   int max_tau_coordinates = 0;
 
   if (iops.iopns[KEYS::TASK] & TASK::GF2) {
-    energy_functions.push_back(new GF2_Functional(p2, p4));
+    energy_functions.push_back(new GF2_Functional(p2));
   }
   if (iops.iopns[KEYS::TASK] & TASK::GF3) {
-    energy_functions.push_back(new GF3_Functional(p2, p4));
+    energy_functions.push_back(new GF3_Functional(p2));
   }
   if (iops.iopns[KEYS::TASK] & TASK::GF2_F12_V) {
-    energy_functions.push_back(new GF2_F12_V(p2, p4));
+    energy_functions.push_back(new GF2_F12_V(p2));
   }
   if (iops.iopns[KEYS::TASK] & TASK::GF2_F12_VBX) {
-    energy_functions.push_back(new GF2_F12_VBX(p2, p4));
+    energy_functions.push_back(new GF2_F12_VBX(p2));
   }
 
 
@@ -273,7 +273,7 @@ void Diagonal_GF::monte_energy() {
 }
 
 void Diagonal_GF::mc_local_energy(const int& step) {
-  ovps.update_ovps(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
+  ovps.update(wavefunctions[WC::electron_pairs_1], wavefunctions[WC::electron_pairs_2], tau);
   for (int i = 0; i < energy_functions.size(); i++) {
     if (!energy_functions[i]->is_f12) {
       energy_functions[i]->energy(qeps[i].qeps, wavefunctions, ovps, electron_pair_list, tau);
@@ -284,4 +284,5 @@ void Diagonal_GF::mc_local_energy(const int& step) {
 }
 
 int Diagonal_GF::full_print(int& step, int checkNum) {
+  return 0;
 }

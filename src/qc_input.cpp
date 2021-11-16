@@ -7,7 +7,7 @@
 
 #include "qc_mpi.h"
 #include "qc_input.h"
-#include "MCF12/correlation_factors.h"
+#include "MCF12/correlation_factor.h"
 
 IOPs::IOPs() {
   /*
@@ -17,9 +17,14 @@ IOPs::IOPs() {
    * TODO
    *  -read values directly instead of setting them
    */
+  bopns.fill(false);
+  dopns.fill(0.0);
+  iopns.fill(0);
   bopns[KEYS::SPHERICAL] = true;
   bopns[KEYS::F12_GAMMA] = false;
   bopns[KEYS::F12_BETA] = false;
+  dopns[KEYS::F12_GAMMA] = -1;
+  dopns[KEYS::F12_BETA] = -1;
   bopns[KEYS::FREEZE_CORE] = true;
 
   dopns[KEYS::MC_DELX] = 0.1;
@@ -35,8 +40,8 @@ IOPs::IOPs() {
   iopns[KEYS::ORDER] = 2;
   iopns[KEYS::JOBTYPE] = JOBTYPE::ENERGY;
   iopns[KEYS::SAMPLER] = SAMPLER::DIRECT;
-  iopns[KEYS::TAU_INTEGRATION] = TAU_INTEGRATION::STOCHASTIC;
-  iopns[KEYS::F12_CORRELATION_FACTOR] = CORRELATION_FACTORS::Slater;
+  iopns[KEYS::TAU_GENERATORS] = TAU_GENERATORS::STOCHASTIC;
+  iopns[KEYS::F12_CORRELATION_FACTOR] = CORRELATION_FACTOR::Slater;
 
   iopns[KEYS::MP2CV_LEVEL] = 0;
   iopns[KEYS::MP3CV_LEVEL] = 0;
@@ -166,8 +171,12 @@ void IOPs::read(const MPI_info& mpi_info, const std::string& file) {
                 iopns[keyval] = string_to_enum<SAMPLER::SAMPLER>(key, SAMPLER::sampler_strings);
                 keySet = false;
                 break;
-              case KEYS::TAU_INTEGRATION:
-                iopns[keyval] = string_to_enum<TAU_INTEGRATION::TAU_INTEGRATION>(key, TAU_INTEGRATION::tau_integration_strings);
+              case KEYS::TAU_INTEGRATION: 
+                std::cout << "TAU_INTEGRATION is depreciated. Please use TAU_GENERATORS\n";
+                std::cerr << "TAU_INTEGRATION is depreciated. Please use TAU_GENERATORS\n";
+                keyval = KEYS::TAU_GENERATORS;
+              case KEYS::TAU_GENERATORS:
+                iopns[keyval] = string_to_enum<TAU_GENERATORS::TAU_GENERATORS>(key, TAU_GENERATORS::tau_integration_strings);
                 keySet = false;
                 break;
               case KEYS::F12_CORRELATION_FACTOR:
@@ -232,7 +241,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
     if (iopns[KEYS::SAMPLER] == SAMPLER::METROPOLIS) {
       std::cout << " MC_DELX: " << dopns[KEYS::MC_DELX] << std::endl;
     }
-    std::cout << " TAU_INTEGRATION: " << TAU_INTEGRATION::tau_integration_strings[iopns[KEYS::TAU_INTEGRATION]]  << std::endl;
+    std::cout << " TAU_GENERATOR: " << TAU_GENERATORS::tau_integration_strings[iopns[KEYS::TAU_GENERATORS]]  << std::endl;
     std::cout << " SPHERICAL: " << bopns[KEYS::SPHERICAL] << std::endl;
 
     if (iopns[KEYS::DEBUG] == 1) {
@@ -274,7 +283,7 @@ void IOPs::print(const MPI_info& mpi_info, const std::string& file) {
    
     if (iopns[KEYS::TASK] | TASK::ANY_F12) {
       std::cout << "Number of Electrons Walkers = " << iopns[KEYS::ELECTRONS] << "\n";
-      std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTORS::CORRELATION_FACTORS>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
+      std::cout << "Correlation Factor = " << correlation_factors_to_string(static_cast<CORRELATION_FACTOR::Type>(iopns[KEYS::F12_CORRELATION_FACTOR])) << "\n";
 
       std::cout << "F12_GAMMA = ";
       if (!bopns[KEYS::F12_GAMMA]) {

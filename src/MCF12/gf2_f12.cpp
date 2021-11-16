@@ -1,11 +1,12 @@
 #include <algorithm>
 #include <iostream>
 #include <numeric>
+#include "cblas.h"
 
 #include "gf2_f12.h"
 
-GF2_F12_V::GF2_F12_V(IOPs& iops, Basis& basis, std::string extension) :
-    MCGF(iops, basis, 0, extension, true),
+GF2_F12_V::GF2_F12_V(IOPs& iops, std::string extension) :
+    MCGF(iops, 0, extension, true),
     traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     x_traces(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]),
     core_11p(iops.iopns[KEYS::ELECTRON_PAIRS]),
@@ -15,19 +16,23 @@ GF2_F12_V::GF2_F12_V(IOPs& iops, Basis& basis, std::string extension) :
     core_23(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_ip_io(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
     T_ip_jo(iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRONS]),
-    T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS])
+    T_io_jo(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
+    correlation_factor(create_Correlation_Factor_Data<std::vector, std::allocator>(
+          iops.iopns[KEYS::ELECTRONS],
+          iops.iopns[KEYS::ELECTRON_PAIRS],
+          static_cast<CORRELATION_FACTOR::Type>(iops.iopns[KEYS::F12_CORRELATION_FACTOR]),
+          iops.dopns[KEYS::F12_GAMMA],
+          iops.dopns[KEYS::F12_BETA]))
 {
-  correlation_factor = create_correlation_factor(iops);
   nsamp_pair = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
   nsamp_one_1 = 1.0 / static_cast<double>(iops.iopns[KEYS::ELECTRONS]);
   nsamp_one_2 = nsamp_one_1 / static_cast<double>(iops.iopns[KEYS::ELECTRONS] - 1.0);
 }
 
 GF2_F12_V::~GF2_F12_V() {
-  delete correlation_factor;
 }
 
-void GF2_F12_V::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+void GF2_F12_V::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List_Type* electron_pair_list, Electron_List_Type* electron_list) {
   calculate_v(egf, wavefunctions, electron_pair_list, electron_list);
   for (int band = 0; band < numBand; band++) {
     x_traces.set(band, offBand, wavefunctions);
@@ -39,7 +44,7 @@ void GF2_F12_V::energy_f12(std::vector<std::vector<double>>& egf, std::unordered
   }
 }
 
-double GF2_F12_V::calculate_v_2e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+double GF2_F12_V::calculate_v_2e(Electron_Pair_List_Type* electron_pair_list, Electron_List_Type* electron_list) {
   for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
     auto f_12 = correlation_factor->f12p[ip];
     core_11p[ip] += c1 * f_12 * traces.p22[ip] * electron_pair_list->rv[ip] * nsamp_pair;
@@ -49,7 +54,7 @@ double GF2_F12_V::calculate_v_2e(Electron_Pair_List* electron_pair_list, Electro
   }
   return 0.0;
 }
-double GF2_F12_V::calculate_v_3e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+double GF2_F12_V::calculate_v_3e(Electron_Pair_List_Type* electron_pair_list, Electron_List_Type* electron_list) {
   double v_1_pair_1_one_int = 0.0;
   for (int ip = 0; ip < electron_pair_list->size(); ++ip) {
     std::array<double, 4> t{0.0, 0.0, 0.0, 0.0};
@@ -87,7 +92,7 @@ void calcualte_v_4e_help(
     }
   }
 }
-double GF2_F12_V::calculate_v_4e(Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+double GF2_F12_V::calculate_v_4e(Electron_Pair_List_Type* electron_pair_list, Electron_List_Type* electron_list) {
   double c_c1 = c1 * nsamp_pair * nsamp_one_2;
   double c_c2 = c2 * nsamp_pair * nsamp_one_2;
 
@@ -107,7 +112,7 @@ double GF2_F12_V::calculate_v_4e(Electron_Pair_List* electron_pair_list, Electro
   calcualte_v_4e_help(T_ip_jo, traces.p13, traces.v23, T_ip_io, T_io_jo, core_23, traces.v13, electron_pair_list->rv, -c_c2, electron_list->size(), electron_pair_list->size());
   return 0.0;
 }
-void GF2_F12_V::calculate_v(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+void GF2_F12_V::calculate_v(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List_Type* electron_pair_list, Electron_List_Type* electron_list) {
   traces.update_v(wavefunctions);
   correlation_factor->update(electron_pair_list, electron_list);
 
@@ -122,13 +127,13 @@ void GF2_F12_V::calculate_v(std::vector<std::vector<double>>& egf, std::unordere
   calculate_v_4e(electron_pair_list, electron_list);
 }
 
-void GF2_F12_V::core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {}
+void GF2_F12_V::core(OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list) {}
 
-void GF2_F12_V::energy_no_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction>&, Electron_Pair_List*, Tau*) {}
+void GF2_F12_V::energy_no_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction_Type>&, Electron_Pair_List_Type*, Tau*) {}
 
-void GF2_F12_V::energy_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction>&, Electron_Pair_List*, Tau*) {}
+void GF2_F12_V::energy_diff(std::vector<std::vector<double>>&, std::unordered_map<int, Wavefunction_Type>&, Electron_Pair_List_Type*, Tau*) {}
 
-GF2_F12_VBX::GF2_F12_VBX(IOPs& iops, Basis& basis) : GF2_F12_V(iops, basis, "f12_VBX"),
+GF2_F12_VBX::GF2_F12_VBX(IOPs& iops) : GF2_F12_V(iops, "f12_VBX"),
     core_11o(iops.iopns[KEYS::ELECTRONS]),
     core_12o(iops.iopns[KEYS::ELECTRONS] * iops.iopns[KEYS::ELECTRONS]),
     core_d11p(iops.iopns[KEYS::ELECTRON_PAIRS]),
@@ -152,7 +157,7 @@ GF2_F12_VBX::GF2_F12_VBX(IOPs& iops, Basis& basis) : GF2_F12_V(iops, basis, "f12
 double multiply_by_two(double x) {
   return 2.0 * x;
 }
-void GF2_F12_VBX::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, Electron_Pair_List* electron_pair_list, Electron_List* electron_list) {
+void GF2_F12_VBX::energy_f12(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, Electron_Pair_List_Type* electron_pair_list, Electron_List_Type* electron_list) {
   std::vector<std::vector<double>> e_v(egf.size(), std::vector<double>(egf[0].size(), 0.0));
 
   calculate_v(e_v, wavefunctions, electron_pair_list, electron_list);
@@ -166,7 +171,7 @@ void GF2_F12_VBX::energy_f12(std::vector<std::vector<double>>& egf, std::unorder
   calculate_bx(egf, wavefunctions, electron_pair_list, electron_list);
 }
 
-void GF2_F12_VBX::calculate_bx(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction>& wavefunctions, const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+void GF2_F12_VBX::calculate_bx(std::vector<std::vector<double>>& egf, std::unordered_map<int, Wavefunction_Type>& wavefunctions, const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   traces.update_bx(wavefunctions, electron_pair_list, electron_list);
 
   std::fill(core_11o.begin(), core_11o.end(), 0.0);
@@ -218,7 +223,7 @@ void GF2_F12_VBX::calculate_bx(std::vector<std::vector<double>>& egf, std::unord
   }
 }
 
-double GF2_F12_VBX::calculate_bx_t_fa_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fa_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for(int ip = 0; ip < electron_pair_list->size();ip++) {
     auto cf = correlation_factor->f12p[ip] * correlation_factor->f12p_a[ip] * nsamp_pair;
@@ -229,7 +234,7 @@ double GF2_F12_VBX::calculate_bx_t_fa_2e(const Electron_Pair_List* electron_pair
   }
   return (t[0] + t[1]);
 }
-double GF2_F12_VBX::calculate_bx_t_fa_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fa_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for(int ip = 0; ip < electron_pair_list->size();ip++) {
     for (int io = 0; io < electron_list->size(); ++io) {
@@ -267,7 +272,7 @@ void calculate_bx_t_fa_4e_help(
     }
   }
 }
-double GF2_F12_VBX::calculate_bx_t_fa_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fa_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c_c3 = c3 * nsamp_pair * nsamp_one_2;
   double c_c4 = c4 * nsamp_pair * nsamp_one_2;
@@ -289,14 +294,14 @@ double GF2_F12_VBX::calculate_bx_t_fa_4e(const Electron_Pair_List* electron_pair
   calculate_bx_t_fa_4e_help(T_ip_jo, traces.p13, traces.v23, T_ip_io, T_io_jo, core_23, traces.v13, T_ip, -c_c4, electron_list->size(), electron_pair_list->size());
   return (t[0] + t[1]);
 }
-double GF2_F12_VBX::calculate_bx_t_fa(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fa(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;
   en += calculate_bx_t_fa_2e(electron_pair_list, electron_list);
   en += calculate_bx_t_fa_3e(electron_pair_list, electron_list);
   en += calculate_bx_t_fa_4e(electron_pair_list, electron_list);
   return en;
 }
-double GF2_F12_VBX::calculate_bx_t_fb_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fb_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for (int io = 0; io < electron_list->size(); ++io) {
     for (int jo = 0; jo < electron_list->size(); ++jo) {
@@ -327,7 +332,7 @@ void calculate_bx_t_fb_3e_help(
     }
   }
 }
-double GF2_F12_VBX::calculate_bx_t_fb_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fb_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c_c3 =  -2.0 * nsamp_one_3 * c3;
   double c_c4 =  -2.0 * nsamp_one_3 * c4;
@@ -450,7 +455,7 @@ void calculate_bx_t_fb_4e_help(
     }
   }
 }
-double GF2_F12_VBX::calculate_bx_t_fb_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fb_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c_c3 = 2.0 * c3 * nsamp_one_4;
   double c_c4 = 2.0 * c4 * nsamp_one_4;
@@ -505,7 +510,7 @@ double GF2_F12_VBX::calculate_bx_t_fb_4e(const Electron_Pair_List* electron_pair
   }
   return (t[0] + t[1]);
 }
-double GF2_F12_VBX::calculate_bx_t_fb(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fb(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;
   en += calculate_bx_t_fb_2e(electron_pair_list, electron_list);
   en += calculate_bx_t_fb_3e(electron_pair_list, electron_list);
@@ -513,7 +518,7 @@ double GF2_F12_VBX::calculate_bx_t_fb(const Electron_Pair_List* electron_pair_li
   return en;
 }
 
-double GF2_F12_VBX::calculate_bx_t_fc_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fc_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for(int ip = 0; ip < electron_pair_list->size();ip++) {
     auto cf = correlation_factor->f12p_c[ip] * correlation_factor->f12p[ip] * nsamp_pair;
@@ -529,7 +534,7 @@ double GF2_F12_VBX::calculate_bx_t_fc_2e(const Electron_Pair_List* electron_pair
   }
   return (t[0] + t[1]);
 }
-double GF2_F12_VBX::calculate_bx_t_fc_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fc_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for(int ip = 0; ip < electron_pair_list->size();ip++) {
     for (int io = 0; io < electron_list->size(); ++io) {
@@ -548,7 +553,7 @@ double GF2_F12_VBX::calculate_bx_t_fc_3e(const Electron_Pair_List* electron_pair
   }
   return (t[0] + t[1]);
 }
-double GF2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c_c3 = c3 * nsamp_pair * nsamp_one_2;
   double c_c4 = c4 * nsamp_pair * nsamp_one_2;
@@ -580,7 +585,7 @@ double GF2_F12_VBX::calculate_bx_t_fc_4e(const Electron_Pair_List* electron_pair
   calculate_bx_t_fa_4e_help(T_ip_jo, traces.dp31, traces.k23, T_ip_io, T_io_jo, core_23, traces.k13, T_ip, -c_c4, electron_list->size(), electron_pair_list->size());
   return (t[0] + t[1]);
 }
-double GF2_F12_VBX::calculate_bx_t_fc(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fc(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;
   en += calculate_bx_t_fc_2e(electron_pair_list, electron_list);
   en += calculate_bx_t_fc_3e(electron_pair_list, electron_list);
@@ -588,38 +593,38 @@ double GF2_F12_VBX::calculate_bx_t_fc(const Electron_Pair_List* electron_pair_li
   return en;
 }
 
-double GF2_F12_VBX::calculate_bx_t_fd_2e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fd_2e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for (int io = 0; io < electron_list->size(); ++io) {
     for (int jo = 0; jo < electron_list->size(); ++jo) {
       auto f_d = correlation_factor->f12o_d[io * traces.electrons + jo] * correlation_factor->f12o[io * traces.electrons + jo];
       auto wgt = 1.0 * electron_list->inverse_weight[io] * electron_list->inverse_weight[jo];
-      t[0] += f_d * (x_traces.ox11[io] * traces.ds_p22[io][jo] - x_traces.ds_x11[io][jo] * traces.op11[jo]) * wgt;
-      t[0] += f_d * (traces.op11[io] * x_traces.ds_x22[io][jo] - traces.ds_p11[io][jo] * x_traces.ox11[jo]) * wgt;
-      t[1] += f_d * (x_traces.ox12[io*traces.electrons+jo] * traces.ds_p12[io][jo] - x_traces.ox12[io*traces.electrons+jo] * traces.ds_p21[io][jo]) * wgt;
+      t[0] += f_d * (x_traces.ox11[io] * traces.ds_p22[io * traces.electrons + jo] - x_traces.ds_x11[io][jo] * traces.op11[jo]) * wgt;
+      t[0] += f_d * (traces.op11[io] * x_traces.ds_x22[io][jo] - traces.ds_p11[io * traces.electrons + jo] * x_traces.ox11[jo]) * wgt;
+      t[1] += f_d * (x_traces.ox12[io*traces.electrons+jo] * traces.ds_p12[io * traces.electrons + jo] - x_traces.ox12[io*traces.electrons+jo] * traces.ds_p21[io * traces.electrons + jo]) * wgt;
       t[1] += f_d * (traces.op12[io * traces.electrons + jo] * x_traces.ds_x12[io][jo] - traces.op12[io * traces.electrons + jo] * x_traces.ds_x21[io][jo]) * wgt;
     }
   }
   return (c3 * t[0] + c4 * t[1]) * nsamp_one_2;
 }
-double GF2_F12_VBX::calculate_bx_t_fd_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fd_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for (int io = 0; io < electron_list->size(); ++io) {
     for (int jo = 0; jo < electron_list->size(); ++jo) {
       for (int ko = 0; ko < electron_list->size(); ++ko) {
         auto wgt = 1.0 * electron_list->inverse_weight[io]* electron_list->inverse_weight[jo] * electron_list->inverse_weight[ko];
         auto cf = correlation_factor->f12o[jo * traces.electrons + ko] * correlation_factor->f12o_d[io * traces.electrons + jo];
-      t[0] += cf * traces.ok12[io * traces.electrons + ko] * (x_traces.ox12[io*traces.electrons+ko] * traces.ds_p22[io][jo]   - x_traces.ds_x31[io][jo][ko] * traces.op11[jo]      ) * wgt;
-      t[0] += cf * traces.ok12[io * traces.electrons + ko] * (traces.op12[io * traces.electrons + ko] * x_traces.ds_x22[io][jo]   - traces.ds_p31[io][jo][ko] * x_traces.ox11[jo]      ) * wgt;
+      t[0] += cf * traces.ok12[io * traces.electrons + ko] * (x_traces.ox12[io*traces.electrons+ko] * traces.ds_p22[io * traces.electrons + jo]   - x_traces.ds_x31[io][jo][ko] * traces.op11[jo]      ) * wgt;
+      t[0] += cf * traces.ok12[io * traces.electrons + ko] * (traces.op12[io * traces.electrons + ko] * x_traces.ds_x22[io][jo]   - traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko] * x_traces.ox11[jo]      ) * wgt;
 
-      t[1] += cf * traces.ok12[io * traces.electrons + ko] * (x_traces.ds_x32[io][jo][ko] * traces.op12[io * traces.electrons + jo]     -  x_traces.ox12[jo*traces.electrons+ko]      * traces.ds_p21[io][jo]) * wgt;
-      t[1] += cf * traces.ok12[io * traces.electrons + ko] * (traces.ds_p32[io][jo][ko] * x_traces.ox12[io*traces.electrons+jo]     -  traces.op12[jo * traces.electrons + ko]      * x_traces.ds_x21[io][jo]) * wgt;
+      t[1] += cf * traces.ok12[io * traces.electrons + ko] * (x_traces.ds_x32[io][jo][ko] * traces.op12[io * traces.electrons + jo]     -  x_traces.ox12[jo*traces.electrons+ko]      * traces.ds_p21[io * traces.electrons + jo]) * wgt;
+      t[1] += cf * traces.ok12[io * traces.electrons + ko] * (traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko] * x_traces.ox12[io*traces.electrons+jo]     -  traces.op12[jo * traces.electrons + ko]      * x_traces.ds_x21[io][jo]) * wgt;
       }
     }
   }
   return -2.0 * (c3 * t[0] + c4 * t[1]) * nsamp_one_3;
 }
-double GF2_F12_VBX::calculate_bx_t_fd_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fd_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   for (int io = 0; io < electron_list->size(); ++io) {
     for (int jo = 0; jo < electron_list->size(); ++jo) {
@@ -629,15 +634,15 @@ double GF2_F12_VBX::calculate_bx_t_fd_4e(const Electron_Pair_List* electron_pair
               if (lo != io) {
                 auto cf = correlation_factor->f12o[ko * traces.electrons + lo] * correlation_factor->f12o_d[io * traces.electrons + jo]; 
                 auto wgt = 1.0 * electron_list->inverse_weight[io]* electron_list->inverse_weight[jo] * electron_list->inverse_weight[ko] * electron_list->inverse_weight[lo];
-   t[0] += cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[io][jo][ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[0] += cf * (traces.ds_p32[io][jo][lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[0] -= cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[io][jo][ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
-   t[0] -= cf * (traces.ds_p32[io][jo][lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[0] += cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[0] += cf * (traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[0] -= cf * (x_traces.ds_x32[io][jo][lo] * traces.op12[io * traces.electrons + ko] - x_traces.ox12[jo*traces.electrons+lo] * traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[0] -= cf * (traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[io*traces.electrons+ko] - traces.op12[jo * traces.electrons + lo] * x_traces.ds_x31[io][jo][ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
 
-   t[1] += cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[io][jo][ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[1] += cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[io][jo][lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
-   t[1] -= cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[io][jo][ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
-   t[1] -= cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[io][jo][lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[1] += cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[1] += cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ok12[io * traces.electrons + ko] * traces.ok12[jo * traces.electrons + lo] * wgt;
+   t[1] -= cf * (x_traces.ox12[io*traces.electrons+lo] * traces.ds_p32[(io * traces.electrons + jo) * traces.electrons + ko] - x_traces.ds_x31[io][jo][lo] * traces.op12[jo * traces.electrons + ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
+   t[1] -= cf * (traces.op12[io * traces.electrons + lo] * x_traces.ds_x32[io][jo][ko] - traces.ds_p31[(io * traces.electrons + jo) * traces.electrons + lo] * x_traces.ox12[jo*traces.electrons+ko]) * traces.ov12[io * traces.electrons + ko] * traces.ov12[jo * traces.electrons + lo] * wgt;
               }
             }
           }
@@ -646,7 +651,7 @@ double GF2_F12_VBX::calculate_bx_t_fd_4e(const Electron_Pair_List* electron_pair
   }
   return (c3 * t[0] + c4 * t[1]) * nsamp_one_4;
 }
-double GF2_F12_VBX::calculate_bx_t_fd(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_t_fd(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;
   en += calculate_bx_t_fd_2e(electron_pair_list, electron_list);
   en += calculate_bx_t_fd_3e(electron_pair_list, electron_list);
@@ -654,7 +659,7 @@ double GF2_F12_VBX::calculate_bx_t_fd(const Electron_Pair_List* electron_pair_li
   return en;
 }
 
-double GF2_F12_VBX::calculate_bx_k_3e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_k_3e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c = 2.0 * nsamp_pair * nsamp_one_1;
   for (int ip = 0; ip < electron_pair_list->size();ip++) {
@@ -708,7 +713,7 @@ void calculate_bx_k_4e_help_2(
     }
   }
 }
-double GF2_F12_VBX::calculate_bx_k_4e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_k_4e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c_c3 = -2.0 * c3 * nsamp_pair * nsamp_one_2;
   double c_c4 = -2.0 * c4 * nsamp_pair * nsamp_one_2;
@@ -874,7 +879,7 @@ void calculate_bx_k_5e_help_2(
     }
   }
 }
-double GF2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   std::array<double, 2> t{0.0, 0.0};
   double c_c3 = 2.0 * nsamp_pair * nsamp_one_3 * c3;
   double c_c4 = 2.0 * nsamp_pair * nsamp_one_3 * c4;
@@ -959,7 +964,7 @@ double GF2_F12_VBX::calculate_bx_k_5e(const Electron_Pair_List* electron_pair_li
   }
   return (t[0] + t[1]);
 }
-double GF2_F12_VBX::calculate_bx_k(const Electron_Pair_List* electron_pair_list, const Electron_List* electron_list) {
+double GF2_F12_VBX::calculate_bx_k(const Electron_Pair_List_Type* electron_pair_list, const Electron_List_Type* electron_list) {
   double en = 0.0;
   en += calculate_bx_k_3e(electron_pair_list, electron_list);
   en += calculate_bx_k_4e(electron_pair_list, electron_list);

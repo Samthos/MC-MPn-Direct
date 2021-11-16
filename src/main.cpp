@@ -3,8 +3,9 @@
 #endif
 
 #include "weight_function.h"
-#include "basis/qc_basis.h"
+#include "basis/basis.h"
 #include "qc_monte.h"
+#include "MCMP/mcmp.h"
 
 int main(int argc, char* argv[]) {
 #ifdef HAVE_MPI
@@ -29,16 +30,27 @@ int main(int argc, char* argv[]) {
   iops.read(mpi_info, argv[1]);
   iops.print(mpi_info, argv[1]);
 
-  Molec molec;
-  molec.read(mpi_info, iops.sopns[KEYS::GEOM]);
+  Molecule molec(mpi_info, iops.sopns[KEYS::GEOM]);
 
-  Basis basis(iops, mpi_info, molec);
+  Basis_Host basis(std::max(iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRONS]), Basis_Parser(iops.sopns[KEYS::BASIS], iops.bopns[KEYS::SPHERICAL], mpi_info, molec));
 
-  QC_monte* qc_monte;
+  QC_monte<std::vector, std::allocator>* qc_monte = nullptr;
+#ifdef HAVE_CUDA
+  QC_monte<thrust::device_vector, thrust::device_allocator>* gpu_qc_monte = nullptr;
+#endif
+
   if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::ENERGY) {
-    qc_monte = new Energy(mpi_info, iops, molec, basis);
+#ifdef HAVE_CUDA
+    gpu_qc_monte = new MCMP<thrust::device_vector, thrust::device_allocator>(mpi_info, iops, molec, basis);
+#else
+    qc_monte = new MCMP<std::vector, std::allocator>(mpi_info, iops, molec, basis);
+#endif
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::DIMER) {
-    qc_monte = new Dimer(mpi_info, iops, molec, basis);
+#ifdef HAVE_CUDA
+    gpu_qc_monte = new Dimer<thrust::device_vector, thrust::device_allocator>(mpi_info, iops, molec, basis);
+#else
+    qc_monte = new Dimer<std::vector, std::allocator>(mpi_info, iops, molec, basis);
+#endif
   } else if (iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GF || iops.iopns[KEYS::JOBTYPE] == JOBTYPE::GFDIFF) {
     qc_monte = new Diagonal_GF(mpi_info, iops, molec, basis);
   } else {
@@ -48,8 +60,17 @@ int main(int argc, char* argv[]) {
       qc_monte = new GF3(mpi_info, iops, molec, basis);
     }
   }
-  qc_monte->monte_energy();
-  delete qc_monte;
+
+  if (qc_monte) {
+    qc_monte->monte_energy();
+    delete qc_monte;
+  }
+#ifdef HAVE_CUDA
+  else if (gpu_qc_monte) {
+    gpu_qc_monte->monte_energy();
+    delete gpu_qc_monte;
+  }
+#endif
 
 #ifdef HAVE_MPI
   MPI_Finalize();

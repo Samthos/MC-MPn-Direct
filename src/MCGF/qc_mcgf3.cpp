@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "cblas.h"
-#include "../blas_calls.h"
+#include "blas_calls.h"
 #include "../qc_monte.h"
 #include "qc_mcgf3.h"
 
@@ -87,104 +87,104 @@ void gf3_helper(
       Tk, mc_pair_num);
   m_m_add_mul(c, Tk, Tk_a, en, mc_pair_num);
 }
-void gf3_core_1(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
-  std::fill(ovps.d_ovps.en3_1mCore, ovps.d_ovps.en3_1mCore + mc_pair_num * mc_pair_num, 0.0);
-  std::fill(ovps.d_ovps.en3_1pCore, ovps.d_ovps.en3_1pCore + mc_pair_num * mc_pair_num, 0.0);
+void gf3_core_1(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(d_ovps.en3_1mCore.begin(), d_ovps.en3_1mCore.end(), 0.0);
+  std::fill(d_ovps.en3_1pCore.begin(), d_ovps.en3_1pCore.end(), 0.0);
 
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1pCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_12.data(), T[2], d_ovps.en3_1pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], d_ovps.en3_1pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_21.data(), T[2], d_ovps.en3_1pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], d_ovps.en3_1pCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_12.data(), T[2], d_ovps.en3_1pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_21.data(), T[2], d_ovps.en3_1pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], d_ovps.en3_1pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], d_ovps.en3_1pCore.data(),  2.00, mc_pair_num);
 
-  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0], ovps.v_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.o_set[0][0].s_12.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[0][0].s_21.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], d_ovps.en3_1mCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[0][0].s_21.data(), T[2], d_ovps.en3_1mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], d_ovps.en3_1mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[0], ovps.v_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_11.data(), T[2], d_ovps.en3_1mCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_12.data(), T[2], d_ovps.en3_1mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.o_set[0][0].s_12.data(), T[2], d_ovps.en3_1mCore.data(),  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[0][0].s_11.data(), T[2], d_ovps.en3_1mCore.data(),  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[0][0].s_21.data(), T[2], d_ovps.en3_1mCore.data(),  2.00, mc_pair_num);
 
-//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1pCore,  4.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1mCore, -4.00, mc_pair_num);
-  m_m_add_mul(4.0, T[2], ovps.v_set[0][0].s_22.data(), ovps.d_ovps.en3_1pCore, mc_pair_num);
+//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[0][0].s_22.data(), T[2], d_ovps.en3_1pCore.data(),  4.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[0][0].s_22.data(), T[2], d_ovps.en3_1mCore.data(), -4.00, mc_pair_num);
+  m_m_add_mul(4.0, T[2], ovps.v_set[0][0].s_22.data(), d_ovps.en3_1pCore.data(), mc_pair_num);
 
-//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[0][0].s_22.data(), T[2], ovps.d_ovps.en3_1mCore,  2.00, mc_pair_num);
-  m_m_add_mul(-2.0, T[2], ovps.v_set[0][0].s_22.data(), ovps.d_ovps.en3_1pCore, mc_pair_num);
+//gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[0][0].s_22.data(), T[2], d_ovps.en3_1pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[0][0].s_22.data(), T[2], d_ovps.en3_1mCore.data(),  2.00, mc_pair_num);
+  m_m_add_mul(-2.0, T[2], ovps.v_set[0][0].s_22.data(), d_ovps.en3_1pCore.data(), mc_pair_num);
 
-  vector_multiply(rv, ovps.d_ovps.en3_1mCore, mc_pair_num);
-  vector_multiply(rv, ovps.d_ovps.en3_1pCore, mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_1mCore.data(), mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_1pCore.data(), mc_pair_num);
 }
-void gf3_core_2(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
-  std::fill(ovps.d_ovps.en3_2mCore, ovps.d_ovps.en3_2mCore + mc_pair_num * mc_pair_num, 0.0);
-  std::fill(ovps.d_ovps.en3_2pCore, ovps.d_ovps.en3_2pCore + mc_pair_num * mc_pair_num, 0.0);
+void gf3_core_2(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(d_ovps.en3_2mCore.begin(), d_ovps.en3_2mCore.end(), 0.0);
+  std::fill(d_ovps.en3_2pCore.begin(), d_ovps.en3_2pCore.end(), 0.0);
 
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1], rv, ovps.v_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.v_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.v_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.v_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2pCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1], rv, ovps.v_set[1][1].s_12.data(), T[2], d_ovps.en3_2pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], d_ovps.en3_2pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.v_set[1][1].s_21.data(), T[2], d_ovps.en3_2pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.v_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], d_ovps.en3_2pCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_12.data(), T[2], d_ovps.en3_2pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.v_set[1][1].s_21.data(), T[2], d_ovps.en3_2pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_21.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], d_ovps.en3_2pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], d_ovps.en3_2pCore.data(),  2.00, mc_pair_num);
 
-  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.v_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_12.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_21.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], d_ovps.en3_2mCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_12.data(), T[2], d_ovps.en3_2mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_21.data(), T[2], d_ovps.en3_2mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], d_ovps.en3_2mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.v_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), T[1], rv, ovps.v_set[1][1].s_11.data(), T[2], d_ovps.en3_2mCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_12.data(), T[2], d_ovps.en3_2mCore.data(),  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.o_set[1][0].s_21.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_11.data(), T[2], d_ovps.en3_2mCore.data(),  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_21.data(), T[2], d_ovps.en3_2mCore.data(),  2.00, mc_pair_num);
 
-//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.v_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2pCore,  4.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2mCore, -4.00, mc_pair_num);
-  m_m_add_mul(4.0, T[2], ovps.v_set[1][1].s_22.data(), ovps.d_ovps.en3_2pCore, mc_pair_num);
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.v_set[1][1].s_22.data(), T[2], d_ovps.en3_2pCore.data(),  4.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_11.data(), T[1], rv, ovps.o_set[1][1].s_22.data(), T[2], d_ovps.en3_2mCore.data(), -4.00, mc_pair_num);
+  m_m_add_mul(4.0, T[2], ovps.v_set[1][1].s_22.data(), d_ovps.en3_2pCore.data(), mc_pair_num);
 
-//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.v_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_22.data(), T[2], ovps.d_ovps.en3_2mCore,  2.00, mc_pair_num);
-  m_m_add_mul(-2.0, T[2], ovps.v_set[1][1].s_22.data(), ovps.d_ovps.en3_2pCore, mc_pair_num);
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.v_set[1][1].s_22.data(), T[2], d_ovps.en3_2pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[0], ovps.o_set[1][0].s_11.data(), ovps.v_set[1][0].s_12.data(), T[1], rv, ovps.o_set[1][1].s_22.data(), T[2], d_ovps.en3_2mCore.data(),  2.00, mc_pair_num);
+  m_m_add_mul(-2.0, T[2], ovps.v_set[1][1].s_22.data(), d_ovps.en3_2pCore.data(), mc_pair_num);
 
-  vector_multiply(rv, ovps.d_ovps.en3_2mCore, mc_pair_num);
-  vector_multiply(rv, ovps.d_ovps.en3_2pCore, mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_2mCore.data(), mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_2pCore.data(), mc_pair_num);
 }
-void gf3_core_12(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
-  std::fill(ovps.d_ovps.en3_12mCore, ovps.d_ovps.en3_12mCore + mc_pair_num * mc_pair_num, 0.0);
-  std::fill(ovps.d_ovps.en3_12pCore, ovps.d_ovps.en3_12pCore + mc_pair_num * mc_pair_num, 0.0);
+void gf3_core_12(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(d_ovps.en3_12mCore.begin(), d_ovps.en3_12mCore.end(), 0.0);
+  std::fill(d_ovps.en3_12pCore.begin(), d_ovps.en3_12pCore.end(), 0.0);
 
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.v_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12pCore,  2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12pCore,  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], d_ovps.en3_12pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.v_set[1][0].s_12.data(), T[2], d_ovps.en3_12pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[1][0].s_21.data(), T[2], d_ovps.en3_12pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], d_ovps.en3_12pCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_12.data(), T[2], d_ovps.en3_12pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_21.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], d_ovps.en3_12pCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], d_ovps.en3_12pCore.data(),  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_21.data(), T[2], d_ovps.en3_12pCore.data(),  1.00, mc_pair_num);
 
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore, -1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.o_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore,  1.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_12.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_21.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], d_ovps.en3_12mCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_12.data(), T[2], d_ovps.en3_12mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_21.data(), T[2], d_ovps.en3_12mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], d_ovps.en3_12mCore.data(), -1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.o_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_11.data(), T[2], d_ovps.en3_12mCore.data(),  1.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_12.data(), T[2], d_ovps.en3_12mCore.data(),  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_21.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_21.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_11.data(), T[2], d_ovps.en3_12mCore.data(),  2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_21.data(), T[2], d_ovps.en3_12mCore.data(),  2.00, mc_pair_num);
 
-//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12pCore,  4.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12mCore, -4.00, mc_pair_num);
-  m_m_add_mul(4.0, T[2], ovps.v_set[1][0].s_22.data(), ovps.d_ovps.en3_12pCore, mc_pair_num);
+//gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.v_set[1][0].s_22.data(), T[2], d_ovps.en3_12pCore.data(),  4.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_12.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), T[1], rv, ovps.o_set[1][0].s_22.data(), T[2], d_ovps.en3_12mCore.data(), -4.00, mc_pair_num);
+  m_m_add_mul(4.0, T[2], ovps.v_set[1][0].s_22.data(), d_ovps.en3_12pCore.data(), mc_pair_num);
 
-//gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12pCore, -2.00, mc_pair_num);
-  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_22.data(), T[2], ovps.d_ovps.en3_12mCore,  2.00, mc_pair_num);
-  m_m_add_mul(-2.0, T[2], ovps.v_set[1][0].s_22.data(), ovps.d_ovps.en3_12pCore, mc_pair_num);
+//gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.v_set[1][0].s_22.data(), T[2], d_ovps.en3_12pCore.data(), -2.00, mc_pair_num);
+  gf3_helper(ovps.o_set[0][0].s_11.data(), ovps.v_set[0][0].s_12.data(), T[0], ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_12.data(), T[1], rv, ovps.o_set[1][0].s_22.data(), T[2], d_ovps.en3_12mCore.data(),  2.00, mc_pair_num);
+  m_m_add_mul(-2.0, T[2], ovps.v_set[1][0].s_22.data(), d_ovps.en3_12pCore.data(), mc_pair_num);
 
-  vector_multiply(rv, ovps.d_ovps.en3_12mCore, mc_pair_num);
-  vector_multiply(rv, ovps.d_ovps.en3_12pCore, mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_12mCore.data(), mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_12pCore.data(), mc_pair_num);
 }
 
 void gf3_helper_c(
@@ -209,27 +209,27 @@ void gf3_helper_c(
   m_m_add_mul(c12, Tk, Tk_a, en_12, mc_pair_num);
   m_m_add_mul(c22, Tk, Tk_b, en_22, mc_pair_num);
 }
-void gf3_core_c(OVPs& ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
-  std::fill(ovps.d_ovps.en3_12cCore, ovps.d_ovps.en3_12cCore + mc_pair_num * mc_pair_num, 0.0);
-  std::fill(ovps.d_ovps.en3_22cCore, ovps.d_ovps.en3_22cCore + mc_pair_num * mc_pair_num, 0.0);
+void gf3_core_c(OVPS_Host& ovps, OVPS_ARRAY& d_ovps, double *rv, int mc_pair_num, std::array<double*, 4>& T) {
+  std::fill(d_ovps.en3_12cCore.begin(), d_ovps.en3_12cCore.end(), 0.0);
+  std::fill(d_ovps.en3_22cCore.begin(), d_ovps.en3_22cCore.end(), 0.0);
 
-  gf3_helper_c(ovps.v_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_11.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  2.00,  ovps.d_ovps.en3_22cCore, -4.00, mc_pair_num);
-  gf3_helper_c(ovps.v_set[1][0].s_11.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_12.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -1.00,  ovps.d_ovps.en3_22cCore,  2.00, mc_pair_num);
-  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -2.00,  ovps.d_ovps.en3_22cCore,  4.00, mc_pair_num);
-  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][1].s_12.data(), ovps.v_set[1][1].s_21.data(), ovps.o_set[1][1].s_11.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  1.00,  ovps.d_ovps.en3_22cCore, -2.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_11.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(),  2.00,  d_ovps.en3_22cCore.data(), -4.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][0].s_11.data(), ovps.o_set[1][1].s_11.data(), ovps.o_set[1][1].s_22.data(), ovps.v_set[1][1].s_12.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(), -1.00,  d_ovps.en3_22cCore.data(),  2.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.o_set[1][1].s_11.data(), ovps.v_set[1][1].s_11.data(), ovps.v_set[1][1].s_22.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(), -2.00,  d_ovps.en3_22cCore.data(),  4.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][0].s_12.data(), ovps.v_set[1][1].s_12.data(), ovps.v_set[1][1].s_21.data(), ovps.o_set[1][1].s_11.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(),  1.00,  d_ovps.en3_22cCore.data(), -2.00, mc_pair_num);
 
-  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -1.00,  ovps.d_ovps.en3_22cCore,  2.00, mc_pair_num);
-  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  2.00,  ovps.d_ovps.en3_22cCore, -4.00, mc_pair_num);
-  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore,  1.00,  ovps.d_ovps.en3_22cCore, -2.00, mc_pair_num);
-  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_22.data(), T[0], rv, ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore, -2.00,  ovps.d_ovps.en3_22cCore,  4.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), ovps.v_set[1][0].s_22.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(), -1.00,  d_ovps.en3_22cCore.data(),  2.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[1][0].s_12.data(), ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_21.data(), T[0], rv, ovps.o_set[0][0].s_22.data(), ovps.o_set[0][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(),  2.00,  d_ovps.en3_22cCore.data(), -4.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_12.data(), T[0], rv, ovps.v_set[0][0].s_22.data(), ovps.v_set[0][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(),  1.00,  d_ovps.en3_22cCore.data(), -2.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[1][0].s_11.data(), ovps.o_set[1][0].s_22.data(), ovps.v_set[1][0].s_22.data(), T[0], rv, ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_11.data(), T[1], d_ovps.en3_12cCore.data(), -2.00,  d_ovps.en3_22cCore.data(),  4.00, mc_pair_num);
 
-  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_22.data(), T[0], rv, ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore,  2.00,  ovps.d_ovps.en3_22cCore, -4.00, mc_pair_num);
-  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], rv, ovps.v_set[1][0].s_22.data(), ovps.v_set[1][0].s_21.data(), T[1], ovps.d_ovps.en3_12cCore, -1.00,  ovps.d_ovps.en3_22cCore,  2.00, mc_pair_num);
-  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], rv, ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore, -2.00,  ovps.d_ovps.en3_22cCore,  4.00, mc_pair_num);
-  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], rv, ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1], ovps.d_ovps.en3_12cCore,  1.00,  ovps.d_ovps.en3_22cCore, -2.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_22.data(), T[0], rv, ovps.v_set[1][0].s_12.data(), ovps.v_set[1][0].s_11.data(), T[1], d_ovps.en3_12cCore.data(),  2.00,  d_ovps.en3_22cCore.data(), -4.00, mc_pair_num);
+  gf3_helper_c(ovps.o_set[1][1].s_11.data(), ovps.o_set[0][0].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), T[0], rv, ovps.v_set[1][0].s_22.data(), ovps.v_set[1][0].s_21.data(), T[1], d_ovps.en3_12cCore.data(), -1.00,  d_ovps.en3_22cCore.data(),  2.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_11.data(), ovps.v_set[0][0].s_22.data(), T[0], rv, ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1], d_ovps.en3_12cCore.data(), -2.00,  d_ovps.en3_22cCore.data(),  4.00, mc_pair_num);
+  gf3_helper_c(ovps.v_set[1][1].s_11.data(), ovps.o_set[0][0].s_22.data(), ovps.v_set[0][0].s_12.data(), ovps.v_set[0][0].s_21.data(), T[0], rv, ovps.o_set[1][0].s_12.data(), ovps.o_set[1][0].s_11.data(), T[1], d_ovps.en3_12cCore.data(),  1.00,  d_ovps.en3_22cCore.data(), -2.00, mc_pair_num);
 
-  vector_multiply(rv, ovps.d_ovps.en3_12cCore, mc_pair_num);
-  vector_multiply(rv, ovps.d_ovps.en3_22cCore, mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_12cCore.data(), mc_pair_num);
+  vector_multiply(rv, d_ovps.en3_22cCore.data(), mc_pair_num);
 }
 
 void strided_transform(
@@ -252,26 +252,26 @@ void GF::mcgf3_local_energy_core() {
 
   std::copy(electron_pair_list->rv.begin(), electron_pair_list->rv.end(), T[3]);
 
-  gf3_core_c(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
-  gf3_core_1(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
-  gf3_core_2(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
-  gf3_core_12(ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
+  gf3_core_c (ovps, d_ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
+  gf3_core_1 (ovps, d_ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
+  gf3_core_2 (ovps, d_ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
+  gf3_core_12(ovps, d_ovps, T[3], iops.iopns[KEYS::ELECTRON_PAIRS], T);
 
   cblas_dgemv(CblasColMajor, CblasNoTrans,
       iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
       1.0,
-      ovps.d_ovps.en3_12cCore, iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.one, 1,
+      d_ovps.en3_12cCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
+      d_ovps.one.data(), 1,
       0.0,
-      ovps.d_ovps.en3c12, 1);
+      d_ovps.en3c12.data(), 1);
 
   cblas_dgemv(CblasColMajor, CblasNoTrans,
       iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
       1.0,
-      ovps.d_ovps.en3_22cCore, iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.one, 1,
+      d_ovps.en3_22cCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
+      d_ovps.one.data(), 1,
       0.0,
-      ovps.d_ovps.en3c22, 1);
+      d_ovps.en3c22.data(), 1);
 
   for (auto &it : T) {
     delete [] it;
@@ -293,8 +293,8 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
       psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band-offBand);
     }
 
-    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c12, 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, ovps.d_ovps.ent, 1);
-    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c22, 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, d_ovps.en3c12.data(), 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, d_ovps.ent.data(), 1);
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, d_ovps.en3c22.data(), 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, d_ovps.ent.data(), 1);
 
     // ent = ovps.ovps.tg_val1[band] * en3_1pCore . psi
     alpha = tau->get_gfn_tau(0, 0, band-offBand, false);
@@ -302,9 +302,9 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_1pCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        beta, ovps.d_ovps.ent, 1);
+        beta, d_ovps.ent.data(), 1);
 
     // ent = ovps.ovps.tg_val2[band] * en3_2pCore . psi + ent
     alpha = tau->get_gfn_tau(1, 1, band-offBand, false);
@@ -312,10 +312,10 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_2pCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
 
     // ent = ovps.ovps.tg_val12[band] * en3_12pCore . psi + ent
     alpha = tau->get_gfn_tau(1, 0, band-offBand, false);
@@ -323,10 +323,10 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_12pCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
 
     // ent = ovps.ovps.tgc_val1[band] * en3_1mCore . psi + ent
     alpha = tau->get_gfn_tau(0, 0, band-offBand, true);
@@ -334,10 +334,10 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_1mCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
 
     // ent = ovps.ovps.tgc_val2[band] * en3_2mCore . psi + ent
     alpha = tau->get_gfn_tau(1, 1, band-offBand, true);
@@ -345,10 +345,10 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_2mCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
 
     // ent = ovps.ovps.tgc_val12[band] * en3_12mCore . psi + ent
     alpha = tau->get_gfn_tau(1, 0, band-offBand, true);
@@ -356,15 +356,15 @@ void GF::mcgf3_local_energy(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_12mCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
 
     // en2 = psi2 . ent
     en3 += cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
 
     en3 = en3 * tau->get_wgt(2) / nsamp;
     egf3[band].front() += en3;
@@ -388,11 +388,11 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
       psi2 = wavefunctions[WC::electron_pairs_2].vir() + (band - offBand);
     }
 
-    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c12, 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, ovps.d_ovps.ent, 1);
-    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, ovps.d_ovps.en3c22, 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, ovps.d_ovps.ent, 1);
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, d_ovps.en3c12.data(), 1, psi1, wavefunctions[WC::electron_pairs_1].lda, 0.0, d_ovps.ent.data(), 1);
+    strided_transform(iops.iopns[KEYS::ELECTRON_PAIRS], 1.0, d_ovps.en3c22.data(), 1, psi2, wavefunctions[WC::electron_pairs_2].lda, 1.0, d_ovps.ent.data(), 1);
     en3[0] = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
 
     // ent = en3_1pCore . psi
     alpha = 1.0;
@@ -400,14 +400,14 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_1pCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     // en2 = psi2 . ent
     en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     en3[1] = en3[1] + en3t * tau->get_gfn_tau(0, 0, band - offBand, false);
 
     // ent = en3_2pCore . psi
@@ -416,14 +416,14 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_2pCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     // en2 = psi2 . ent
     en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     en3[2] = en3[2] + en3t * tau->get_gfn_tau(1, 1, band - offBand, false);
 
     // ent = en3_12pCore . psi
@@ -432,14 +432,14 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12pCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_12pCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     // en2 = psi2 . ent
     en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     en3[3] = en3[3] + en3t * tau->get_gfn_tau(1, 0, band - offBand, false);
 
 
@@ -449,14 +449,14 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_1mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_1mCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     // en2 = psi2 . ent
     en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     en3[4] = en3[4] + en3t * tau->get_gfn_tau(0, 0, band - offBand, true);
 
     // ent = en3_2mCore . psi
@@ -465,14 +465,14 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_2mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_2mCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     // en2 = psi2 . ent
     en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     en3[5] = en3[5] + en3t * tau->get_gfn_tau(1, 1, band - offBand, true);
 
     // ent = en3_12mCore . psi
@@ -481,14 +481,14 @@ void GF::mcgf3_local_energy_diff(std::vector<std::vector<double>>& egf3) {
     cblas_dgemv(CblasColMajor, CblasNoTrans,
         iops.iopns[KEYS::ELECTRON_PAIRS], iops.iopns[KEYS::ELECTRON_PAIRS],
         alpha,
-        ovps.d_ovps.en3_12mCore, iops.iopns[KEYS::ELECTRON_PAIRS],
+        d_ovps.en3_12mCore.data(), iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
         beta,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     // en2 = psi2 . ent
     en3t = cblas_ddot(iops.iopns[KEYS::ELECTRON_PAIRS],
         psi2, wavefunctions[WC::electron_pairs_2].lda,
-        ovps.d_ovps.ent, 1);
+        d_ovps.ent.data(), 1);
     en3[6] = en3[6] + en3t * tau->get_gfn_tau(1, 0, band - offBand, true);
 
     for (auto &it : en3) {
@@ -555,10 +555,10 @@ void GF::mcgf3_local_energy_full(int band) {
   // enCore = alpha en2pCore + beta en2mCore
   alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / nsamp;
   beta = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / nsamp;
-  std::transform(ovps.d_ovps.en2pCore,
-      ovps.d_ovps.en2pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.en2mCore,
-      ovps.d_ovps.enCore,
+  std::transform(d_ovps.en2pCore.begin(),
+      d_ovps.en2pCore.end(),
+      d_ovps.en2mCore.begin(),
+      d_ovps.enCore.begin(),
       [&](double a, double b) {return alpha*a + beta*b;});
 
   nsamp = static_cast<double>(iops.iopns[KEYS::ELECTRON_PAIRS]);
@@ -566,67 +566,67 @@ void GF::mcgf3_local_energy_full(int band) {
 
   // enCore = alpha en3_1p + enCore
   alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en3_1pCore,
-      ovps.d_ovps.en3_1pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.enCore,
-      ovps.d_ovps.enCore,
+  std::transform(d_ovps.en3_1pCore.begin(),
+      d_ovps.en3_1pCore.end(),
+      d_ovps.enCore.begin(),
+      d_ovps.enCore.begin(),
       [&](double a, double b) {return alpha*a + b;});
 
   // enCore = alpha en3_2p + enCore
   alpha = tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en3_2pCore,
-      ovps.d_ovps.en3_2pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.enCore,
-      ovps.d_ovps.enCore,
+  std::transform(d_ovps.en3_2pCore.begin(),
+      d_ovps.en3_2pCore.end(),
+      d_ovps.enCore.begin(),
+      d_ovps.enCore.begin(),
       [&](double a, double b) {return alpha*a + b;});
 
   // enCore = alpha en3_12p + enCore
   alpha = tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en3_12pCore,
-      ovps.d_ovps.en3_12pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.enCore,
-      ovps.d_ovps.enCore,
+  std::transform(d_ovps.en3_12pCore.begin(),
+      d_ovps.en3_12pCore.end(),
+      d_ovps.enCore.begin(),
+      d_ovps.enCore.begin(),
       [&](double a, double b) {return alpha*a + b;});
 
   // enCore = alpha en3_1m + enCore
   alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en3_1mCore,
-      ovps.d_ovps.en3_1mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.enCore,
-      ovps.d_ovps.enCore,
+  std::transform(d_ovps.en3_1mCore.begin(),
+      d_ovps.en3_1mCore.end(),
+      d_ovps.enCore.begin(),
+      d_ovps.enCore.begin(),
       [&](double a, double b) {return alpha*a + b;});
 
   // enCore = alpha en3_2m + enCore
   alpha = tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en3_2mCore,
-      ovps.d_ovps.en3_2mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.enCore,
-      ovps.d_ovps.enCore,
+  std::transform(d_ovps.en3_2mCore.begin(),
+      d_ovps.en3_2mCore.end(),
+      d_ovps.enCore.begin(),
+      d_ovps.enCore.begin(),
       [&](double a, double b) {return alpha*a + b;});
 
   // enCore = alpha en3_12m + enCore
   alpha = tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en3_12mCore,
-      ovps.d_ovps.en3_12mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-      ovps.d_ovps.enCore,
-      ovps.d_ovps.enCore,
+  std::transform(d_ovps.en3_12mCore.begin(),
+      d_ovps.en3_12mCore.end(),
+      d_ovps.enCore.begin(),
+      d_ovps.enCore.begin(),
       [&](double a, double b) {return alpha*a + b;});
 
   mcgf_full_helper(
       iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       1.00, 0.00,
       1.00, 1.00,
-      ovps.d_ovps.enCore,
+      d_ovps.enCore.data(),
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent,
-      ovps.d_ovps.enBlock[band][0]);
+      d_ovps.ent.data(),
+      d_ovps.enBlock[band][0].data());
 
   // ent = diag[enc12] . psi1
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
       wavefunctions[WC::electron_pairs_1].occ(), wavefunctions[WC::electron_pairs_1].lda,
-      ovps.d_ovps.en3c12, 1,
-      ovps.d_ovps.ent, ivir2 - iocc1);
+      d_ovps.en3c12.data(), 1,
+      d_ovps.ent.data(), ivir2 - iocc1);
 
   // en3 = Transpose[psi2] . ent + en3
   // alpha = 1.00;
@@ -635,15 +635,15 @@ void GF::mcgf3_local_energy_full(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent, ivir2 - iocc1,
-      beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
+      d_ovps.ent.data(), ivir2 - iocc1,
+      beta, d_ovps.enBlock[band][0].data(), ivir2-iocc1);
 
   // ent = diag[en3c22] . psi2
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.en3c22, 1,
-      ovps.d_ovps.ent, ivir2 - iocc1);
+      d_ovps.en3c22.data(), 1,
+      d_ovps.ent.data(), ivir2 - iocc1);
 
   // en3 = Transpose[psi2] . ent + en3
   alpha = tau->get_wgt(2) / nsamp;
@@ -651,8 +651,8 @@ void GF::mcgf3_local_energy_full(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent, ivir2 - iocc1,
-      beta, ovps.d_ovps.enBlock[band][0], ivir2-iocc1);
+      d_ovps.ent.data(), ivir2 - iocc1,
+      beta, d_ovps.enBlock[band][0].data(), ivir2-iocc1);
 }
 void GF::mcgf3_local_energy_full_diff(int band) {
   double nsamp, nsamp2;
@@ -664,80 +664,80 @@ void GF::mcgf3_local_energy_full_diff(int band) {
 
   alpha = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(1) / nsamp2;
   beta = tau->get_gfn_tau(0, 0, band - offBand, false) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en2pCore,
-                 ovps.d_ovps.en2pCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-                 ovps.d_ovps.en3_1pCore,
-                 ovps.d_ovps.enCore,
+  std::transform(d_ovps.en2pCore.begin(),
+                 d_ovps.en2pCore.end(),
+                 d_ovps.en3_1pCore.begin(),
+                 d_ovps.enCore.begin(),
                  [&](double a, double b) {return alpha*a + beta*b;});
   mcgf_full_helper(
       iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       1.00, 0.00,
       1.00, 0.00,
-      ovps.d_ovps.enCore,
+      d_ovps.enCore.data(),
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent,
-      ovps.d_ovps.en3_1p);
+      d_ovps.ent.data(),
+      d_ovps.en3_1p);
 
-  // ent = alpha en3_2pCore . psi2
+  // ent = alpha en3_2pCore.data() . psi2
   mcgf_full_helper(
       iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 1, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
-      ovps.d_ovps.en3_2pCore,
+      d_ovps.en3_2pCore.data(),
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent,
-      ovps.d_ovps.en3_2p);
+      d_ovps.ent.data(),
+      d_ovps.en3_2p);
 
-  // ent = alpha en3_12pCore . psi2
+  // ent = alpha en3_12pCore.data() . psi2
   mcgf_full_helper(
       iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 0, band - offBand, false) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
-      ovps.d_ovps.en3_12pCore,
+      d_ovps.en3_12pCore.data(),
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent,
-      ovps.d_ovps.en3_12p);
+      d_ovps.ent.data(),
+      d_ovps.en3_12p);
 
   alpha = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(1) / nsamp2;
   beta = tau->get_gfn_tau(0, 0, band - offBand, true) * tau->get_wgt(2) / nsamp;
-  std::transform(ovps.d_ovps.en2mCore,
-                 ovps.d_ovps.en2mCore + iops.iopns[KEYS::ELECTRON_PAIRS] * iops.iopns[KEYS::ELECTRON_PAIRS],
-                 ovps.d_ovps.en3_1mCore,
-                 ovps.d_ovps.enCore,
+  std::transform(d_ovps.en2mCore.begin(),
+                 d_ovps.en2mCore.end(),
+                 d_ovps.en3_1mCore.begin(),
+                 d_ovps.enCore.begin(),
                  [&](double a, double b) {return alpha*a + beta*b;});
   mcgf_full_helper(
       iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       1.00, 0.00,
       1.00, 0.00,
-      ovps.d_ovps.enCore,
+      d_ovps.enCore.data(),
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent,
-      ovps.d_ovps.en3_1m);
+      d_ovps.ent.data(),
+      d_ovps.en3_1m);
 
   mcgf_full_helper(
       iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 1, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
-      ovps.d_ovps.en3_2mCore,
+      d_ovps.en3_2mCore.data(),
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent,
-      ovps.d_ovps.en3_2m);
+      d_ovps.ent.data(),
+      d_ovps.en3_2m);
 
   mcgf_full_helper(
       iops.iopns[KEYS::ELECTRON_PAIRS], ivir2-iocc1,
       tau->get_gfn_tau(1, 0, band - offBand, true) * tau->get_wgt(2) / nsamp, 0.00,
       1.00, 0.00,
-      ovps.d_ovps.en3_12mCore,
+      d_ovps.en3_12mCore.data(),
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent,
-      ovps.d_ovps.en3_12m);
+      d_ovps.ent.data(),
+      d_ovps.en3_12m);
 
   // ent = diag[enc12] . psi1
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
       wavefunctions[WC::electron_pairs_1].occ(), wavefunctions[WC::electron_pairs_1].lda,
-      ovps.d_ovps.en3c12, 1,
-      ovps.d_ovps.ent, ivir2 - iocc1);
+      d_ovps.en3c12.data(), 1,
+      d_ovps.ent.data(), ivir2 - iocc1);
 
   // en3 = Transpose[psi2] . ent + en3
   // alpha = 1.00;
@@ -746,15 +746,15 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent, ivir2 - iocc1,
-      beta, ovps.d_ovps.en3_c, ivir2-iocc1);
+      d_ovps.ent.data(), ivir2 - iocc1,
+      beta, d_ovps.en3_c, ivir2-iocc1);
 
   // ent = diag[en3c22] . psi2
   Ddgmm(DDGMM_SIDE_RIGHT,
       ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], 
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.en3c22, 1,
-      ovps.d_ovps.ent, ivir2 - iocc1);
+      d_ovps.en3c22.data(), 1,
+      d_ovps.ent.data(), ivir2 - iocc1);
 
   // en3 = Transpose[psi2] . ent + en3
   alpha = tau->get_wgt(2) / nsamp;
@@ -762,14 +762,14 @@ void GF::mcgf3_local_energy_full_diff(int band) {
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
       ivir2-iocc1, ivir2-iocc1, iops.iopns[KEYS::ELECTRON_PAIRS], alpha,
       wavefunctions[WC::electron_pairs_2].occ(), wavefunctions[WC::electron_pairs_2].lda,
-      ovps.d_ovps.ent, ivir2 - iocc1,
-      beta, ovps.d_ovps.en3_c, ivir2-iocc1);
+      d_ovps.ent.data(), ivir2 - iocc1,
+      beta, d_ovps.en3_c, ivir2-iocc1);
 }
 
 
 
-GF3_Functional::GF3_Functional(IOPs& iops, Basis& basis) :
-  MCGF(iops, basis, 2, "23", false),
+GF3_Functional::GF3_Functional(IOPs& iops) :
+  MCGF(iops, 2, "23", false),
   one(n_electron_pairs, 1.0),
   en3c12(n_electron_pairs),
   en3c22(n_electron_pairs),
@@ -799,7 +799,7 @@ GF3_Functional::GF3_Functional(IOPs& iops, Basis& basis) :
   }
 }
 
-void GF3_Functional::gf3_core_1(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_1(OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list) {
   std::fill(en3_1mCore.begin(), en3_1mCore.end(), 0.0);
   std::fill(en3_1pCore.begin(), en3_1pCore.end(), 0.0);
 
@@ -832,7 +832,7 @@ void GF3_Functional::gf3_core_1(OVPs& ovps, Electron_Pair_List* electron_pair_li
   vector_multiply(electron_pair_list->rv.data(), en3_1mCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_1pCore.data(), n_electron_pairs);
 }
-void GF3_Functional::gf3_core_2(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_2(OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list) {
   std::fill(en3_2mCore.begin(), en3_2mCore.end(), 0.0);
   std::fill(en3_2pCore.begin(), en3_2pCore.end(), 0.0);
 
@@ -865,7 +865,7 @@ void GF3_Functional::gf3_core_2(OVPs& ovps, Electron_Pair_List* electron_pair_li
   vector_multiply(electron_pair_list->rv.data(), en3_2mCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_2pCore.data(), n_electron_pairs);
 }
-void GF3_Functional::gf3_core_12(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_12(OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list) {
   std::fill(en3_12mCore.begin(), en3_12mCore.end(), 0.0);
   std::fill(en3_12pCore.begin(), en3_12pCore.end(), 0.0);
 
@@ -898,7 +898,7 @@ void GF3_Functional::gf3_core_12(OVPs& ovps, Electron_Pair_List* electron_pair_l
   vector_multiply(electron_pair_list->rv.data(), en3_12mCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_12pCore.data(), n_electron_pairs);
 }
-void GF3_Functional::gf3_core_c(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::gf3_core_c(OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list) {
   std::fill(en3_12cCore.begin(), en3_12cCore.end(), 0.0);
   std::fill(en3_22cCore.begin(), en3_22cCore.end(), 0.0);
 
@@ -920,7 +920,7 @@ void GF3_Functional::gf3_core_c(OVPs& ovps, Electron_Pair_List* electron_pair_li
   vector_multiply(electron_pair_list->rv.data(), en3_12cCore.data(), n_electron_pairs);
   vector_multiply(electron_pair_list->rv.data(), en3_22cCore.data(), n_electron_pairs);
 }
-void GF3_Functional::core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
+void GF3_Functional::core(OVPS_Host& ovps, Electron_Pair_List_Type* electron_pair_list) {
   rv = electron_pair_list->rv.data();
 
   gf3_core_c(ovps, electron_pair_list);
@@ -946,8 +946,8 @@ void GF3_Functional::core(OVPs& ovps, Electron_Pair_List* electron_pair_list) {
 }
 
 void GF3_Functional::energy_no_diff(std::vector<std::vector<double>>& egf3, 
-       std::unordered_map<int, Wavefunction>& wavefunctions,
-       Electron_Pair_List* electron_pair_list, Tau* tau) {
+       std::unordered_map<int, Wavefunction_Type>& wavefunctions,
+       Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   for (int band = 0; band < numBand; band++) {
     double en3 = 0;
     double alpha, beta;
@@ -1036,8 +1036,8 @@ void GF3_Functional::energy_no_diff(std::vector<std::vector<double>>& egf3,
 }
 
 void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3, 
-       std::unordered_map<int, Wavefunction>& wavefunctions,
-       Electron_Pair_List* electron_pair_list, Tau* tau) {
+       std::unordered_map<int, Wavefunction_Type>& wavefunctions,
+       Electron_Pair_List_Type* electron_pair_list, Tau* tau) {
   for (int band = 0; band < numBand; band++) {
     int ip, dp;
     std::array<double, 7> en3{0, 0, 0, 0, 0, 0, 0};
@@ -1181,8 +1181,8 @@ void GF3_Functional::energy_diff(std::vector<std::vector<double>>& egf3,
 }
 
 void GF3_Functional::energy_f12(std::vector<std::vector<double>>&, 
-   std::unordered_map<int, Wavefunction>&,
-   Electron_Pair_List*, Electron_List*) {}
+   std::unordered_map<int, Wavefunction_Type>&,
+   Electron_Pair_List_Type*, Electron_List_Type*) {}
 
 
 /*
